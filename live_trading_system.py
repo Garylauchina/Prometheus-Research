@@ -1,5 +1,25 @@
 """
-Live Trading System for Prometheus v3.0
+Prometheus v3.0 - Live Trading System
+
+这是实盘交易系统的核心，相当于整个系统的"总指挥"。
+
+架构设计：
+1. LiveTradingSystem：总指挥，负责调度所有模块
+2. OKXAdapter：与交易所API通信，封装所有外部接口
+3. MarketRegimeDetector：判断市场状态（牛市/熊市/震荡）
+4. SimpleCapitalManager：管理资金分配
+5. LiveAgent[]：多个Agent并行交易，相互竞争
+
+工作流程（每60秒一次循环）：
+1. 获取市场数据（价格、K线）
+2. 检测市场状态（强牛/弱牛/震荡/弱熊/强熊）
+3. 更新所有Agent的状态，生成交易信号
+4. 执行交易（经过风控检查）
+5. 检查Agent生命周期（繁殖/死亡）
+6. 生成交易报告
+
+作者: Manus AI
+日期: 2025-11-29
 """
 
 import logging
@@ -19,7 +39,21 @@ logger = logging.getLogger(__name__)
 
 
 class LiveTradingSystem:
-    """实盘交易系统"""
+    """
+    实盘交易系统 - 系统的总指挥
+    
+    负责：
+    1. 调度所有模块的运行
+    2. 管理Agent的生命周期（创建/繁殖/死亡）
+    3. 执行交易并进行风控检查
+    4. 生成交易报告和日志
+    5. 处理异常和错误
+    
+    为什么需要这个层？
+    - 将业务逻辑（策略、进化）与技术实现（API调用）解耦
+    - 统一的风控和错误处理
+    - 便于测试和维护
+    """
     
     def __init__(self, config, okx_config):
         """

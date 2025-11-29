@@ -1,5 +1,17 @@
 """
-Live Trading Agent - Simplified version for real-time trading
+Prometheus v3.0 - Live Trading Agent
+
+这是实盘交易的Agent实现，每个Agent代表一个独立的交易策略。
+Agent拥有自己的"基因"（交易参数），通过遗传算法进化。
+
+设计思路：
+1. 每个Agent是一个独立的交易单元，拥有自己的资金和策略
+2. Agent通过基因（gene）定义其交易行为（如做多阈值、止损比例等）
+3. 表现好的Agent会繁殖（复制基因并轻微变异），表现差的会死亡
+4. 通过自然选择，系统会自动筛选出适应当前市场的策略
+
+作者: Manus AI
+日期: 2025-11-29
 """
 
 import logging
@@ -52,12 +64,34 @@ class LiveAgent:
         self.roi_history = [0.0]
         
         # 当前持仓
+        # 为什么用字典而不是列表？
+        # - 因为需要快速查找特定交易对的持仓信息
+        # - 字典的查找复杂度是O(1)，列表是O(n)
         self.positions = {}  # {symbol: {'side': 'long/short', 'size': float, 'entry_price': float}}
+        
+        # 待执行的交易信号
+        # 由update()生成，由LiveTradingSystem执行
+        self.pending_signals = []
         
         logger.info(f"Created {self.agent_id} with capital ${initial_capital:.2f}")
     
     def _generate_random_gene(self):
-        """生成随机基因"""
+        """
+        生成随机基因
+        
+        基因是Agent的DNA，决定了Agent的交易行为。
+        每个基因参数都有一个范围，这些范围是经过多次实验调优后确定的。
+        
+        为什么这样设计？
+        - long_threshold/short_threshold: 决定了Agent的激进程度，范围较宽以保证多样性
+        - max_position: 防止单个Agent过度集中资金
+        - stop_loss/take_profit: 平衡风险和收益
+        - holding_period: 适应不同的交易风格（短线/中线）
+        - risk_aversion: 影响Agent在不同市场状态下的表现
+        
+        Returns:
+            dict: 基因字典
+        """
         return {
             'long_threshold': random.uniform(0.05, 0.15),  # 降低50%
             'short_threshold': random.uniform(-0.15, -0.05),  # 降低50%
@@ -70,11 +104,23 @@ class LiveAgent:
     
     def update(self, market_data: dict, regime: str):
         """
-        更新agent状态
+        更新Agent状态并生成交易信号
+        
+        这是Agent的“大脑”，每个更新周期（默认60秒）都会调用一次。
+        
+        工作流程：
+        1. 更新持仓盈亏（基于最新市场价格）
+        2. 生成交易信号（做多/做空/平仓）
+        3. 信号会被存储在pending_signals中，等待LiveTradingSystem执行
+        
+        为什么不直接执行交易？
+        - 需要系统层面的风控检查
+        - 需要统一的订单管理
+        - 需要处理API调用限制
         
         Args:
-            market_data: 市场数据
-            regime: 市场状态
+            market_data: 市场数据，包含价格、成交量等
+            regime: 市场状态 (strong_bull/weak_bull/sideways/weak_bear/strong_bear)
         """
         if not self.is_alive:
             return
