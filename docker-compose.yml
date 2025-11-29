@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  prometheus:
+    build: .
+    container_name: prometheus-v30
+    restart: always
+    
+    # 环境变量（从.env文件加载）
+    env_file:
+      - .env
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # 挂载卷（持久化日志）
+    volumes:
+      - ./trading_logs:/app/trading_logs
+    
+    # 网络模式
+    network_mode: "bridge"
+
+# 可选：添加监控服务
+# services:
+#   prometheus-monitor:
+#     image: prom/prometheus
+#     ports:
+#       - "9090:9090"
