@@ -73,7 +73,7 @@ class LiveAgent:
         # 由update()生成，由LiveTradingSystem执行
         self.pending_signals = []
         
-        logger.info(f"Created {self.agent_id} with capital ${initial_capital:.2f}")
+        logger.info(f"创建 {self.agent_id} 代理，初始资金 ${initial_capital:.2f}")
     
     def _generate_random_gene(self):
         """
