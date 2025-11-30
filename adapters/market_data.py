@@ -4,7 +4,8 @@ Market Data Manager for OKX API
 
 import logging
 import time
-from okx import MarketData
+# 使用兼容性模块来解决导入问题
+from .okx_compat import MarketData
 from .errors import APIError
 
 logger = logging.getLogger(__name__)

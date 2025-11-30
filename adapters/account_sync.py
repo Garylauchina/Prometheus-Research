@@ -3,7 +3,8 @@ Account Sync for OKX API
 """
 
 import logging
-from okx import Account
+# 使用兼容性模块来解决导入问题
+from .okx_compat import Account
 from .errors import APIError
 
 logger = logging.getLogger(__name__)

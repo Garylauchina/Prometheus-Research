@@ -4,7 +4,8 @@ Order Manager for OKX API
 
 import logging
 import time
-from okx import Trade
+# 使用兼容性模块来解决导入问题
+from .okx_compat import Trade
 from .errors import APIError, OrderError
 
 logger = logging.getLogger(__name__)
