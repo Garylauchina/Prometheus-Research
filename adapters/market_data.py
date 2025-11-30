@@ -23,6 +23,7 @@ class MarketDataManager:
         """
         self.config = config
         self.flag = config.get('flag', '1')
+        # In okx v0.4.0, MarketData is a module that contains MarketAPI class
         self.rest_api = MarketData.MarketAPI(flag=self.flag)
         self.cache = {}
         
