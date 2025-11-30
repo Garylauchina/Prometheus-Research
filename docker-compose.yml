@@ -1,14 +1,38 @@
 version: '3.8'
 
+# 定义自定义网络
+etworks:
+  prometheus-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# 定义持久化卷
+volumes:
+  trading-logs:
+  application-logs:
+  # 可选：如果需要数据库，添加数据库卷
+  # db-data:
+
 services:
   prometheus:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: prometheus-v30
     restart: always
     
     # 环境变量（从.env文件加载）
     env_file:
       - .env
+    
+    # 环境变量覆盖
+    environment:
+      - TZ=UTC
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
     
     # 资源限制
     deploy:
@@ -26,17 +50,94 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+        compress: "true"
     
-    # 挂载卷（持久化日志）
+    # 健康检查（与Dockerfile中的健康检查协同工作）
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # 挂载卷（持久化日志和配置）
     volumes:
-      - ./trading_logs:/app/trading_logs
+      - trading-logs:/app/trading_logs
+      - application-logs:/app/logs
+      - ./config:/app/config:ro  # 只读挂载配置目录
     
-    # 网络模式
-    network_mode: "bridge"
+    # 网络配置
+    networks:
+      - prometheus-network
+    
+    # 启动依赖
+    depends_on:
+      # 如果有数据库服务，添加依赖
+      # - db
+      # 如果有Redis服务，添加依赖
+      # - redis
+      # 添加健康检查依赖
+      :
+    
+    # 安全选项
+    security_opt:
+      - no-new-privileges:true
+    
+    # 容器能力限制
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
-# 可选：添加监控服务
-# services:
-#   prometheus-monitor:
-#     image: prom/prometheus
-#     ports:
-#       - "9090:9090"
+  # 可选：添加Prometheus监控服务
+  prometheus-monitor:
+    image: prom/prometheus:v2.42.0
+    container_name: prometheus-monitor
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - prometheus-network
+
+  # 可选：添加Grafana用于可视化
+  grafana:
+    image: grafana/grafana:9.4.7
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus-monitor
+    networks:
+      - prometheus-network
+
+  # 可选：添加Redis用于缓存
+  # redis:
+  #   image: redis:7.0-alpine
+  #   container_name: redis
+  #   restart: always
+  #   volumes:
+  #     - redis-data:/data
+  #   networks:
+  #     - prometheus-network
+
+# 定义监控服务的持久化卷
+volumes:
+  prometheus-data:
+  grafana-data:
+  # redis-data:
