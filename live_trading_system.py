@@ -30,6 +30,7 @@ import os
 import psutil
 import pickle
 import traceback
+import platform
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 import json
@@ -737,12 +738,25 @@ class LiveTradingSystem:
             # 出错时不抛出异常，避免影响主流程
     
     def _get_market_data(self):
-        """获取市场数据"""
+        """获取市场数据，增强版：增加MarketDataManager健康状态检查和SSL错误处理"""
+        import ssl
+        import socket
+        
         # 检查缓存是否有效
         cache_ttl = self.performance['market_data_cache_ttl']
+        
+        # 如果发生SSL错误，延长缓存有效期以避免频繁重试
+        is_ssl_error = self.health_monitor.get_health_status().get('market_data', {}).get('last_error') and \
+                      'SSL' in self.health_monitor.get_health_status().get('market_data', {}).get('last_error', '')
+        
+        # 根据错误状态动态调整缓存TTL
+        adjusted_cache_ttl = cache_ttl * 2 if is_ssl_error else cache_ttl
+        
+        # 检查缓存有效性
         if (self._market_data_cache['data'] and 
-            time.time() - self._market_data_cache['timestamp'] < cache_ttl):
-            logger.debug("使用市场数据缓存")
+            time.time() - self._market_data_cache['timestamp'] < adjusted_cache_ttl):
+            cache_age = time.time() - self._market_data_cache['timestamp']
+            logger.debug(f"使用市场数据缓存 (缓存时间: {cache_age:.1f}秒)")
             self.performance_stats['cache_hits'] += 1
             return self._market_data_cache['data']
         
@@ -750,68 +764,462 @@ class LiveTradingSystem:
         spot_symbol = self.config['markets']['spot']['symbol']
         futures_symbol = self.config['markets']['futures']['symbol']
         
+        # 检查MarketDataManager的健康状态
+        if hasattr(self.adapter, 'market_data_manager'):
+            health_status = self.adapter.market_data_manager.get_health_status()
+            if not health_status['is_healthy']:
+                logger.warning(f"组件 market_data 不健康: {health_status['last_error']}，连续失败次数: {health_status['consecutive_failures']}")
+                
+                # 如果连续失败次数超过阈值，尝试执行轻量级恢复
+                if health_status['consecutive_failures'] >= 3:
+                    logger.warning("检测到市场数据组件连续失败，尝试轻量级恢复...")
+                    try:
+                        # 重置API连接
+                        if hasattr(self.adapter.market_data_manager, 'reset_connection'):
+                            self.adapter.market_data_manager.reset_connection()
+                            logger.info("成功重置MarketDataManager连接")
+                    except Exception as recovery_error:
+                        logger.error(f"重置MarketDataManager连接失败: {recovery_error}")
+        
         # API调用节流控制
         self._throttle_api_calls(required_calls=3)  # 获取现货价格、合约价格和K线数据
         
         start_time = time.time()
         
+        # 设置最大重试次数
+        max_retries = 2
+        retry_count = 0
+        
+        while retry_count <= max_retries:
+            try:
+                # 获取现货价格
+                spot_price = self.adapter.get_price(spot_symbol)
+                
+                # 获取合约价格
+                futures_price = self.adapter.get_price(futures_symbol)
+                
+                # 获取K线数据（用于市场状态检测）
+                candles = self.adapter.get_candles(
+                    spot_symbol,
+                    bar='1H',
+                    limit=100
+                )
+                
+                # 计算API响应时间
+                response_time = time.time() - start_time
+                self.health_monitor.check_api_response_time(response_time)
+                
+                # 更新健康状态
+                self.health_monitor.update_health_status('api_connection', True)
+                self.health_monitor.update_health_status('market_data', True)
+                self.error_counters['market_data'] = 0
+                self.last_successful_operation['market_data'] = datetime.now()
+                
+                market_data = {
+                    'spot': {
+                        'symbol': spot_symbol,
+                        'price': spot_price,
+                        'timestamp': time.time()
+                    },
+                    'futures': {
+                        'symbol': futures_symbol,
+                        'price': futures_price,
+                        'timestamp': time.time()
+                    },
+                    'candles': candles
+                }
+                
+                # 更新缓存
+                self._market_data_cache['data'] = market_data
+                self._market_data_cache['timestamp'] = time.time()
+                
+                # 同时更新_last_market_data用于错误恢复
+                self._last_market_data = market_data
+                
+                return market_data
+            
+            except (ssl.SSLError, socket.timeout) as e:
+                # 特殊处理SSL错误和超时
+                error_str = str(e)
+                retry_count += 1
+                self.error_counters['market_data'] += 1
+                
+                # 更新健康状态
+                self.health_monitor.update_health_status('market_data', False, error_str)
+                
+                # 记录SSL握手超时错误
+                if isinstance(e, ssl.SSLError) and "handshake operation timed out" in error_str:
+                    logger.error(f"SSL握手超时错误: {error_str}，重试次数: {retry_count}/{max_retries}")
+                    
+                    # 立即尝试重置连接
+                    if hasattr(self.adapter, 'market_data_manager') and hasattr(self.adapter.market_data_manager, 'reset_connection'):
+                        try:
+                            logger.warning("尝试重置SSL连接...")
+                            self.adapter.market_data_manager.reset_connection()
+                        except Exception as reset_error:
+                            logger.error(f"重置连接失败: {reset_error}")
+                else:
+                    logger.error(f"网络错误: {error_str}，重试次数: {retry_count}/{max_retries}")
+                
+                # 如果不是最后一次重试，等待后重试
+                if retry_count <= max_retries:
+                    wait_time = 0.5 * (2 ** (retry_count - 1))  # 指数退避
+                    logger.info(f"等待 {wait_time:.2f}秒后重试...")
+                    time.sleep(wait_time)
+                # 如果是最后一次重试且有缓存，使用缓存
+                elif self._market_data_cache['data']:
+                    logger.warning("达到最大重试次数，使用缓存的市场数据")
+                    return self._market_data_cache['data']
+            
+            except Exception as e:
+                # 处理其他错误
+                self.error_counters['market_data'] += 1
+                self.health_monitor.update_health_status('market_data', False, str(e))
+                logger.error(f"获取市场数据失败: {e}")
+                
+                # 如果有最近的有效数据，尝试使用缓存数据
+                if self._market_data_cache['data']:
+                    logger.warning("使用缓存的市场数据")
+                    return self._market_data_cache['data']
+                
+                raise
+        
+        # 所有重试都失败且没有缓存，抛出异常
+        raise Exception("获取市场数据失败：所有重试都已耗尽且没有可用缓存")
+    
+    def _check_and_recover(self, error=None, component='unknown'):
+        """
+        检查并执行轻量级恢复策略，特别是针对SSL错误，增强版：包含详细诊断日志
+        
+        Args:
+            error: 捕获到的异常
+            component: 出错的组件名称
+            
+        Returns:
+            bool: 恢复是否成功
+        """
+        import ssl
+        import socket
+        
+        # 记录恢复操作的诊断信息
+        recovery_context = {
+            "component": component,
+            "timestamp": datetime.now().isoformat(),
+            "error_type": type(error).__name__ if error else "N/A"
+        }
+        logger.info(f"开始对组件 {component} 执行轻量级恢复检查: {json.dumps(recovery_context)}")
+        
+        recovery_success = False
+        
+        # 1. 分析错误类型
+        is_ssl_error = False
+        is_timeout_error = False
+        is_ssl_handshake_timeout = False
+        error_str = str(error) if error else "未知错误"
+        
+        if isinstance(error, ssl.SSLError):
+            is_ssl_error = True
+            is_ssl_handshake_timeout = "handshake operation timed out" in error_str
+            
+            # 记录SSL错误的详细诊断信息
+            self._log_ssl_diagnostic_info(error, f"recovery_{component}")
+            
+            # 记录SSL错误的关键信息
+            if is_ssl_handshake_timeout:
+                logger.warning(f"检测到SSL握手超时错误: {error_str}")
+                # 记录SSL握手超时的详细上下文
+                handshake_context = {
+                    "error_code": getattr(error, 'errno', 'N/A'),
+                    "component": component,
+                    "attempt_time": datetime.now().isoformat()
+                }
+                logger.info(f"SSL握手超时上下文: {json.dumps(handshake_context)}")
+            else:
+                logger.warning(f"检测到其他SSL错误: {error_str}")
+        elif isinstance(error, socket.timeout):
+            is_timeout_error = True
+            logger.warning(f"检测到超时错误: {error_str}")
+        
+        # 2. 根据组件和错误类型执行不同的恢复策略
+        if component == 'market_data' or component == 'unknown':
+            if is_ssl_error or is_timeout_error:
+                logger.info("执行市场数据组件的轻量级恢复...")
+                recovery_success = self._recover_market_data()
+        
+        # 3. 全局连接清理（如果需要）
+        if not recovery_success and (is_ssl_error or is_timeout_error):
+            logger.info("执行全局连接清理...")
+            recovery_success = self._cleanup_connections()
+        
+        # 4. 如果恢复成功，更新健康状态
+        if recovery_success:
+            logger.info(f"组件 {component} 的轻量级恢复成功")
+            self.health_monitor.update_health_status(component, True)
+            self.error_counters[component] = 0 if component in self.error_counters else 0
+            self.last_successful_operation[component] = datetime.now()
+        else:
+            logger.warning(f"组件 {component} 的轻量级恢复失败")
+        
+        return recovery_success
+    
+    def _recover_market_data(self):
+        """
+        恢复市场数据组件的轻量级策略
+        
+        Returns:
+            bool: 恢复是否成功
+        """
+        success = False
+        
         try:
-            # 获取现货价格
-            spot_price = self.adapter.get_price(spot_symbol)
+            # 步骤1: 检查并重置MarketDataManager连接
+            if hasattr(self.adapter, 'market_data_manager'):
+                # 重置连接
+                if hasattr(self.adapter.market_data_manager, 'reset_connection'):
+                    logger.info("重置MarketDataManager连接...")
+                    self.adapter.market_data_manager.reset_connection()
+                
+                # 清理缓存
+                if hasattr(self.adapter.market_data_manager, 'clear_cache'):
+                    logger.info("清理MarketDataManager缓存...")
+                    self.adapter.market_data_manager.clear_cache()
+                
+                # 验证连接
+                logger.info("验证MarketDataManager连接...")
+                # 使用一个简单的价格查询来验证连接是否恢复
+                test_symbol = self.config['markets']['spot']['symbol']
+                
+                # 验证连接时使用较短的超时
+                old_timeout = None
+                if hasattr(self.adapter.market_data_manager, 'timeout'):
+                    old_timeout = self.adapter.market_data_manager.timeout
+                    self.adapter.market_data_manager.timeout = 3  # 3秒超时
+                
+                try:
+                    # 尝试获取一个简单的价格
+                    test_price = self.adapter.market_data_manager.get_ticker(test_symbol)
+                    if test_price:
+                        logger.info(f"MarketDataManager连接验证成功，获取到价格: {test_price}")
+                        success = True
+                    else:
+                        logger.warning("MarketDataManager连接验证失败：无法获取价格")
+                except Exception as verify_error:
+                    logger.error(f"MarketDataManager连接验证失败: {verify_error}")
+                finally:
+                    # 恢复原始超时设置
+                    if old_timeout is not None:
+                        self.adapter.market_data_manager.timeout = old_timeout
             
-            # 获取合约价格
-            futures_price = self.adapter.get_price(futures_symbol)
+            # 步骤2: 如果MarketDataManager恢复失败，尝试清理本地缓存和状态
+            if not success:
+                logger.info("清理本地市场数据缓存...")
+                # 延长缓存有效期，避免频繁重试
+                if hasattr(self, 'performance'):
+                    original_ttl = self.performance.get('market_data_cache_ttl', 10)
+                    self.performance['market_data_cache_ttl'] = original_ttl * 3
+                    logger.info(f"临时延长市场数据缓存有效期至 {original_ttl * 3}秒")
+        
+        except Exception as recovery_error:
+            logger.error(f"市场数据组件恢复过程中出错: {recovery_error}")
+        
+        return success
+    
+    def _cleanup_connections(self):
+        """
+        执行全局连接清理，关闭可能损坏的连接
+        
+        Returns:
+            bool: 清理是否成功
+        """
+        try:
+            logger.info("执行全局网络连接清理...")
             
-            # 获取K线数据（用于市场状态检测）
-            candles = self.adapter.get_candles(
-                spot_symbol,
-                bar='1H',
-                limit=100
-            )
+            # 尝试强制关闭可能的连接
+            # 注意：这是一个安全的清理尝试，不应该直接访问底层连接对象
             
-            # 计算API响应时间
-            response_time = time.time() - start_time
-            self.health_monitor.check_api_response_time(response_time)
+            # 重置会话对象（如果存在）
+            if hasattr(self.adapter, '_session') and self.adapter._session:
+                try:
+                    logger.info("重置适配器会话...")
+                    self.adapter._session.close()
+                    # 通常会话会在下次请求时自动重新创建
+                except Exception as session_error:
+                    logger.warning(f"重置会话时出错: {session_error}")
             
-            # 更新健康状态
-            self.health_monitor.update_health_status('api_connection', True)
-            self.health_monitor.update_health_status('market_data', True)
-            self.error_counters['market_data'] = 0
-            self.last_successful_operation['market_data'] = datetime.now()
+            # 释放可能的连接池资源
+            logger.info("清理完成，等待连接池资源释放...")
+            time.sleep(1)  # 短暂暂停，给系统时间释放资源
             
-            market_data = {
-                'spot': {
-                    'symbol': spot_symbol,
-                    'price': spot_price,
-                    'timestamp': time.time()
-                },
-                'futures': {
-                    'symbol': futures_symbol,
-                    'price': futures_price,
-                    'timestamp': time.time()
-                },
-                'candles': candles
-            }
+            return True
+        except Exception as cleanup_error:
+            logger.error(f"全局连接清理失败: {cleanup_error}")
+            return False
+    
+    def _recover_adapter(self, adapter_type='market_data'):
+        """
+        恢复适配器连接，执行深度清理和重试验证
+        
+        Args:
+            adapter_type: 适配器类型 ('market_data', 'trade', 等)
             
-            # 更新缓存
-            self._market_data_cache['data'] = market_data
-            self._market_data_cache['timestamp'] = time.time()
+        Returns:
+            bool: 恢复是否成功
+        """
+        import ssl
+        import socket
+        
+        logger.info(f"开始恢复 {adapter_type} 适配器连接")
+        
+        # 1. 深度连接清理
+        logger.info("执行适配器深度连接清理...")
+        
+        try:
+            # 获取对应的适配器
+            adapter = None
+            if adapter_type == 'market_data':
+                adapter = self.adapter.market_data_manager if hasattr(self.adapter, 'market_data_manager') else None
+            else:
+                adapter = self.adapter
             
-            # 同时更新_last_market_data用于错误恢复
-            self._last_market_data = market_data
+            if not adapter:
+                logger.warning(f"未找到 {adapter_type} 适配器")
+                return False
             
-            return market_data
-        except Exception as e:
-            self.error_counters['market_data'] += 1
-            self.health_monitor.update_health_status('market_data', False, str(e))
-            logger.error(f"获取市场数据失败: {e}")
+            # 2. 执行连接重置和资源释放
+            cleanup_steps = []
             
-            # 如果有最近的有效数据，尝试使用缓存数据
-            if self._market_data_cache['data']:
-                logger.warning("使用缓存的市场数据")
-                return self._market_data_cache['data']
+            # 重置会话/连接池
+            if hasattr(adapter, '_session'):
+                cleanup_steps.append("重置会话")
+                try:
+                    if adapter._session:
+                        adapter._session.close()
+                        # 置为None以便下次使用时重新创建
+                        adapter._session = None
+                        logger.info("成功重置并关闭会话")
+                except Exception as session_error:
+                    logger.error(f"重置会话失败: {session_error}")
             
-            raise
+            # 重置HTTP连接
+            if hasattr(adapter, 'reset_connection'):
+                cleanup_steps.append("重置连接")
+                try:
+                    adapter.reset_connection()
+                    logger.info("成功重置适配器连接")
+                except Exception as reset_error:
+                    logger.error(f"重置连接失败: {reset_error}")
+            
+            # 清理缓存
+            if hasattr(adapter, 'clear_cache'):
+                cleanup_steps.append("清理缓存")
+                try:
+                    adapter.clear_cache()
+                    logger.info("成功清理适配器缓存")
+                except Exception as cache_error:
+                    logger.error(f"清理缓存失败: {cache_error}")
+            
+            # 重置任何可能的连接状态标志
+            if hasattr(adapter, '_connection_healthy'):
+                adapter._connection_healthy = False
+            
+            # 等待资源释放
+            if cleanup_steps:
+                logger.info(f"完成清理步骤: {', '.join(cleanup_steps)}，等待资源释放...")
+                time.sleep(1.5)  # 稍长的等待时间确保资源完全释放
+            
+            # 3. 重试验证
+            logger.info("开始适配器连接重试验证...")
+            
+            # 保存原始超时设置
+            original_timeout = None
+            if hasattr(adapter, 'timeout'):
+                original_timeout = adapter.timeout
+                # 设置较短的验证超时
+                adapter.timeout = 5
+            
+            # 保存原始重试设置
+            original_retries = None
+            if hasattr(adapter, 'max_retries'):
+                original_retries = adapter.max_retries
+                adapter.max_retries = 1  # 验证时只重试一次
+            
+            verification_success = False
+            verification_attempts = 3
+            
+            for attempt in range(1, verification_attempts + 1):
+                try:
+                    logger.info(f"验证尝试 {attempt}/{verification_attempts}")
+                    
+                    # 根据适配器类型选择验证方法
+                    if adapter_type == 'market_data':
+                        # 市场数据适配器：尝试获取简单的价格数据
+                        test_symbol = self.config['markets']['spot']['symbol']
+                        if hasattr(adapter, 'get_ticker'):
+                            test_data = adapter.get_ticker(test_symbol)
+                            if test_data:
+                                logger.info(f"市场数据适配器验证成功，获取到数据: {test_data}")
+                                verification_success = True
+                                break
+                    elif adapter_type == 'trade':
+                        # 交易适配器：可以尝试获取账户信息或订单状态（只读操作）
+                        if hasattr(adapter, 'get_account'):
+                            test_data = adapter.get_account()
+                            if test_data:
+                                logger.info("交易适配器验证成功，获取到账户信息")
+                                verification_success = True
+                                break
+                    else:
+                        # 通用验证：检查是否能进行基本连接
+                        if hasattr(adapter, '_ping'):
+                            ping_result = adapter._ping()
+                            if ping_result:
+                                logger.info(f"通用适配器验证成功: {ping_result}")
+                                verification_success = True
+                                break
+                    
+                    if not verification_success:
+                        logger.warning(f"验证尝试 {attempt} 失败，等待后重试...")
+                        time.sleep(1)
+                        
+                except (ssl.SSLError, socket.timeout) as connection_error:
+                    logger.error(f"验证尝试 {attempt} 遇到连接错误: {connection_error}")
+                    # SSL错误时可以尝试再次清理
+                    if isinstance(connection_error, ssl.SSLError) and hasattr(adapter, 'reset_connection'):
+                        try:
+                            adapter.reset_connection()
+                        except Exception:
+                            pass
+                    if attempt < verification_attempts:
+                        time.sleep(2)  # SSL错误等待更长时间
+                except Exception as verify_error:
+                    logger.error(f"验证尝试 {attempt} 失败: {verify_error}")
+                    if attempt < verification_attempts:
+                        time.sleep(1)
+            
+            # 恢复原始设置
+            if original_timeout is not None:
+                adapter.timeout = original_timeout
+            if original_retries is not None:
+                adapter.max_retries = original_retries
+            
+            # 4. 更新健康状态
+            if verification_success:
+                logger.info(f"{adapter_type} 适配器恢复成功")
+                # 更新适配器内部健康状态（如果有）
+                if hasattr(adapter, '_connection_healthy'):
+                    adapter._connection_healthy = True
+                if hasattr(adapter, '_health_status'):
+                    adapter._health_status['is_healthy'] = True
+                    adapter._health_status['consecutive_failures'] = 0
+                    adapter._health_status['last_error'] = None
+                return True
+            else:
+                logger.error(f"{adapter_type} 适配器恢复失败：所有验证尝试都失败")
+                return False
+                
+        except Exception as recovery_error:
+            logger.error(f"适配器恢复过程中发生异常: {recovery_error}")
+            return False
     
     def _perform_health_check(self):
         """执行系统健康检查"""
@@ -1058,22 +1466,51 @@ class LiveTradingSystem:
             return False
     
     def _handle_critical_error(self, error):
-        """处理关键错误"""
+        """处理关键错误，增强版：优化SSL握手超时检测和恢复机制"""
         logger.info("处理关键错误...")
         
         # 记录错误信息
         error_type = type(error).__name__
+        error_str = str(error)
+        
+        # 检查是否是SSL握手超时错误
+        is_ssl_handshake_timeout = 'ssl' in error_type.lower() and ('handshake' in error_str.lower() and 'timeout' in error_str.lower())
+        
+        # 记录SSL错误的详细诊断信息
+        if 'ssl' in error_type.lower():
+            self._log_ssl_diagnostic_info(error, "critical_error_handling")
+        
+        # 更新错误计数器
+        self._update_error_counters(error_type, error_str)
         
         # 根据错误类型执行不同的恢复操作
-        if error_type in ['NetworkError', 'TimeoutError', 'ConnectionError']:
+        if is_ssl_handshake_timeout:
+            # 专门处理SSL握手超时错误，优先级最高
+            logger.info("检测到SSL握手超时错误，启动专门的恢复流程")
+            # 1. 立即检查并恢复市场数据适配器
+            recovery_success = self._check_and_recover('market_data', error)
+            
+            if not recovery_success:
+                logger.warning("市场数据适配器恢复失败，尝试深度恢复...")
+                # 2. 尝试全面清理连接
+                self._cleanup_connections()
+                # 3. 执行更彻底的适配器恢复
+                self._recover_adapter('market_data')
+                
+        elif error_type in ['NetworkError', 'TimeoutError', 'ConnectionError']:
             # 网络错误，尝试恢复适配器
             logger.info("检测到网络错误，尝试恢复适配器")
-            self._recover_adapter()
+            recovery_success = self._check_and_recover('market_data', error)
+            if not recovery_success:
+                self._recover_adapter()
+                
         elif 'API' in error_type:
             # API错误，检查是否需要重启适配器
             if self.health_monitor.should_recover('api_connection'):
                 logger.info("API错误累积过多，尝试恢复适配器")
+                self._check_and_recover('market_data', error)
                 self._recover_adapter()
+                
         elif 'Agent' in error_type or 'LiveAgent' in str(error):
             # 代理相关错误
             self._recreate_failed_agents()
@@ -1085,6 +1522,84 @@ class LiveTradingSystem:
             # 安全模式：关闭所有持仓并暂停交易
             if hasattr(self, '_enter_safe_mode'):
                 self._enter_safe_mode()
+            
+        # 记录错误恢复操作完成
+        logger.info("关键错误恢复操作完成")
+        
+    def _log_ssl_diagnostic_info(self, error, context="unknown"):
+        """
+        记录详细的SSL错误诊断信息，便于问题排查
+        
+        Args:
+            error: SSL错误对象
+            context: 错误发生的上下文信息
+        """
+        try:
+            # 收集基本错误信息
+            error_type = type(error).__name__
+            error_str = str(error)
+            
+            # 诊断信息字典
+            diagnostic = {
+                "timestamp": datetime.now().isoformat(),
+                "context": context,
+                "error_type": error_type,
+                "error_message": error_str,
+                "system_info": {
+                    "python_version": platform.python_version(),
+                    "system": platform.system(),
+                    "release": platform.release(),
+                    "machine": platform.machine()
+                }
+            }
+            
+            # 收集更多SSL错误相关信息
+            if hasattr(error, 'errno'):
+                diagnostic["errno"] = error.errno
+            if hasattr(error, 'ssl_reason'):
+                diagnostic["ssl_reason"] = error.ssl_reason
+            if hasattr(error, 'reason'):
+                diagnostic["reason"] = error.reason
+            
+            # 记录详细的诊断日志
+            logger.info(f"SSL错误诊断信息: {json.dumps(diagnostic, ensure_ascii=False, indent=2)}")
+            
+            # 记录摘要信息便于快速查看
+            logger.error(
+                f"SSL错误摘要 | "
+                f"上下文: {context} | "
+                f"类型: {error_type} | "
+                f"消息: {error_str[:100]}..."
+            )
+            
+        except Exception as log_error:
+            logger.error(f"记录SSL诊断信息时发生错误: {log_error}")
+            
+    def _update_error_counters(self, error_type, error_str):
+        """更新错误计数器，针对SSL错误进行特殊处理"""
+        # 更新通用错误计数器
+        if 'market_data' in self.error_counters:
+            self.error_counters['market_data'] += 1
+        
+        # 针对SSL握手超时增加专门的计数器
+        is_ssl_handshake_timeout = 'ssl' in error_type.lower() and ('handshake' in error_str.lower() and 'timeout' in error_str.lower())
+        if is_ssl_handshake_timeout:
+            # 初始化SSL错误计数器（如果不存在）
+            if 'ssl_handshake_errors' not in self.error_counters:
+                self.error_counters['ssl_handshake_errors'] = 0
+            
+            # 增加SSL握手错误计数
+            self.error_counters['ssl_handshake_errors'] += 1
+            logger.warning(f"SSL握手超时错误计数: {self.error_counters['ssl_handshake_errors']}")
+            
+            # 记录SSL握手超时的诊断信息
+            logger.warning(f"SSL握手超时累积状态: 当前 {self.error_counters['ssl_handshake_errors']}次，" 
+                          f"市场数据错误总计 {self.error_counters.get('market_data', 0)}次")
+            
+            # 如果SSL握手错误过多，可以考虑更激进的措施
+            if self.error_counters['ssl_handshake_errors'] > 15:
+                logger.error("SSL握手超时错误过多，重置SSL错误计数器")
+                self.error_counters['ssl_handshake_errors'] = 0
     
     def _update_market_regime(self, market_data):
         """更新市场状态"""

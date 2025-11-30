@@ -300,7 +300,10 @@ class LiveAgent:
             final_signal_strength = np.mean(signal_components)
         
         # 生成交易信号
-        if final_signal_strength > 0.15:  # 提高做多阈值的稳定性
+        # 使用基因中的阈值，让每个Agent有不同的交易风格
+        long_threshold = max(0.08, self.gene['long_threshold'])  # 最低0.08
+        short_threshold = min(-0.08, self.gene['short_threshold'])  # 最低-0.08
+        if final_signal_strength > long_threshold:      
             # 做多信号
             signals.append({
                 'action': 'open',
@@ -316,7 +319,7 @@ class LiveAgent:
                 }
             })
         
-        elif final_signal_strength < -0.15:  # 提高做空阈值的稳定性
+        elif final_signal_strength < short_threshold:  
             # 做空信号（只在合约市场）
             signals.append({
                 'action': 'open',
