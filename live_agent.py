@@ -18,6 +18,7 @@ import logging
 import time
 from typing import Dict, Optional
 import random
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -171,43 +172,139 @@ class LiveAgent:
         """
         signals = []
         
-        # 简化版信号生成：基于价格动量
+        # 检查是否有足够的K线数据
         candles = market_data.get('candles', [])
-        if len(candles) < 20:
+        if len(candles) < 100:  # 增加所需的K线数量，以支持更多技术指标计算
             return signals
         
-        # 计算短期和长期均线
-        prices = [float(c[4]) for c in candles[-20:]]
-        short_ma = sum(prices[-5:]) / 5
-        long_ma = sum(prices[-20:]) / 20
+        # 提取价格数据
+        close_prices = np.array([float(c[4]) for c in candles[-100:]])
+        high_prices = np.array([float(c[2]) for c in candles[-100:]])
+        low_prices = np.array([float(c[3]) for c in candles[-100:]])
         
-        # 计算动量
+        # 计算技术指标
+        # 1. 均线动量
+        short_ma = np.mean(close_prices[-5:])
+        long_ma = np.mean(close_prices[-20:])
         momentum = (short_ma - long_ma) / long_ma
+        
+        # 2. RSI (Relative Strength Index)
+        delta = np.diff(close_prices)
+        # 计算gain和loss
+        gain = np.where(delta > 0, delta, 0)
+        loss = np.where(delta < 0, -delta, 0)
+        
+        # 使用简单移动平均计算RSI
+        avg_gain = np.mean(gain[-14:])
+        avg_loss = np.mean(loss[-14:])
+        
+        # 处理可能的空值
+        if np.isnan(avg_gain) or np.isnan(avg_loss) or avg_loss == 0:
+            rsi = 50  # 默认值
+        else:
+            rs = avg_gain / avg_loss
+            rsi = 100 - (100 / (1 + rs))
+        
+        # 3. MACD (Moving Average Convergence Divergence)
+        # 使用numpy实现指数加权移动平均
+        def exponential_moving_average(data, span):
+            alpha = 2 / (span + 1)
+            weights = (1 - alpha) ** np.arange(len(data)-1, -1, -1)
+            weights /= weights.sum()
+            return np.dot(data, weights)
+        
+        # 计算MACD
+        prices_needed = max(12, 26)
+        recent_prices = close_prices[-prices_needed:]
+        
+        ema12 = exponential_moving_average(recent_prices, 12)
+        ema26 = exponential_moving_average(recent_prices, 26)
+        macd_line = ema12 - ema26
+        
+        # 简化版MACD柱状图计算
+        # 使用最后5个MACD值计算信号线
+        if len(close_prices) > 34:  # 确保有足够的数据计算信号线
+            macd_values = [exponential_moving_average(close_prices[-i-26:-i], 12) - 
+                          exponential_moving_average(close_prices[-i-26:-i], 26) 
+                          for i in range(5)]
+            signal_line = exponential_moving_average(np.array(macd_values), 9)
+            macd_hist = macd_line - signal_line
+        else:
+            macd_hist = macd_line  # 简化处理
+        
+        # 4. Bollinger Bands
+        sma20 = np.mean(close_prices[-20:])
+        std20 = np.std(close_prices[-20:])
+        upper_band = sma20 + (2 * std20)
+        lower_band = sma20 - (2 * std20)
+        bb_width = (upper_band - lower_band) / sma20
+        bb_position = (close_prices[-1] - lower_band) / bb_width
         
         # 根据市场状态调整阈值
         regime_config = self.config['market_regime']['regimes'].get(regime, {'long': 0.5, 'short': 0.5})
         long_bias = regime_config['long']
         short_bias = regime_config['short']
         
-        # 生成信号
+        # 综合信号计算
+        final_signal_strength = 0.0
+        signal_components = []
+        
+        # 动量信号
         if momentum > self.gene['long_threshold'] * (2 - long_bias):
+            signal_components.append(momentum * long_bias)
+        elif momentum < self.gene['short_threshold'] * (2 - short_bias):
+            signal_components.append(momentum * short_bias)
+        
+        # RSI信号 (超买超卖)
+        if rsi < 30:  # 超卖
+            signal_components.append(0.2 * (30 - rsi) / 30)
+        elif rsi > 70:  # 超买
+            signal_components.append(-0.2 * (rsi - 70) / 30)
+        
+        # MACD信号
+        signal_components.append(0.2 * macd_hist / (sma20 * 0.01) if macd_hist != 0 else 0)
+        
+        # Bollinger Bands信号
+        if bb_position < 0.3:  # 接近下轨
+            signal_components.append(0.2 * (0.3 - bb_position) / 0.3)
+        elif bb_position > 0.7:  # 接近上轨
+            signal_components.append(-0.2 * (bb_position - 0.7) / 0.3)
+        
+        # 计算最终信号强度
+        if signal_components:
+            final_signal_strength = np.mean(signal_components)
+        
+        # 生成交易信号
+        if final_signal_strength > 0.15:  # 提高做多阈值的稳定性
             # 做多信号
             signals.append({
                 'action': 'open',
                 'side': 'long',
                 'symbol': self.config['markets']['spot']['symbol'],
                 'market': 'spot',
-                'strength': min(1.0, momentum * long_bias)
+                'strength': min(1.0, final_signal_strength * long_bias),
+                'indicators': {
+                    'momentum': momentum,
+                    'rsi': rsi,
+                    'macd_hist': macd_hist,
+                    'bb_position': bb_position
+                }
             })
         
-        elif momentum < self.gene['short_threshold'] * (2 - short_bias):
+        elif final_signal_strength < -0.15:  # 提高做空阈值的稳定性
             # 做空信号（只在合约市场）
             signals.append({
                 'action': 'open',
                 'side': 'short',
                 'symbol': self.config['markets']['futures']['symbol'],
                 'market': 'futures',
-                'strength': min(1.0, abs(momentum) * short_bias)
+                'strength': min(1.0, abs(final_signal_strength) * short_bias),
+                'indicators': {
+                    'momentum': momentum,
+                    'rsi': rsi,
+                    'macd_hist': macd_hist,
+                    'bb_position': bb_position
+                }
             })
         
         # 检查止损/止盈
@@ -307,16 +404,18 @@ class LiveAgent:
     
     def _mutate_gene(self):
         """
-        增强的基因变异机制
+        高级基因变异机制
         
-        使用高斯分布进行变异，保持参数在合理范围内，并考虑参数间的相关性
+        特性：
+        1. 自适应变异率：根据ROI和年龄调整变异强度
+        2. 精英保护：表现好的参数变异率降低
+        3. 增强参数相关性：更复杂的参数关联调整
+        4. 多样性保护：避免过早收敛到局部最优
+        5. 策略风格一致性：确保参数组合形成连贯的交易风格
         """
         import numpy as np
         
         new_gene = self.gene.copy()
-        
-        # 变异配置
-        mutation_rate = 0.3  # 提高变异率以增加多样性
         
         # 参数范围约束
         param_ranges = {
@@ -326,15 +425,62 @@ class LiveAgent:
             'stop_loss': (0.01, 0.15),
             'take_profit': (0.02, 0.3),
             'holding_period': (60, 7200),  # 1分钟到2小时
-            'risk_aversion': (0.1, 3.0)
+            'risk_aversion': (0.1, 3.0),
+            'rsi_oversold': (20, 40),     # 新增RSI参数范围
+            'rsi_overbought': (60, 80),   # 新增RSI参数范围
+            'macd_signal_length': (9, 21), # 新增MACD参数范围
+            'bb_std_dev': (1.5, 3.0)      # 新增布林带参数范围
         }
         
-        # 对于每个基因参数
+        # 确保所有参数都在范围内
         for key in new_gene:
-            if random.random() < mutation_rate:
+            if key in param_ranges:
+                if isinstance(new_gene[key], (int, float)):
+                    new_gene[key] = max(param_ranges[key][0], min(param_ranges[key][1], new_gene[key]))
+        
+        # 1. 计算自适应变异率
+        # 基于ROI的变异率调整：表现越好，变异率越低
+        roi_factor = max(0.5, min(1.5, 1.0 - self.roi * 5))  # ROI越高，变异率越低
+        
+        # 基于交易次数的经验调整
+        experience_factor = max(0.8, min(1.2, 1.0 + (self.trade_count / 1000) * 0.2))
+        
+        # 基础变异率
+        base_mutation_rate = 0.25
+        mutation_rate = base_mutation_rate * roi_factor * experience_factor
+        
+        # 2. 为每个参数设置变异概率和强度
+        # 表现好的参数变异率降低（精英保护）
+        param_weights = {
+            'long_threshold': max(0.7, min(1.3, 1.0 + (self.roi * 2) if self.roi > 0 else 1.0)),
+            'short_threshold': max(0.7, min(1.3, 1.0 + (self.roi * 2) if self.roi > 0 else 1.0)),
+            'stop_loss': max(0.8, min(1.2, 1.0 + (self.roi * 1) if self.roi > 0 else 1.0)),
+            'take_profit': max(0.8, min(1.2, 1.0 + (self.roi * 1) if self.roi > 0 else 1.0)),
+            'max_position': max(0.8, min(1.2, 1.0 + (self.roi * 1) if self.roi > 0 else 1.0)),
+            'holding_period': max(0.9, min(1.1, 1.0 + (self.roi * 0.5) if self.roi > 0 else 1.0)),
+            'risk_aversion': max(0.9, min(1.1, 1.0 + (self.roi * 0.5) if self.roi > 0 else 1.0))
+        }
+        
+        # 3. 执行参数变异
+        for key in new_gene:
+            # 个性化变异概率
+            p = mutation_rate * param_weights.get(key, 1.0)
+            
+            if random.random() < p:
+                # 变异强度根据参数重要性调整
                 if isinstance(new_gene[key], float):
-                    # 使用高斯分布进行变异，标准差为原值的10%
-                    std_dev = abs(new_gene[key] * 0.1) or 0.01  # 防止标准差为0
+                    # 动态调整变异强度
+                    if key in ['long_threshold', 'short_threshold']:
+                        # 阈值参数使用较小的变异强度
+                        std_dev = abs(new_gene[key] * 0.08) or 0.01
+                    elif key in ['stop_loss', 'take_profit']:
+                        # 风险参数使用中等变异强度
+                        std_dev = abs(new_gene[key] * 0.12) or 0.01
+                    else:
+                        # 其他参数使用默认变异强度
+                        std_dev = abs(new_gene[key] * 0.10) or 0.01
+                        
+                    # 应用变异
                     mutation = np.random.normal(0, std_dev)
                     new_value = new_gene[key] + mutation
                     
@@ -343,33 +489,94 @@ class LiveAgent:
                         new_value = max(param_ranges[key][0], min(param_ranges[key][1], new_value))
                     
                     new_gene[key] = new_value
+                
                 elif isinstance(new_gene[key], int):
                     # 整数参数的变异
-                    std_dev = max(1, int(new_gene[key] * 0.1))  # 至少变异1
+                    std_dev = max(1, int(new_gene[key] * 0.1))
                     mutation = np.random.normal(0, std_dev)
                     new_value = int(new_gene[key] + mutation)
                     
-                    # 确保在有效范围内
                     if key in param_ranges:
-                        new_value = max(param_ranges[key][0], min(param_ranges[key][1], new_value))
+                        new_value = max(int(param_ranges[key][0]), min(int(param_ranges[key][1]), new_value))
                     
                     new_gene[key] = new_value
         
-        # 参数相关性调整
-        # 1. 风险偏好一致性：止损和止盈应该相互协调
-        if random.random() < 0.2:
-            # 正相关调整
-            correlation_factor = random.uniform(0.8, 1.2)
-            new_gene['stop_loss'] = max(param_ranges['stop_loss'][0], min(param_ranges['stop_loss'][1], 
-                                                                     new_gene['stop_loss'] * correlation_factor))
-            new_gene['take_profit'] = max(param_ranges['take_profit'][0], min(param_ranges['take_profit'][1], 
-                                                                         new_gene['take_profit'] * correlation_factor))
+        # 4. 增强的参数相关性调整
         
-        # 2. 风险规避与最大仓位的协调
+        # a. 风险偏好一致性：止损、止盈、仓位大小的协调
+        if random.random() < 0.3:  # 增加调整概率
+            risk_profile = random.choice(['conservative', 'balanced', 'aggressive'])  # 随机选择风险偏好
+            
+            if risk_profile == 'conservative':
+                # 保守型：小止损、小止盈、小仓位
+                scale_factor = random.uniform(0.8, 0.95)
+                new_gene['stop_loss'] = max(param_ranges['stop_loss'][0], new_gene['stop_loss'] * scale_factor)
+                new_gene['take_profit'] = max(param_ranges['take_profit'][0], new_gene['take_profit'] * scale_factor)
+                new_gene['max_position'] = max(param_ranges['max_position'][0], new_gene['max_position'] * scale_factor)
+                new_gene['risk_aversion'] = min(param_ranges['risk_aversion'][1], new_gene['risk_aversion'] * 1.1)
+                
+            elif risk_profile == 'aggressive':
+                # 激进型：大止损、大止盈、大仓位
+                scale_factor = random.uniform(1.05, 1.2)
+                new_gene['stop_loss'] = min(param_ranges['stop_loss'][1], new_gene['stop_loss'] * scale_factor)
+                new_gene['take_profit'] = min(param_ranges['take_profit'][1], new_gene['take_profit'] * scale_factor)
+                new_gene['max_position'] = min(param_ranges['max_position'][1], new_gene['max_position'] * scale_factor)
+                new_gene['risk_aversion'] = max(param_ranges['risk_aversion'][0], new_gene['risk_aversion'] * 0.9)
+        
+        # b. 交易频率与持仓周期的协调
+        if random.random() < 0.25:
+            if random.random() < 0.5:
+                # 高频交易：小阈值、短持仓周期
+                new_gene['long_threshold'] = min(param_ranges['long_threshold'][1], 
+                                               new_gene['long_threshold'] * random.uniform(0.8, 0.95))
+                new_gene['short_threshold'] = max(param_ranges['short_threshold'][0], 
+                                                new_gene['short_threshold'] * random.uniform(1.05, 1.2))
+                new_gene['holding_period'] = max(param_ranges['holding_period'][0], 
+                                               int(new_gene['holding_period'] * random.uniform(0.7, 0.9)))
+            else:
+                # 低频交易：大阈值、长持仓周期
+                new_gene['long_threshold'] = max(param_ranges['long_threshold'][0], 
+                                               new_gene['long_threshold'] * random.uniform(1.05, 1.2))
+                new_gene['short_threshold'] = min(param_ranges['short_threshold'][1], 
+                                                new_gene['short_threshold'] * random.uniform(0.8, 0.95))
+                new_gene['holding_period'] = min(param_ranges['holding_period'][1], 
+                                               int(new_gene['holding_period'] * random.uniform(1.1, 1.3)))
+        
+        # c. 风险规避与技术指标敏感度的协调
         if random.random() < 0.2:
-            # 风险规避度高的Agent应该有更小的最大仓位
-            new_gene['max_position'] = min(param_ranges['max_position'][1], 
-                                        1.0 / (0.5 + new_gene['risk_aversion'] * 0.3))
+            # 高风险规避的Agent应该使用更保守的技术指标参数
+            if new_gene['risk_aversion'] > 1.5:  # 高风险规避
+                # 更保守的RSI设置
+                if 'rsi_oversold' in new_gene:
+                    new_gene['rsi_oversold'] = min(param_ranges['rsi_oversold'][1], 
+                                                 new_gene['rsi_oversold'] * random.uniform(1.05, 1.15))
+                if 'rsi_overbought' in new_gene:
+                    new_gene['rsi_overbought'] = max(param_ranges['rsi_overbought'][0], 
+                                                   new_gene['rsi_overbought'] * random.uniform(0.85, 0.95))
+                # 更宽的布林带
+                if 'bb_std_dev' in new_gene:
+                    new_gene['bb_std_dev'] = min(param_ranges['bb_std_dev'][1], 
+                                              new_gene['bb_std_dev'] * random.uniform(1.1, 1.2))
+        
+        # 5. 多样性保护：变异方向多样化
+        if random.random() < 0.15:  # 15%的概率执行多样性保护
+            # 随机选择一个参数，强制向相反方向变异
+            param_to_diversify = random.choice(['long_threshold', 'short_threshold', 'max_position', 'stop_loss'])
+            if param_to_diversify in new_gene and param_to_diversify in param_ranges:
+                # 如果参数接近范围上限，则向减小方向变异
+                range_size = param_ranges[param_to_diversify][1] - param_ranges[param_to_diversify][0]
+                normalized_value = (new_gene[param_to_diversify] - param_ranges[param_to_diversify][0]) / range_size
+                
+                if normalized_value > 0.7:  # 接近上限
+                    new_gene[param_to_diversify] *= random.uniform(0.8, 0.9)
+                elif normalized_value < 0.3:  # 接近下限
+                    new_gene[param_to_diversify] *= random.uniform(1.1, 1.2)
+        
+        # 确保所有参数最终都在有效范围内
+        for key in new_gene:
+            if key in param_ranges:
+                if isinstance(new_gene[key], (int, float)):
+                    new_gene[key] = max(param_ranges[key][0], min(param_ranges[key][1], new_gene[key]))
         
         return new_gene
     

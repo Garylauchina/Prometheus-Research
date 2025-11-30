@@ -6,8 +6,8 @@ import os
 CONFIG_VIRTUAL_TRADING = {
     # 基础配置
     'initial_capital': 5000,  # $5,000 USDT
-    'initial_agents': 5,      # 5个初始agent
-    'max_agents': 10,         # 最多10个agent
+    'initial_agents': 8,      # 增加到8个初始agent，提高多样性
+    'max_agents': 15,         # 增加到15个最大agent
     
     # 市场配置
     'markets': {
@@ -32,14 +32,14 @@ CONFIG_VIRTUAL_TRADING = {
     'agent_manager': {
         'reproduction': {
             'enabled': True,
-            'min_roi': 0.05,     # 5% ROI可繁殖
-            'min_trades': 3,     # 至少3笔交易
-            'cost_ratio': 0.1    # 繁殖成本10%
+            'min_roi': 0.03,     # 降低到3% ROI可繁殖，加速进化
+            'min_trades': 2,     # 降低到至少2笔交易
+            'cost_ratio': 0.08   # 降低繁殖成本到8%
         },
         'death': {
-            'roi_threshold': -0.20,      # 亏损20%死亡
-            'max_inactive_days': 7,      # 7天不交易死亡
-            'check_interval': 3600       # 每小时检查一次
+            'roi_threshold': -0.15,      # 调整为亏损15%死亡
+            'max_inactive_days': 3,      # 调整为3天不交易死亡
+            'check_interval': 1800       # 每30分钟检查一次
         }
     },
     
@@ -52,10 +52,10 @@ CONFIG_VIRTUAL_TRADING = {
     
     # 策略配置
     'strategy': {
-        'long_threshold': 0.2,   # 做多阈值
-        'short_threshold': -0.2, # 做空阈值
-        'max_position': 1.0,     # 最大仓位
-        'max_leverage': 1.0      # 最大杠杆（agent级别）
+        'long_threshold': 0.15,   # 降低做多阈值，使交易更频繁
+        'short_threshold': -0.15, # 降低做空阈值
+        'max_position': 1.0,      # 最大仓位
+        'max_leverage': 1.0       # 最大杠杆（agent级别）
     },
     
     # 市场状态配置
@@ -73,12 +73,12 @@ CONFIG_VIRTUAL_TRADING = {
     
     # 风险控制
     'risk': {
-        'max_daily_trades': 100,      # 每日最多100笔
-        'max_daily_loss': 0.10,       # 每日最大亏损10%
-        'max_leverage': 3,            # 最高3倍杠杆
-        'max_position_pct': 0.30,     # 单个仓位最多30%
-        'stop_loss_pct': 0.05,        # 止损5%
-        'max_order_value': 500        # 单笔订单最大$500
+        'max_daily_trades': 150,      # 增加到每日最多150笔
+        'max_daily_loss': 0.08,       # 降低每日最大亏损到8%
+        'max_leverage': 3,            # 保持3倍杠杆
+        'max_position_pct': 0.35,     # 增加单个仓位到35%
+        'stop_loss_pct': 0.04,        # 调整止损到4%
+        'max_order_value': 800        # 增加单笔订单最大$800
     },
     
     # 交易循环
@@ -91,7 +91,7 @@ CONFIG_VIRTUAL_TRADING = {
     
     # 日志配置
     'logging': {
-        'level': 'INFO',
+        'level': 'DEBUG',  # 提高日志级别到DEBUG，便于开发调试
         'dir': 'logs',  # 使用相对路径，将在项目根目录下创建logs文件夹
         'file_prefix': 'prometheus',
         'max_size_mb': 100,

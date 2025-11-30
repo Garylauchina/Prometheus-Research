@@ -26,16 +26,147 @@ import logging
 import time
 import signal
 import sys
-from datetime import datetime
-from typing import Dict, List
+import os
+import psutil
+import pickle
+import traceback
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any, Tuple
 import json
+import threading
 
 from adapters.okx_adapter import OKXTradingAdapter
 from live_agent import LiveAgent
 from market_regime import MarketRegimeDetector
 from simple_capital_manager import SimpleCapitalManager
+from backtest_live_bridge import BacktestLiveBridge, create_bridge_adapter
+from monitoring.system_monitor import SystemMonitor
+from monitoring.trade_reporter import TradeReporter
+from monitoring.alert_system import AlertSystem
 
 logger = logging.getLogger(__name__)
+
+
+class SystemHealthMonitor:
+    """
+    系统健康监控器
+    
+    负责监控系统各组件的健康状态，检测异常并触发恢复机制。
+    """
+    
+    def __init__(self, config):
+        self.config = config
+        self.health_check_interval = config.get('health_monitor', {}).get('check_interval', 300)  # 默认5分钟
+        self.max_api_response_time = config.get('health_monitor', {}).get('max_api_response_time', 5)  # 最大API响应时间
+        self.max_memory_usage = config.get('health_monitor', {}).get('max_memory_usage', 80)  # 最大内存使用率(%)
+        self.max_cpu_usage = config.get('health_monitor', {}).get('max_cpu_usage', 90)  # 最大CPU使用率(%)
+        
+        # 组件健康状态
+        self.health_status = {
+            'api_connection': True,
+            'market_data': True,
+            'agents': True,
+            'risk_manager': True,
+            'last_api_response_time': 0,
+            'memory_usage': 0,
+            'cpu_usage': 0,
+            'last_health_check': None,
+            'consecutive_failures': {
+                'api_connection': 0,
+                'market_data': 0,
+                'agents': 0,
+                'risk_manager': 0
+            },
+            'last_error_time': {
+                'api_connection': None,
+                'market_data': None,
+                'agents': None,
+                'risk_manager': None
+            }
+        }
+        
+        # 恢复策略配置
+        self.recovery_strategies = config.get('health_monitor', {}).get('recovery_strategies', {
+            'api_connection': {'max_failures': 3, 'action': 'restart_adapter'},
+            'market_data': {'max_failures': 5, 'action': 'wait_retry'},
+            'agents': {'max_failures': 3, 'action': 'recreate_failed_agents'},
+            'risk_manager': {'max_failures': 2, 'action': 'restart_risk_manager'}
+        })
+        
+        logger.info("系统健康监控器初始化完成")
+    
+    def update_health_status(self, component, status, error_msg=None):
+        """更新组件健康状态"""
+        if component in self.health_status:
+            self.health_status[component] = status
+            self.health_status['last_health_check'] = datetime.now()
+            
+            if not status:
+                self.health_status['consecutive_failures'][component] += 1
+                self.health_status['last_error_time'][component] = datetime.now()
+                logger.warning(f"组件 {component} 不健康: {error_msg}，连续失败次数: {self.health_status['consecutive_failures'][component]}")
+            else:
+                self.health_status['consecutive_failures'][component] = 0
+    
+    def check_system_resources(self):
+        """检查系统资源使用情况"""
+        process = psutil.Process(os.getpid())
+        memory_info = process.memory_percent()
+        cpu_info = process.cpu_percent(interval=1)
+        
+        self.health_status['memory_usage'] = memory_info
+        self.health_status['cpu_usage'] = cpu_info
+        
+        # 检查内存和CPU使用情况
+        memory_healthy = memory_info < self.max_memory_usage
+        cpu_healthy = cpu_info < self.max_cpu_usage
+        
+        if not memory_healthy:
+            logger.warning(f"内存使用率过高: {memory_info:.2f}%")
+        if not cpu_healthy:
+            logger.warning(f"CPU使用率过高: {cpu_info:.2f}%")
+        
+        return memory_healthy and cpu_healthy
+    
+    def check_api_response_time(self, response_time):
+        """检查API响应时间"""
+        self.health_status['last_api_response_time'] = response_time
+        healthy = response_time < self.max_api_response_time
+        
+        if not healthy:
+            logger.warning(f"API响应时间过长: {response_time:.2f}秒")
+        
+        return healthy
+    
+    def get_health_status(self):
+        """获取当前健康状态摘要"""
+        return {
+            'overall_status': all(self.health_status[comp] for comp in ['api_connection', 'market_data', 'agents', 'risk_manager']),
+            'components': {
+                comp: {
+                    'status': self.health_status[comp],
+                    'consecutive_failures': self.health_status['consecutive_failures'][comp],
+                    'last_error': self.health_status['last_error_time'][comp].isoformat() if self.health_status['last_error_time'][comp] else None
+                }
+                for comp in ['api_connection', 'market_data', 'agents', 'risk_manager']
+            },
+            'resources': {
+                'memory_usage': self.health_status['memory_usage'],
+                'cpu_usage': self.health_status['cpu_usage'],
+                'api_response_time': self.health_status['last_api_response_time']
+            },
+            'last_check': self.health_status['last_health_check'].isoformat() if self.health_status['last_health_check'] else None
+        }
+    
+    def should_recover(self, component):
+        """检查是否需要触发恢复机制"""
+        failures = self.health_status['consecutive_failures'].get(component, 0)
+        max_failures = self.recovery_strategies.get(component, {}).get('max_failures', 3)
+        return failures >= max_failures
+    
+    def get_recovery_action(self, component):
+        """获取恢复操作"""
+        return self.recovery_strategies.get(component, {}).get('action', 'wait_retry')
 
 
 class LiveTradingSystem:
@@ -48,11 +179,14 @@ class LiveTradingSystem:
     3. 执行交易并进行风控检查
     4. 生成交易报告和日志
     5. 处理异常和错误
+    6. 监控系统健康状态
+    7. 实现自动恢复机制
     
     为什么需要这个层？
     - 将业务逻辑（策略、进化）与技术实现（API调用）解耦
     - 统一的风控和错误处理
     - 便于测试和维护
+    - 提高系统稳定性和可靠性
     """
     
     def __init__(self, config, okx_config):
@@ -65,6 +199,13 @@ class LiveTradingSystem:
         """
         self.config = config
         self.okx_config = okx_config
+        
+        # 初始化桥接器 - 这是连接回测和实盘的关键组件
+        self.bridge = create_bridge_adapter({
+            'mode': 'live',
+            'backtest': config.get('backtest', {}),
+            'live_only': ['exchanges', 'api_keys', 'webhook_urls']
+        })
         
         # 初始化OKX适配器
         self.adapter = OKXTradingAdapter(okx_config)
@@ -98,17 +239,209 @@ class LiveTradingSystem:
         # 运行状态
         self.running = False
         self.stop_requested = False
+        self.safe_mode = False
+        self.safe_mode_entry_time = None
+        self.safe_mode_exit_time = None
+        
+        # 错误计数器
+        self.error_counters = {
+            'market_data': 0,
+            'order_execution': 0,
+            'agent_update': 0
+        }
+        
+        # 最后一次成功操作的时间
+        self.last_successful_operation = {
+            'market_data': None,
+            'order_execution': None,
+            'agent_update': None
+        }
+        
+        # 状态持久化配置
+        self.state_dir = os.path.join(os.getcwd(), 'system_state')
+        if not os.path.exists(self.state_dir):
+            os.makedirs(self.state_dir)
+        
+        # 上次持久化状态的时间
+        self.last_state_save_time = datetime.now()
+        
+        # 异常模式检测
+        self.abnormal_patterns = {
+            'rapid_price_changes': [],
+            'failed_orders_sequence': [],
+            'api_timeouts': []
+        }
+        
+        # 待恢复的代理信息
+        self._pending_agents_to_recreate = []
+        
+        # 健康监控器
+        self.health_monitor = SystemHealthMonitor(config)
+        
+        # 初始化监控与报告系统
+        self.system_monitor = SystemMonitor(config.get('monitoring', {}))
+        self.trade_reporter = TradeReporter(config.get('reporting', {}))
+        self.alert_system = AlertSystem(config.get('alerts', {}))
+        
+        # 恢复机制锁
+        self.recovery_lock = threading.RLock()
+        
+        # 系统运行统计
+        self.system_stats = {
+            'recovery_attempts': 0,
+            'component_restarts': {
+                'adapter': 0,
+                'risk_manager': 0,
+                'agents': 0,
+                'market_data': 0
+            },
+            'last_recovery_time': None,
+            'crashes': 0,
+            'restarts': 0
+        }
+        
+        # 性能优化相关配置
+        self.performance = {
+            'enable_concurrency': config.get('performance', {}).get('enable_concurrency', True),
+            'max_concurrent_agents': config.get('performance', {}).get('max_concurrent_agents', 10),
+            'api_rate_limit': config.get('performance', {}).get('api_rate_limit', 60),  # 每分钟请求数
+            'market_data_cache_ttl': config.get('performance', {}).get('market_data_cache_ttl', 5),  # 缓存有效期(秒)
+            'batch_trade_size': config.get('performance', {}).get('batch_trade_size', 5),  # 批量交易大小
+            'agent_update_timeout': config.get('performance', {}).get('agent_update_timeout', 3),  # 代理更新超时(秒)
+            'trade_execution_timeout': config.get('performance', {}).get('trade_execution_timeout', 5)  # 交易执行超时(秒)
+        }
+        
+        # 性能统计
+        self.performance_stats = {
+            'loop_times': [],
+            'agent_update_times': [],
+            'trade_execution_times': [],
+            'api_calls': 0,
+            'cache_hits': 0,
+            'cache_misses': 0,
+            'throttled_calls': 0
+        }
+        
+        # API调用节流控制
+        self.api_call_history = []
+        
+        # 市场数据缓存
+        self._market_data_cache = {
+            'data': None,
+            'timestamp': 0
+        }
+        
+        # 价格历史缓存
+        self._price_history_cache = {
+            'data': {},
+            'timestamp': {}
+        }
+        
+        # 尝试加载之前的状态
+        self._load_last_state()
         
         # 注册信号处理
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         
-        logger.info("实盘交易系统初始化完成")
+        logger.info("实盘交易系统初始化完成，回测-实盘桥接器已启用，监控系统已初始化")
     
     def _signal_handler(self, signum, frame):
         """信号处理器"""
-        logger.info(f"收到信号 {signum}，正在停止...")
+        logger.info(f"收到信号 {signum}，准备优雅关闭系统")
+        self.safe_shutdown()
+    
+    def safe_shutdown(self):
+        """安全关闭系统，包括状态保存和持仓清理"""
+        logger.info("开始安全关闭流程...")
+        
+        # 保存当前状态
+        self._save_state()
+        
+        # 请求停止
         self.stop_requested = True
+    
+    def _save_state(self):
+        """保存系统状态到文件"""
+        try:
+            state_file = os.path.join(self.state_dir, f"state_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl")
+            state = {
+                'timestamp': datetime.now(),
+                'agents': [agent.get_state() for agent in self.agents if agent.is_alive],
+                'capital_manager': self.capital_manager.get_state() if hasattr(self.capital_manager, 'get_state') else None,
+                'stats': self.stats,
+                'system_stats': self.system_stats,
+                'error_counters': self.error_counters,
+                'market_detector_state': self.market_detector.get_state() if hasattr(self.market_detector, 'get_state') else None
+            }
+            
+            with open(state_file, 'wb') as f:
+                pickle.dump(state, f)
+            
+            # 保留最近5个状态文件
+            self._clean_old_state_files()
+            
+            logger.info(f"系统状态已保存到 {state_file}")
+            self.last_state_save_time = datetime.now()
+            return True
+        except Exception as e:
+            logger.error(f"保存系统状态失败: {e}")
+            return False
+    
+    def _clean_old_state_files(self):
+        """清理旧的状态文件，只保留最近的几个"""
+        try:
+            state_files = [f for f in os.listdir(self.state_dir) if f.startswith('state_') and f.endswith('.pkl')]
+            state_files.sort()
+            
+            # 删除最旧的文件，保留最近5个
+            files_to_delete = state_files[:-5]
+            for file in files_to_delete:
+                os.remove(os.path.join(self.state_dir, file))
+        except Exception as e:
+            logger.error(f"清理旧状态文件失败: {e}")
+    
+    def _load_last_state(self):
+        """加载最近的系统状态"""
+        try:
+            state_files = [f for f in os.listdir(self.state_dir) if f.startswith('state_') and f.endswith('.pkl')]
+            if not state_files:
+                logger.info("没有找到可恢复的状态文件")
+                return False
+            
+            # 获取最新的状态文件
+            state_files.sort()
+            last_state_file = state_files[-1]
+            state_file_path = os.path.join(self.state_dir, last_state_file)
+            
+            with open(state_file_path, 'rb') as f:
+                state = pickle.load(f)
+            
+            logger.info(f"加载状态文件: {last_state_file}，保存时间: {state['timestamp']}")
+            
+            # 恢复统计数据
+            self.stats = state.get('stats', self.stats)
+            self.system_stats = state.get('system_stats', self.system_stats)
+            self.error_counters = state.get('error_counters', self.error_counters)
+            
+            # 增加重启计数
+            self.system_stats['restarts'] += 1
+            
+            # 保存代理状态信息，用于可能的重建
+            self._pending_agents_to_recreate = state.get('agents', [])
+            
+            # 发送重启通知
+            if hasattr(self, 'alert_system'):
+                self.alert_system.send_alert(
+                    'system_restart',
+                    f"系统从状态文件恢复，上次保存时间: {state['timestamp']}",
+                    severity='warning'
+                )
+            
+            return True
+        except Exception as e:
+            logger.error(f"加载系统状态失败: {e}")
+            return False
     
     def initialize_agents(self):
         """初始化交易代理"""
@@ -148,20 +481,51 @@ class LiveTradingSystem:
         # 初始化交易代理
         self.initialize_agents()
         
+        # 启动监控与报告线程
+        self.monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
+        self.reporting_thread = threading.Thread(target=self._reporting_loop, daemon=True)
+        self.monitoring_thread.start()
+        self.reporting_thread.start()
+        logger.info("监控与报告线程已启动")
+        
         # 获取初始账户状态
-        initial_summary = self.adapter.get_account_summary()
-        logger.info(f"初始账户余额: ${initial_summary['total_equity']:.2f}")
+        try:
+            initial_summary = self.adapter.get_account_summary()
+            logger.info(f"初始账户余额: ${initial_summary['total_equity']:.2f}")
+        except Exception as e:
+            logger.error(f"获取初始账户状态失败: {e}")
+            # 尝试恢复适配器连接
+            self._recover_adapter()
         
         # 主循环
         end_time = time.time() + duration_seconds
         update_interval = self.config['trading']['update_interval']
+        
+        # 健康检查计时器
+        next_health_check = time.time() + self.health_monitor.health_check_interval
+        
+        # 性能报告计时器
+        next_performance_report = time.time() + 300  # 每5分钟报告一次性能
         
         iteration = 0
         while self.running and time.time() < end_time and not self.stop_requested:
             iteration += 1
             loop_start = time.time()
             
+            # 保存当前迭代次数用于暂停交易计算
+            self._current_iteration = iteration
+            
             try:
+                # 定期执行健康检查
+                if time.time() >= next_health_check:
+                    self._perform_health_check()
+                    next_health_check = time.time() + self.health_monitor.health_check_interval
+                
+                # 定期报告性能统计
+                if time.time() >= next_performance_report:
+                    self._report_performance_stats()
+                    next_performance_report = time.time() + 300
+                
                 logger.info(f"=== 迭代 {iteration} ===")
                 
                 # 1. 获取市场数据
@@ -183,8 +547,26 @@ class LiveTradingSystem:
                 # 6. 打印状态
                 self._print_status()
                 
-                # 7. 等待下一次更新
+                # 7. 检查是否需要恢复操作
+                self._check_and_recover()
+                
+                # 8. 等待下一次更新
                 elapsed = time.time() - loop_start
+                self.performance_stats['loop_times'].append(elapsed)
+                
+                # 动态调整更新间隔（基于系统负载）
+                if len(self.performance_stats['loop_times']) > 10:
+                    avg_loop_time = sum(self.performance_stats['loop_times'][-10:]) / 10
+                    # 如果平均循环时间超过更新间隔的80%，考虑调整
+                    if avg_loop_time > (update_interval * 0.8):
+                        # 临时降低并发度以减轻系统负载
+                        if self.performance['enable_concurrency']:
+                            self.performance['max_concurrent_agents'] = max(3, self.performance['max_concurrent_agents'] - 2)
+                            logger.warning(f"系统负载过高，调整最大并发代理数: {self.performance['max_concurrent_agents']}")
+                    else:
+                        # 系统负载正常，可以逐渐恢复并发度
+                        self.performance['max_concurrent_agents'] = min(20, self.performance['max_concurrent_agents'] + 1)
+                
                 sleep_time = max(0, update_interval - elapsed)
                 if sleep_time > 0:
                     logger.debug(f"休眠 {sleep_time:.1f}秒...")
@@ -193,45 +575,516 @@ class LiveTradingSystem:
             except Exception as e:
                 logger.error(f"交易循环错误: {e}", exc_info=True)
                 self.stats['failed_trades'] += 1
-                time.sleep(5)  # 错误后等待5秒
+                self.error_counters['market_data'] += 1
+                self.health_monitor.update_health_status('market_data', False, str(e))
+                
+                # 尝试执行必要的恢复操作
+                self._handle_critical_error(e)
+                
+                # 错误后等待，时间随错误次数增加
+                wait_time = min(30, 5 + (self.error_counters['market_data'] * 2))
+                logger.info(f"错误后等待 {wait_time}秒...")
+                time.sleep(wait_time)
         
         # 停止交易
         self.stop()
         
-
+        # 输出最终性能报告
+        self._report_performance_stats()
+        
         logger.info("实盘交易完成")
+    
+    def _report_performance_stats(self):
+        """
+        报告系统性能统计
+        """
+        try:
+            # 安全检查
+            if not hasattr(self, 'performance_stats') or not self.performance_stats:
+                logger.info("性能统计: 配置缺失")
+                return
+            
+            # 处理空数据情况
+            if not self.performance_stats.get('loop_times'):
+                logger.info("性能统计: 暂无数据")
+                return
+            
+            # 计算性能指标，添加异常处理
+            try:
+                loop_times = self.performance_stats.get('loop_times', [])
+                if loop_times:
+                    avg_loop_time = sum(loop_times) / len(loop_times)
+                    max_loop_time = max(loop_times)
+                    min_loop_time = min(loop_times)
+                else:
+                    avg_loop_time = max_loop_time = min_loop_time = 0
+            except Exception as e:
+                logger.error(f"计算循环时间统计失败: {e}")
+                avg_loop_time = max_loop_time = min_loop_time = 0
+            
+            # 计算代理更新性能
+            agent_update_stats = "暂无数据"
+            try:
+                agent_update_times = self.performance_stats.get('agent_update_times', [])
+                if agent_update_times:
+                    avg_agent_update = sum(agent_update_times) / len(agent_update_times)
+                    agent_update_stats = f"平均: {avg_agent_update:.3f}秒"
+            except Exception as e:
+                logger.error(f"计算代理更新性能失败: {e}")
+            
+            # 计算交易执行性能
+            trade_execution_stats = "暂无数据"
+            try:
+                trade_execution_times = self.performance_stats.get('trade_execution_times', [])
+                if trade_execution_times:
+                    avg_trade_execution = sum(trade_execution_times) / len(trade_execution_times)
+                    trade_execution_stats = f"平均: {avg_trade_execution:.3f}秒"
+            except Exception as e:
+                logger.error(f"计算交易执行性能失败: {e}")
+            
+            # 计算缓存命中率
+            cache_hit_rate = "暂无数据"
+            try:
+                cache_hits = self.performance_stats.get('cache_hits', 0)
+                cache_misses = self.performance_stats.get('cache_misses', 0)
+                total_cache = cache_hits + cache_misses
+                if total_cache > 0:
+                    hit_rate = (cache_hits / total_cache) * 100
+                    cache_hit_rate = f"{hit_rate:.1f}%"
+            except Exception as e:
+                logger.error(f"计算缓存命中率失败: {e}")
+            
+            # 获取并发设置
+            concurrent_agents = "未知"
+            try:
+                if hasattr(self, 'performance'):
+                    concurrent_agents = str(self.performance.get('max_concurrent_agents', '未知'))
+            except Exception as e:
+                logger.error(f"获取并发设置失败: {e}")
+            
+            # 生成报告
+            logger.info("======== 性能统计报告 ========")
+            logger.info(f"循环时间: 平均 {avg_loop_time:.3f}秒, 最大 {max_loop_time:.3f}秒, 最小 {min_loop_time:.3f}秒")
+            logger.info(f"代理更新性能: {agent_update_stats}")
+            logger.info(f"交易执行性能: {trade_execution_stats}")
+            logger.info(f"API调用: 总计 {self.performance_stats.get('api_calls', 0)}次")
+            logger.info(f"API节流: 总计 {self.performance_stats.get('throttled_calls', 0)}次")
+            logger.info(f"缓存命中率: {cache_hit_rate}")
+            logger.info(f"当前并发设置: {concurrent_agents}个代理")
+            logger.info("==============================")
+            
+            # 安全地重置部分统计数据
+            try:
+                # 保留最近的100条循环时间用于动态调整
+                if len(loop_times) > 100:
+                    self.performance_stats['loop_times'] = loop_times[-100:]
+                
+                # 重置详细的更新和执行时间，避免内存占用过大
+                self.performance_stats['agent_update_times'] = []
+                self.performance_stats['trade_execution_times'] = []
+            except Exception as e:
+                logger.error(f"重置性能统计失败: {e}")
+        
+        except Exception as e:
+            logger.error(f"生成性能报告失败: {e}")
+    
+    def _throttle_api_calls(self, required_calls=1):
+        """API调用节流控制"""
+        try:
+            # 参数验证
+            if required_calls <= 0:
+                return
+            
+            current_time = time.time()
+            
+            # 确保api_call_history存在
+            if not hasattr(self, 'api_call_history'):
+                self.api_call_history = []
+            
+            # 清理过期的调用记录
+            self.api_call_history = [t for t in self.api_call_history if current_time - t < 60]
+            
+            # 检查是否需要节流
+            if len(self.api_call_history) + required_calls > self.performance.get('api_rate_limit', 60):
+                # 安全检查：避免空列表导致的错误
+                if self.api_call_history:
+                    oldest_call = min(self.api_call_history)
+                    wait_time = 60 - (current_time - oldest_call) + 0.1  # 加0.1秒确保安全
+                    
+                    if wait_time > 0 and wait_time < 30:  # 限制最大等待时间，避免死等
+                        logger.debug(f"API调用节流，等待 {wait_time:.2f}秒")
+                        if hasattr(self.performance_stats, 'throttled_calls'):
+                            self.performance_stats['throttled_calls'] += 1
+                        time.sleep(wait_time)
+                        
+                        # 再次清理过期记录
+                        self.api_call_history = [t for t in self.api_call_history if current_time - t < 60]
+                    else:
+                        logger.warning(f"节流等待时间异常 ({wait_time:.2f}秒)，跳过节流")
+            
+            # 记录新的调用，防止记录过多导致内存问题
+            max_history_size = 1000  # 设置最大历史记录数
+            for _ in range(required_calls):
+                self.api_call_history.append(time.time())
+                if hasattr(self.performance_stats, 'api_calls'):
+                    self.performance_stats['api_calls'] += 1
+            
+            # 限制历史记录大小
+            if len(self.api_call_history) > max_history_size:
+                self.api_call_history = self.api_call_history[-max_history_size:]
+        except Exception as e:
+            logger.error(f"API节流控制异常: {e}")
+            # 出错时不抛出异常，避免影响主流程
     
     def _get_market_data(self):
         """获取市场数据"""
+        # 检查缓存是否有效
+        cache_ttl = self.performance['market_data_cache_ttl']
+        if (self._market_data_cache['data'] and 
+            time.time() - self._market_data_cache['timestamp'] < cache_ttl):
+            logger.debug("使用市场数据缓存")
+            self.performance_stats['cache_hits'] += 1
+            return self._market_data_cache['data']
+        
+        self.performance_stats['cache_misses'] += 1
         spot_symbol = self.config['markets']['spot']['symbol']
         futures_symbol = self.config['markets']['futures']['symbol']
         
-        # 获取现货价格
-        spot_price = self.adapter.get_price(spot_symbol)
+        # API调用节流控制
+        self._throttle_api_calls(required_calls=3)  # 获取现货价格、合约价格和K线数据
         
-        # 获取合约价格
-        futures_price = self.adapter.get_price(futures_symbol)
+        start_time = time.time()
         
-        # 获取K线数据（用于市场状态检测）
-        candles = self.adapter.get_candles(
-            spot_symbol,
-            bar='1H',
-            limit=100
-        )
+        try:
+            # 获取现货价格
+            spot_price = self.adapter.get_price(spot_symbol)
+            
+            # 获取合约价格
+            futures_price = self.adapter.get_price(futures_symbol)
+            
+            # 获取K线数据（用于市场状态检测）
+            candles = self.adapter.get_candles(
+                spot_symbol,
+                bar='1H',
+                limit=100
+            )
+            
+            # 计算API响应时间
+            response_time = time.time() - start_time
+            self.health_monitor.check_api_response_time(response_time)
+            
+            # 更新健康状态
+            self.health_monitor.update_health_status('api_connection', True)
+            self.health_monitor.update_health_status('market_data', True)
+            self.error_counters['market_data'] = 0
+            self.last_successful_operation['market_data'] = datetime.now()
+            
+            market_data = {
+                'spot': {
+                    'symbol': spot_symbol,
+                    'price': spot_price,
+                    'timestamp': time.time()
+                },
+                'futures': {
+                    'symbol': futures_symbol,
+                    'price': futures_price,
+                    'timestamp': time.time()
+                },
+                'candles': candles
+            }
+            
+            # 更新缓存
+            self._market_data_cache['data'] = market_data
+            self._market_data_cache['timestamp'] = time.time()
+            
+            # 同时更新_last_market_data用于错误恢复
+            self._last_market_data = market_data
+            
+            return market_data
+        except Exception as e:
+            self.error_counters['market_data'] += 1
+            self.health_monitor.update_health_status('market_data', False, str(e))
+            logger.error(f"获取市场数据失败: {e}")
+            
+            # 如果有最近的有效数据，尝试使用缓存数据
+            if self._market_data_cache['data']:
+                logger.warning("使用缓存的市场数据")
+                return self._market_data_cache['data']
+            
+            raise
+    
+    def _perform_health_check(self):
+        """执行系统健康检查"""
+        logger.info("执行系统健康检查...")
         
-        return {
-            'spot': {
-                'symbol': spot_symbol,
-                'price': spot_price,
-                'timestamp': time.time()
-            },
-            'futures': {
-                'symbol': futures_symbol,
-                'price': futures_price,
-                'timestamp': time.time()
-            },
-            'candles': candles
-        }
+        # 检查系统资源
+        resources_healthy = self.health_monitor.check_system_resources()
+        
+        # 检查API连接
+        api_healthy = self._check_api_connection()
+        
+        # 检查代理状态
+        agents_healthy = self._check_agents_health()
+        
+        # 检查风控管理器
+        risk_manager_healthy = self._check_risk_manager()
+        
+        # 记录健康状态
+        health_status = self.health_monitor.get_health_status()
+        logger.info(f"健康检查结果: {json.dumps(health_status, indent=2)}")
+        
+        # 如果资源使用过高，尝试执行资源清理
+        if not resources_healthy:
+            self._cleanup_resources()
+        
+        return health_status['overall_status']
+    
+    def _check_api_connection(self):
+        """检查API连接状态"""
+        try:
+            start_time = time.time()
+            self.adapter.get_price(self.config['markets']['spot']['symbol'])
+            response_time = time.time() - start_time
+            
+            healthy = self.health_monitor.check_api_response_time(response_time)
+            self.health_monitor.update_health_status('api_connection', healthy)
+            return healthy
+        except Exception as e:
+            self.health_monitor.update_health_status('api_connection', False, str(e))
+            logger.warning(f"API连接检查失败: {e}")
+            return False
+    
+    def _check_agents_health(self):
+        """检查代理健康状态"""
+        try:
+            active_agents = [a for a in self.agents if a.is_alive]
+            
+            # 检查代理是否有异常
+            for agent in active_agents:
+                if hasattr(agent, 'last_update_time') and agent.last_update_time:
+                    # 检查是否长时间未更新
+                    time_since_update = (datetime.now() - agent.last_update_time).total_seconds()
+                    if time_since_update > 300:  # 5分钟
+                        logger.warning(f"代理 {agent.agent_id} 长时间未更新: {time_since_update:.0f}秒")
+            
+            # 如果活跃代理数量少于最小阈值，认为不健康
+            min_active_agents = max(1, self.config['initial_agents'] // 2)
+            healthy = len(active_agents) >= min_active_agents
+            self.health_monitor.update_health_status('agents', healthy)
+            return healthy
+        except Exception as e:
+            self.health_monitor.update_health_status('agents', False, str(e))
+            logger.error(f"代理健康检查失败: {e}")
+            return False
+    
+    def _check_risk_manager(self):
+        """检查风控管理器状态"""
+        try:
+            # 尝试获取风控指标，验证风控管理器是否正常工作
+            metrics = self.adapter.risk_manager.get_risk_metrics()
+            healthy = True
+            self.health_monitor.update_health_status('risk_manager', healthy)
+            return healthy
+        except Exception as e:
+            self.health_monitor.update_health_status('risk_manager', False, str(e))
+            logger.error(f"风控管理器检查失败: {e}")
+            return False
+    
+    def _cleanup_resources(self):
+        """清理系统资源"""
+        logger.info("执行资源清理...")
+        
+        # 清理内存中不再需要的数据
+        if hasattr(self, '_historical_data') and len(self._historical_data) > 10000:
+            self._historical_data = self._historical_data[-5000:]
+            logger.info("清理历史数据")
+        
+        # 强制垃圾回收
+        import gc
+        gc.collect()
+        logger.info("触发垃圾回收")
+    
+    def _check_and_recover(self):
+        """检查是否需要恢复并执行恢复操作"""
+        with self.recovery_lock:
+            # 检测异常模式
+            abnormal_detected = self._detect_abnormal_patterns()
+            
+            if abnormal_detected and not self.safe_mode:
+                self._enter_safe_mode()
+            
+            # 检查各个组件是否需要恢复
+            for component in ['api_connection', 'market_data', 'agents', 'risk_manager']:
+                if hasattr(self.health_monitor, 'should_recover') and self.health_monitor.should_recover(component):
+                    # 获取失败次数
+                    failure_count = 0
+                    if hasattr(self.health_monitor, 'health_status') and 'consecutive_failures' in self.health_monitor.health_status:
+                        failure_count = self.health_monitor.health_status['consecutive_failures'].get(component, 0)
+                    
+                    # 使用自适应恢复策略
+                    action = self._adaptive_recovery_strategy(component, failure_count)
+                    logger.warning(f"组件 {component} 需要恢复，执行操作: {action} (失败次数: {failure_count})")
+                    
+                    self.system_stats['recovery_attempts'] += 1
+                    self.system_stats['last_recovery_time'] = datetime.now()
+                    
+                    # 保存当前状态
+                    self._save_state()
+                    
+                    # 执行恢复操作
+                    if action == 'full_restart':
+                        self._full_restart()
+                    elif action == 'restart_adapter':
+                        self._recover_adapter()
+                    elif action == 'recreate_failed_agents':
+                        self._recreate_failed_agents()
+                    elif action == 'restart_risk_manager':
+                        self._restart_risk_manager()
+                    elif action == 'wait_retry':
+                        logger.info("等待并重试...")
+                        time.sleep(5)
+            
+            # 定期保存状态（每10分钟）
+            if (datetime.now() - self.last_state_save_time).total_seconds() > 600:
+                self._save_state()
+            
+            # 检查是否需要从安全模式退出
+            if self.safe_mode:
+                safe_mode_duration = (datetime.now() - self.safe_mode_entry_time).total_seconds()
+                if safe_mode_duration > 1800:  # 30分钟
+                    # 检查系统是否恢复正常
+                    all_healthy = True
+                    for component in ['api_connection', 'market_data']:
+                        if hasattr(self.health_monitor, 'is_healthy') and not self.health_monitor.is_healthy(component):
+                            all_healthy = False
+                            break
+                    
+                    if all_healthy:
+                        logger.info("系统已恢复正常，退出安全模式")
+                        self._exit_safe_mode()
+    
+    def _recover_adapter(self):
+        """恢复OKX适配器连接"""
+        logger.info("尝试恢复适配器连接...")
+        
+        try:
+            # 关闭旧连接
+            if hasattr(self.adapter, 'close'):
+                self.adapter.close()
+            
+            # 创建新的适配器实例
+            self.adapter = OKXTradingAdapter(self.okx_config)
+            
+            # 验证连接
+            test_price = self.adapter.get_price(self.config['markets']['spot']['symbol'])
+            logger.info(f"适配器连接恢复成功，测试价格: {test_price}")
+            
+            # 更新统计
+            self.system_stats['component_restarts']['adapter'] += 1
+            
+            # 重置健康状态
+            self.health_monitor.update_health_status('api_connection', True)
+            self.error_counters['market_data'] = 0
+            
+            return True
+        except Exception as e:
+            logger.error(f"适配器恢复失败: {e}")
+            self.health_monitor.update_health_status('api_connection', False, str(e))
+            return False
+    
+    def _recreate_failed_agents(self):
+        """重新创建失败的代理"""
+        logger.info("尝试重新创建失败的代理...")
+        
+        try:
+            active_agents = [a for a in self.agents if a.is_alive]
+            min_active_agents = max(1, self.config['initial_agents'] // 2)
+            
+            # 如果活跃代理数量不足，创建新代理
+            agents_to_create = min_active_agents - len(active_agents)
+            if agents_to_create > 0:
+                logger.info(f"需要创建 {agents_to_create} 个新代理")
+                
+                for i in range(agents_to_create):
+                    # 从资金池分配资金
+                    capital = self.capital_manager.allocate_capital(
+                        self.config['capital_manager']['min_agent_capital']
+                    )
+                    
+                    if capital > 0:
+                        agent = LiveAgent(
+                            agent_id=f"recovered_agent_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}",
+                            initial_capital=capital,
+                            config=self.config
+                        )
+                        self.agents.append(agent)
+                        logger.info(f"创建恢复代理 {agent.agent_id}，分配资金 ${capital:.2f}")
+            
+            # 更新统计
+            self.system_stats['component_restarts']['agents'] += 1
+            
+            # 重置健康状态
+            self.health_monitor.update_health_status('agents', True)
+            
+            return True
+        except Exception as e:
+            logger.error(f"代理恢复失败: {e}")
+            self.health_monitor.update_health_status('agents', False, str(e))
+            return False
+    
+    def _restart_risk_manager(self):
+        """重启风控管理器"""
+        logger.info("尝试重启风控管理器...")
+        
+        try:
+            # 重新初始化风控管理器
+            if hasattr(self.adapter, 'restart_risk_manager'):
+                self.adapter.restart_risk_manager()
+                logger.info("风控管理器重启成功")
+                
+                # 更新统计
+                self.system_stats['component_restarts']['risk_manager'] += 1
+                
+                # 重置健康状态
+                self.health_monitor.update_health_status('risk_manager', True)
+                
+                return True
+            else:
+                logger.warning("适配器不支持风控管理器重启")
+                return False
+        except Exception as e:
+            logger.error(f"风控管理器重启失败: {e}")
+            self.health_monitor.update_health_status('risk_manager', False, str(e))
+            return False
+    
+    def _handle_critical_error(self, error):
+        """处理关键错误"""
+        logger.info("处理关键错误...")
+        
+        # 记录错误信息
+        error_type = type(error).__name__
+        
+        # 根据错误类型执行不同的恢复操作
+        if error_type in ['NetworkError', 'TimeoutError', 'ConnectionError']:
+            # 网络错误，尝试恢复适配器
+            logger.info("检测到网络错误，尝试恢复适配器")
+            self._recover_adapter()
+        elif 'API' in error_type:
+            # API错误，检查是否需要重启适配器
+            if self.health_monitor.should_recover('api_connection'):
+                logger.info("API错误累积过多，尝试恢复适配器")
+                self._recover_adapter()
+        elif 'Agent' in error_type or 'LiveAgent' in str(error):
+            # 代理相关错误
+            self._recreate_failed_agents()
+        
+        # 检查系统是否需要进入安全模式
+        if self.error_counters['market_data'] >= 10 or \
+           self.error_counters['order_execution'] >= 10:
+            logger.warning("错误过多，考虑进入安全模式")
+            # 安全模式：关闭所有持仓并暂停交易
+            if hasattr(self, '_enter_safe_mode'):
+                self._enter_safe_mode()
     
     def _update_market_regime(self, market_data):
         """更新市场状态"""
@@ -243,54 +1096,714 @@ class LiveTradingSystem:
         return 'sideways'
     
     def _update_agents(self, market_data, regime):
-        """更新所有agents"""
-        for agent in self.agents:
-            if agent.is_alive:
+        """
+        更新所有agents（通过桥接器）
+        使用并发更新提升性能
+        """
+        update_start_time = time.time()
+        
+        # 安全检查
+        if not hasattr(self, 'agents') or not self.agents:
+            logger.warning("代理列表为空，跳过更新")
+            return
+        
+        active_agents = [agent for agent in self.agents if hasattr(agent, 'is_alive') and agent.is_alive]
+        
+        # 数据准备阶段的异常处理
+        try:
+            # 使用桥接器格式化市场数据（只需一次）
+            formatted_market_data = self.bridge.format_market_data(market_data)
+            
+            # 获取价格历史（只需一次）
+            symbol = self.config.get('markets', {}).get('spot', {}).get('symbol', '')
+            if not symbol:
+                logger.error("无法获取交易对信息，使用串行更新模式")
+                raise ValueError("交易对信息缺失")
+            
+            price_history = self._get_price_history(symbol, 100)
+            
+            # 使用桥接器构建标准化的市场特征（只需一次）
+            market_features = self.bridge.build_market_features(
+                price_history, 
+                -1  # 使用最新数据点
+            )
+            
+        except Exception as e:
+            logger.error(f"准备代理更新数据失败: {e}")
+            # 数据准备失败时，降级到基本串行更新模式
+            for agent in active_agents:
                 try:
-                    # 更新agent状态
-                    agent.update(market_data, regime)
+                    # 使用有限的市场数据进行更新
+                    basic_price = market_data.get('spot', {}).get('price', 0)
+                    if basic_price > 0:
+                        agent.update({}, basic_price, regime)
+                        agent.last_update_time = datetime.now()
+                except Exception as inner_e:
+                    logger.error(f"基本更新代理 {getattr(agent, 'agent_id', 'unknown')} 失败: {inner_e}")
+            return
+        
+        # 检查是否启用并发
+        enable_concurrency = self.performance.get('enable_concurrency', True)
+        max_concurrent_agents = self.performance.get('max_concurrent_agents', 10)
+        
+        if enable_concurrency and len(active_agents) > 3:
+            # 使用线程池进行并发更新
+            try:
+                from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
+                
+                # 计算批处理大小，增加安全限制
+                batch_size = min(max(1, max_concurrent_agents), len(active_agents), 20)  # 最多20个并发
+                
+                logger.debug(f"使用并发更新代理，批量大小: {batch_size}")
+                
+                def update_agent_wrapper(agent):
+                    try:
+                        # 超时控制
+                        update_timeout = self.performance.get('agent_update_timeout', 3)
+                        import threading
+                        
+                        def update_with_timeout():
+                            start_time = time.time()
+                            agent.update(market_features, formatted_market_data['price'], regime)
+                            agent.last_update_time = datetime.now()
+                            return time.time() - start_time
+                        
+                        # 使用线程执行带超时的更新
+                        update_thread = threading.Thread(target=update_with_timeout)
+                        update_thread.daemon = True
+                        update_thread.start()
+                        update_thread.join(update_timeout)
+                        
+                        if update_thread.is_alive():
+                            raise TimeoutError(f"代理更新超时 (> {update_timeout}秒)")
+                            
+                        return (getattr(agent, 'agent_id', 'unknown'), True, update_with_timeout())
+                    except Exception as e:
+                        return (getattr(agent, 'agent_id', 'unknown'), False, str(e))
+                
+                # 执行并发更新
+                update_failures = 0
+                with ThreadPoolExecutor(max_workers=batch_size) as executor:
+                    futures = {executor.submit(update_agent_wrapper, agent): agent for agent in active_agents}
+                    
+                    # 总体超时控制
+                    total_timeout = min(len(active_agents) * 2, 60)  # 最多等待60秒
+                    
+                    for future in as_completed(futures, timeout=total_timeout):
+                        try:
+                            agent_id, success, result = future.result(timeout=5)  # 单个future结果也设置超时
+                            
+                            if success:
+                                # 记录更新时间
+                                if hasattr(self, 'performance_stats') and hasattr(self.performance_stats, 'agent_update_times'):
+                                    self.performance_stats['agent_update_times'].append(result)
+                            else:
+                                # 处理更新失败
+                                update_failures += 1
+                                logger.error(f"并发更新代理 {agent_id} 失败: {result}")
+                                
+                                agent = futures.get(future)
+                                if agent:
+                                    if hasattr(agent, 'update_failures'):
+                                        agent.update_failures += 1
+                                    else:
+                                        agent.update_failures = 1
+                                    
+                                    if agent.update_failures >= 5:
+                                        logger.warning(f"代理 {agent_id} 多次更新失败，标记为不活跃")
+                                        agent.is_alive = False
+                        except TimeoutError:
+                            logger.warning(f"获取代理更新结果超时")
+                            update_failures += 1
+                
+                # 更新错误计数，确保属性存在
+                if not hasattr(self, 'error_counters'):
+                    self.error_counters = {'agent_update': 0}
+                
+                if update_failures > 0:
+                    self.error_counters['agent_update'] = update_failures
+                else:
+                    self.error_counters['agent_update'] = 0
+                    if hasattr(self, 'last_successful_operation'):
+                        self.last_successful_operation['agent_update'] = datetime.now()
+            except Exception as e:
+                logger.error(f"并发更新代理异常: {e}")
+                # 并发失败时降级到串行模式
+                enable_concurrency = False
+        
+        if not enable_concurrency:
+            # 串行更新（适用于少量代理或并发失败时）
+            for agent in active_agents:
+                try:
+                    start_time = time.time()
+                    # 串行更新也添加超时保护
+                    update_timeout = self.performance.get('agent_update_timeout', 3)
+                    import signal
+                    
+                    def update_with_timeout_serial():
+                        agent.update(market_features, formatted_market_data['price'], regime)
+                        agent.last_update_time = datetime.now()
+                    
+                    # 简单的超时控制（不使用signal，以兼容Windows）
+                    import threading
+                    update_thread = threading.Thread(target=update_with_timeout_serial)
+                    update_thread.daemon = True
+                    update_thread.start()
+                    update_thread.join(update_timeout)
+                    
+                    if update_thread.is_alive():
+                        raise TimeoutError(f"代理更新超时 (> {update_timeout}秒)")
+                        
+                    # 记录性能指标
+                    update_time = time.time() - start_time
+                    if hasattr(self, 'performance_stats') and hasattr(self.performance_stats, 'agent_update_times'):
+                        self.performance_stats['agent_update_times'].append(update_time)
+                    
                 except Exception as e:
-                    logger.error(f"Error updating {agent.agent_id}: {e}")
+                    if not hasattr(self, 'error_counters'):
+                        self.error_counters = {'agent_update': 0}
+                    self.error_counters['agent_update'] += 1
+                    agent_id = getattr(agent, 'agent_id', 'unknown')
+                    logger.error(f"更新代理 {agent_id} 失败: {e}")
+                    
+                    # 对多次失败的代理标记为不活跃
+                    if hasattr(agent, 'update_failures'):
+                        agent.update_failures += 1
+                    else:
+                        agent.update_failures = 1
+                    
+                    if agent.update_failures >= 5:
+                        logger.warning(f"代理 {agent_id} 多次更新失败，标记为不活跃")
+                        agent.is_alive = False
+            
+            # 所有代理更新成功
+            if hasattr(self, 'error_counters') and hasattr(self, 'last_successful_operation'):
+                if not self.error_counters.get('agent_update', 0):
+                    self.last_successful_operation['agent_update'] = datetime.now()
+        
+        # 记录总体更新时间
+        total_update_time = time.time() - update_start_time
+        logger.debug(f"代理更新完成，耗时: {total_update_time:.2f}秒，活跃代理数: {len(active_agents)}")
+                        
+    def _get_price_history(self, symbol: str, window: int = 100) -> List[Dict]:
+        """
+        获取价格历史数据
+        
+        Args:
+            symbol: 交易对
+            window: 窗口大小
+            
+        Returns:
+            价格历史列表
+        """
+        try:
+            # 获取K线数据
+            klines = self.adapter.get_candles(symbol, bar='1m', limit=window)
+            
+            # 转换为标准格式
+            price_history = []
+            for kline in klines:
+                entry = self.bridge.format_market_data({
+                    'timestamp': kline[0],  # 假设第一个字段是时间戳
+                    'open': kline[1],      # 第二个字段是开盘价
+                    'high': kline[2],      # 第三个字段是最高价
+                    'low': kline[3],       # 第四个字段是最低价
+                    'close': kline[4],     # 第五个字段是收盘价
+                    'volume': kline[5]     # 第六个字段是成交量
+                })
+                price_history.append(entry)
+            
+            return price_history
+        except Exception as e:
+            logger.error(f"获取价格历史失败: {e}")
+            return []
     
     def _execute_trades(self):
-        """执行交易"""
+        """
+        执行交易（通过桥接器）
+        使用批量处理提升性能
+        """
+        execution_start_time = time.time()
+        
+        # 安全检查
+        if not hasattr(self, 'agents') or not self.agents:
+            logger.warning("代理列表为空，跳过交易执行")
+            return
+        
+        # 确保必要属性存在
+        if not hasattr(self, 'error_counters'):
+            self.error_counters = {'order_execution': 0}
+        if not hasattr(self, 'stats'):
+            self.stats = {'total_trades': 0, 'successful_trades': 0, 'failed_trades': 0}
+        if not hasattr(self, 'last_successful_operation'):
+            self.last_successful_operation = {'order_execution': None}
+        
+        # 收集所有待执行的交易信号
+        pending_trades = []
         for agent in self.agents:
-            if not agent.is_alive:
+            if not hasattr(agent, 'is_alive') or not agent.is_alive:
                 continue
             
-            # 检查是否有待执行的信号
+            if hasattr(agent, 'pause_trading') and agent.pause_trading:
+                continue
+            
             if not hasattr(agent, 'pending_signals') or not agent.pending_signals:
                 continue
             
-            # 执行每个信号
+            # 收集该代理的所有信号，添加基本验证
             for signal in agent.pending_signals:
-                try:
-                    # 转换信号为订单请求
-                    order_request = self._signal_to_order(signal, agent)
-                    
-                    if order_request is None:
-                        continue
-                    
-                    # 执行订单
-                    logger.info(f"{agent.agent_id} 下单: {signal['action']} {signal.get('side', 'close')} {signal['symbol']}")
-                    order = self.adapter.place_order(order_request)
-                    
-                    # 更新统计
-                    self.stats['total_trades'] += 1
-                    self.stats['successful_trades'] += 1
-                    
-                    # 更新交易代理状态
-                    agent.last_trade_time = time.time()
-                    agent.trade_count += 1
-                    
-                    logger.info(f"{agent.agent_id} 订单执行成功: {order.order_id}")
-                    
-                except Exception as e:
-                    logger.error(f"代理 {agent.agent_id} 交易执行失败: {e}")
-                    self.stats['failed_trades'] += 1
+                if isinstance(signal, dict) and 'action' in signal and 'symbol' in signal:
+                    pending_trades.append((agent, signal))
+                else:
+                    logger.warning(f"忽略无效信号: {signal}")
+        
+        logger.debug(f"准备执行 {len(pending_trades)} 笔交易")
+        
+        # 批量处理交易
+        batch_size = self.performance.get('batch_trade_size', 5)
+        batch_size = max(1, min(batch_size, 20))  # 限制批量大小范围
+        
+        # 按照交易对分组，减少重复的市场数据请求
+        trades_by_symbol = {}
+        for agent, signal in pending_trades:
+            symbol = signal.get('symbol', 'unknown')
+            if symbol not in trades_by_symbol:
+                trades_by_symbol[symbol] = []
+            trades_by_symbol[symbol].append((agent, signal))
+        
+        # 为每个交易对处理批量交易
+        for symbol, symbol_trades in trades_by_symbol.items():
+            # 尝试获取该交易对的市场数据（每个交易对只获取一次）
+            symbol_market_data = None
+            try:
+                symbol_market_data = self._get_market_data_for_signal(symbol)
+            except Exception as e:
+                logger.error(f"获取交易对 {symbol} 的市场数据失败: {e}")
+                continue  # 跳过该交易对的所有交易
             
-            # 清空已处理的信号
-            agent.pending_signals = []
+            # 分批处理该交易对的交易
+            for i in range(0, len(symbol_trades), batch_size):
+                batch = symbol_trades[i:i+batch_size]
+                
+                # API调用节流控制
+                try:
+                    self._throttle_api_calls(required_calls=len(batch))
+                except Exception as e:
+                    logger.warning(f"API节流控制异常: {e}，继续执行")
+                
+                # 执行批量交易
+                for agent, signal in batch:
+                    try:
+                        start_time = time.time()
+                        
+                        # 获取市场信息
+                        market = signal.get('market', 'spot')
+                        
+                        # 使用已获取的市场数据（优化）
+                        raw_market_data = symbol_market_data
+                        
+                        # 使用桥接器格式化市场数据
+                        formatted_market_data = self.bridge.format_market_data(raw_market_data)
+                        current_price = formatted_market_data.get('price', 0)
+                        
+                        if current_price <= 0:
+                            logger.warning(f"无效价格数据: {current_price}，跳过交易")
+                            continue
+                        
+                        # 转换信号为标准化交易指令
+                        trade_instruction = self.bridge.convert_strategy_signal(
+                            signal.get('strength', 0), 
+                            signal.get('market_regime', 'sideways')
+                        )
+                        
+                        # 只有非持有的信号才执行
+                        if trade_instruction.get('side') == 'hold':
+                            continue
+                        
+                        # 转换信号为订单请求
+                        order_request = self._signal_to_order(signal, agent)
+                        
+                        if order_request is None:
+                            continue
+                        
+                        # 添加置信度信息
+                        order_request['confidence'] = trade_instruction.get('confidence', 0)
+                        order_request['timestamp'] = trade_instruction.get('timestamp', int(time.time()))
+                        
+                        # 交易安全检查
+                        if order_request.get('size', 0) <= 0:
+                            logger.warning(f"无效订单大小: {order_request.get('size')}")
+                            continue
+                        
+                        if order_request.get('price', 0) <= 0 and order_request.get('order_type') == 'limit':
+                            logger.warning(f"无效限价: {order_request.get('price')}")
+                            continue
+                        
+                        # 执行订单，添加超时控制
+                        agent_id = getattr(agent, 'agent_id', 'unknown')
+                        logger.info(f"{agent_id} 下单: {signal.get('action')} {signal.get('side', 'close')} {symbol} (置信度: {order_request['confidence']:.2f})")
+                        
+                        # 交易执行超时控制
+                        import threading
+                        execution_result = {'order': None, 'exception': None}
+                        
+                        def execute_order_thread():
+                            try:
+                                if hasattr(self.bridge, 'mode') and self.bridge.mode == 'live':
+                                    execution_result['order'] = self.adapter.place_order(order_request)
+                                else:
+                                    # 回测模式下，通过桥接器模拟执行
+                                    execution_result['order'] = self.bridge.execute_order(order_request, current_price)
+                            except Exception as e:
+                                execution_result['exception'] = e
+                        
+                        # 启动交易执行线程
+                        execution_timeout = self.performance.get('trade_execution_timeout', 5)
+                        exec_thread = threading.Thread(target=execute_order_thread)
+                        exec_thread.daemon = True
+                        exec_thread.start()
+                        exec_thread.join(execution_timeout)
+                        
+                        # 检查执行结果和超时
+                        if exec_thread.is_alive():
+                            raise TimeoutError(f"订单执行超时 (> {execution_timeout}秒)")
+                        
+                        if execution_result['exception']:
+                            raise execution_result['exception']
+                        
+                        order = execution_result['order']
+                        
+                        # 处理订单结果
+                        if hasattr(self.bridge, 'mode') and self.bridge.mode == 'live':
+                            normalized_result = {
+                                'order_id': getattr(order, 'order_id', f"manual_{int(time.time())}"),
+                                'status': self._map_order_status(order.get('state', 'filled')),
+                                'side': order_request.get('side'),
+                                'price': order.get('price_avg', current_price),
+                                'quantity': order.get('size', order_request.get('size', 0)),
+                                'timestamp': int(time.time()),
+                                'type': order_request.get('order_type', 'market'),
+                                'filled_amount': order.get('filled_size', order_request.get('size', 0)),
+                                'fee': order.get('fee', 0)
+                            }
+                        else:
+                            # 回测模式下，直接使用桥接器结果
+                            normalized_result = order
+                        
+                        # 更新统计
+                        self.stats['total_trades'] = self.stats.get('total_trades', 0) + 1
+                        if normalized_result.get('status') in ['filled', 'partially_filled']:
+                            self.stats['successful_trades'] = self.stats.get('successful_trades', 0) + 1
+                        else:
+                            self.stats['failed_trades'] = self.stats.get('failed_trades', 0) + 1
+                        
+                        # 记录交易到报告系统（添加异常处理）
+                        try:
+                            trade_record = {
+                                'trade_id': normalized_result.get('order_id', 'unknown'),
+                                'agent_id': agent_id,
+                                'symbol': order_request.get('symbol', symbol),
+                                'market': order_request.get('market', market),
+                                'side': order_request.get('side'),
+                                'action': signal.get('action'),
+                                'price': normalized_result.get('price', 0),
+                                'quantity': normalized_result.get('quantity', 0),
+                                'filled_amount': normalized_result.get('filled_amount', 0),
+                                'fee': normalized_result.get('fee', 0),
+                                'status': normalized_result.get('status'),
+                                'timestamp': datetime.now(),
+                                'confidence': order_request.get('confidence', 0),
+                                'signal_strength': signal.get('strength', 0),
+                                'market_regime': signal.get('market_regime', 'sideways')
+                            }
+                            if hasattr(self, 'trade_reporter'):
+                                self.trade_reporter.record_trade(trade_record)
+                        except Exception as report_e:
+                            logger.error(f"记录交易报告失败: {report_e}")
+                        
+                        # 更新交易代理状态
+                        agent.last_trade_time = time.time()
+                        agent.trade_count = getattr(agent, 'trade_count', 0) + 1
+                        
+                        # 更新性能统计
+                        execution_time = time.time() - start_time
+                        if hasattr(self, 'performance_stats') and hasattr(self.performance_stats, 'trade_execution_times'):
+                            self.performance_stats['trade_execution_times'].append(execution_time)
+                        
+                        logger.info(f"{agent_id} 订单执行成功: {normalized_result.get('order_id')} (耗时: {execution_time:.2f}秒)")
+                        
+                    except Exception as e:
+                        self.error_counters['order_execution'] = self.error_counters.get('order_execution', 0) + 1
+                        agent_id = getattr(agent, 'agent_id', 'unknown')
+                        logger.error(f"代理 {agent_id} 交易执行失败: {e}")
+                        self.stats['failed_trades'] = self.stats.get('failed_trades', 0) + 1
+                        
+                        # 连续失败多次，考虑暂停该代理交易
+                        if hasattr(agent, 'trade_failures'):
+                            agent.trade_failures += 1
+                        else:
+                            agent.trade_failures = 1
+                        
+                        if agent.trade_failures >= 3:
+                            logger.warning(f"代理 {agent_id} 交易连续失败，暂停交易5次迭代")
+                            agent.pause_trading = True
+                            agent.pause_until_iteration = hasattr(self, '_current_iteration') and self._current_iteration + 5 or 5
+        
+        # 处理暂停交易的代理
+        for agent in self.agents:
+            if hasattr(agent, 'pause_trading') and agent.pause_trading:
+                if hasattr(agent, 'pause_until_iteration') and hasattr(self, '_current_iteration'):
+                    if self._current_iteration >= agent.pause_until_iteration:
+                        agent.pause_trading = False
+                        agent.trade_failures = 0
+                        agent_id = getattr(agent, 'agent_id', 'unknown')
+                        logger.info(f"代理 {agent_id} 恢复交易")
+                    else:
+                        agent_id = getattr(agent, 'agent_id', 'unknown')
+                        logger.debug(f"代理 {agent_id} 仍在交易暂停期内")
+            
+            # 安全地清空已处理的信号
+            if hasattr(agent, 'pending_signals'):
+                try:
+                    agent.pending_signals = []
+                except Exception as e:
+                    logger.warning(f"清空代理信号失败: {e}")
+        
+        # 重置错误计数（如果有成功交易）
+        if self.stats.get('successful_trades', 0) > 0:
+            self.last_successful_operation['order_execution'] = datetime.now()
+            self.error_counters['order_execution'] = 0
+            
+        # 记录总体执行时间
+        total_execution_time = time.time() - execution_start_time
+        logger.debug(f"交易执行完成，耗时: {total_execution_time:.2f}秒，处理交易: {len(pending_trades)}笔")
+            
+    def _get_market_data_for_signal(self, symbol):
+        """
+        获取用于信号处理的市场数据
+        增强版：添加缓存、重试机制和错误处理
+        
+        Args:
+            symbol: 交易对
+            
+        Returns:
+            市场数据字典
+        """
+        try:
+            # 参数验证
+            if not symbol or not isinstance(symbol, str):
+                logger.warning(f"无效的交易对: {symbol}")
+                return {'price': 0, 'candles': [], 'timestamp': time.time(), 'error': 'invalid_symbol'}
+            
+            # 初始化缓存（如果不存在）
+            if not hasattr(self, '_market_data_cache'):
+                self._market_data_cache = {}
+                self._market_data_cache_times = {}
+            
+            # 缓存设置
+            cache_ttl = 1.0  # 缓存1秒
+            current_time = time.time()
+            
+            # 检查缓存是否有效
+            if symbol in self._market_data_cache and \
+               symbol in self._market_data_cache_times and \
+               current_time - self._market_data_cache_times[symbol] < cache_ttl:
+                # 缓存命中，更新统计
+                if hasattr(self, 'performance_stats'):
+                    self.performance_stats['cache_hits'] = self.performance_stats.get('cache_hits', 0) + 1
+                return self._market_data_cache[symbol]
+            
+            # 缓存未命中，更新统计
+            if hasattr(self, 'performance_stats'):
+                self.performance_stats['cache_misses'] = self.performance_stats.get('cache_misses', 0) + 1
+            
+            # 结果初始化为默认值
+            result = {
+                'price': 0,
+                'candles': [],
+                'timestamp': current_time,
+                'success': False
+            }
+            
+            # 获取价格数据（添加重试机制）
+            max_retries = 2
+            price_success = False
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    # API调用节流控制
+                    if hasattr(self, '_throttle_api_calls'):
+                        try:
+                            self._throttle_api_calls(required_calls=1)
+                        except Exception as e:
+                            logger.warning(f"API节流控制异常: {e}")
+                    
+                    # 获取价格
+                    price = self.adapter.get_price(symbol)
+                    
+                    # 验证价格有效性
+                    try:
+                        price_value = float(price)
+                        if price_value > 0:
+                            result['price'] = price_value
+                            price_success = True
+                            break
+                        else:
+                            logger.warning(f"获取到无效价格: {price}")
+                    except (ValueError, TypeError):
+                        logger.warning(f"价格数据类型错误: {price}")
+                        
+                except Exception as e:
+                    logger.warning(f"获取价格失败 (尝试 {attempt+1}/{max_retries+1}): {e}")
+                    
+                # 退避重试
+                if attempt < max_retries:
+                    backoff_time = 0.1 * (2 ** attempt)
+                    time.sleep(backoff_time)
+            
+            # 获取K线数据（添加重试机制）
+            candles_success = False
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    # API调用节流控制
+                    if hasattr(self, '_throttle_api_calls'):
+                        try:
+                            self._throttle_api_calls(required_calls=1)
+                        except Exception as e:
+                            logger.warning(f"API节流控制异常: {e}")
+                    
+                    # 获取K线数据
+                    candles = self.adapter.get_candles(symbol, bar='1m', limit=10)
+                    
+                    # 验证K线数据有效性
+                    if isinstance(candles, list) and len(candles) > 0:
+                        # 验证第一根K线的数据格式
+                        first_candle = candles[0]
+                        if isinstance(first_candle, (list, tuple)) and len(first_candle) >= 6:  # 至少需要包含基本OHLCV数据
+                            result['candles'] = candles
+                            candles_success = True
+                            break
+                        else:
+                            logger.warning(f"K线数据格式错误: {first_candle}")
+                    else:
+                        logger.warning(f"获取到空的K线数据")
+                        
+                except Exception as e:
+                    logger.warning(f"获取K线数据失败 (尝试 {attempt+1}/{max_retries+1}): {e}")
+                    
+                # 退避重试
+                if attempt < max_retries:
+                    backoff_time = 0.1 * (2 ** attempt)
+                    time.sleep(backoff_time)
+            
+            # 判断是否成功获取任何数据
+            result['success'] = price_success or candles_success
+            
+            # 更新结果时间戳
+            result['timestamp'] = time.time()
+            
+            # 更新错误计数器
+            if not result['success']:
+                if hasattr(self, 'error_counters'):
+                    self.error_counters['market_data'] = self.error_counters.get('market_data', 0) + 1
+                result['error'] = 'data_retrieval_failed'
+            else:
+                # 清除错误计数器
+                if hasattr(self, 'error_counters'):
+                    self.error_counters['market_data'] = 0
+                if hasattr(self, 'last_successful_operation'):
+                    self.last_successful_operation['market_data'] = datetime.now()
+            
+            # 更新缓存（只缓存成功的数据）
+            if result['success']:
+                self._market_data_cache[symbol] = result.copy()
+                self._market_data_cache_times[symbol] = time.time()
+                
+                # 清理过期缓存，避免内存泄漏
+                self._clean_cache()
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"获取信号市场数据异常: {e}")
+            # 记录错误
+            if hasattr(self, 'error_counters'):
+                self.error_counters['market_data'] = self.error_counters.get('market_data', 0) + 1
+            return {'price': 0, 'candles': [], 'timestamp': time.time(), 'error': str(e), 'success': False}
+            
+    def _clean_cache(self):
+        """
+        清理过期缓存，防止内存泄漏
+        """
+        try:
+            # 缓存大小限制
+            max_cache_size = 500
+            if hasattr(self, '_market_data_cache') and len(self._market_data_cache) > max_cache_size:
+                # 移除最旧的缓存项
+                oldest_key = min(self._market_data_cache_times.items(), key=lambda x: x[1])[0]
+                if oldest_key in self._market_data_cache:
+                    del self._market_data_cache[oldest_key]
+                if oldest_key in self._market_data_cache_times:
+                    del self._market_data_cache_times[oldest_key]
+                
+                logger.debug(f"清理市场数据缓存，当前大小: {len(self._market_data_cache)}")
+        except Exception as e:
+            logger.warning(f"清理缓存失败: {e}")
+            # 静默处理缓存清理错误，不影响主流程
+            
+    def _map_order_status(self, status):
+        """
+        映射订单状态到标准状态
+        
+        Args:
+            status: 原始订单状态
+            
+        Returns:
+            标准订单状态
+        """
+        status_map = {
+            'live': 'submitted',
+            'partially_filled': 'partially_filled',
+            'filled': 'filled',
+            'cancelled': 'cancelled',
+            'rejected': 'failed'
+        }
+        return status_map.get(status, 'unknown')
+    
+    def _enter_safe_mode(self):
+        """进入安全模式：关闭所有持仓，暂停新开仓"""
+        logger.warning("===== 进入安全模式 =====")
+        
+        # 关闭所有持仓
+        self._close_all_positions()
+        
+        # 暂停所有代理交易
+        for agent in self.agents:
+            if agent.is_alive:
+                agent.pause_trading = True
+                logger.info(f"代理 {agent.agent_id} 已暂停交易")
+        
+        # 记录安全模式状态
+        self.safe_mode = True
+        self.safe_mode_entry_time = datetime.now()
+        
+        # 等待一段时间后自动退出安全模式
+        # 注意：这会在主循环中检查，不会阻塞此处执行
+    
+    def _exit_safe_mode(self):
+        """退出安全模式"""
+        logger.warning("===== 退出安全模式 =====")
+        
+        # 恢复代理交易
+        for agent in self.agents:
+            if agent.is_alive:
+                agent.pause_trading = False
+                logger.info(f"代理 {agent.agent_id} 交易恢复")
+        
+        # 更新状态
+        self.safe_mode = False
+        self.safe_mode_exit_time = datetime.now()
     
     def _signal_to_order(self, signal, agent):
         """
@@ -304,109 +1817,231 @@ class LiveTradingSystem:
             订单请求字典，或None
         """
         try:
-            if signal['action'] == 'close':
-                # 平仓信号
-                if signal['symbol'] not in agent.positions:
-                    return None
-                
-                pos = agent.positions[signal['symbol']]
-                
-                # 确定平仓方向
-                if pos['side'] == 'long':
-                    side = 'sell'
-                    pos_side = 'long'
-                else:
-                    side = 'buy'
-                    pos_side = 'short'
-                
-                # 构建平仓订单
-                market = 'futures' if 'SWAP' in signal['symbol'] else 'spot'
-                return {
-                    'market': market,
-                    'symbol': signal['symbol'],
-                    'side': side,
-                    'pos_side': pos_side,
-                    'order_type': 'market',
-                    'size': abs(pos['size']),
-                    'reduce_only': True
-                }
+            # 参数验证
+            if not isinstance(signal, dict):
+                logger.warning(f"无效的信号类型: {type(signal).__name__}")
+                return None
             
-            elif signal['action'] == 'open':
-                # 开仓信号
-                market = signal['market']
-                symbol = signal['symbol']
-                side = signal['side']
-                strength = signal.get('strength', 0.5)
-                
-                # 计算订单数量
-                if market == 'spot':
-                    # 现货：使用agent资金的一定比例
-                    value = agent.capital * strength * 0.3  # 最多30%资金
-                    # 限制单笔订单最大$500，提供默认值
-                    max_order_value = self.config.get('risk', {}).get('max_order_value', 500)
-                    value = min(value, max_order_value)
+            # 必需字段检查
+            required_fields = ['symbol']
+            for field in required_fields:
+                if field not in signal:
+                    logger.warning(f"信号缺少必需字段: {field}")
+                    return None
+            
+            # action字段检查
+            action = signal.get('action', '').lower()
+            if action not in ['close', 'open']:
+                logger.warning(f"无效的action类型: {action}")
+                return None
+            
+            # 代理状态检查
+            if not agent or not hasattr(agent, 'is_alive') or not agent.is_alive:
+                logger.warning(f"尝试使用不活跃代理生成订单")
+                return None
+            
+            # 安全检查：获取代理ID
+            agent_id = getattr(agent, 'agent_id', 'unknown')
+            
+            # 平仓信号处理
+            if action == 'close':
+                try:
+                    symbol = signal['symbol']
                     
-                    # 获取当前价格
-                    try:
-                        current_price = self.adapter.get_price(symbol)
-                        if current_price <= 0:
-                            logger.error(f"Invalid price for {symbol}: {current_price}")
-                            return None
-                        size = value / current_price
-                        
-                        # 现货最小0.0001 BTC
-                        if size < 0.0001:
-                            return None
-                        
-                        return {
-                            'market': 'spot',
-                            'symbol': symbol,
-                            'side': 'buy',  # 现货只能做多
-                            'order_type': 'market',
-                            'size': round(size, 4)
-                        }
-                    except Exception as e:
-                        logger.error(f"Failed to get price for {symbol}: {e}")
-                        return None
-                
-                else:
-                    # 合约：计算合约张数
-                    value = agent.capital * strength * 0.3  # 最多30%资金
-                    max_order_value = self.config.get('risk', {}).get('max_order_value', 500)
-                    value = min(value, max_order_value)
-                    
-                    # 每张合约约100 USDT
-                    size = int(value / 100)
-                    
-                    # 最少1张
-                    if size < 1:
+                    # 检查持仓是否存在
+                    if not hasattr(agent, 'positions') or not isinstance(agent.positions, dict):
+                        logger.warning(f"代理没有有效的持仓信息")
                         return None
                     
-                    # 确定方向
-                    if side == 'long':
-                        order_side = 'buy'
+                    if symbol not in agent.positions:
+                        logger.warning(f"代理没有 {symbol} 的持仓")
+                        return None
+                    
+                    pos = agent.positions[symbol]
+                    
+                    # 检查持仓数据完整性
+                    if not isinstance(pos, dict) or 'side' not in pos or 'size' not in pos:
+                        logger.warning(f"持仓数据不完整: {pos}")
+                        return None
+                    
+                    # 确定平仓方向
+                    if pos['side'] == 'long':
+                        side = 'sell'
                         pos_side = 'long'
                     else:
-                        order_side = 'sell'
+                        side = 'buy'
                         pos_side = 'short'
                     
-                    # 获取杠杆配置，提供默认值
-                    leverage = self.config.get('markets', {}).get('futures', {}).get('max_leverage', 2)
+                    # 确定市场类型
+                    market = 'futures' if 'SWAP' in symbol else 'spot'
                     
-                    return {
-                        'market': 'futures',
+                    # 构建平仓订单
+                    order_request = {
+                        'market': market,
                         'symbol': symbol,
-                        'side': order_side,
-                        'pos_side': pos_side,
+                        'side': side,
                         'order_type': 'market',
-                        'size': size,
-                        'leverage': leverage
+                        'size': abs(float(pos['size'])),  # 确保是浮点数
+                        'reduce_only': True,
+                        'agent_id': agent_id,
+                        'timestamp': int(time.time())
                     }
+                    
+                    # 合约添加pos_side
+                    if market == 'futures':
+                        order_request['pos_side'] = pos_side
+                    
+                    logger.debug(f"生成平仓订单: {order_request}")
+                    return order_request
+                    
+                except KeyError as e:
+                    logger.error(f"平仓信号缺少关键字段: {e}")
+                    return None
+                except (ValueError, TypeError) as e:
+                    logger.error(f"平仓数据类型错误: {e}")
+                    return None
             
+            # 开仓信号处理
+            elif action == 'open':
+                try:
+                    # 验证必要字段
+                    required_open_fields = ['market', 'symbol', 'side']
+                    for field in required_open_fields:
+                        if field not in signal:
+                            logger.warning(f"开仓信号缺少必需字段: {field}")
+                            return None
+                    
+                    market = signal['market']
+                    symbol = signal['symbol']
+                    side = signal['side']
+                    strength = min(max(float(signal.get('strength', 0.5)), 0), 1)  # 归一化到0-1范围
+                    
+                    # 验证参数值
+                    if market not in ['spot', 'futures', 'linear', 'inverse']:
+                        logger.warning(f"无效的市场类型: {market}")
+                        return None
+                    
+                    if side not in ['long', 'short', 'buy', 'sell']:
+                        logger.warning(f"无效的交易方向: {side}")
+                        return None
+                    
+                    # 确保代理有资金
+                    if not hasattr(agent, 'capital') or float(agent.capital) <= 0:
+                        logger.warning(f"代理资金不足: {getattr(agent, 'capital', '未知')}")
+                        return None
+                    
+                    # 获取风险配置，提供合理默认值
+                    max_order_value = self.config.get('risk', {}).get('max_order_value', 500)
+                    position_percent = 0.3  # 默认使用30%资金
+                    
+                    # 计算订单价值
+                    try:
+                        value = float(agent.capital) * strength * position_percent
+                        value = min(value, float(max_order_value))  # 限制最大订单价值
+                        
+                        if value <= 0:
+                            logger.warning(f"计算的订单价值无效: {value}")
+                            return None
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"计算订单价值失败: {e}")
+                        return None
+                    
+                    # 现货市场处理
+                    if market == 'spot':
+                        try:
+                            # 获取当前价格，添加错误处理和超时
+                            current_price = None
+                            for attempt in range(3):  # 最多尝试3次
+                                try:
+                                    current_price = self.adapter.get_price(symbol)
+                                    if float(current_price) > 0:
+                                        break
+                                except Exception as e:
+                                    logger.warning(f"获取价格失败 (尝试 {attempt+1}/3): {e}")
+                                    time.sleep(0.1 * (attempt + 1))  # 指数退避
+                            
+                            if current_price is None or float(current_price) <= 0:
+                                logger.error(f"无法获取有效价格: {current_price}")
+                                return None
+                            
+                            # 计算数量
+                            current_price = float(current_price)
+                            size = value / current_price
+                            
+                            # 数量限制检查
+                            min_size = 0.0001  # 现货最小0.0001
+                            if size < min_size:
+                                logger.warning(f"订单数量小于最小限制: {size} < {min_size}")
+                                return None
+                            
+                            # 舍入到合理精度
+                            size = round(size, 4)
+                            
+                            # 现货订单始终是买入
+                            return {
+                                'market': 'spot',
+                                'symbol': symbol,
+                                'side': 'buy',
+                                'order_type': 'market',
+                                'size': size,
+                                'agent_id': agent_id,
+                                'timestamp': int(time.time()),
+                                'signal_strength': strength
+                            }
+                            
+                        except Exception as e:
+                            logger.error(f"现货订单生成失败: {e}")
+                            return None
+                    
+                    # 合约市场处理
+                    else:
+                        try:
+                            # 合约价值估算（每张合约约100 USDT）
+                            contract_value = 100.0
+                            size = int(value / contract_value)
+                            
+                            # 数量限制检查
+                            min_size = 1  # 最少1张
+                            if size < min_size:
+                                logger.warning(f"订单数量小于最小限制: {size} < {min_size}")
+                                return None
+                            
+                            # 确定订单方向
+                            if side == 'long' or side == 'buy':
+                                order_side = 'buy'
+                                pos_side = 'long'
+                            else:
+                                order_side = 'sell'
+                                pos_side = 'short'
+                            
+                            # 获取杠杆配置，限制在合理范围内
+                            leverage = int(self.config.get('markets', {}).get('futures', {}).get('max_leverage', 2))
+                            leverage = max(1, min(leverage, 100))  # 限制杠杆在1-100倍
+                            
+                            return {
+                                'market': 'futures',
+                                'symbol': symbol,
+                                'side': order_side,
+                                'pos_side': pos_side,
+                                'order_type': 'market',
+                                'size': size,
+                                'leverage': leverage,
+                                'agent_id': agent_id,
+                                'timestamp': int(time.time()),
+                                'signal_strength': strength
+                            }
+                            
+                        except Exception as e:
+                            logger.error(f"合约订单生成失败: {e}")
+                            return None
+                            
             return None
             
         except Exception as e:
-            logger.error(f"Error converting signal to order: {e}")
+            logger.error(f"信号转换为订单失败: {e}")
+            # 记录错误统计
+            if hasattr(self, 'error_counters'):
+                self.error_counters['signal_to_order'] = self.error_counters.get('signal_to_order', 0) + 1
             return None
     
     def _check_lifecycle(self):
@@ -448,6 +2083,273 @@ class LiveTradingSystem:
         logger.info(f"总交易次数: {self.stats['total_trades']}")
         logger.info(f"代理出生数: {self.stats['births']}, 代理死亡数: {self.stats['deaths']}")
     
+    def _monitoring_loop(self):
+        """监控系统循环"""
+        logger.info("监控循环已启动")
+        monitoring_interval = self.config.get('monitoring', {}).get('interval', 60)  # 默认60秒
+        
+        while self.running:
+            try:
+                # 收集系统指标
+                system_metrics = {
+                    'cpu_percent': psutil.cpu_percent(),
+                    'memory_percent': psutil.virtual_memory().percent,
+                    'disk_percent': psutil.disk_usage('.').percent,
+                    'network_io': psutil.net_io_counters(),
+                    'process_count': len(psutil.pids())
+                }
+                
+                # 更新系统监控器
+                self.system_monitor.update_system_metrics(system_metrics)
+                
+                # 收集交易统计
+                trade_statistics = {
+                    'total_trades': self.stats['total_trades'],
+                    'successful_trades': self.stats['successful_trades'],
+                    'failed_trades': self.stats['failed_trades'],
+                    'error_counters': self.error_counters.copy()
+                }
+                self.system_monitor.update_trade_statistics(trade_statistics)
+                
+                # 收集代理性能
+                agent_performance = []
+                for agent in self.agents:
+                    if agent.is_alive:
+                        agent_performance.append({
+                            'agent_id': agent.agent_id,
+                            'capital': agent.capital,
+                            'roi': agent.roi,
+                            'trade_count': agent.trade_count,
+                            'last_trade_time': agent.last_trade_time
+                        })
+                self.system_monitor.update_agent_performance(agent_performance)
+                
+                # 检查健康状态
+                health_status = self.system_monitor.get_latest_health_status()
+                
+                # 如果健康分数过低，发送警报
+                if health_status.get('health_score', 100) < 60:
+                    self.alert_system.send_alert(
+                        'system_health',
+                        f'系统健康分数过低: {health_status.get("health_score", 100)}/100',
+                        health_status
+                    )
+                    
+                # 检查错误率
+                total_errors = sum(self.error_counters.values())
+                if total_errors > 10:
+                    self.alert_system.send_alert(
+                        'error_rate',
+                        f'系统错误数量过多: {total_errors}',
+                        self.error_counters.copy()
+                    )
+                    
+                # 检查API连接状态
+                if not self.health_monitor.health_status['api_connection']:
+                    self.alert_system.send_alert(
+                        'api_connection',
+                        'API连接异常',
+                        self.health_monitor.get_health_status()
+                    )
+                    
+            except Exception as e:
+                logger.error(f"监控循环错误: {e}")
+            
+            time.sleep(monitoring_interval)
+    
+    def _reporting_loop(self):
+        """报告系统循环"""
+        logger.info("报告循环已启动")
+        daily_report_time = self.config.get('reporting', {}).get('daily_time', '23:59')  # 默认每日23:59生成报告
+        
+        while self.running:
+            try:
+                # 检查是否到达每日报告时间
+                now = datetime.now()
+                current_time = now.strftime('%H:%M')
+                
+                if current_time == daily_report_time:
+                    # 生成每日报告
+                    daily_report = self.trade_reporter.generate_daily_report()
+                    if daily_report:
+                        report_file = self.trade_reporter.save_report(daily_report, 'daily')
+                        logger.info(f"每日报告已生成: {report_file}")
+                        
+                        # 发送报告摘要
+                        self.alert_system.send_daily_summary(daily_report)
+                    
+                    # 等待1分钟，避免重复生成
+                    time.sleep(60)
+                
+                # 每小时生成性能摘要
+                elif now.minute == 0 and now.second < 10:  # 每小时整点，给10秒容错
+                    # 获取系统性能摘要
+                    performance_summary = self.system_monitor.get_performance_summary()
+                    
+                    # 生成文本报告并记录到日志
+                    self.system_monitor._generate_text_report(performance_summary)
+                    
+                    # 等待10秒，避免重复生成
+                    time.sleep(10)
+                    
+            except Exception as e:
+                logger.error(f"报告循环错误: {e}")
+            
+            time.sleep(10)  # 每10秒检查一次时间
+    
+    def _enter_safe_mode(self):
+        """进入安全模式：关闭所有持仓，暂停新开仓"""
+        logger.warning("===== 进入安全模式 =====")
+        
+        # 关闭所有持仓
+        self._close_all_positions()
+        
+        # 暂停所有代理交易
+        for agent in self.agents:
+            if hasattr(agent, 'pause_trading'):
+                agent.pause_trading = True
+                logger.info(f"代理 {agent.agent_id} 已暂停交易")
+        
+        # 记录安全模式状态
+        self.safe_mode = True
+        self.safe_mode_entry_time = datetime.now()
+        
+        # 发送警报
+        self.alert_system.send_alert(
+            'safe_mode_activated',
+            "系统已进入安全模式，所有持仓已关闭",
+            severity='warning'
+        )
+    
+    def _exit_safe_mode(self):
+        """退出安全模式"""
+        logger.warning("===== 退出安全模式 =====")
+        
+        # 恢复代理交易
+        for agent in self.agents:
+            if hasattr(agent, 'pause_trading'):
+                agent.pause_trading = False
+                logger.info(f"代理 {agent.agent_id} 交易恢复")
+        
+        # 更新状态
+        self.safe_mode = False
+        self.safe_mode_exit_time = datetime.now()
+        
+        # 发送警报
+        self.alert_system.send_alert(
+            'safe_mode_deactivated',
+            "系统已退出安全模式，交易恢复",
+            severity='info'
+        )
+    
+    def _detect_abnormal_patterns(self):
+        """检测异常交易模式"""
+        # 快速价格变动检测
+        current_time = datetime.now()
+        
+        # 记录并分析价格变动速率
+        for symbol in self.config['markets']['futures'].get('symbols', []):
+            try:
+                price = self.adapter.get_price(symbol)
+                self.abnormal_patterns['rapid_price_changes'].append((current_time, symbol, price))
+                
+                # 只保留最近的10个价格点
+                if len(self.abnormal_patterns['rapid_price_changes']) > 10:
+                    self.abnormal_patterns['rapid_price_changes'] = self.abnormal_patterns['rapid_price_changes'][-10:]
+                
+                # 检查是否有超过5%的急剧价格变动
+                if len(self.abnormal_patterns['rapid_price_changes']) >= 5:
+                    prices = [x[2] for x in self.abnormal_patterns['rapid_price_changes']]
+                    if max(prices) / min(prices) > 1.05:
+                        logger.warning(f"检测到快速价格波动: {symbol}")
+                        self.alert_system.send_alert(
+                            'abnormal_price_movement',
+                            f"符号 {symbol} 在短时间内出现超过5%的价格波动",
+                            severity='warning'
+                        )
+                        return True
+            except Exception:
+                pass
+        
+        # 检查失败订单序列
+        if len(self.abnormal_patterns['failed_orders_sequence']) >= 5:
+            # 最近5个订单都失败了
+            logger.warning("检测到连续失败订单模式")
+            self.alert_system.send_alert(
+                'consecutive_failed_orders',
+                "检测到连续5个订单失败，可能存在系统问题",
+                severity='warning'
+            )
+            return True
+        
+        return False
+    
+    def _adaptive_recovery_strategy(self, component, failure_count):
+        """根据失败次数和类型采用自适应恢复策略"""
+        if failure_count >= 5:
+            # 多次失败，采用更激进的恢复策略
+            if component == 'api_connection':
+                # 尝试更换API端点或代理
+                if hasattr(self.adapter, 'switch_endpoint'):
+                    self.adapter.switch_endpoint()
+            return 'full_restart'  # 多次失败，建议完全重启
+        elif failure_count >= 3:
+            # 中度失败，进入安全模式并重启组件
+            self._enter_safe_mode()
+            return self.health_monitor.get_recovery_action(component)
+        else:
+            # 轻度失败，使用常规恢复策略
+            return self.health_monitor.get_recovery_action(component)
+    
+    def _full_restart(self):
+        """完全重启系统"""
+        logger.warning("执行系统完全重启...")
+        
+        try:
+            # 保存当前状态
+            self._save_state()
+            
+            # 关闭所有持仓
+            self._close_all_positions()
+            
+            # 重置所有组件
+            if hasattr(self.adapter, 'close'):
+                self.adapter.close()
+            
+            # 重新初始化适配器
+            self.adapter = OKXTradingAdapter(self.okx_config)
+            
+            # 重置健康状态
+            for component in ['api_connection', 'market_data', 'agents', 'risk_manager']:
+                if hasattr(self.health_monitor, 'update_health_status'):
+                    self.health_monitor.update_health_status(component, True)
+            
+            # 重置错误计数器
+            self.error_counters = {
+                'market_data': 0,
+                'order_execution': 0,
+                'agent_update': 0
+            }
+            
+            logger.info("系统完全重启成功")
+            
+            # 通知警报系统
+            self.alert_system.send_alert(
+                'system_restart',
+                "系统已完全重启并重置",
+                severity='info'
+            )
+            
+            return True
+        except Exception as e:
+            logger.error(f"系统完全重启失败: {e}")
+            self.alert_system.send_alert(
+                'system_error',
+                f"系统重启失败: {str(e)}",
+                severity='critical'
+            )
+            return False
+    
     def stop(self):
         """停止交易系统"""
         if not self.running:
@@ -459,6 +2361,9 @@ class LiveTradingSystem:
         
         # 关闭所有持仓
         self._close_all_positions()
+        
+        # 保存最终状态
+        self._save_state()
         
         # 生成最终报告
         self._generate_report()
@@ -489,10 +2394,15 @@ class LiveTradingSystem:
     
     def _generate_report(self):
         """生成交易报告"""
-        logger.info("Generating trading report...")
+        logger.info("生成交易报告...")
         
         # 获取最终账户状态
-        final_summary = self.adapter.get_account_summary()
+        try:
+            final_summary = self.adapter.get_account_summary()
+        except Exception as e:
+            logger.error(f"获取最终账户状态失败: {e}")
+            # 使用默认值
+            final_summary = {'total_equity': self.config['initial_capital']}
         
         # 计算ROI
         initial_capital = self.config['initial_capital']
@@ -501,6 +2411,9 @@ class LiveTradingSystem:
         
         # 计算运行时长
         duration = (self.stats['end_time'] - self.stats['start_time']).total_seconds()
+        
+        # 获取健康状态摘要
+        health_summary = self.health_monitor.get_health_status()
         
         report = {
             'summary': {
@@ -522,15 +2435,30 @@ class LiveTradingSystem:
                 'active_agents': len([a for a in self.agents if a.is_alive]),
                 'births': self.stats['births'],
                 'deaths': self.stats['deaths']
+            },
+            'system_health': {
+                'health_summary': health_summary,
+                'recovery_attempts': self.system_stats['recovery_attempts'],
+                'component_restarts': self.system_stats['component_restarts'],
+                'last_recovery_time': self.system_stats['last_recovery_time'].isoformat() if self.system_stats['last_recovery_time'] else None,
+                'error_counters': self.error_counters
             }
         }
         
-        # 保存报告
-        report_file = f"/home/ubuntu/trading_logs/report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_file, 'w') as f:
-            json.dump(report, f, indent=2)
+        # 确保报告目录存在
+        report_dir = os.path.join(os.getcwd(), 'trading_logs')
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
         
-        logger.info(f"Report saved to {report_file}")
-        logger.info(f"Final ROI: {roi:.2f}%")
+        # 保存报告
+        report_file = os.path.join(report_dir, f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        try:
+            with open(report_file, 'w', encoding='utf-8') as f:
+                json.dump(report, f, indent=2, ensure_ascii=False)
+            
+            logger.info(f"报告已保存到 {report_file}")
+            logger.info(f"最终ROI: {roi:.2f}%")
+        except Exception as e:
+            logger.error(f"保存报告失败: {e}")
         
         return report
