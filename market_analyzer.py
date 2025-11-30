@@ -27,11 +27,24 @@ class MarketAnalyzer:
             index: 索引
         
         Returns:
-            价格
+            价格，如果无法获取返回0.0
         """
-        if isinstance(price_history[index], dict):
-            return price_history[index]['price']
-        return price_history[index]
+        try:
+            if index < 0 or index >= len(price_history):
+                return 0.0
+                
+            if isinstance(price_history[index], dict):
+                price = price_history[index].get('price', 0.0)
+            else:
+                price = float(price_history[index])
+                
+            # 确保返回有效的正价格
+            if price <= 0 or math.isnan(price) or math.isinf(price):
+                return 0.0
+                
+            return price
+        except (IndexError, TypeError, ValueError, KeyError):
+            return 0.0
     
     def analyze(self, price_history: List[float], current_day: int) -> Dict[str, float]:
         """
@@ -45,31 +58,61 @@ class MarketAnalyzer:
             市场特征字典 {feature_name: value}
             value范围 [-1, 1]
         """
-        if current_day < 1 or current_day >= len(price_history):
+        # 增强的边界条件检查
+        if not price_history or current_day < 1 or current_day >= len(price_history):
+            return {}
+        
+        # 验证数据有效性
+        try:
+            # 检查第一个价格是否有效
+            if self._get_price(price_history, current_day) <= 0:
+                return {}
+        except (IndexError, TypeError, ValueError):
             return {}
         
         features = {}
         
         # 1. 趋势方向
-        features.update(self._analyze_trend_direction(price_history, current_day))
+        try:
+            features.update(self._analyze_trend_direction(price_history, current_day))
+        except Exception:
+            pass
         
         # 2. 波动性
-        features.update(self._analyze_volatility(price_history, current_day))
+        try:
+            features.update(self._analyze_volatility(price_history, current_day))
+        except Exception:
+            pass
         
         # 3. 情绪
-        features.update(self._analyze_sentiment(price_history, current_day))
+        try:
+            features.update(self._analyze_sentiment(price_history, current_day))
+        except Exception:
+            pass
         
         # 4. 成交量（简化版，使用价格波动代替）
-        features.update(self._analyze_volume(price_history, current_day))
+        try:
+            features.update(self._analyze_volume(price_history, current_day))
+        except Exception:
+            pass
         
         # 5. 价格模式
-        features.update(self._analyze_price_pattern(price_history, current_day))
+        try:
+            features.update(self._analyze_price_pattern(price_history, current_day))
+        except Exception:
+            pass
         
         # 6. 趋势强度
-        features.update(self._analyze_trend_strength(price_history, current_day))
+        try:
+            features.update(self._analyze_trend_strength(price_history, current_day))
+        except Exception:
+            pass
         
         # 7. 支撑阻力
-        features.update(self._analyze_support_resistance(price_history, current_day))
+        try:
+            features.update(self._analyze_support_resistance(price_history, current_day))
+        except Exception:
+            pass
         
         return features
     
@@ -127,32 +170,41 @@ class MarketAnalyzer:
         returns = []
         for i in range(day-window+1, day+1):
             if i > 0:
-                ret = (self._get_price(prices, i) - self._get_price(prices, i-1)) / self._get_price(prices, i-1)
-                returns.append(ret)
+                prev_price = self._get_price(prices, i-1)
+                curr_price = self._get_price(prices, i)
+                # 避免除以零
+                if prev_price > 0 and curr_price > 0:
+                    ret = (curr_price - prev_price) / prev_price
+                    # 过滤极端值
+                    if abs(ret) < 1.0:  # 忽略超过100%的异常波动
+                        returns.append(ret)
         
-        if not returns:
+        if len(returns) < window * 0.5:  # 需要至少50%的有效数据
             return {}
         
-        # 计算标准差（波动率）
-        mean_return = sum(returns) / len(returns)
-        variance = sum((r - mean_return) ** 2 for r in returns) / len(returns)
-        volatility = math.sqrt(variance)
-        
-        features = {}
-        
-        # 根据波动率分类
-        if volatility > 0.08:
-            features['extreme_high_vol'] = 1.0
-        elif volatility > 0.05:
-            features['high_vol'] = 0.9
-        elif volatility > 0.02:
-            features['normal_vol'] = 0.6
-        elif volatility > 0.01:
-            features['low_vol'] = 0.7
-        else:
-            features['ultra_low_vol'] = 0.8
-        
-        return features
+        try:
+            # 计算标准差（波动率）
+            mean_return = sum(returns) / len(returns)
+            variance = sum((r - mean_return) ** 2 for r in returns) / len(returns)
+            volatility = math.sqrt(max(0, variance))  # 确保方差非负
+            
+            features = {}
+            
+            # 根据波动率分类
+            if volatility > 0.08:
+                features['extreme_high_vol'] = 1.0
+            elif volatility > 0.05:
+                features['high_vol'] = 0.9
+            elif volatility > 0.02:
+                features['normal_vol'] = 0.6
+            elif volatility > 0.01:
+                features['low_vol'] = 0.7
+            else:
+                features['ultra_low_vol'] = 0.8
+            
+            return features
+        except Exception:
+            return {}
     
     def _analyze_sentiment(self, prices: List[float], day: int) -> Dict[str, float]:
         """分析市场情绪（基于RSI）"""
@@ -161,43 +213,58 @@ class MarketAnalyzer:
         if day < rsi_period + 1:
             return {}
         
-        # 计算RSI
-        gains = []
-        losses = []
-        
-        for i in range(day-rsi_period, day):
-            change = self._get_price(prices, i+1) - self._get_price(prices, i)
-            if change > 0:
-                gains.append(change)
-                losses.append(0)
+        try:
+            # 计算RSI
+            gains = []
+            losses = []
+            valid_days = 0
+            
+            for i in range(day-rsi_period, day):
+                prev_price = self._get_price(prices, i)
+                curr_price = self._get_price(prices, i+1)
+                
+                if prev_price > 0 and curr_price > 0:
+                    valid_days += 1
+                    change = curr_price - prev_price
+                    if change > 0:
+                        gains.append(change)
+                        losses.append(0)
+                    else:
+                        gains.append(0)
+                        losses.append(abs(change))
+            
+            if valid_days < rsi_period * 0.5:  # 需要足够的有效数据
+                return {}
+            
+            avg_gain = sum(gains) / rsi_period
+            avg_loss = sum(losses) / rsi_period
+            
+            if avg_loss == 0:
+                rsi = 100
             else:
-                gains.append(0)
-                losses.append(abs(change))
-        
-        avg_gain = sum(gains) / rsi_period
-        avg_loss = sum(losses) / rsi_period
-        
-        if avg_loss == 0:
-            rsi = 100
-        else:
-            rs = avg_gain / avg_loss
-            rsi = 100 - (100 / (1 + rs))
-        
-        features = {}
-        
-        # 根据RSI分类情绪
-        if rsi > 80:
-            features['extreme_greed'] = 1.0
-        elif rsi > 70:
-            features['greed'] = 0.8
-        elif rsi > 45 and rsi < 55:
-            features['neutral'] = 0.6
-        elif rsi < 30:
-            features['fear'] = 0.8
-        elif rsi < 20:
-            features['extreme_fear'] = 1.0
-        
-        return features
+                rs = avg_gain / avg_loss
+                rsi = 100 - (100 / (1 + rs))
+            
+            # 确保RSI在有效范围内
+            rsi = max(0, min(100, rsi))
+            
+            features = {}
+            
+            # 根据RSI分类情绪
+            if rsi > 80:
+                features['extreme_greed'] = 1.0
+            elif rsi > 70:
+                features['greed'] = 0.8
+            elif rsi > 45 and rsi < 55:
+                features['neutral'] = 0.6
+            elif rsi < 30:
+                features['fear'] = 0.8
+            elif rsi < 20:
+                features['extreme_fear'] = 1.0
+            
+            return features
+        except Exception:
+            return {}
     
     def _analyze_volume(self, prices: List[float], day: int) -> Dict[str, float]:
         """分析成交量（简化版，使用价格波动幅度代替）"""

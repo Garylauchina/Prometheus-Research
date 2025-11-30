@@ -8,16 +8,25 @@ import logging
 import argparse
 from datetime import datetime
 
-# Add prometheus_v30 to path
-sys.path.insert(0, '/home/ubuntu')
+# Add current directory to path
+sys.path.insert(0, os.path.abspath('.'))
 
-from prometheus_v30.live_trading_system import LiveTradingSystem
-from prometheus_v30.config_virtual import CONFIG_VIRTUAL_TRADING
+from live_trading_system import LiveTradingSystem
+from config_virtual import CONFIG_VIRTUAL_TRADING
 
 
 def setup_logging(config):
     """设置日志"""
+    # 获取日志目录，支持相对路径和绝对路径
     log_dir = config['logging']['dir']
+    # 如果是Linux风格的绝对路径且在Windows环境下运行，转换为Windows风格路径
+    if os.name == 'nt' and log_dir.startswith('/'):
+        # 将Linux路径转换为Windows路径（例如 /home/user 转换为 C:\home\user）
+        log_dir = 'C:' + log_dir.replace('/', '\\')
+    # 如果是相对路径，则相对于当前脚本所在目录
+    if not os.path.isabs(log_dir):
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), log_dir)
+    
     os.makedirs(log_dir, exist_ok=True)
     
     log_file = os.path.join(
@@ -25,20 +34,37 @@ def setup_logging(config):
         f"{config['logging']['file_prefix']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     )
     
-    # 配置日志格式
-    logging.basicConfig(
-        level=getattr(logging, config['logging']['level']),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler(sys.stdout)
-        ]
+    # 创建logger实例
+    logger = logging.getLogger()
+    logger.setLevel(getattr(logging, config['logging']['level']))
+    
+    # 清除现有handler
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
+    # 创建格式器
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # 创建文件handler，支持日志轮转
+    from logging.handlers import RotatingFileHandler
+    file_handler = RotatingFileHandler(
+        log_file,
+        maxBytes=config['logging'].get('max_size_mb', 100) * 1024 * 1024,
+        backupCount=config['logging'].get('backup_count', 10)
     )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
     
-    logger = logging.getLogger(__name__)
-    logger.info(f"Logging to {log_file}")
+    # 创建控制台handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
     
-    return logger
+    # 使用根logger或特定logger都可以，这里保持返回__name__ logger以保持一致性
+    app_logger = logging.getLogger(__name__)
+    app_logger.info(f"Logging to {log_file}")
+    
+    return app_logger
 
 
 def main():
@@ -55,26 +81,21 @@ def main():
     logger = setup_logging(CONFIG_VIRTUAL_TRADING)
     
     logger.info("=" * 60)
-    logger.info("Prometheus v3.0 Virtual Trading System")
+    logger.info("Prometheus v3.0 虚拟交易系统")
     logger.info("=" * 60)
-    logger.info(f"Duration: {args.duration} seconds ({args.duration/60:.1f} minutes)")
-    logger.info(f"Initial capital: ${CONFIG_VIRTUAL_TRADING['initial_capital']}")
-    logger.info(f"Initial agents: {CONFIG_VIRTUAL_TRADING['initial_agents']}")
+    logger.info(f"运行时长: {args.duration} 秒 ({args.duration/60:.1f} 分钟)")
+    logger.info(f"初始资金: ${CONFIG_VIRTUAL_TRADING['initial_capital']}")
+    logger.info(f"初始代理数量: {CONFIG_VIRTUAL_TRADING['initial_agents']}")
     logger.info("=" * 60)
     
-    # 获取OKX API凭证
-    okx_config = {
-        'api_key': os.getenv('OKX_API_KEY'),
-        'secret_key': os.getenv('OKX_SECRET_KEY'),
-        'passphrase': os.getenv('OKX_PASSPHRASE'),
-        'flag': '1',  # 模拟盘
-        'risk_config': CONFIG_VIRTUAL_TRADING['risk']
-    }
+    # 从配置文件获取OKX API凭证
+    okx_config = CONFIG_VIRTUAL_TRADING['okx_api'].copy()
+    okx_config['risk_config'] = CONFIG_VIRTUAL_TRADING['risk']
     
     # 验证API凭证
     if not all([okx_config['api_key'], okx_config['secret_key'], okx_config['passphrase']]):
-        logger.error("OKX API credentials not found in environment variables")
-        logger.error("Please set: OKX_API_KEY, OKX_SECRET_KEY, OKX_PASSPHRASE")
+        logger.error("在config_virtual.py中未找到OKX API凭证")
+        logger.error("请检查config_virtual.py中的okx_api部分")
         sys.exit(1)
     
     try:
@@ -84,12 +105,12 @@ def main():
         # 运行交易
         system.run(duration_seconds=args.duration)
         
-        logger.info("Trading completed successfully")
+        logger.info("交易成功完成")
         
     except KeyboardInterrupt:
-        logger.info("Interrupted by user")
+        logger.info("用户中断程序")
     except Exception as e:
-        logger.error(f"Fatal error: {e}", exc_info=True)
+        logger.error(f"致命错误: {e}", exc_info=True)
         sys.exit(1)
 
 

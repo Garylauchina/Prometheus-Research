@@ -33,7 +33,7 @@ class AccountSync:
         self.balance_cache = {}
         self.positions_cache = {}
         
-        logger.info(f"AccountSync initialized (flag={config.get('flag', '1')})")
+        logger.info(f"账户同步器初始化完成 (flag={config.get('flag', '1')})")
     
     def get_balance(self, ccy=None):
         """
@@ -168,12 +168,12 @@ class AccountSync:
                 'positions': positions
             }
             
-            logger.info(f"Account summary: equity={total_equity:.2f}, unrealized_pnl={total_unrealized_pnl:.2f}")
+            logger.info(f"账户摘要: equity={total_equity:.2f}, unrealized_pnl={total_unrealized_pnl:.2f}")
             
             return summary
         
         except Exception as e:
-            logger.error(f"Exception in get_account_summary: {e}")
+            logger.error(f"获取账户摘要错误: {e}")
             raise
     
     def get_usdt_balance(self):

@@ -306,19 +306,70 @@ class LiveAgent:
         return new_agent
     
     def _mutate_gene(self):
-        """变异基因"""
+        """
+        增强的基因变异机制
+        
+        使用高斯分布进行变异，保持参数在合理范围内，并考虑参数间的相关性
+        """
+        import numpy as np
+        
         new_gene = self.gene.copy()
         
-        # 随机变异一些参数
-        mutation_rate = 0.1
+        # 变异配置
+        mutation_rate = 0.3  # 提高变异率以增加多样性
+        
+        # 参数范围约束
+        param_ranges = {
+            'long_threshold': (0.01, 0.3),
+            'short_threshold': (-0.3, -0.01),
+            'max_position': (0.1, 1.0),
+            'stop_loss': (0.01, 0.15),
+            'take_profit': (0.02, 0.3),
+            'holding_period': (60, 7200),  # 1分钟到2小时
+            'risk_aversion': (0.1, 3.0)
+        }
+        
+        # 对于每个基因参数
         for key in new_gene:
             if random.random() < mutation_rate:
                 if isinstance(new_gene[key], float):
-                    # 浮点数：±20%变异
-                    new_gene[key] *= random.uniform(0.8, 1.2)
+                    # 使用高斯分布进行变异，标准差为原值的10%
+                    std_dev = abs(new_gene[key] * 0.1) or 0.01  # 防止标准差为0
+                    mutation = np.random.normal(0, std_dev)
+                    new_value = new_gene[key] + mutation
+                    
+                    # 确保在有效范围内
+                    if key in param_ranges:
+                        new_value = max(param_ranges[key][0], min(param_ranges[key][1], new_value))
+                    
+                    new_gene[key] = new_value
                 elif isinstance(new_gene[key], int):
-                    # 整数：±20%变异
-                    new_gene[key] = int(new_gene[key] * random.uniform(0.8, 1.2))
+                    # 整数参数的变异
+                    std_dev = max(1, int(new_gene[key] * 0.1))  # 至少变异1
+                    mutation = np.random.normal(0, std_dev)
+                    new_value = int(new_gene[key] + mutation)
+                    
+                    # 确保在有效范围内
+                    if key in param_ranges:
+                        new_value = max(param_ranges[key][0], min(param_ranges[key][1], new_value))
+                    
+                    new_gene[key] = new_value
+        
+        # 参数相关性调整
+        # 1. 风险偏好一致性：止损和止盈应该相互协调
+        if random.random() < 0.2:
+            # 正相关调整
+            correlation_factor = random.uniform(0.8, 1.2)
+            new_gene['stop_loss'] = max(param_ranges['stop_loss'][0], min(param_ranges['stop_loss'][1], 
+                                                                     new_gene['stop_loss'] * correlation_factor))
+            new_gene['take_profit'] = max(param_ranges['take_profit'][0], min(param_ranges['take_profit'][1], 
+                                                                         new_gene['take_profit'] * correlation_factor))
+        
+        # 2. 风险规避与最大仓位的协调
+        if random.random() < 0.2:
+            # 风险规避度高的Agent应该有更小的最大仓位
+            new_gene['max_position'] = min(param_ranges['max_position'][1], 
+                                        1.0 / (0.5 + new_gene['risk_aversion'] * 0.3))
         
         return new_gene
     

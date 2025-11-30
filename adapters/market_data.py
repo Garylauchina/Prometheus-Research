@@ -26,7 +26,7 @@ class MarketDataManager:
         self.rest_api = MarketData.MarketAPI(flag=self.flag)
         self.cache = {}
         
-        logger.info(f"MarketDataManager initialized (flag={self.flag})")
+        logger.info(f"市场数据管理器初始化完成 (flag={self.flag})")
     
     def get_ticker(self, symbol):
         """

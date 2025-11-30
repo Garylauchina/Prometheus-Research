@@ -30,10 +30,10 @@ from datetime import datetime
 from typing import Dict, List
 import json
 
-from prometheus_v30.adapters.okx_adapter import OKXTradingAdapter
-from prometheus_v30.live_agent import LiveAgent
-from prometheus_v30.market_regime import MarketRegimeDetector
-from prometheus_v30.simple_capital_manager import SimpleCapitalManager
+from adapters.okx_adapter import OKXTradingAdapter
+from live_agent import LiveAgent
+from market_regime import MarketRegimeDetector
+from simple_capital_manager import SimpleCapitalManager
 
 logger = logging.getLogger(__name__)
 
@@ -103,16 +103,16 @@ class LiveTradingSystem:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         
-        logger.info("LiveTradingSystem initialized")
+        logger.info("实盘交易系统初始化完成")
     
     def _signal_handler(self, signum, frame):
         """信号处理器"""
-        logger.info(f"Received signal {signum}, stopping...")
+        logger.info(f"收到信号 {signum}，正在停止...")
         self.stop_requested = True
     
     def initialize_agents(self):
-        """初始化agents"""
-        logger.info(f"Initializing {self.config['initial_agents']} agents...")
+        """初始化交易代理"""
+        logger.info(f"正在初始化 {self.config['initial_agents']} 个交易代理...")
         
         for i in range(self.config['initial_agents']):
             # 从资金池分配资金
@@ -127,11 +127,11 @@ class LiveTradingSystem:
                     config=self.config
                 )
                 self.agents.append(agent)
-                logger.info(f"Created {agent.agent_id} with capital ${capital:.2f}")
+                logger.info(f"创建代理 {agent.agent_id}，分配资金 ${capital:.2f}")
             else:
-                logger.warning(f"Insufficient capital for agent {i+1}")
+                logger.warning(f"代理 {i+1} 资金不足")
         
-        logger.info(f"Initialized {len(self.agents)} agents")
+        logger.info(f"初始化完成 {len(self.agents)} 个代理")
     
     def run(self, duration_seconds=3600):
         """
@@ -140,17 +140,17 @@ class LiveTradingSystem:
         Args:
             duration_seconds: 运行时长（秒）
         """
-        logger.info(f"Starting live trading for {duration_seconds} seconds...")
+        logger.info(f"开始实盘交易，运行时长 {duration_seconds} 秒...")
         
         self.stats['start_time'] = datetime.now()
         self.running = True
         
-        # 初始化agents
+        # 初始化交易代理
         self.initialize_agents()
         
         # 获取初始账户状态
         initial_summary = self.adapter.get_account_summary()
-        logger.info(f"Initial account: ${initial_summary['total_equity']:.2f}")
+        logger.info(f"初始账户余额: ${initial_summary['total_equity']:.2f}")
         
         # 主循环
         end_time = time.time() + duration_seconds
@@ -162,16 +162,16 @@ class LiveTradingSystem:
             loop_start = time.time()
             
             try:
-                logger.info(f"=== Iteration {iteration} ===")
+                logger.info(f"=== 迭代 {iteration} ===")
                 
                 # 1. 获取市场数据
                 market_data = self._get_market_data()
                 
                 # 2. 更新市场状态
                 regime = self._update_market_regime(market_data)
-                logger.info(f"Market regime: {regime}")
+                logger.info(f"市场状态: {regime}")
                 
-                # 3. 更新所有agents
+                # 3. 更新所有交易代理
                 self._update_agents(market_data, regime)
                 
                 # 4. 执行交易
@@ -187,18 +187,19 @@ class LiveTradingSystem:
                 elapsed = time.time() - loop_start
                 sleep_time = max(0, update_interval - elapsed)
                 if sleep_time > 0:
-                    logger.debug(f"Sleeping for {sleep_time:.1f}s...")
+                    logger.debug(f"休眠 {sleep_time:.1f}秒...")
                     time.sleep(sleep_time)
             
             except Exception as e:
-                logger.error(f"Error in trading loop: {e}", exc_info=True)
+                logger.error(f"交易循环错误: {e}", exc_info=True)
                 self.stats['failed_trades'] += 1
                 time.sleep(5)  # 错误后等待5秒
         
         # 停止交易
         self.stop()
         
-        logger.info("Live trading completed")
+
+        logger.info("实盘交易完成")
     
     def _get_market_data(self):
         """获取市场数据"""
@@ -271,21 +272,21 @@ class LiveTradingSystem:
                         continue
                     
                     # 执行订单
-                    logger.info(f"{agent.agent_id} placing order: {signal['action']} {signal.get('side', 'close')} {signal['symbol']}")
+                    logger.info(f"{agent.agent_id} 下单: {signal['action']} {signal.get('side', 'close')} {signal['symbol']}")
                     order = self.adapter.place_order(order_request)
                     
                     # 更新统计
                     self.stats['total_trades'] += 1
                     self.stats['successful_trades'] += 1
                     
-                    # 更新agent状态
+                    # 更新交易代理状态
                     agent.last_trade_time = time.time()
                     agent.trade_count += 1
                     
-                    logger.info(f"{agent.agent_id} order executed: {order.order_id}")
+                    logger.info(f"{agent.agent_id} 订单执行成功: {order.order_id}")
                     
                 except Exception as e:
-                    logger.error(f"Failed to execute trade for {agent.agent_id}: {e}")
+                    logger.error(f"代理 {agent.agent_id} 交易执行失败: {e}")
                     self.stats['failed_trades'] += 1
             
             # 清空已处理的信号
@@ -341,29 +342,38 @@ class LiveTradingSystem:
                 if market == 'spot':
                     # 现货：使用agent资金的一定比例
                     value = agent.capital * strength * 0.3  # 最多30%资金
-                    # 限制单笔订单最大$500
-                    value = min(value, self.config['risk']['max_order_value'])
+                    # 限制单笔订单最大$500，提供默认值
+                    max_order_value = self.config.get('risk', {}).get('max_order_value', 500)
+                    value = min(value, max_order_value)
                     
                     # 获取当前价格
-                    current_price = self.adapter.get_price(symbol)
-                    size = value / current_price
-                    
-                    # 现货最小0.0001 BTC
-                    if size < 0.0001:
+                    try:
+                        current_price = self.adapter.get_price(symbol)
+                        if current_price <= 0:
+                            logger.error(f"Invalid price for {symbol}: {current_price}")
+                            return None
+                        size = value / current_price
+                        
+                        # 现货最小0.0001 BTC
+                        if size < 0.0001:
+                            return None
+                        
+                        return {
+                            'market': 'spot',
+                            'symbol': symbol,
+                            'side': 'buy',  # 现货只能做多
+                            'order_type': 'market',
+                            'size': round(size, 4)
+                        }
+                    except Exception as e:
+                        logger.error(f"Failed to get price for {symbol}: {e}")
                         return None
-                    
-                    return {
-                        'market': 'spot',
-                        'symbol': symbol,
-                        'side': 'buy',  # 现货只能做多
-                        'order_type': 'market',
-                        'size': round(size, 4)
-                    }
                 
                 else:
                     # 合约：计算合约张数
                     value = agent.capital * strength * 0.3  # 最多30%资金
-                    value = min(value, self.config['risk']['max_order_value'])
+                    max_order_value = self.config.get('risk', {}).get('max_order_value', 500)
+                    value = min(value, max_order_value)
                     
                     # 每张合约约100 USDT
                     size = int(value / 100)
@@ -380,6 +390,9 @@ class LiveTradingSystem:
                         order_side = 'sell'
                         pos_side = 'short'
                     
+                    # 获取杠杆配置，提供默认值
+                    leverage = self.config.get('markets', {}).get('futures', {}).get('max_leverage', 2)
+                    
                     return {
                         'market': 'futures',
                         'symbol': symbol,
@@ -387,7 +400,7 @@ class LiveTradingSystem:
                         'pos_side': pos_side,
                         'order_type': 'market',
                         'size': size,
-                        'leverage': self.config['markets']['futures']['max_leverage']
+                        'leverage': leverage
                     }
             
             return None
@@ -429,11 +442,11 @@ class LiveTradingSystem:
         # 获取账户摘要
         summary = self.adapter.get_account_summary()
         
-        logger.info(f"Active agents: {len(active_agents)}/{len(self.agents)}")
-        logger.info(f"Total equity: ${summary['total_equity']:.2f}")
-        logger.info(f"Unrealized PnL: ${summary['total_unrealized_pnl']:.2f}")
-        logger.info(f"Total trades: {self.stats['total_trades']}")
-        logger.info(f"Births: {self.stats['births']}, Deaths: {self.stats['deaths']}")
+        logger.info(f"活跃代理数量: {len(active_agents)}/{len(self.agents)}")
+        logger.info(f"总权益: ${summary['total_equity']:.2f}")
+        logger.info(f"未实现盈亏: ${summary['total_unrealized_pnl']:.2f}")
+        logger.info(f"总交易次数: {self.stats['total_trades']}")
+        logger.info(f"代理出生数: {self.stats['births']}, 代理死亡数: {self.stats['deaths']}")
     
     def stop(self):
         """停止交易系统"""

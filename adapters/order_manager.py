@@ -102,9 +102,9 @@ class OrderManager:
             config['passphrase'],
             flag=config.get('flag', '1')
         )
-        self.orders = {}  # orderId -> Order
+        self.orders = {}  # 订单缓存
         
-        logger.info(f"OrderManager initialized (flag={config.get('flag', '1')})")
+        logger.info(f"订单管理器初始化完成 (flag={config.get('flag', '1')})")
     
     def place_order(self, order_request):
         """

@@ -1,6 +1,7 @@
 """
 Virtual Trading Configuration for Prometheus v3.0
 """
+import os
 
 CONFIG_VIRTUAL_TRADING = {
     # 基础配置
@@ -91,9 +92,17 @@ CONFIG_VIRTUAL_TRADING = {
     # 日志配置
     'logging': {
         'level': 'INFO',
-        'dir': '/home/ubuntu/trading_logs',
+        'dir': 'logs',  # 使用相对路径，将在项目根目录下创建logs文件夹
         'file_prefix': 'prometheus',
         'max_size_mb': 100,
         'backup_count': 10
+    },
+    
+    # OKX API配置
+    'okx_api': {
+        'api_key': '265a4c37-1dc1-40d8-80d0-11004026ca48',  # OKX API密钥
+        'secret_key': '0AD30E01A7B66FBBBEB7E30D8E0E18B4',  # OKX Secret Key
+        'passphrase': 'Garylauchina3.14',  # OKX密码
+        'flag': '1'  # 1=模拟盘，0=实盘
     }
 }

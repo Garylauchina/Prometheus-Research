@@ -39,7 +39,7 @@ class RiskManager:
         self.max_position_pct = self.risk_config.get('max_position_pct', 0.20)  # 20%
         self.stop_loss_pct = self.risk_config.get('stop_loss_pct', 0.05)  # 5%
         
-        logger.info(f"RiskManager initialized: max_daily_trades={self.max_daily_trades}, "
+        logger.info(f"风险管理器初始化完成: max_daily_trades={self.max_daily_trades}, "
                    f"max_daily_loss={self.max_daily_loss}, max_leverage={self.max_leverage}")
     
     def check_order(self, order_request, account_balance=None):
