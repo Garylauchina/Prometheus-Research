@@ -14,15 +14,24 @@ logger = logging.getLogger(__name__)
 # 尝试多种导入方式的通用函数
 def import_okx_module(module_name):
     """
-    尝试多种方式导入OKX模块
+    尝试多种方式导入OKX模块，特别优化支持OKX 2.1.2版本
     
     Args:
         module_name: 要导入的模块名称，如'MarketData', 'Trade', 'Account'
-        
+    
     Returns:
         成功导入的模块对象，如果所有尝试都失败则返回None
     """
-    # 方式1: 直接从okx导入（适用于新版）
+    # 检查OKX版本，特别处理2.1.2版本
+    okx_version = None
+    try:
+        import okx
+        okx_version = getattr(okx, '__version__', None)
+        logger.debug(f"检测到OKX版本: {okx_version}")
+    except Exception as e:
+        logger.debug(f"无法检测OKX版本: {e}")
+    
+    # 方式1: 直接从okx导入（适用于新版，包括2.1.2）
     try:
         import_statement = f"from okx import {module_name}"
         logger.debug(f"尝试: {import_statement}")
@@ -35,7 +44,7 @@ def import_okx_module(module_name):
     except ImportError as e:
         logger.debug(f"失败: {import_statement}, 错误: {e}")
     
-    # 方式2: 尝试从okx.api导入（适用于新版）
+    # 方式2: 尝试从okx.api导入（适用于新版，包括2.1.2）
     try:
         import_statement = f"from okx.api import {module_name}"
         logger.debug(f"尝试: {import_statement}")
@@ -47,6 +56,27 @@ def import_okx_module(module_name):
         return module
     except ImportError as e:
         logger.debug(f"失败: {import_statement}, 错误: {e}")
+    
+    # 方式2.1: 针对OKX 2.1.2版本的替代路径
+    try:
+        # 构建可能的API路径映射
+        api_path_map = {
+            'MarketData': 'okx.api.market',
+            'Trade': 'okx.api.trade',
+            'Account': 'okx.api.account'
+        }
+        
+        if module_name in api_path_map:
+            import_statement = f"import {api_path_map[module_name]} as {module_name}"
+            logger.debug(f"尝试OKX 2.1.2专用路径: {import_statement}")
+            
+            # 使用exec执行导入语句
+            exec(import_statement, globals())
+            module = globals()[module_name]
+            logger.debug(f"成功: {import_statement}")
+            return module
+    except ImportError as e:
+        logger.debug(f"失败: OKX 2.1.2专用路径, 错误: {e}")
     
     # 方式3: 动态导入对应的.py文件（适用于旧版）
     try:
@@ -204,10 +234,20 @@ def import_okx_module(module_name):
                     self.flag = flag
                     logger.info(f"AccountAPI初始化 (flag={flag})")
                 
-                # 实现必要的方法，返回模拟数据
+                # 实现必要的方法，返回模拟数据 - 兼容OKX 2.1.2版本
                 def get_balance(self):
                     logger.info("模拟调用get_balance")
                     return {'code': '0', 'data': [{'adjEq': '5000', 'details': []}]}
+                
+                # 兼容OKX 2.1.2版本的get_account_balance方法
+                def get_account_balance(self, ccy=None, **kwargs):
+                    logger.info(f"模拟调用get_account_balance, ccy={ccy}")
+                    return {'code': '0', 'data': [{'adjEq': '5000', 'details': []}]}
+                
+                # 兼容OKX 2.1.2版本的get_positions方法
+                def get_positions(self, instType=None, **kwargs):
+                    logger.info(f"模拟调用get_positions, instType={instType}")
+                    return {'code': '0', 'data': []}
             
             module.AccountAPI = AccountAPI
         

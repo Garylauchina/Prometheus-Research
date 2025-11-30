@@ -52,15 +52,16 @@ source venv/bin/activate  # Linux/macOS
 
 ```bash
 pip install -r requirements.txt
+# 确保安装OKX 2.1.2版本
+pip install okx==2.1.2
 ```
 
-注意：requirements.txt中已经更新为使用可用的版本：
-- `okx>=1.0.9` (PyPI上可用的最新稳定版本)
+> **重要说明**：项目需要使用OKX 2.1.2版本以确保最佳兼容性。requirements.txt中已指定此版本要求。
 
 如果需要手动安装特定版本，可以使用：
 
 ```bash
-pip install okx>=1.0.9
+pip install okx==2.1.2
 ```
 
 ## 5. 配置项目
