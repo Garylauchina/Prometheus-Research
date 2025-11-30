@@ -2034,9 +2034,9 @@ class LiveTradingSystem:
                         except Exception as e:
                             logger.error(f"合约订单生成失败: {e}")
                             return None
-                            
-            return None
-            
+                except Exception as e:
+                    logger.error(f"开仓信号处理异常: {e}")
+                    return None
         except Exception as e:
             logger.error(f"信号转换为订单失败: {e}")
             # 记录错误统计
