@@ -545,3 +545,60 @@ class SystemMonitor:
             'agent_performance': self._aggregate_agent_performance(),
             'health_status': self._calculate_health_status()
         }
+    
+    def update_system_metrics(self, *args, **kwargs):
+        """
+        更新系统指标
+        
+        收集并更新系统资源使用情况的指标，包括CPU、内存、磁盘和网络使用情况。
+        这个方法被外部组件调用以定期更新系统状态。
+        
+        Args:
+            *args: 可变位置参数，用于兼容不同的调用方式
+            **kwargs: 可变关键字参数，用于兼容不同的调用方式
+        """
+        try:
+            # 调用现有的收集系统指标方法
+            self._collect_system_metrics()
+            logger.debug("系统指标已更新")
+        except Exception as e:
+            logger.error(f"更新系统指标失败: {e}")
+    
+    def update_trade_statistics(self, *args, **kwargs):
+        """
+        更新交易统计信息
+        
+        记录和更新交易统计数据，这个方法被外部组件调用以跟踪交易活动。
+        
+        Args:
+            *args: 可变位置参数，用于兼容不同的调用方式
+            **kwargs: 可变关键字参数，包含交易统计信息
+        """
+        try:
+            # 如果提供了交易统计数据，则记录它
+            if kwargs:
+                self.record_trade_statistics(kwargs)
+            logger.debug("交易统计已更新")
+        except Exception as e:
+            logger.error(f"更新交易统计失败: {e}")
+    
+    def update_agent_performance(self, *args, **kwargs):
+        """
+        更新代理性能指标
+        
+        记录和更新代理的性能指标，这个方法被外部组件调用以跟踪代理活动。
+        
+        Args:
+            *args: 可变位置参数，用于兼容不同的调用方式
+            **kwargs: 可变关键字参数，包含代理ID和性能指标
+        """
+        try:
+            # 检查是否提供了代理ID和指标
+            if len(args) > 0:
+                agent_id = args[0]
+                # 尝试从args或kwargs中获取指标
+                metrics = args[1] if len(args) > 1 else kwargs
+                self.record_agent_metrics(agent_id, metrics)
+            logger.debug("代理性能已更新")
+        except Exception as e:
+            logger.error(f"更新代理性能失败: {e}")

@@ -298,6 +298,18 @@ if Account and not hasattr(Account, 'AccountAPI'):
             def __init__(self, api_key='', api_secret_key='', passphrase='', flag='1'):
                 self.flag = flag
                 logger.info(f"Fallback AccountAPI初始化 (flag={flag})")
+            
+            def get_balance(self):
+                logger.info("Fallback get_balance")
+                return {'code': '0', 'data': [{'adjEq': '5000', 'details': []}]}
+            
+            def get_account_balance(self):
+                logger.info("Fallback get_account_balance")
+                return {'code': '0', 'data': [{'adjEq': '5000', 'details': []}]}
+            
+            def get_positions(self):
+                logger.info("Fallback get_positions")
+                return {'code': '0', 'data': []}
         
         Account.AccountAPI = FallbackAccountAPI
         logger.warning("为Account模块添加了Fallback AccountAPI类")

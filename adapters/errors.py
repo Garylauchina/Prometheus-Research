@@ -21,3 +21,7 @@ class OrderError(TradingError):
 class NetworkError(TradingError):
     """网络错误"""
     pass
+
+class DataConsistencyError(TradingError):
+    """数据一致性错误"""
+    pass

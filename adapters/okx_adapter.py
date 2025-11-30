@@ -10,7 +10,7 @@ from .order_manager import OrderManager
 from .account_sync import AccountSync
 from .risk_manager import RiskManager
 from .errors import (
-    RiskControlError, OrderError, APIError, NetworkError
+    RiskControlError, OrderError, APIError, NetworkError, DataConsistencyError
 )
 
 logger = logging.getLogger(__name__)
