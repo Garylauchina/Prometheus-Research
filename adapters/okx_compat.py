@@ -303,12 +303,12 @@ if Account and not hasattr(Account, 'AccountAPI'):
                 logger.info("Fallback get_balance")
                 return {'code': '0', 'data': [{'adjEq': '5000', 'details': []}]}
             
-            def get_account_balance(self):
-                logger.info("Fallback get_account_balance")
+            def get_account_balance(self, ccy=None, **kwargs):
+                logger.info(f"Fallback get_account_balance, ccy={ccy}")
                 return {'code': '0', 'data': [{'adjEq': '5000', 'details': []}]}
             
-            def get_positions(self):
-                logger.info("Fallback get_positions")
+            def get_positions(self, instType=None, **kwargs):
+                logger.info(f"Fallback get_positions, instType={instType}")
                 return {'code': '0', 'data': []}
         
         Account.AccountAPI = FallbackAccountAPI
