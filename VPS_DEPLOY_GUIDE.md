@@ -48,20 +48,23 @@ source venv/bin/activate  # Linux/macOS
 
 ## 4. 安装依赖
 
-### 4.1 安装依赖
+### 4. 安装依赖
+
+使用以下命令安装项目依赖：
 
 ```bash
 pip install -r requirements.txt
-# 确保安装OKX 2.1.2版本
-pip install okx==2.1.2
+# 确保安装正确的OKX SDK库
+pip install python-okx>=0.4.0
 ```
 
-> **重要说明**：项目需要使用OKX 2.1.2版本以确保最佳兼容性。requirements.txt中已指定此版本要求。
+> **重要说明**：项目需要使用正确的OKX SDK库名称python-okx，最新稳定版本为0.4.0。requirements.txt中已指定此依赖。
+
 
 如果需要手动安装特定版本，可以使用：
 
 ```bash
-pip install okx==2.1.2
+pip install python-okx>=0.4.0
 ```
 
 ## 5. 配置项目
