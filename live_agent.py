@@ -159,6 +159,31 @@ class LiveAgent:
         self.capital_history.append(self.capital)
         self.roi_history.append(self.roi)
     
+    def get_state(self):
+        """
+        获取代理状态，用于保存和恢复
+        
+        Returns:
+            dict: 包含代理状态的字典
+        """
+        return {
+            'agent_id': self.agent_id,
+            'initial_capital': self.initial_capital,
+            'capital': self.capital,
+            'gene': self.gene,
+            'is_alive': self.is_alive,
+            'death_reason': self.death_reason,
+            'birth_time': self.birth_time,
+            'last_trade_time': self.last_trade_time,
+            'trade_count': self.trade_count,
+            'successful_trades': self.successful_trades,
+            'failed_trades': self.failed_trades,
+            'total_pnl': self.total_pnl,
+            'roi': self.roi,
+            'positions': self.positions,
+            'pending_signals': self.pending_signals
+        }
+    
     def _generate_signals(self, market_data: dict, regime: str):
         """
         生成交易信号

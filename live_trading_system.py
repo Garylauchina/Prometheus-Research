@@ -1164,7 +1164,13 @@ class LiveTradingSystem:
                         
                         def update_with_timeout():
                             start_time = time.time()
-                            agent.update(market_features, formatted_market_data['price'], regime)
+                            # 整合市场数据为一个字典，符合LiveAgent.update()方法的参数要求
+                            market_data = {
+                                'spot': {'price': formatted_market_data['price']},
+                                'futures': {'price': formatted_market_data['price']},
+                                'features': market_features
+                            }
+                            agent.update(market_data, regime)
                             agent.last_update_time = datetime.now()
                             return time.time() - start_time
                         
