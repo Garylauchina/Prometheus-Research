@@ -338,6 +338,9 @@ class LiveTradingSystem:
             'timestamp': {}
         }
         
+        # 市场数据缓存时间记录
+        self._market_data_cache_times = {}
+        
         # 尝试加载之前的状态
         self._load_last_state()
         
@@ -765,18 +768,18 @@ class LiveTradingSystem:
         futures_symbol = self.config['markets']['futures']['symbol']
         
         # 检查MarketDataManager的健康状态
-        if hasattr(self.adapter, 'market_data_manager'):
-            health_status = self.adapter.market_data_manager.get_health_status()
-            if not health_status['is_healthy']:
-                logger.warning(f"组件 market_data 不健康: {health_status['last_error']}，连续失败次数: {health_status['consecutive_failures']}")
+        if hasattr(self.adapter, 'market_data'):
+            health_status = self.adapter.market_data.get_health_status() if hasattr(self.adapter.market_data, 'get_health_status') else {'is_healthy': True}
+            if hasattr(health_status, 'get') and not health_status.get('is_healthy', True):
+                logger.warning(f"组件 market_data 不健康: {health_status.get('last_error', 'unknown')}，连续失败次数: {health_status.get('consecutive_failures', 0)}")
                 
                 # 如果连续失败次数超过阈值，尝试执行轻量级恢复
-                if health_status['consecutive_failures'] >= 3:
+                if health_status.get('consecutive_failures', 0) >= 3:
                     logger.warning("检测到市场数据组件连续失败，尝试轻量级恢复...")
                     try:
                         # 重置API连接
-                        if hasattr(self.adapter.market_data_manager, 'reset_connection'):
-                            self.adapter.market_data_manager.reset_connection()
+                        if hasattr(self.adapter.market_data, 'reset_connection'):
+                            self.adapter.market_data.reset_connection()
                             logger.info("成功重置MarketDataManager连接")
                     except Exception as recovery_error:
                         logger.error(f"重置MarketDataManager连接失败: {recovery_error}")
@@ -852,10 +855,10 @@ class LiveTradingSystem:
                     logger.error(f"SSL握手超时错误: {error_str}，重试次数: {retry_count}/{max_retries}")
                     
                     # 立即尝试重置连接
-                    if hasattr(self.adapter, 'market_data_manager') and hasattr(self.adapter.market_data_manager, 'reset_connection'):
+                    if hasattr(self.adapter, 'market_data') and hasattr(self.adapter.market_data, 'reset_connection'):
                         try:
                             logger.warning("尝试重置SSL连接...")
-                            self.adapter.market_data_manager.reset_connection()
+                            self.adapter.market_data.reset_connection()
                         except Exception as reset_error:
                             logger.error(f"重置连接失败: {reset_error}")
                 else:
@@ -1677,17 +1680,39 @@ class LiveTradingSystem:
                         update_timeout = self.performance.get('agent_update_timeout', 3)
                         import threading
                         
+                        # 使用共享变量来获取线程执行结果
+                        result_data = {'success': False, 'execution_time': None, 'error': None}
+                        
                         def update_with_timeout():
-                            start_time = time.time()
-                            # 整合市场数据为一个字典，符合LiveAgent.update()方法的参数要求
-                            market_data = {
-                                'spot': {'price': formatted_market_data['price']},
-                                'futures': {'price': formatted_market_data['price']},
-                                'features': market_features
-                            }
-                            agent.update(market_data, regime)
-                            agent.last_update_time = datetime.now()
-                            return time.time() - start_time
+                            try:
+                                start_time = time.time()
+                                # 整合市场数据为一个字典，符合LiveAgent.update()方法的参数要求
+                                # 添加candles数据，确保LiveAgent能够计算技术指标和信号强度
+                                candles = []
+                                try:
+                                    # 尝试从适配器获取K线数据
+                                    if hasattr(self.adapter, 'market_data') and hasattr(self.adapter.market_data, 'get_candles'):
+                                        symbol = self.config['markets']['spot']['symbol']
+                                        candles = self.adapter.market_data.get_candles(symbol, '1m', 100)
+                                        logger.debug(f"获取到 {len(candles)} 条K线数据用于代理更新")
+                                    else:
+                                        logger.warning("无法获取K线数据，使用空列表")
+                                except Exception as e:
+                                    logger.error(f"获取K线数据失败: {e}")
+                                     
+                                market_data = {
+                                    'spot': {'price': formatted_market_data['price']},
+                                    'futures': {'price': formatted_market_data['price']},
+                                    'features': market_features,
+                                    'candles': candles  # 添加candles键，确保信号计算
+                                }
+                                agent.update(market_data, regime)
+                                agent.last_update_time = datetime.now()
+                                result_data['execution_time'] = time.time() - start_time
+                                result_data['success'] = True
+                            except Exception as e:
+                                result_data['error'] = str(e)
+                                result_data['success'] = False
                         
                         # 使用线程执行带超时的更新
                         update_thread = threading.Thread(target=update_with_timeout)
@@ -1698,7 +1723,10 @@ class LiveTradingSystem:
                         if update_thread.is_alive():
                             raise TimeoutError(f"代理更新超时 (> {update_timeout}秒)")
                             
-                        return (getattr(agent, 'agent_id', 'unknown'), True, update_with_timeout())
+                        if result_data['success']:
+                            return (getattr(agent, 'agent_id', 'unknown'), True, result_data['execution_time'])
+                        else:
+                            raise Exception(result_data['error'] if result_data['error'] else "代理更新失败")
                     except Exception as e:
                         return (getattr(agent, 'agent_id', 'unknown'), False, str(e))
                 
@@ -1996,17 +2024,32 @@ class LiveTradingSystem:
                         
                         # 处理订单结果
                         if hasattr(self.bridge, 'mode') and self.bridge.mode == 'live':
-                            normalized_result = {
-                                'order_id': getattr(order, 'order_id', f"manual_{int(time.time())}"),
-                                'status': self._map_order_status(order.get('state', 'filled')),
-                                'side': order_request.get('side'),
-                                'price': order.get('price_avg', current_price),
-                                'quantity': order.get('size', order_request.get('size', 0)),
-                                'timestamp': int(time.time()),
-                                'type': order_request.get('order_type', 'market'),
-                                'filled_amount': order.get('filled_size', order_request.get('size', 0)),
-                                'fee': order.get('fee', 0)
-                            }
+                            # 检查order是对象还是字典，并相应地访问其属性
+                            if isinstance(order, dict):
+                                normalized_result = {
+                                    'order_id': order.get('order_id', order.get('ordId', f"manual_{int(time.time())}")),
+                                    'status': self._map_order_status(order.get('state', order.get('status', 'filled'))),
+                                    'side': order_request.get('side'),
+                                    'price': order.get('price_avg', order.get('avgPx', current_price)),
+                                    'quantity': order.get('size', order_request.get('size', 0)),
+                                    'timestamp': int(time.time()),
+                                    'type': order_request.get('order_type', 'market'),
+                                    'filled_amount': order.get('filled_size', order.get('accFillSz', order_request.get('size', 0))),
+                                    'fee': order.get('fee', 0)
+                                }
+                            else:
+                                # 处理Order对象
+                                normalized_result = {
+                                    'order_id': getattr(order, 'order_id', getattr(order, 'ordId', f"manual_{int(time.time())}")),
+                                    'status': self._map_order_status(getattr(order, 'state', getattr(order, 'status', 'filled'))),
+                                    'side': order_request.get('side'),
+                                    'price': getattr(order, 'price_avg', getattr(order, 'avgPx', current_price)),
+                                    'quantity': getattr(order, 'size', order_request.get('size', 0)),
+                                    'timestamp': int(time.time()),
+                                    'type': order_request.get('order_type', 'market'),
+                                    'filled_amount': getattr(order, 'filled_size', getattr(order, 'accFillSz', order_request.get('size', 0))),
+                                    'fee': getattr(order, 'fee', 0)
+                                }
                         else:
                             # 回测模式下，直接使用桥接器结果
                             normalized_result = order
@@ -2460,8 +2503,16 @@ class LiveTradingSystem:
                         value = float(agent.capital) * strength * position_percent
                         value = min(value, float(max_order_value))  # 限制最大订单价值
                         
-                        if value <= 0:
-                            logger.warning(f"计算的订单价值无效: {value}")
+                        # 确保价值有最小值，防止生成过小的订单
+                        # 根据市场类型设置不同的最小订单价值
+                        if market == 'contract':
+                            min_value = 50.0  # 合约市场保留较高的最小价值
+                        else:
+                            min_value = 30.0  # 现货市场允许较小的订单价值
+                        
+                        # 只有当订单价值严格小于最小值时才返回警告
+                        if value < min_value:
+                            logger.warning(f"计算的订单价值过小: {value}，需要至少{min_value}")
                             return None
                     except (ValueError, TypeError) as e:
                         logger.error(f"计算订单价值失败: {e}")
@@ -2519,13 +2570,16 @@ class LiveTradingSystem:
                         try:
                             # 合约价值估算（每张合约约100 USDT）
                             contract_value = 100.0
-                            size = int(value / contract_value)
                             
-                            # 数量限制检查
-                            min_size = 1  # 最少1张
-                            if size < min_size:
-                                logger.warning(f"订单数量小于最小限制: {size} < {min_size}")
-                                return None
+                            # 计算并确保至少有1张合约
+                            size = max(1, int(value / contract_value))
+                            
+                            # 验证大小合理性
+                            if size > 100:  # 防止异常大的订单
+                                logger.warning(f"订单数量异常大: {size}")
+                                size = 100
+                            
+                            logger.info(f"生成合约订单数量: {size} 张")
                             
                             # 确定订单方向
                             if side == 'long' or side == 'buy':

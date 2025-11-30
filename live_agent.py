@@ -276,28 +276,108 @@ class LiveAgent:
         
         # 动量信号
         if momentum > self.gene['long_threshold'] * (2 - long_bias):
-            signal_components.append(momentum * long_bias)
+            # 限制动量信号范围
+            momentum_signal = momentum * long_bias
+            momentum_signal = max(-0.8, min(0.8, momentum_signal))
+            signal_components.append(momentum_signal)
+            logger.debug(f"[{self.agent_id}] 动量信号: {momentum_signal:.4f}")
         elif momentum < self.gene['short_threshold'] * (2 - short_bias):
-            signal_components.append(momentum * short_bias)
+            # 限制动量信号范围
+            momentum_signal = momentum * short_bias
+            momentum_signal = max(-0.8, min(0.8, momentum_signal))
+            signal_components.append(momentum_signal)
+            logger.debug(f"[{self.agent_id}] 动量信号: {momentum_signal:.4f}")
         
         # RSI信号 (超买超卖)
         if rsi < 30:  # 超卖
-            signal_components.append(0.2 * (30 - rsi) / 30)
+            rsi_signal = 0.2 * (30 - rsi) / 30
+            rsi_signal = min(0.8, rsi_signal)  # 限制最大值为0.8
+            signal_components.append(rsi_signal)
+            logger.debug(f"[{self.agent_id}] RSI信号: {rsi_signal:.4f}")
         elif rsi > 70:  # 超买
-            signal_components.append(-0.2 * (rsi - 70) / 30)
+            rsi_signal = -0.2 * (rsi - 70) / 30
+            rsi_signal = max(-0.8, rsi_signal)  # 限制最小值为-0.8
+            signal_components.append(rsi_signal)
+            logger.debug(f"[{self.agent_id}] RSI信号: {rsi_signal:.4f}")
         
-        # MACD信号
-        signal_components.append(0.2 * macd_hist / (sma20 * 0.01) if macd_hist != 0 else 0)
+        # MACD信号 - 优化计算以避免异常值
+        if sma20 > 0:  # 确保sma20有效
+            # 归一化MACD柱状图值
+            # 使用更稳健的归一化方法，避免分母过小导致的异常值
+            normalization_factor = max(sma20 * 0.01, 0.1)  # 确保分母至少为0.1
+            raw_macd_signal = macd_hist / normalization_factor
+            
+            # 限制原始信号范围
+            raw_macd_signal = max(-5.0, min(5.0, raw_macd_signal))
+            
+            # 应用权重并限制最终MACD信号范围
+            macd_signal = 0.2 * raw_macd_signal
+            macd_signal = max(-0.8, min(0.8, macd_signal))  # 进一步限制范围，避免单个组件影响过大
+            
+            signal_components.append(macd_signal)
+            logger.debug(f"[{self.agent_id}] MACD信号计算: macd_hist={macd_hist:.6f}, sma20={sma20:.6f}, 信号={macd_signal:.4f}")
+        else:
+            signal_components.append(0.0)
+            logger.debug(f"[{self.agent_id}] MACD信号计算: SMA20无效，使用默认值0")
         
         # Bollinger Bands信号
         if bb_position < 0.3:  # 接近下轨
-            signal_components.append(0.2 * (0.3 - bb_position) / 0.3)
+            bb_signal = 0.2 * (0.3 - bb_position) / 0.3
+            bb_signal = min(0.8, bb_signal)  # 限制最大值为0.8
+            signal_components.append(bb_signal)
+            logger.debug(f"[{self.agent_id}] 布林带信号: {bb_signal:.4f}")
         elif bb_position > 0.7:  # 接近上轨
-            signal_components.append(-0.2 * (bb_position - 0.7) / 0.3)
+            bb_signal = -0.2 * (bb_position - 0.7) / 0.3
+            bb_signal = max(-0.8, bb_signal)  # 限制最小值为-0.8
+            signal_components.append(bb_signal)
+            logger.debug(f"[{self.agent_id}] 布林带信号: {bb_signal:.4f}")
         
         # 计算最终信号强度
         if signal_components:
-            final_signal_strength = np.mean(signal_components)
+            # 记录每个信号组件的值用于调试
+            component_types = ['动量', 'RSI', 'MACD', '布林带']
+            component_values = signal_components[:4]  # 确保不超过4个组件
+            debug_info = ', '.join([f"{t}: {v:.4f}" for t, v in zip(component_types, component_values)])
+            logger.info(f"[{self.agent_id}] 信号组件: {debug_info}")
+            
+            # 计算原始平均信号强度
+            raw_mean = np.mean(signal_components)
+            
+            # 添加信号平滑处理，避免直接达到边界值
+            # 使用tanh函数进行非线性转换，使信号更平滑地接近边界
+            # 调整参数确保最大值约为1.8，最小值约为-1.8，避免直接达到±2.0
+            final_signal_strength = 1.8 * np.tanh(raw_mean / 1.5)
+            
+            # 仍然保留边界检查作为最后保障
+            final_signal_strength = max(-1.9, min(1.9, final_signal_strength))
+            
+            # 计算信号强度变化率（如果有历史数据）
+            if hasattr(self, 'prev_signal_strength'):
+                signal_change = final_signal_strength - self.prev_signal_strength
+                logger.info(f"[{self.agent_id}] 信号强度变化: {signal_change:.4f}")
+                # 如果信号变化剧烈，添加警告
+                if abs(signal_change) > 1.0:
+                    logger.warning(f"[{self.agent_id}] 信号强度剧烈变化: {signal_change:.4f}")
+            
+            # 存储当前信号强度用于下次比较
+            self.prev_signal_strength = final_signal_strength
+            
+            # 如果信号强度接近边界，记录详细信息
+            if abs(final_signal_strength) > 1.7:
+                logger.warning(f"[{self.agent_id}] 信号强度接近边界: {final_signal_strength:.4f}, 原始均值: {raw_mean:.4f}")
+                # 记录所有信号组件的详细信息
+                logger.warning(f"[{self.agent_id}] 信号组件详情: {signal_components}")
+            
+            # 添加日志系统记录，确保信号强度被记录
+            logger.info(f"[{self.agent_id}] 信号强度: {final_signal_strength:.4f}, 原始均值: {raw_mean:.4f}, 组件数: {len(signal_components)}")
+            # 同时保留直接打印到终端
+            print(f"[{self.agent_id}] 信号强度: {final_signal_strength:.4f}, 组件数: {len(signal_components)}")
+        else:
+            final_signal_strength = 0.0
+            logger.warning(f"[{self.agent_id}] 没有生成有效信号组件，信号强度设为0")
+            # 重置历史记录
+            if hasattr(self, 'prev_signal_strength'):
+                delattr(self, 'prev_signal_strength')
         
         # 生成交易信号
         # 使用基因中的阈值，让每个Agent有不同的交易风格

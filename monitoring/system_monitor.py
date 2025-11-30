@@ -182,6 +182,13 @@ class SystemMonitor:
                 - max_drawdown: 最大回撤
                 - is_alive: 是否存活
         """
+        # 确保agent_id始终是可哈希的类型（避免列表作为字典键）
+        if isinstance(agent_id, list):
+            # 将列表转换为字符串，确保可哈希
+            agent_id_str = str(agent_id)
+            logger.warning(f"检测到列表类型的agent_id，已转换为字符串: {agent_id_str}")
+            agent_id = agent_id_str
+        
         agent_data = {
             'timestamp': datetime.now().isoformat(),
             'agent_id': agent_id,
@@ -336,6 +343,11 @@ class SystemMonitor:
         agent_groups = {}
         for metric in self.agent_metrics:
             agent_id = metric['agent_id']
+            # 确保agent_id是可哈希的类型
+            if isinstance(agent_id, list):
+                agent_id = str(agent_id)
+                logger.warning(f"在聚合代理性能时检测到列表类型的agent_id，已转换为字符串")
+            
             if agent_id not in agent_groups:
                 agent_groups[agent_id] = []
             agent_groups[agent_id].append(metric)

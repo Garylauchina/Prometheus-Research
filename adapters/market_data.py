@@ -223,12 +223,17 @@ class MarketDataManager:
             # 更新失败状态
             self._update_health_status(False, str(e))
             
-            # 尝试返回缓存价格（即使过期）
-            if 'price' in cached:
+            # 尝试返回缓存价格（即使过期），但确保价格有效
+            if 'price' in cached and cached['price'] > 0:
                 logger.warning(f"使用缓存价格 (缓存时间: {cache_age:.1f}秒): {symbol} = {cached['price']}")
                 # 更新最后使用时间
                 cached['last_used'] = current_time
                 return cached['price']
+            elif 'price' in cached and cached['price'] <= 0:
+                logger.error(f"缓存价格无效: {symbol} = {cached['price']}，丢弃缓存并抛出异常")
+                # 删除无效缓存
+                if symbol in self.cache:
+                    del self.cache[symbol]
             raise
     
     @retry_with_backoff(max_retries=3, backoff_factor=0.5)
