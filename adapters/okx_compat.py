@@ -168,7 +168,8 @@ def import_okx_module(module_name):
                 # 实现必要的方法，返回模拟数据
                 def get_ticker(self, instId):
                     logger.info(f"模拟调用get_ticker: {instId}")
-                    return {'code': '0', 'data': [{'instId': instId, 'last': '0', 'open24h': '0'}]}
+                    # 返回有效的BTC-USDT价格
+                    return {'code': '0', 'data': [{'instId': instId, 'last': '50000.0', 'open24h': '49500.0'}]}
                 
                 def get_instruments(self, instType='SPOT', uly=None, instId=None):
                     logger.info(f"模拟调用get_instruments")
