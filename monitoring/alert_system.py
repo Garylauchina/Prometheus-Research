@@ -49,6 +49,21 @@ class AlertSystem:
         
         logger.info("交易警报系统初始化完成")
     
+    def send_alert(self, alert_type: str, message: str, severity: str = 'warning'):
+        """
+        直接发送警报（兼容旧API）
+        
+        Args:
+            alert_type: 警报类型
+            message: 警报消息
+            severity: 警报严重性 (info, warning, error, critical)
+            
+        Returns:
+            bool: 是否成功发送
+        """
+        # 调用现有方法
+        return self.check_and_send_alert(alert_type, message, severity)
+    
     def check_and_send_alert(self, alert_type: str, message: str, 
                            severity: str = 'warning', 
                            data: Optional[Dict] = None, 
