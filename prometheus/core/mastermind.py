@@ -63,7 +63,9 @@ class Mastermind:
     def __init__(self, 
                  initial_capital: float = 100000.0,
                  decision_mode: str = "llm",
-                 llm_model: Optional[str] = None):
+                 llm_model: Optional[str] = None,
+                 bulletin_board=None,
+                 nirvana_system=None):
         """
         初始化主脑
         
@@ -71,6 +73,8 @@ class Mastermind:
             initial_capital: 系统初始总资金
             decision_mode: 决策模式 ("llm"[默认], "human", "hybrid")
             llm_model: LLM模型名称（用于LLM模式）
+            bulletin_board: 公告板系统（v4）
+            nirvana_system: 涅槃系统
             
         Note:
             v4.0 以LLM先知为主要决策模式，人工基本不参与
@@ -80,6 +84,10 @@ class Mastermind:
         self.strategy = GlobalStrategy()
         self.market_regime = MarketRegime.UNKNOWN
         self.decision_mode = decision_mode
+        
+        # v4.0 系统集成
+        self.bulletin_board = bulletin_board
+        self.nirvana_system = nirvana_system
         
         # 决策历史
         self.decision_history: List[Dict] = []
@@ -374,4 +382,103 @@ class Mastermind:
             'strategy': self.strategy.__dict__,
             'decision_count': len(self.decision_history)
         }
+    
+    # ========== v4.0 公告板集成 ==========
+    
+    def announce_strategy(self, 
+                          strategy_type: str,
+                          parameters: Dict,
+                          reason: str = ""):
+        """
+        发布战略公告
+        
+        Args:
+            strategy_type: 策略类型 (conservative/aggressive/balanced)
+            parameters: 策略参数
+            reason: 原因说明
+        """
+        if not self.bulletin_board:
+            logger.warning("公告板未初始化，无法发布战略公告")
+            return
+        
+        # 发布到战略公告板
+        self.bulletin_board.post(
+            tier='strategic',
+            title=f'全局战略调整：{strategy_type}',
+            content={
+                'type': 'STRATEGY_ADJUSTMENT',
+                'strategy_type': strategy_type,
+                'parameters': parameters,
+                'reason': reason,
+                'market_regime': self.market_regime.value
+            },
+            publisher='Mastermind',
+            priority='high' if strategy_type == 'conservative' else 'normal',
+            tags=['strategy', strategy_type]
+        )
+        
+        logger.info(f"📢 战略公告已发布: {strategy_type} - {reason}")
+    
+    def trigger_nirvana(self, reason: str, target_count: int = 10):
+        """
+        触发涅槃机制（快速复活Agent）
+        
+        Args:
+            reason: 触发原因
+            target_count: 目标复活数量
+        """
+        if not self.nirvana_system:
+            logger.warning("涅槃系统未初始化")
+            return
+        
+        # 触发涅槃
+        logger.info(f"🔥 主脑触发涅槃机制: {reason}，目标复活 {target_count} 个Agent")
+        
+        # 发布公告
+        if self.bulletin_board:
+            self.bulletin_board.post(
+                tier='strategic',
+                title='🔥 涅槃机制启动',
+                content={
+                    'type': 'NIRVANA_EVENT',
+                    'reason': reason,
+                    'target_count': target_count,
+                    'message': '极端市场环境，启动大规模复活机制'
+                },
+                publisher='Mastermind',
+                priority='urgent',
+                tags=['nirvana', 'emergency']
+            )
+    
+    def set_global_risk_level(self, risk_level: int, reason: str = ""):
+        """
+        设置全局风险等级
+        
+        Args:
+            risk_level: 风险等级 (1-5)
+            reason: 原因
+        """
+        if not 1 <= risk_level <= 5:
+            logger.error(f"无效的风险等级: {risk_level}")
+            return
+        
+        old_level = self.strategy.risk_level
+        self.strategy.risk_level = risk_level
+        
+        logger.info(f"风险等级调整: {old_level} → {risk_level} ({reason})")
+        
+        # 发布公告
+        if self.bulletin_board:
+            self.bulletin_board.post(
+                tier='strategic',
+                title=f'风险等级调整：Level {risk_level}',
+                content={
+                    'type': 'RISK_LEVEL_CHANGE',
+                    'old_level': old_level,
+                    'new_level': risk_level,
+                    'reason': reason
+                },
+                publisher='Mastermind',
+                priority='high' if abs(risk_level - old_level) >= 2 else 'normal'
+            )
 

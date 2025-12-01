@@ -129,7 +129,9 @@ class AgentV4:
                  initial_capital: float,
                  gene: Optional[Dict] = None,
                  personality: Optional[AgentPersonality] = None,
-                 parent_permission: Optional[PermissionLevel] = None):
+                 parent_permission: Optional[PermissionLevel] = None,
+                 bulletin_board=None,
+                 permission_system=None):
         """
         初始化 Agent
         
@@ -139,6 +141,8 @@ class AgentV4:
             gene: 交易基因（策略参数）
             personality: 性格特质
             parent_permission: 父母的权限级别（用于继承）
+            bulletin_board: 公告板系统（v4）
+            permission_system: 交易权限系统
         """
         self.agent_id = agent_id
         self.initial_capital = initial_capital
@@ -148,8 +152,11 @@ class AgentV4:
         self.gene = gene if gene else self._generate_random_gene()
         self.personality = personality if personality else self._generate_random_personality()
         
-        # 权限系统（新增）
-        self.permission_system = TradingPermissionSystem()
+        # v4.0 系统集成
+        self.bulletin_board = bulletin_board
+        self.permission_system = permission_system or TradingPermissionSystem()
+        
+        # 权限系统
         if parent_permission and parent_permission != PermissionLevel.NOVICE:
             # 继承父母权限，但降一级
             self.permission_level = self.permission_system.get_inherited_level(parent_permission)
@@ -163,6 +170,10 @@ class AgentV4:
         self.death_time: Optional[datetime] = None
         self.death_reason: Optional[DeathReason] = None
         self.days_alive = 0
+        
+        # 公告阅读历史
+        self.bulletin_read_count = 0
+        self.last_bulletins_read = []
         
         # 情绪状态
         self.emotion = EmotionalState()
@@ -971,5 +982,166 @@ class AgentV4:
             'personality': self.personality.__dict__,
             'is_in_last_stand': self.is_in_last_stand,
             'positions': len(self.positions)
+        }
+    
+    # ========== v4.0 公告板集成 ==========
+    
+    def read_bulletins(self, tier: Optional[str] = None, limit: int = 5) -> List[Dict]:
+        """
+        读取公告板
+        
+        Args:
+            tier: 层级过滤 ('strategic', 'market', 'system', None=all)
+            limit: 最大数量
+        
+        Returns:
+            List[Dict]: 公告列表（已转换为字典）
+        """
+        if not self.bulletin_board:
+            logger.warning(f"{self.agent_id}: 公告板未初始化")
+            return []
+        
+        # 读取公告
+        bulletins = self.bulletin_board.read(self.agent_id, tier=tier, limit=limit)
+        
+        # 记录
+        self.bulletin_read_count += len(bulletins)
+        self.last_bulletins_read = bulletins
+        
+        logger.debug(f"{self.agent_id} 读取了 {len(bulletins)} 条公告")
+        
+        # 转换为字典方便处理
+        return [b.to_dict() for b in bulletins]
+    
+    def interpret_bulletin(self, bulletin: Dict) -> Dict:
+        """
+        解读公告（基于基因和性格）
+        
+        Args:
+            bulletin: 公告数据
+        
+        Returns:
+            Dict: 解读结果
+                - accept: 是否接受公告建议
+                - confidence: 信心度 (0-1)
+                - action: 拟采取的行动
+        """
+        content = bulletin.get('content', {})
+        tier = bulletin.get('tier', '')
+        
+        # 基础信心度（基于性格）
+        base_confidence = self.personality.confidence
+        
+        # 战略公告（主脑）- 权威性高
+        if tier == 'strategic':
+            # 更倾向接受权威指令，但性格会影响
+            accept_threshold = 0.3  # 较低，容易接受
+            confidence_boost = 0.2
+        
+        # 市场公告（监督者）- 信息性
+        elif tier == 'market':
+            # 根据市场敏感度决定
+            market_sensitivity = self.gene.get('market_sensitivity', 0.5)
+            accept_threshold = 1 - market_sensitivity
+            confidence_boost = 0.1
+        
+        # 系统公告（监督者）- 警告性
+        elif tier == 'system':
+            # 根据风险偏好决定
+            risk_aversion = 1 - self.personality.risk_appetite
+            accept_threshold = 1 - risk_aversion
+            confidence_boost = 0.15
+        
+        else:
+            accept_threshold = 0.5
+            confidence_boost = 0
+        
+        # 计算最终信心度
+        final_confidence = min(base_confidence + confidence_boost, 1.0)
+        
+        # 决定是否接受
+        accept = final_confidence > accept_threshold
+        
+        # 决定行动
+        if accept:
+            if tier == 'strategic':
+                action = 'adjust_strategy'
+            elif tier == 'market':
+                action = 'analyze_opportunity'
+            elif tier == 'system':
+                action = 'reduce_risk'
+            else:
+                action = 'monitor'
+        else:
+            action = 'ignore'
+        
+        return {
+            'accept': accept,
+            'confidence': final_confidence,
+            'action': action,
+            'reason': f"基于性格({self.personality.confidence:.2f})和基因决策"
+        }
+    
+    def process_bulletins_and_decide(self) -> Dict:
+        """
+        读取并处理所有公告，做出综合决策
+        
+        Returns:
+            Dict: 决策结果
+        """
+        # 1. 读取公告
+        bulletins = self.read_bulletins(limit=10)
+        
+        if not bulletins:
+            return {
+                'decision': 'no_info',
+                'action': 'hold',
+                'reason': '无公告信息'
+            }
+        
+        # 2. 解读每条公告
+        interpretations = []
+        for bulletin in bulletins:
+            interp = self.interpret_bulletin(bulletin)
+            interpretations.append({
+                'bulletin_id': bulletin.get('bulletin_id'),
+                'tier': bulletin.get('tier'),
+                'title': bulletin.get('title'),
+                **interp
+            })
+        
+        # 3. 综合决策
+        accepted_bulletins = [i for i in interpretations if i['accept']]
+        
+        if not accepted_bulletins:
+            return {
+                'decision': 'all_rejected',
+                'action': 'hold',
+                'reason': '所有公告均未接受'
+            }
+        
+        # 4. 根据接受的公告做出决策
+        # 优先级：战略 > 系统 > 市场
+        strategic = [b for b in accepted_bulletins if b['tier'] == 'strategic']
+        system = [b for b in accepted_bulletins if b['tier'] == 'system']
+        market = [b for b in accepted_bulletins if b['tier'] == 'market']
+        
+        if strategic:
+            primary = strategic[0]
+        elif system:
+            primary = system[0]
+        elif market:
+            primary = market[0]
+        else:
+            primary = accepted_bulletins[0]
+        
+        return {
+            'decision': 'bulletin_guided',
+            'action': primary['action'],
+            'primary_bulletin': primary['bulletin_id'],
+            'accepted_count': len(accepted_bulletins),
+            'total_count': len(bulletins),
+            'confidence': primary['confidence'],
+            'reason': f"接受了 {len(accepted_bulletins)}/{len(bulletins)} 条公告，主要依据: {primary['title']}"
         }
 
