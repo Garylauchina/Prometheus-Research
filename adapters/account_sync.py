@@ -187,7 +187,10 @@ class AccountSync:
         获取USDT余额（快捷方法）
         
         Returns:
-            float: USDT可用余额
+            float: USDT可用余额（保持高精度）
         """
         balance = self.get_balance(ccy='USDT')
-        return balance.get('available', 0.0)
+        # 确保返回高精度的USDT可用余额
+        available_balance = balance.get('available', 0.0)
+        logger.info(f"当前USDT可用余额: {available_balance}")
+        return available_balance

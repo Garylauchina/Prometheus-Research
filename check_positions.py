@@ -4,6 +4,7 @@
 """
 OKX账户持仓检查脚本
 用于查看当前账户的持仓、余额和未成交订单
+支持实盘和模拟盘切换
 """
 
 import sys
@@ -72,18 +73,33 @@ except ImportError as e:
     print(f"sys.path: {sys.path}")
     sys.exit(1)
 
+# 询问用户要查看实盘还是模拟盘
+print("请选择要查看的环境:")
+print("1. 模拟盘 (默认)")
+print("2. 实盘")
+
+# 获取用户输入，默认为1（模拟盘）
+env_choice = input("请输入选择 (1/2) [1]: ").strip()
+if env_choice == '2':
+    flag = 0  # 实盘
+    env_name = "实盘"
+else:
+    flag = 1  # 模拟盘
+    env_name = "模拟盘"
+
 print("="*80)
-print("OKX账户持仓检查")
+print(f"OKX账户持仓检查 - {env_name}")
 print("="*80)
 
 print("\n连接到OKX...")
 try:
+    
     # 直接使用用户提供的API凭证
     okx_config = {
         'api_key': "265a4c37-1dc1-40d8-80d0-11004026ca48",
         'secret_key': "0AD30E01A7B66FBBBEB7E30D8E0E18B4",
         'passphrase': "Garylauchina3.14",
-        'flag': 1  # 使用模拟盘模式
+        'flag': flag  # 根据用户选择设置环境
     }
     
     # 创建模拟适配器的函数，作为备用方案
@@ -102,7 +118,7 @@ try:
     try:
         # 尝试使用提供的API凭证创建适配器
         adapter = OKXTradingAdapter(okx_config)
-        print(f"已使用提供的API凭证连接到OKX，交易模式: {okx_config['flag']}")
+        print(f"已使用提供的API凭证连接到OKX，交易模式: {okx_config['flag']} ({env_name})")
     except Exception as e:
         print(f"警告: 无法使用提供的API凭证连接到OKX: {e}")
         print("将使用模拟模式运行。")
@@ -114,7 +130,7 @@ except Exception as e:
 
 # 账户信息
 print("\n" + "="*80)
-print("账户信息")
+print(f"账户信息 - {env_name}")
 print("="*80)
 try:
     account_info = adapter.get_account_summary()
@@ -125,7 +141,7 @@ try:
     
     # 显示中文标准化输出
     print("\n" + "="*80)
-    print("中文标准化输出")
+    print(f"中文标准化输出 - {env_name}")
     print("="*80)
     print(format_account_info_cn(account_info))
 except Exception as e:
@@ -134,7 +150,7 @@ except Exception as e:
 
 # 持仓列表
 print("\n" + "="*80)
-print("持仓列表")
+print(f"持仓列表 - {env_name}")
 print("="*80)
 try:
     # 直接获取所有持仓，不指定inst_type参数
@@ -184,11 +200,12 @@ except Exception as e:
 
 # USDT余额检查
 print("\n" + "="*80)
-print("USDT余额")
+print(f"USDT余额 (高精度显示) - {env_name}")
 print("="*80)
 try:
     usdt_balance = adapter.get_usdt_balance()
-    print(f"USDT可用余额: ${usdt_balance:.2f}")
+    # 显示完整精度的USDT余额，不进行四舍五入
+    print(f"USDT可用余额: ${usdt_balance}")
 except Exception as e:
     print(f"错误: 无法获取USDT余额: {e}")
 
@@ -205,5 +222,5 @@ except Exception as e:
     print(f"错误: 无法获取API统计: {e}")
 
 print("="*80)
-print("检查完成")
+print(f"检查完成 - {env_name}")
 print("="*80)
