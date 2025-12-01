@@ -2,7 +2,7 @@
 # 使用多阶段构建减小镜像体积
 
 # 第一阶段：构建环境
-FROM python:3.11-slim AS builder
+FROM python:3.13.2-slim AS builder
 
 # 标签信息
 LABEL maintainer="Prometheus Trading Bot Team"
@@ -34,7 +34,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 第二阶段：运行环境
-FROM python:3.11-slim
+FROM python:3.13.2-slim
 
 # 设置时区
 RUN apt-get update && apt-get install -y \

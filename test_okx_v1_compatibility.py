@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Prometheus交易系统 - OKX v1.x 兼容性测试
+Prometheus交易系统 - OKX API 功能验证
 
-这个脚本测试与OKX v1.x版本的兼容性，确保：
-1. 新版本的OKX包可以正确安装
-2. 兼容性模块能够适应新版本的结构
-3. 所有必要的API类都可以正常访问
+这个脚本验证python-okx库的基本功能和API类可用性，确保系统正常运行。
 """
 
 import os
@@ -23,31 +20,26 @@ logger = logging.getLogger(__name__)
 # 添加项目根目录到Python路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def test_okx_version():
-    """测试OKX包版本"""
-    logger.info("=== 测试1: OKX包版本检查 ===")
+def test_okx_import():
+    """测试python-okx库导入"""
+    logger.info("=== 测试1: python-okx库导入检查 ===")
     try:
         import okx
-        version = getattr(okx, '__version__', '未知')
-        logger.info(f"✓ OKX包版本: {version}")
+        logger.info(f"✓ 成功导入python-okx库")
         return True
     except ImportError as e:
-        logger.error(f"✗ 导入OKX包失败: {e}")
+        logger.error(f"✗ 导入python-okx库失败: {e}")
         return False
 
-def test_compatibility_module():
-    """测试兼容性模块"""
-    logger.info("\n=== 测试2: 兼容性模块测试 ===")
+def test_compat_module():
+    """测试okx_compat模块导入"""
+    logger.info("\n=== 测试2: okx_compat模块测试 ===")
     try:
         from adapters import okx_compat
-        logger.info("✓ 成功导入兼容性模块")
-        
-        # 应用兼容性修复
-        results = okx_compat.apply_compatibility_fixes()
-        logger.info(f"✓ 兼容性修复应用结果: {results}")
+        logger.info("✓ 成功导入okx_compat模块")
         return True
     except Exception as e:
-        logger.error(f"✗ 兼容性模块测试失败: {e}")
+        logger.error(f"✗ okx_compat模块测试失败: {e}")
         return False
 
 def test_module_imports():
@@ -105,12 +97,12 @@ def test_market_data_manager():
 
 def main():
     """运行所有测试"""
-    logger.info("开始OKX v1.x兼容性测试")
+    logger.info("开始OKX API功能验证")
     logger.info("=" * 50)
     
     tests = [
-        test_okx_version,
-        test_compatibility_module,
+        test_okx_import,
+        test_compat_module,
         test_module_imports,
         test_api_classes,
         test_market_data_manager
@@ -124,14 +116,14 @@ def main():
     
     logger.info("\n" + "=" * 50)
     if all_passed:
-        logger.info("🎉 所有兼容性测试通过! 解决方案可以部署到VPS。")
-        logger.info("\n兼容性解决方案要点:")
-        logger.info("1. 支持OKX v1.x版本")
-        logger.info("2. 自动处理不同版本的导入差异")
-        logger.info("3. 确保MarketData.MarketAPI等类始终可用")
+        logger.info("🎉 所有OKX API功能验证通过!")
+        logger.info("\n验证结果:")
+        logger.info("1. python-okx库正确安装")
+        logger.info("2. 所有必要的API模块和类可正常访问")
+        logger.info("3. MarketDataManager可以正常初始化")
         return 0
     else:
-        logger.error("❌ 部分兼容性测试失败，请检查日志并修复问题")
+        logger.error("❌ 部分功能验证失败，请检查日志并修复问题")
         return 1
 
 if __name__ == "__main__":

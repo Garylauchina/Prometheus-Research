@@ -197,10 +197,8 @@ class OrderManager:
                 order_data = result.data
                 if hasattr(order_data, 'ordId'):
                     order_id = order_data.ordId
-                elif hasattr(order_data, 'orderId'):
-                    order_id = order_data.orderId
                 else:
-                    raise OrderError("No order ID in object response")
+                    raise OrderError("No order ID in response")
                     
                 # 创建Order对象
                 order = Order(
@@ -224,7 +222,7 @@ class OrderManager:
     
     def cancel_order(self, order_id, symbol=None):
         """
-        撤单（兼容python-okx库）
+        撤单
         
         Args:
             order_id: 订单ID
@@ -240,34 +238,22 @@ class OrderManager:
             
             inst_id = symbol or order.symbol
             
-            # 撤单 - python-okx库的cancel_order方法，确保参数名正确
+            # 撤单
             result = self.trade_api.cancel_order(
                 instId=inst_id,
                 ordId=order_id
             )
             
-            # 处理返回结果（兼容python-okx库）
-            if isinstance(result, dict):
-                if result.get('code') == '0':
-                    if order:
-                        order.status = 'cancelled'
-                    logger.info(f"Order cancelled: {order_id}")
-                    return True
-                else:
-                    error_msg = result.get('msg', 'Unknown error')
-                    logger.error(f"Failed to cancel order: {error_msg}")
-                    raise OrderError(f"Failed to cancel order: {error_msg}")
+            # 处理返回结果
+            if result.get('code') == '0':
+                if order:
+                    order.status = 'cancelled'
+                logger.info(f"Order cancelled: {order_id}")
+                return True
             else:
-                # 处理可能的对象类型返回值
-                if hasattr(result, 'code') and result.code == '0':
-                    if order:
-                        order.status = 'cancelled'
-                    logger.info(f"Order cancelled: {order_id}")
-                    return True
-                else:
-                    error_msg = str(result)
-                    logger.error(f"Failed to cancel order: {error_msg}")
-                    raise OrderError(f"Failed to cancel order: {error_msg}")
+                error_msg = result.get('msg', 'Unknown error')
+                logger.error(f"Failed to cancel order: {error_msg}")
+                raise OrderError(f"Failed to cancel order: {error_msg}")
         
         except Exception as e:
             logger.error(f"Exception in cancel_order: {e}")
@@ -275,7 +261,7 @@ class OrderManager:
     
     def get_order_status(self, order_id, symbol=None):
         """
-        查询订单状态（兼容python-okx库）
+        查询订单状态
         
         Args:
             order_id: 订单ID
@@ -291,21 +277,17 @@ class OrderManager:
             
             inst_id = symbol or order.symbol
             
-            # 查询订单 - python-okx库的get_order方法
+            # 查询订单
             result = self.trade_api.get_order(
                 instId=inst_id,
                 ordId=order_id
             )
             
-            # 处理返回结果（兼容python-okx库）
-            if isinstance(result, dict) and result.get('code') == '0' and len(result.get('data', [])) > 0:
-                # 标准API返回格式
+            # 处理返回结果
+            if result.get('code') == '0' and len(result.get('data', [])) > 0:
                 okx_order = result['data'][0]
-            elif hasattr(result, 'data'):
-                # 处理可能的对象类型返回值
-                okx_order = result.data
             else:
-                error_msg = str(result) if not isinstance(result, dict) else result.get('msg', 'Unknown error')
+                error_msg = result.get('msg', 'Unknown error')
                 logger.error(f"Failed to get order status: {error_msg}")
                 raise OrderError(f"Failed to get order status: {error_msg}")
             
@@ -364,8 +346,7 @@ class OrderManager:
                 'sz': str(order_request['size'])
             }
             
-            # 杠杆（注意：python-okx库中参数名可能是leverage而非lever）
-            # 先不设置杠杆，通过账户配置设置
+            # 杠杆设置通过账户配置处理
             
             # 限价单需要价格
             if order_request['order_type'] == 'limit':

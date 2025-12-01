@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Prometheus交易系统 - Trade.TradeAPI 修复测试
+Prometheus交易系统 - Trade API 功能验证
 
-这个脚本专门测试Trade模块和TradeAPI类的可用性，确保修复有效。
+这个脚本验证Trade模块和TradeAPI类的正常功能，确保交易功能可正常使用。
 """
 
 import os
@@ -105,7 +105,7 @@ def test_order_manager_import():
 
 def main():
     """运行所有测试"""
-    logger.info("开始Trade.TradeAPI修复测试")
+    logger.info("开始Trade API功能验证")
     logger.info("=" * 50)
     
     tests = [
@@ -123,14 +123,14 @@ def main():
     
     logger.info("\n" + "=" * 50)
     if all_passed:
-        logger.info("🎉 所有Trade.TradeAPI修复测试通过!")
-        logger.info("\n修复确认:")
+        logger.info("🎉 所有Trade API功能验证通过!")
+        logger.info("\n验证结果:")
         logger.info("1. Trade模块可以成功导入")
-        logger.info("2. Trade.TradeAPI类始终可用")
+        logger.info("2. Trade.TradeAPI类可用")
         logger.info("3. OrderManager可以成功初始化")
         return 0
     else:
-        logger.error("❌ 部分Trade.TradeAPI修复测试失败，请检查日志")
+        logger.error("❌ 部分Trade API功能验证失败，请检查日志")
         return 1
 
 if __name__ == "__main__":

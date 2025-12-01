@@ -92,9 +92,9 @@ class AccountSync:
         
         Args:
             inst_type: 产品类型（可选）
-                - 'SPOT': 现货
-                - 'SWAP': 永续合约
-                - 'FUTURES': 交割合约
+                - 'spot': 现货
+                - 'swap': 永续合约
+                - 'futures': 交割合约
         
         Returns:
             dict: 持仓信息
@@ -105,6 +105,9 @@ class AccountSync:
                 - side: 持仓方向
         """
         try:
+            # 确保inst_type参数值转换为大写，符合OKX API要求
+            if inst_type is not None:
+                inst_type = inst_type.upper()
             result = self.account_api.get_positions(instType=inst_type)
             
             if result['code'] == '0':

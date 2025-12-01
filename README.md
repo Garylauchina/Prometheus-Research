@@ -3,7 +3,7 @@
 **基于遗传算法和多Agent进化的自动化交易系统，现已增强性能优化和系统稳定性**
 
 [![Version](https://img.shields.io/badge/version-3.0-blue)](#)
-[![Python](https://img.shields.io/badge/python-3.11-green)](#)
+[![Python](https://img.shields.io/badge/python-3.13.2-green)](#)
 [![License](https://img.shields.io/badge/license-MIT-orange)](#)
 [![Performance](https://img.shields.io/badge/performance-optimized-green)](#)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](#)
@@ -126,7 +126,7 @@ Prometheus v3.0是一个基于遗传算法和多Agent进化的AI驱动加密货�
 
 ### 环境要求
 
-- Python 3.11+
+- Python 3.13.2+
 - OKX账户（模拟盘或实盘）
 - 8GB+ RAM
 - 稳定的网络连接
