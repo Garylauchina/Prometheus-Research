@@ -10,7 +10,7 @@ import sys
 import os
 
 # 添加项目路径
-project_path = '/home/ubuntu/prometheus_v30'
+project_path = 'E:\\Trae_store\\prometheus-v30\\'
 if os.path.exists(project_path):
     sys.path.insert(0, project_path)
 else:
