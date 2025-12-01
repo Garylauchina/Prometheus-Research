@@ -1996,7 +1996,19 @@ class LiveTradingSystem:
                                     'features': market_features,
                                     'candles': candles  # 添加candles键，确保信号计算
                                 }
+                                
+                                # 添加Agent更新日志
+                                logger.info(f">>> 更新 {agent.agent_id}")
+                                logger.info(f"    资金: ${agent.capital:.2f}")
+                                logger.info(f"    持仓: {len(agent.positions)}个")
+                                
                                 agent.update(market_data, regime)
+                                
+                                logger.info(f"    信号数: {len(agent.pending_signals)}")
+                                if agent.pending_signals:
+                                    for sig in agent.pending_signals:
+                                        logger.info(f"    信号: {sig}")
+                                        
                                 agent.last_update_time = datetime.now()
                                 result_data['execution_time'] = time.time() - start_time
                                 result_data['success'] = True
@@ -2019,6 +2031,12 @@ class LiveTradingSystem:
                             raise Exception(result_data['error'] if result_data['error'] else "代理更新失败")
                     except Exception as e:
                         return (getattr(agent, 'agent_id', 'unknown'), False, str(e))
+                
+                # 添加更新前的日志
+                logger.info(f"=" * 80)
+                logger.info(f"开始更新 {len(active_agents)} 个Agent")
+                logger.info(f"市场数据: candles={len(formatted_market_data.get('candles', []))}根")
+                logger.info(f"=" * 80)
                 
                 # 执行并发更新
                 update_failures = 0
@@ -2071,6 +2089,12 @@ class LiveTradingSystem:
                 enable_concurrency = False
         
         if not enable_concurrency:
+            # 添加更新前的日志
+            logger.info(f"=" * 80)
+            logger.info(f"开始更新 {len(active_agents)} 个Agent")
+            logger.info(f"市场数据: candles={len(formatted_market_data.get('candles', []))}根")
+            logger.info(f"=" * 80)
+            
             # 串行更新（适用于少量代理或并发失败时）
             for agent in active_agents:
                 try:
@@ -2091,7 +2115,19 @@ class LiveTradingSystem:
                         logger.debug(f"串行模式 - 准备更新代理 {getattr(agent, 'agent_id', 'unknown')} 的市场数据: ")
                         logger.debug(f"  - 蜡烛图数据数量: {len(market_data.get('candles', []))}")
                         logger.debug(f"  - 价格: {market_data.get('spot', {}).get('price')}")
+                        
+                        # 添加Agent更新日志
+                        logger.info(f">>> 更新 {agent.agent_id}")
+                        logger.info(f"    资金: ${agent.capital:.2f}")
+                        logger.info(f"    持仓: {len(agent.positions)}个")
+                        
                         agent.update(market_data, regime)
+                        
+                        logger.info(f"    信号数: {len(agent.pending_signals)}")
+                        if agent.pending_signals:
+                            for sig in agent.pending_signals:
+                                logger.info(f"    信号: {sig}")
+                                
                         agent.last_update_time = datetime.now()
                     
                     # 简单的超时控制（不使用signal，以兼容Windows）

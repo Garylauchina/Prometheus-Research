@@ -46,7 +46,7 @@ CONFIG_VIRTUAL_TRADING = {
     # 资金池
     'capital_manager': {
         'enabled': True,
-        'pool_ratio': 0.3,  # 30%资金进入资金池
+        'pool_ratio': 0.1,  # 降低资金池比例，释放更多资金给Agent
         'min_agent_capital': 100  # 每个agent最少$100
     },
     
