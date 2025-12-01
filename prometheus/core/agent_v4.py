@@ -34,12 +34,72 @@ class DeathReason(Enum):
 
 @dataclass
 class AgentPersonality:
-    """Agent 性格特质"""
-    aggression: float = 0.5      # 激进度 (0-1)
-    risk_tolerance: float = 0.5  # 风险承受度 (0-1)
-    survival_will: float = 0.7   # 生存意志 (0-1)
-    adaptability: float = 0.5    # 适应能力 (0-1)
-    patience: float = 0.5        # 耐心程度 (0-1)
+    """
+    Agent 性格特质（扩展版）
+    
+    多维度性格系统，防止性格趋同，增加群体多样性
+    """
+    # 核心性格
+    aggression: float = 0.5      # 激进度 (0-1) - 影响仓位大小和交易频率
+    risk_tolerance: float = 0.5  # 风险承受度 (0-1) - 影响止损止盈
+    survival_will: float = 0.7   # 生存意志 (0-1) - 影响自杀和拼搏决策
+    adaptability: float = 0.5    # 适应能力 (0-1) - 影响策略调整速度
+    patience: float = 0.5        # 耐心程度 (0-1) - 影响持仓时间
+    
+    # 交易风格
+    trend_following: float = 0.5  # 趋势跟随倾向 (0-1)
+    contrarian: float = 0.5       # 逆向思维倾向 (0-1)
+    momentum_seeking: float = 0.5  # 动量追逐倾向 (0-1)
+    mean_reversion: float = 0.5   # 均值回归倾向 (0-1)
+    
+    # 情绪特质
+    optimism: float = 0.5        # 乐观程度 (0-1)
+    fear_sensitivity: float = 0.5  # 恐惧敏感度 (0-1)
+    greed_level: float = 0.5     # 贪婪程度 (0-1)
+    discipline: float = 0.5      # 纪律性 (0-1)
+    
+    # 学习特质
+    learning_rate: float = 0.5   # 学习速度 (0-1)
+    memory_decay: float = 0.5    # 记忆衰减 (0-1)
+    exploration: float = 0.5     # 探索倾向 (0-1)
+    exploitation: float = 0.5    # 利用倾向 (0-1)
+    
+    # 社交特质（群体行为）
+    herd_mentality: float = 0.5  # 从众心理 (0-1)
+    independence: float = 0.5    # 独立性 (0-1)
+    competitiveness: float = 0.5  # 竞争性 (0-1)
+    cooperation: float = 0.5     # 合作性 (0-1)
+    
+    def get_personality_vector(self) -> List[float]:
+        """获取性格向量（用于计算多样性）"""
+        return [
+            self.aggression, self.risk_tolerance, self.survival_will,
+            self.adaptability, self.patience, self.trend_following,
+            self.contrarian, self.momentum_seeking, self.mean_reversion,
+            self.optimism, self.fear_sensitivity, self.greed_level,
+            self.discipline, self.learning_rate, self.memory_decay,
+            self.exploration, self.exploitation, self.herd_mentality,
+            self.independence, self.competitiveness, self.cooperation
+        ]
+    
+    def calculate_diversity_score(self, other: 'AgentPersonality') -> float:
+        """
+        计算与另一个性格的差异度
+        
+        Args:
+            other: 另一个Agent的性格
+            
+        Returns:
+            float: 差异度分数 (0-1)，越高越不同
+        """
+        vec1 = np.array(self.get_personality_vector())
+        vec2 = np.array(other.get_personality_vector())
+        
+        # 使用欧式距离
+        distance = np.linalg.norm(vec1 - vec2)
+        max_distance = np.sqrt(len(vec1))  # 最大可能距离
+        
+        return min(distance / max_distance, 1.0)
 
 
 @dataclass
@@ -142,13 +202,45 @@ class AgentV4:
         }
     
     def _generate_random_personality(self) -> AgentPersonality:
-        """生成随机性格"""
+        """
+        生成随机性格（多样化）
+        
+        使用不同的分布函数生成各个维度，确保性格多样性
+        """
         return AgentPersonality(
-            aggression=np.random.uniform(0.2, 0.8),
-            risk_tolerance=np.random.uniform(0.2, 0.8),
-            survival_will=np.random.uniform(0.5, 0.9),
-            adaptability=np.random.uniform(0.3, 0.8),
-            patience=np.random.uniform(0.3, 0.8)
+            # 核心性格 - 使用均匀分布
+            aggression=np.random.uniform(0.2, 0.9),
+            risk_tolerance=np.random.uniform(0.2, 0.9),
+            survival_will=np.random.uniform(0.4, 0.95),
+            adaptability=np.random.uniform(0.3, 0.9),
+            patience=np.random.uniform(0.2, 0.9),
+            
+            # 交易风格 - 使用Beta分布（更自然）
+            trend_following=np.random.beta(2, 2),
+            contrarian=np.random.beta(2, 2),
+            momentum_seeking=np.random.beta(2, 2),
+            mean_reversion=np.random.beta(2, 2),
+            
+            # 情绪特质 - 使用正态分布截断
+            optimism=np.clip(np.random.normal(0.5, 0.2), 0, 1),
+            fear_sensitivity=np.clip(np.random.normal(0.5, 0.2), 0, 1),
+            greed_level=np.clip(np.random.normal(0.5, 0.2), 0, 1),
+            discipline=np.clip(np.random.normal(0.6, 0.2), 0, 1),  # 偏向高纪律性
+            
+            # 学习特质 - 使用对数正态分布
+            learning_rate=np.clip(np.random.lognormal(-0.5, 0.5), 0, 1),
+            memory_decay=np.random.uniform(0.3, 0.8),
+            exploration=np.random.beta(2, 2),
+            exploitation=np.random.beta(2, 2),
+            
+            # 社交特质 - 使用混合分布
+            herd_mentality=np.random.choice([
+                np.random.uniform(0.1, 0.3),  # 低从众
+                np.random.uniform(0.7, 0.9)   # 高从众
+            ]),
+            independence=np.random.uniform(0.3, 0.9),
+            competitiveness=np.random.beta(2, 2),
+            cooperation=np.random.beta(2, 2)
         )
     
     def update_emotional_state(self):
@@ -405,6 +497,106 @@ class AgentV4:
         
         logger.info(f"Agent {self.agent_id} 死亡记录: {death_record}")
         return death_record
+    
+    def calculate_inheritance(self, inheritance_ratio: float = 0.3) -> Tuple[float, float]:
+        """
+        计算遗产分配
+        
+        死亡Agent的资产分配：
+        - 一部分传给子代（作为奖励）
+        - 一部分归还资金池
+        
+        Args:
+            inheritance_ratio: 继承比例（传给子代的比例）
+            
+        Returns:
+            Tuple[float, float]: (传给子代的金额, 归还资金池的金额)
+        """
+        # 如果是自杀或拼搏失败，降低继承比例（惩罚）
+        if self.death_reason in [DeathReason.SUICIDE, DeathReason.FAILED_LAST_STAND]:
+            inheritance_ratio *= 0.5  # 减半
+        
+        # 根据表现调整继承比例
+        capital_ratio = self.current_capital / self.initial_capital
+        if capital_ratio > 1.5:  # 表现优秀，增加继承
+            inheritance_ratio *= 1.5
+        elif capital_ratio < 0.5:  # 表现很差，减少继承
+            inheritance_ratio *= 0.5
+        
+        # 计算分配
+        to_offspring = self.current_capital * inheritance_ratio
+        to_pool = self.current_capital - to_offspring
+        
+        logger.info(f"Agent {self.agent_id} 遗产分配: 子代={to_offspring:.2f}, 资金池={to_pool:.2f}")
+        
+        return to_offspring, to_pool
+    
+    def prepare_for_breeding(self) -> Dict:
+        """
+        准备繁殖数据
+        
+        Returns:
+            Dict: 包含基因、性格和表现指标的完整数据
+        """
+        return {
+            'gene': self.gene.copy(),
+            'personality': self.personality.__dict__.copy(),
+            'performance_metrics': {
+                'total_trades': self.trade_count,
+                'win_rate': self.win_count / max(self.trade_count, 1),
+                'total_return': (self.current_capital - self.initial_capital) / self.initial_capital,
+                'sharpe_ratio': self._calculate_sharpe_ratio(),
+                'max_drawdown': self._calculate_max_drawdown(),
+                'survival_days': self.days_alive,
+                'birth_time': self.birth_time,
+                'death_time': self.death_time,
+                'death_reason': self.death_reason.value if self.death_reason else 'alive',
+                'generation': 0,  # 会由基因库更新
+                'parent_genes': []  # 会由基因库更新
+            }
+        }
+    
+    def _calculate_sharpe_ratio(self) -> float:
+        """
+        计算夏普比率
+        
+        Returns:
+            float: 夏普比率
+        """
+        if len(self.capital_history) < 2:
+            return 0.0
+        
+        # 计算每日收益率
+        returns = np.diff(self.capital_history) / self.capital_history[:-1]
+        
+        if len(returns) == 0:
+            return 0.0
+        
+        # 夏普比率 = 平均收益 / 收益标准差
+        mean_return = np.mean(returns)
+        std_return = np.std(returns)
+        
+        if std_return == 0:
+            return 0.0
+        
+        sharpe = mean_return / std_return * np.sqrt(252)  # 年化
+        return sharpe
+    
+    def _calculate_max_drawdown(self) -> float:
+        """
+        计算最大回撤
+        
+        Returns:
+            float: 最大回撤比例
+        """
+        if len(self.capital_history) < 2:
+            return 0.0
+        
+        capital_array = np.array(self.capital_history)
+        running_max = np.maximum.accumulate(capital_array)
+        drawdown = (capital_array - running_max) / running_max
+        
+        return abs(np.min(drawdown))
     
     def get_status(self) -> Dict:
         """

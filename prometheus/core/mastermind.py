@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 import logging
+from .llm_oracle import LLMOracle, HumanOracle
 
 logger = logging.getLogger(__name__)
 
@@ -52,24 +53,39 @@ class Mastermind:
     2. 资源分配策略
     3. 进化方向引导
     4. 生态平衡控制
+    
+    决策模式：
+    - LLM先知模式：使用AI辅助决策
+    - 人工干预模式：人类操作员直接决策
+    - 混合模式：LLM提供建议，人工最终决策
     """
     
-    def __init__(self, initial_capital: float = 100000.0):
+    def __init__(self, 
+                 initial_capital: float = 100000.0,
+                 decision_mode: str = "hybrid",
+                 llm_model: Optional[str] = None):
         """
         初始化主脑
         
         Args:
             initial_capital: 系统初始总资金
+            decision_mode: 决策模式 ("llm", "human", "hybrid")
+            llm_model: LLM模型名称（用于LLM模式）
         """
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.strategy = GlobalStrategy()
         self.market_regime = MarketRegime.UNKNOWN
+        self.decision_mode = decision_mode
         
         # 决策历史
         self.decision_history: List[Dict] = []
         
-        logger.info(f"主脑已初始化，总资金: {initial_capital}")
+        # 初始化决策系统
+        self.llm_oracle = LLMOracle(model=llm_model or "gpt-4") if decision_mode in ["llm", "hybrid"] else None
+        self.human_oracle = HumanOracle() if decision_mode in ["human", "hybrid"] else None
+        
+        logger.info(f"主脑已初始化，总资金: {initial_capital}, 决策模式: {decision_mode}")
     
     def analyze_market_regime(self, market_data: Dict) -> MarketRegime:
         """
@@ -215,30 +231,69 @@ class Mastermind:
     def make_strategic_decision(self,
                                market_data: Dict,
                                agent_statistics: Dict,
-                               system_metrics: Dict) -> Dict:
+                               system_metrics: Dict,
+                               human_override: Optional[Dict] = None) -> Dict:
         """
         做出战略决策（主脑的主要决策入口）
+        
+        根据决策模式选择决策方式：
+        - llm: 完全使用LLM决策
+        - human: 等待人工输入
+        - hybrid: LLM提供建议，人工可以覆盖
         
         Args:
             market_data: 市场数据
             agent_statistics: Agent 统计数据
             system_metrics: 系统指标
+            human_override: 人工覆盖参数（可选）
             
         Returns:
             Dict: 决策结果
         """
-        # 1. 分析市场
+        # 1. 基础分析
         self.market_regime = self.analyze_market_regime(market_data)
-        
-        # 2. 调整全局策略
-        strategy = self.adjust_global_strategy(agent_statistics, self.market_regime)
-        
-        # 3. 评估系统健康
         health = self.evaluate_system_health(system_metrics)
         
-        # 4. 做出决策
+        # 2. 根据决策模式获取策略建议
+        if self.decision_mode == "llm":
+            # 纯LLM决策
+            llm_analysis = self.llm_oracle.analyze_market_situation(
+                market_data, agent_statistics, system_metrics
+            )
+            strategy = self._apply_llm_suggestions(llm_analysis)
+            decision_source = "llm"
+            
+        elif self.decision_mode == "human":
+            # 纯人工决策
+            if human_override:
+                strategy = self._apply_human_adjustments(human_override)
+                decision_source = "human"
+            else:
+                # 使用默认策略
+                strategy = self.adjust_global_strategy(agent_statistics, self.market_regime)
+                decision_source = "default"
+                
+        else:  # hybrid
+            # 混合决策：LLM提供建议，人工可覆盖
+            llm_analysis = self.llm_oracle.analyze_market_situation(
+                market_data, agent_statistics, system_metrics
+            )
+            
+            if human_override:
+                # 人工覆盖LLM建议
+                strategy = self._apply_human_adjustments(human_override)
+                decision_source = "human_override"
+                logger.info("人工覆盖LLM建议")
+            else:
+                # 采用LLM建议
+                strategy = self._apply_llm_suggestions(llm_analysis)
+                decision_source = "llm_suggestion"
+        
+        # 3. 构建决策结果
         decision = {
             'timestamp': market_data.get('timestamp'),
+            'decision_mode': self.decision_mode,
+            'decision_source': decision_source,
             'market_regime': self.market_regime.value,
             'strategy': strategy,
             'health': health,
@@ -253,8 +308,54 @@ class Mastermind:
         # 记录决策
         self.decision_history.append(decision)
         
-        logger.info(f"战略决策完成: {decision}")
+        logger.info(f"战略决策完成 [{decision_source}]: {decision}")
         return decision
+    
+    def _apply_llm_suggestions(self, llm_analysis: Dict) -> GlobalStrategy:
+        """
+        应用LLM的策略建议
+        
+        Args:
+            llm_analysis: LLM分析结果
+            
+        Returns:
+            GlobalStrategy: 更新后的策略
+        """
+        adjustments = llm_analysis.get('strategy_adjustments', {})
+        
+        self.strategy.total_capital_utilization = adjustments.get('capital_utilization', 0.7)
+        self.strategy.risk_level = adjustments.get('risk_level', 3)
+        self.strategy.selection_pressure = adjustments.get('selection_pressure', 0.5)
+        self.strategy.environmental_pressure = adjustments.get('environmental_pressure', 1.0)
+        
+        logger.info(f"应用LLM建议: {adjustments}")
+        return self.strategy
+    
+    def _apply_human_adjustments(self, adjustments: Dict) -> GlobalStrategy:
+        """
+        应用人工调整
+        
+        Args:
+            adjustments: 人工调整参数
+            
+        Returns:
+            GlobalStrategy: 更新后的策略
+        """
+        if 'capital_utilization' in adjustments:
+            self.strategy.total_capital_utilization = adjustments['capital_utilization']
+        if 'risk_level' in adjustments:
+            self.strategy.risk_level = adjustments['risk_level']
+        if 'selection_pressure' in adjustments:
+            self.strategy.selection_pressure = adjustments['selection_pressure']
+        if 'environmental_pressure' in adjustments:
+            self.strategy.environmental_pressure = adjustments['environmental_pressure']
+        if 'max_agents' in adjustments:
+            self.strategy.max_agents = adjustments['max_agents']
+        if 'min_agents' in adjustments:
+            self.strategy.min_agents = adjustments['min_agents']
+        
+        logger.info(f"应用人工调整: {adjustments}")
+        return self.strategy
     
     def get_statistics(self) -> Dict:
         """
