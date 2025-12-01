@@ -9,6 +9,7 @@ from .mastermind import Mastermind, MarketRegime, GlobalStrategy
 from .supervisor import Supervisor, AgentHealthReport
 from .agent_v4 import AgentV4, AgentState, DeathReason, AgentPersonality, EmotionalState
 from .gene_pool import GenePool, GeneRecord
+from .valhalla import Valhalla, Inscription, HallLevel
 from .medal_system import MedalSystem, Medal, MedalType
 from .nirvana_system import NirvanaSystem, NirvanaEvent, NirvanaReason
 from .llm_oracle import LLMOracle, HumanOracle
@@ -41,6 +42,11 @@ __all__ = [
     # 基因库
     'GenePool',
     'GeneRecord',
+    
+    # 英灵殿
+    'Valhalla',
+    'Inscription',
+    'HallLevel',
     
     # 奖章系统
     'MedalSystem',
