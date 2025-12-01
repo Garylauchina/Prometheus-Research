@@ -122,6 +122,14 @@ from configs.config import CONFIG
 - 市场状态检测（5种状态）
 - 完善的风控系统
 
+#### 技术指标（已实现）✅
+- RSI（相对强弱指标）- 完整实现
+- MACD（移动平均收敛散度）- 完整实现
+- Bollinger Bands（布林带）- 完整实现
+- 综合信号系统（多指标加权组合）
+- 可配置的指标权重（通过Agent基因）
+- 详细文档：[docs/TECHNICAL_INDICATORS.md](docs/TECHNICAL_INDICATORS.md)
+
 #### 性能优化
 - API调用节流控制
 - 市场数据缓存机制
@@ -171,9 +179,14 @@ from configs.config import CONFIG
 #### 计划新增
 - [ ] 动态止损/止盈策略
 - [ ] Web监控面板
-- [ ] 更多技术指标（RSI、MACD、布林带）
+- [ ] 技术指标增强
+  - ✅ **v3.1已实现**: RSI、MACD、布林带（基础版）
+  - [ ] 动态参数调整
+  - [ ] 更多指标类型（Stochastic、ATR、CCI、ADX等）
+  - [ ] 多时间周期分析
+  - [ ] 指标背离检测
 - [ ] 智能资金分配算法
-- [ ] 市场情绪分析
+- [ ] 市场情绪分析增强
 
 ### [3.3.0] - 计划中（预计2026年Q1）
 
