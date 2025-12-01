@@ -8,6 +8,52 @@ OKX账户持仓检查脚本
 
 import sys
 import os
+from decimal import Decimal, ROUND_HALF_UP
+
+# 中文标准化输出函数
+def format_account_info_cn(account_info):
+    """将账户信息格式化为中文标准化输出"""
+    result = []
+    
+    # 余额信息
+    result.append("# 账户信息标准化输出\n")
+    result.append("## 余额信息\n")
+    
+    balance_info = account_info.get('balance', {})
+    if balance_info:
+        for currency, details in balance_info.items():
+            result.append(f"- **货币类型**: {currency}")
+            result.append(f"  - **可用余额**: {details.get('available', 0)} {currency}")
+            result.append(f"  - **冻结余额**: {details.get('frozen', 0)} {currency}")
+            result.append(f"  - **总资产**: {details.get('equity', 0)} {currency}\n")
+    else:
+        result.append("- 暂无余额信息\n")
+    
+    # 持仓信息
+    result.append("## 持仓信息\n")
+    
+    positions_info = account_info.get('positions', {})
+    if positions_info:
+        for symbol, details in positions_info.items():
+            result.append(f"- **交易对**: {symbol}")
+            result.append(f"  - **持仓数量**: {details.get('size', 0)}")
+            result.append(f"  - **开仓均价**: {details.get('avg_price', 0)}")
+            result.append(f"  - **未实现盈亏**: {details.get('unrealized_pnl', 0)}")
+            result.append(f"  - **杠杆倍数**: {details.get('leverage', 0)}倍")
+            
+            # 持仓方向中文转换
+            side = details.get('side', '').lower()
+            if side == 'short':
+                side_cn = "做空(short)"
+            elif side == 'long':
+                side_cn = "做多(long)"
+            else:
+                side_cn = side or "N/A"
+            result.append(f"  - **持仓方向**: {side_cn}\n")
+    else:
+        result.append("- 暂无持仓信息\n")
+    
+    return '\n'.join(result)
 
 # 添加项目路径
 project_path = 'E:\\Trae_store\\prometheus-v30\\'
@@ -19,7 +65,7 @@ else:
 
 try:
     from adapters.okx_adapter import OKXTradingAdapter
-    from config_virtual import CONFIG_VIRTUAL_TRADING as CONFIG
+    from config import CONFIG_V3 as CONFIG
 except ImportError as e:
     print(f"错误: 无法导入模块: {e}")
     print(f"当前路径: {os.getcwd()}")
@@ -32,14 +78,35 @@ print("="*80)
 
 print("\n连接到OKX...")
 try:
-    # 确保正确传递API配置
+    # 直接使用用户提供的API凭证
     okx_config = {
-        'api_key': CONFIG['okx_api']['api_key'],
-        'secret_key': CONFIG['okx_api']['secret_key'],
-        'passphrase': CONFIG['okx_api']['passphrase'],
-        'flag': CONFIG['okx_api']['flag']
+        'api_key': "265a4c37-1dc1-40d8-80d0-11004026ca48",
+        'secret_key': "0AD30E01A7B66FBBBEB7E30D8E0E18B4",
+        'passphrase': "Garylauchina3.14",
+        'flag': 1  # 使用模拟盘模式
     }
-    adapter = OKXTradingAdapter(okx_config)
+    
+    # 创建模拟适配器的函数，作为备用方案
+    def create_mock_adapter():
+        class MockAdapter:
+            def get_account_summary(self):
+                return {"total_equity": 0, "available_balance": 0, "total_unrealized_pnl": 0, "realized_pnl": 0, "balance": {}, "positions": {}}
+            def get_positions(self):
+                return []
+            def get_usdt_balance(self):
+                return 0
+            def get_api_stats(self):
+                return {"success": 0, "failure": 0, "retry": 0}
+        return MockAdapter()
+    
+    try:
+        # 尝试使用提供的API凭证创建适配器
+        adapter = OKXTradingAdapter(okx_config)
+        print(f"已使用提供的API凭证连接到OKX，交易模式: {okx_config['flag']}")
+    except Exception as e:
+        print(f"警告: 无法使用提供的API凭证连接到OKX: {e}")
+        print("将使用模拟模式运行。")
+        adapter = create_mock_adapter()
 except Exception as e:
     print(f"错误: 无法连接到OKX: {e}")
     print(f"配置信息: {CONFIG.get('okx_api', '未找到okx_api配置')}")
@@ -55,10 +122,12 @@ try:
     print(f"可用余额: ${account_info.get('available_balance', 0):.2f}")
     print(f"未实现盈亏: ${account_info.get('total_unrealized_pnl', 0):.2f}")
     print(f"已实现盈亏: ${account_info.get('realized_pnl', 0):.2f}")
-    # 显示更多可用的账户信息
-    for key, value in account_info.items():
-        if key not in ['total_equity', 'available_balance', 'total_unrealized_pnl', 'realized_pnl']:
-            print(f"  {key}: {value}")
+    
+    # 显示中文标准化输出
+    print("\n" + "="*80)
+    print("中文标准化输出")
+    print("="*80)
+    print(format_account_info_cn(account_info))
 except Exception as e:
     print(f"错误: 无法获取账户信息: {e}")
     print(f"账户信息详情: {account_info}")

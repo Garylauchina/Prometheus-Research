@@ -25,11 +25,13 @@ class AccountSync:
                 - flag: '0'实盘, '1'模拟盘
         """
         self.config = config
+        # 确保flag始终是字符串类型
+        flag = str(config.get('flag', '1'))
         self.account_api = Account.AccountAPI(
             config['api_key'],
             config['secret_key'],
             config['passphrase'],
-            flag=config.get('flag', '1')
+            flag=flag
         )
         self.balance_cache = {}
         self.positions_cache = {}

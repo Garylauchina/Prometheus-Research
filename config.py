@@ -11,6 +11,14 @@ CONFIG_V3 = {
     'initial_agents': 3,  # 修改为3个初始Agent
     'trading_fee': 0.001,  # Round 10: OKX taker fee 0.1% (correct rate)
     
+    # OKX API配置占位符
+    'okx_api': {
+        'api_key': '',  # 请在此处填入您的OKX API密钥
+        'secret_key': '',  # 请在此处填入您的OKX API密钥
+        'passphrase': '',  # 请在此处填入您的OKX API密钥
+        'flag': 0  # 交易模式：0-实盘，1-模拟盘
+    },
+    
     # 智能体管理器配置
     'agent_manager': {
         'max_agents': 50,

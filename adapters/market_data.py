@@ -148,7 +148,8 @@ class MarketDataManager:
                 - backoff_factor: 退避因子
         """
         self.config = config
-        self.flag = config.get('flag', '1')
+        # 确保flag始终是字符串类型
+        self.flag = str(config.get('flag', '1'))
         self.timeout = config.get('timeout', 10)  # 默认超时时间10秒
         self.max_retries = config.get('max_retries', 3)
         self.backoff_factor = config.get('backoff_factor', 0.5)

@@ -133,11 +133,13 @@ class OrderManager:
                 - flag: '0'实盘, '1'模拟盘
         """
         self.config = config
+        # 确保flag始终是字符串类型
+        flag = str(config.get('flag', '1'))
         self.trade_api = Trade.TradeAPI(
             config['api_key'],
             config['secret_key'],
             config['passphrase'],
-            flag=config.get('flag', '1')
+            flag=flag
         )
         self.orders = {}  # 订单缓存
         
