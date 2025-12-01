@@ -13,6 +13,13 @@ from .medal_system import MedalSystem, Medal, MedalType
 from .nirvana_system import NirvanaSystem, NirvanaEvent, NirvanaReason
 from .llm_oracle import LLMOracle, HumanOracle
 from .bulletin_board import BulletinBoardSystem, Bulletin, BulletinType, Priority
+from .trading_permissions import (
+    TradingPermissionSystem, 
+    RiskController, 
+    PermissionLevel, 
+    TradingProduct, 
+    PermissionConfig
+)
 
 __all__ = [
     # 主脑
@@ -54,5 +61,12 @@ __all__ = [
     'Bulletin',
     'BulletinType',
     'Priority',
+    
+    # 交易权限系统
+    'TradingPermissionSystem',
+    'RiskController',
+    'PermissionLevel',
+    'TradingProduct',
+    'PermissionConfig',
 ]
 

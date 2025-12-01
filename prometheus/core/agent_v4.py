@@ -3,13 +3,14 @@ Agent (智能体) v4.0 - Prometheus v4.0
 完全自主的交易执行者，拥有情绪和极端行为能力
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 import logging
 import numpy as np
 from .bulletin_board import AgentBulletinProcessor
+from .trading_permissions import PermissionLevel, TradingProduct, TradingPermissionSystem
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +128,8 @@ class AgentV4:
                  agent_id: str,
                  initial_capital: float,
                  gene: Optional[Dict] = None,
-                 personality: Optional[AgentPersonality] = None):
+                 personality: Optional[AgentPersonality] = None,
+                 parent_permission: Optional[PermissionLevel] = None):
         """
         初始化 Agent
         
@@ -136,6 +138,7 @@ class AgentV4:
             initial_capital: 初始资金
             gene: 交易基因（策略参数）
             personality: 性格特质
+            parent_permission: 父母的权限级别（用于继承）
         """
         self.agent_id = agent_id
         self.initial_capital = initial_capital
@@ -144,6 +147,15 @@ class AgentV4:
         # 基因和性格
         self.gene = gene if gene else self._generate_random_gene()
         self.personality = personality if personality else self._generate_random_personality()
+        
+        # 权限系统（新增）
+        self.permission_system = TradingPermissionSystem()
+        if parent_permission and parent_permission != PermissionLevel.NOVICE:
+            # 继承父母权限，但降一级
+            self.permission_level = self.permission_system.get_inherited_level(parent_permission)
+        else:
+            # 创世Agent从新手开始
+            self.permission_level = PermissionLevel.NOVICE
         
         # 生命周期
         self.state = AgentState.NEWBORN
@@ -212,13 +224,25 @@ class AgentV4:
                 'emotion': np.random.uniform(0.1, 0.4)      # 情绪状态
             },
             
-            # 公告板敏感度（新增）
+            # 公告板敏感度
             'bulletin_sensitivity': {
                 'global': np.random.uniform(0.0, 1.0),      # 主脑战略
                 'market': np.random.uniform(0.0, 1.0),      # 市场事件
                 'system': np.random.uniform(0.0, 1.0),      # 系统风险
                 'social': np.random.uniform(0.0, 1.0)       # 社交信号
-            }
+            },
+            
+            # 交易品种偏好（新增）
+            'product_preference': {
+                'spot': np.random.uniform(0.0, 1.0),        # 现货偏好
+                'margin': np.random.uniform(0.0, 1.0),      # 杠杆交易偏好
+                'perpetual': np.random.uniform(0.0, 1.0),   # 永续合约偏好
+                'futures': np.random.uniform(0.0, 1.0),     # 交割合约偏好
+                'options': np.random.uniform(0.0, 1.0)      # 期权偏好
+            },
+            
+            # 杠杆倾向（新增）
+            'leverage_appetite': np.random.uniform(0.0, 1.0)  # 0=保守 1=激进
         }
     
     def _generate_random_personality(self) -> AgentPersonality:
@@ -635,6 +659,193 @@ class AgentV4:
         
         logger.info(f"Agent {self.agent_id} 死亡记录: {death_record}")
         return death_record
+    
+    def select_trading_product(self, market_data: Dict) -> TradingProduct:
+        """
+        选择交易品种
+        
+        过程：
+        1. 基因决定偏好
+        2. 权限系统过滤
+        3. 市场环境影响
+        
+        Args:
+            market_data: 市场数据
+            
+        Returns:
+            TradingProduct: 选择的交易品种
+        """
+        # 获取允许的品种
+        config = self.permission_system.permissions[self.permission_level]
+        allowed_products = config.allowed_products
+        
+        # 基因偏好（只考虑允许的）
+        preferences = {}
+        for product in allowed_products:
+            product_key = product.value  # 'spot', 'margin', etc.
+            preferences[product] = self.gene['product_preference'].get(product_key, 0.5)
+        
+        # 市场环境调整
+        volatility = market_data.get('volatility', 0.03)
+        
+        # 高波动时倾向现货（风险规避）
+        if volatility > 0.05:
+            if TradingProduct.SPOT in preferences:
+                preferences[TradingProduct.SPOT] *= 1.5
+        
+        # 低波动时可以用杠杆
+        elif volatility < 0.02:
+            if TradingProduct.PERPETUAL in preferences:
+                preferences[TradingProduct.PERPETUAL] *= 1.3
+        
+        # 情绪影响
+        if self.emotion.fear > 0.7:
+            # 恐惧时倾向现货
+            if TradingProduct.SPOT in preferences:
+                preferences[TradingProduct.SPOT] *= 2.0
+        elif self.emotion.confidence > 0.8:
+            # 自信时倾向高风险品种
+            for product in [TradingProduct.PERPETUAL, TradingProduct.FUTURES]:
+                if product in preferences:
+                    preferences[product] *= 1.5
+        
+        # 选择最高偏好的
+        if preferences:
+            selected = max(preferences.items(), key=lambda x: x[1])[0]
+            return selected
+        else:
+            # 如果没有允许的品种（不应该发生），返回SPOT
+            return TradingProduct.SPOT
+    
+    def calculate_leverage(self, market_data: Dict) -> float:
+        """
+        计算实际使用的杠杆
+        
+        过程：
+        1. 基因决定杠杆偏好（0-1）
+        2. 权限系统限制上限
+        3. 市场环境和情绪调整
+        
+        Args:
+            market_data: 市场数据
+            
+        Returns:
+            float: 实际杠杆倍数
+        """
+        # 权限允许的最大杠杆
+        max_allowed = self.permission_system.get_max_leverage(self.permission_level)
+        
+        # 基因偏好杠杆（线性映射到允许范围）
+        leverage_appetite = self.gene.get('leverage_appetite', 0.5)
+        gene_leverage = 1.0 + (max_allowed - 1.0) * leverage_appetite
+        
+        # 情绪调整
+        if self.emotion.fear > 0.7:
+            gene_leverage *= 0.5  # 恐惧时大幅降低杠杆
+        elif self.emotion.fear > 0.5:
+            gene_leverage *= 0.7
+        
+        if self.emotion.confidence > 0.8:
+            gene_leverage *= 1.2  # 自信时小幅提高杠杆
+        elif self.emotion.confidence > 0.6:
+            gene_leverage *= 1.1
+        
+        if self.emotion.despair > 0.8:
+            gene_leverage *= 0.3  # 绝望时极度保守
+        
+        # 市场波动调整
+        volatility = market_data.get('volatility', 0.03)
+        if volatility > 0.08:      # 极高波动
+            gene_leverage *= 0.5
+        elif volatility > 0.05:    # 高波动
+            gene_leverage *= 0.7
+        elif volatility < 0.02:    # 低波动
+            gene_leverage *= 1.2
+        
+        # 性格影响
+        if self.personality.risk_tolerance > 0.7:
+            gene_leverage *= 1.1  # 风险偏好高
+        elif self.personality.risk_tolerance < 0.3:
+            gene_leverage *= 0.8  # 风险厌恶
+        
+        # 最终杠杆（确保在合理范围内）
+        final_leverage = min(gene_leverage, max_allowed)
+        final_leverage = max(1.0, final_leverage)  # 最低1x
+        
+        return final_leverage
+    
+    def update_permission_level(self):
+        """
+        更新权限等级（由Supervisor定期调用）
+        """
+        # 计算统计数据
+        stats = {
+            'days_alive': self.days_alive,
+            'total_return': self.total_pnl / max(self.initial_capital, 1.0),
+            'win_rate': self.win_count / max(self.trade_count, 1),
+            'max_drawdown': self.calculate_max_drawdown()
+        }
+        
+        # 评估新级别
+        new_level = self.permission_system.evaluate_agent_level(stats)
+        
+        # 如果级别变化
+        if new_level != self.permission_level:
+            old_level = self.permission_level
+            self.permission_level = new_level
+            
+            # 计算升级奖励
+            bonus_ratio = self.permission_system.get_upgrade_bonus(old_level, new_level)
+            if bonus_ratio > 0:
+                bonus = self.current_capital * bonus_ratio
+                self.current_capital += bonus
+                logger.info(
+                    f"🎉 Agent {self.agent_id} 权限升级: {old_level.value} → {new_level.value}, "
+                    f"奖励: {bonus:.2f}"
+                )
+            else:
+                logger.warning(
+                    f"⚠️ Agent {self.agent_id} 权限降级: {old_level.value} → {new_level.value}"
+                )
+    
+    def calculate_max_drawdown(self) -> float:
+        """
+        计算最大回撤
+        
+        Returns:
+            float: 最大回撤比例 (0-1)
+        """
+        if len(self.capital_history) < 2:
+            return 0.0
+        
+        peak = self.capital_history[0]
+        max_dd = 0.0
+        
+        for capital in self.capital_history:
+            if capital > peak:
+                peak = capital
+            dd = (peak - capital) / peak if peak > 0 else 0
+            max_dd = max(max_dd, dd)
+        
+        return max_dd
+    
+    def get_stats(self) -> Dict:
+        """
+        获取Agent统计数据（用于权限评估）
+        
+        Returns:
+            Dict: 统计数据
+        """
+        return {
+            'agent_id': self.agent_id,
+            'days_alive': self.days_alive,
+            'total_return': self.total_pnl / max(self.initial_capital, 1.0),
+            'win_rate': self.win_count / max(self.trade_count, 1),
+            'max_drawdown': self.calculate_max_drawdown(),
+            'current_capital': self.current_capital,
+            'trade_count': self.trade_count,
+            'permission_level': self.permission_level
+        }
     
     def calculate_inheritance(self, inheritance_ratio: float = 0.3) -> Tuple[float, float]:
         """
