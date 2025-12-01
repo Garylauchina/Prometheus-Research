@@ -62,15 +62,18 @@ class Mastermind:
     
     def __init__(self, 
                  initial_capital: float = 100000.0,
-                 decision_mode: str = "hybrid",
+                 decision_mode: str = "llm",
                  llm_model: Optional[str] = None):
         """
         初始化主脑
         
         Args:
             initial_capital: 系统初始总资金
-            decision_mode: 决策模式 ("llm", "human", "hybrid")
+            decision_mode: 决策模式 ("llm"[默认], "human", "hybrid")
             llm_model: LLM模型名称（用于LLM模式）
+            
+        Note:
+            v4.0 以LLM先知为主要决策模式，人工基本不参与
         """
         self.initial_capital = initial_capital
         self.current_capital = initial_capital

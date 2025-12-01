@@ -1,6 +1,7 @@
 """
 监督者 (Supervisor) - Prometheus v4.0
 系统的观察者和评估者，负责监控 Agent 和施加环境压力
+v4.0: 集成奖章制度
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -8,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 import numpy as np
+from .medal_system import MedalSystem
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +75,10 @@ class Supervisor:
         self.agent_reports: Dict[str, List[AgentHealthReport]] = {}
         self.population_statistics: List[Dict] = []
         
-        logger.info("监督者已初始化")
+        # 奖章系统
+        self.medal_system = MedalSystem()
+        
+        logger.info("监督者已初始化（含奖章系统）")
     
     def calculate_despair_index(self,
                                 consecutive_losses: int,
@@ -257,6 +262,11 @@ class Supervisor:
         if agent_data['agent_id'] not in self.agent_reports:
             self.agent_reports[agent_data['agent_id']] = []
         self.agent_reports[agent_data['agent_id']].append(report)
+        
+        # 评估并颁发奖章
+        newly_awarded = self.medal_system.evaluate_and_award(agent_data)
+        if newly_awarded:
+            logger.info(f"🏅 Agent {agent_data['agent_id']} 获得 {len(newly_awarded)} 个新奖章")
         
         logger.debug(f"Agent {agent_data['agent_id']} 评估完成: {health_status}")
         return report

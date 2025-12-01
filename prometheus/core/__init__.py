@@ -8,6 +8,10 @@ Core Module - 核心业务逻辑
 from .mastermind import Mastermind, MarketRegime, GlobalStrategy
 from .supervisor import Supervisor, AgentHealthReport
 from .agent_v4 import AgentV4, AgentState, DeathReason, AgentPersonality, EmotionalState
+from .gene_pool import GenePool, GeneRecord
+from .medal_system import MedalSystem, Medal, MedalType
+from .nirvana_system import NirvanaSystem, NirvanaEvent, NirvanaReason
+from .llm_oracle import LLMOracle, HumanOracle
 
 __all__ = [
     # 主脑
@@ -25,5 +29,23 @@ __all__ = [
     'DeathReason',
     'AgentPersonality',
     'EmotionalState',
+    
+    # 基因库
+    'GenePool',
+    'GeneRecord',
+    
+    # 奖章系统
+    'MedalSystem',
+    'Medal',
+    'MedalType',
+    
+    # 涅槃系统
+    'NirvanaSystem',
+    'NirvanaEvent',
+    'NirvanaReason',
+    
+    # 决策系统
+    'LLMOracle',
+    'HumanOracle',
 ]
 
