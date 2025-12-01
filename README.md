@@ -1,8 +1,8 @@
-# Prometheus v3.0 - AI驱动加密货币交易系统
+# Prometheus v3.1 - AI驱动加密货币交易系统
 
 **基于遗传算法和多Agent进化的自动化交易系统，具备完整的进化机制和环境自适应能力**
 
-[![Version](https://img.shields.io/badge/version-3.0-blue)](#)
+[![Version](https://img.shields.io/badge/version-3.1-blue)](#)
 [![Python](https://img.shields.io/badge/python-3.13+-green)](#)
 [![License](https://img.shields.io/badge/license-MIT-orange)](#)
 [![Evolution](https://img.shields.io/badge/evolution-enabled-brightgreen)](#)
@@ -384,53 +384,64 @@ docker-compose down
 
 ## 🗺️ 开发路线图
 
-### v3.1 (计划中)
+### v3.2 (计划中 - 预计2025年12月)
 
-- [ ] Evolution系统完全自动化
-- [ ] 更多技术指标（RSI、MACD、布林带）
 - [ ] 动态止损/止盈策略
 - [ ] Web监控面板
+- [ ] 更多技术指标（RSI、MACD、布林带）
 - [ ] 智能资金分配算法
+- [ ] 市场情绪分析
 
-### v3.2 (计划中)
+### v3.3 (计划中 - 预计2026年Q1)
 
-- [ ] 机器学习模型集成
-- [ ] 跨交易所套利
-- [ ] 移动端App
-- [ ] 多币种自动对冲
-- [ ] 高级风险分析
+- [ ] 机器学习模型辅助策略优化
+- [ ] 跨交易所套利功能
+- [ ] 移动端App开发
+- [ ] 多币种自动对冲策略
+- [ ] 高级风险分析仪表盘
 
 ---
 
 ## 📝 更新日志
 
-### v3.0 (2025-12-02) - 重大重构 ⭐
+### v3.1 (2025-12-02) - 重大重构与Evolution系统 ⭐
 
-**Evolution系统**
+**Evolution系统（核心创新）**
 - ✅ 完整的资金循环机制（100%回收）
-- ✅ 环境压力自适应系统
-- ✅ 多维度繁殖/死亡机制
-- ✅ 2000+行完整文档
+- ✅ 环境压力自适应系统（三维度计算）
+- ✅ 多维度繁殖/死亡机制（7层判断）
+- ✅ 混合资金资助机制（父代+资金池）
+- ✅ 2000+行完整文档和示例
 
-**项目重构**
+**项目架构重构**
 - ✅ 模块化架构（prometheus包）
+- ✅ 清晰的包结构（core/strategies/evolution）
 - ✅ 统一配置管理（configs/）
-- ✅ 完整测试套件（tests/）
-- ✅ 清理冗余文件
-- ✅ 优化项目结构
+- ✅ 完整测试套件（tests/unit/integration/performance）
+- ✅ 清理冗余文件（3个Agent版本→1个统一实现）
+- ✅ 优化项目结构（90+文件井然有序）
+
+**文档完善**
+- ✅ 3000+行完整文档体系
+- ✅ Evolution系统完整指南（800行）
+- ✅ 项目迁移指南（400行）
+- ✅ 快速入门教程（200行）
+- ✅ API参考文档
 
 **性能优化**
-- ✅ API调用节流
-- ✅ 数据缓存机制
-- ✅ 并发处理优化
+- ✅ API调用节流控制
+- ✅ 市场数据缓存机制
+- ✅ 并发代理更新优化
+- ✅ 批量交易执行
 
-### v3.0-beta (2025-11-29)
+### v3.0 (2025-11-29) - 基础版本
 
 - ✅ OKX API完整集成
 - ✅ 实时交易系统
-- ✅ 多Agent进化机制
+- ✅ 多Agent进化机制（基础版）
 - ✅ 市场状态检测
 - ✅ 完善风控系统
+- ✅ Docker支持
 
 ---
 
@@ -504,7 +515,7 @@ MIT License - 详见 [LICENSE](LICENSE)
 
 <div align="center">
 
-**Prometheus v3.0** - AI驱动的进化交易系统
+**Prometheus v3.1** - AI驱动的进化交易系统
 
 [开始使用](#-快速开始) • [Evolution系统](QUICKSTART_EVOLUTION.md) • [完整文档](docs/)
 

@@ -8,14 +8,14 @@ Version: 3.0
 License: MIT
 """
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 __author__ = "Prometheus Team"
 __license__ = "MIT"
 
 # 版本信息
 VERSION_INFO = {
     'major': 3,
-    'minor': 0,
+    'minor': 1,
     'patch': 0,
     'release': 'stable'
 }
