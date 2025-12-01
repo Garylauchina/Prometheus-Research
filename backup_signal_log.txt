@@ -1,0 +1,5 @@
+
+[2025-12-01 13:30:29.381] [test_agent_direct] 🚨 FINAL SIGNAL STRENGTH = 0.0000, 原因: 方法开始初始化 🚨
+[2025-12-01 13:30:29.385] [test_agent_direct] 🚨 FINAL SIGNAL STRENGTH = 0.0000, 原因: K线数据不足 🚨
+[2025-12-01 13:31:20.189] [test_agent_direct] 🚨 FINAL SIGNAL STRENGTH = 0.0000, 原因: 方法开始初始化 🚨
+[2025-12-01 13:31:20.194] [test_agent_direct] 🚨 FINAL SIGNAL STRENGTH = 0.0000, 原因: K线数据不足 🚨

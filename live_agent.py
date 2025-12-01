@@ -16,9 +16,11 @@ Agent拥有自己的"基因"（交易参数），通过遗传算法进化。
 
 import logging
 import time
+import os
 from typing import Dict, Optional
 import random
 import numpy as np
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -84,30 +86,85 @@ class LiveAgent:
         每个基因参数都有一个范围，这些范围是经过多次实验调优后确定的。
         
         为什么这样设计？
-        - long_threshold/short_threshold: 决定了Agent的激进程度，范围较宽以保证多样性
+        - long_threshold/short_threshold: 决定了Agent的激进程度，使用对数正态分布更符合金融市场特性
         - max_position: 防止单个Agent过度集中资金
-        - stop_loss/take_profit: 平衡风险和收益
-        - holding_period: 适应不同的交易风格（短线/中线）
+        - stop_loss/take_profit: 平衡风险和收益，使用对数正态分布
+        - holding_period: 适应不同的交易风格（短线/中线），使用对数分布模拟市场时间周期特性
         - risk_aversion: 影响Agent在不同市场状态下的表现
         
         Returns:
             dict: 基因字典
         """
+        # 使用对数正态分布生成阈值参数（更符合金融市场特性）
+        long_threshold = np.random.lognormal(mean=np.log(0.1), sigma=0.3) * 0.5
+        long_threshold = max(0.02, min(0.25, long_threshold))  # 更宽的范围
+        
+        # 同样使用对数正态分布生成空头阈值，取负值
+        short_threshold_abs = np.random.lognormal(mean=np.log(0.1), sigma=0.3) * 0.5
+        short_threshold_abs = max(0.02, min(0.25, short_threshold_abs))
+        short_threshold = -short_threshold_abs
+        
+        # 最大仓位使用三角分布，集中在中位数附近
+        max_position = random.triangular(0.3, 0.8, 1.2)  # 允许略超100%仓位用于测试
+        
+        # 止损使用对数正态分布，集中在较小值附近
+        stop_loss = np.random.lognormal(mean=np.log(0.05), sigma=0.3)
+        stop_loss = max(0.01, min(0.15, stop_loss))  # 更宽的范围
+        
+        # 止盈同样使用对数正态分布
+        take_profit = np.random.lognormal(mean=np.log(0.1), sigma=0.4)
+        take_profit = max(0.02, min(0.3, take_profit))  # 更宽的范围
+        
+        # 持有期使用对数分布，更符合市场时间特性
+        holding_period_log = np.random.lognormal(mean=np.log(1200), sigma=0.8)
+        holding_period = max(60, min(7200, int(holding_period_log)))  # 从1分钟到2小时
+        
+        # 风险偏好使用正态分布，集中在适中值附近
+        risk_aversion = np.random.normal(loc=1.0, scale=0.4)
+        risk_aversion = max(0.3, min(2.0, risk_aversion))  # 更广泛的风险偏好范围
+        
+        # 波动率调整因子 - 使用正态分布
+        volatility_adjustment = np.random.normal(loc=1.0, scale=0.15)
+        volatility_adjustment = max(0.8, min(1.2, volatility_adjustment))
+        
+        # 市场状态敏感度 - 使用对数正态分布
+        market_regime_sensitivity = np.random.lognormal(mean=np.log(1.0), sigma=0.3)
+        market_regime_sensitivity = max(0.5, min(1.5, market_regime_sensitivity))
+        
+        # 指标权重 - 确保权重之和在合理范围内
+        momentum_weight = np.random.uniform(0.2, 0.8)
+        rsi_weight = np.random.uniform(0.2, 0.8)
+        macd_weight = np.random.uniform(0.2, 0.8)
+        bollinger_weight = np.random.uniform(0.2, 0.8)
+        
+        # 计算总权重并归一化
+        total_weight = momentum_weight + rsi_weight + macd_weight + bollinger_weight
+        normalization_factor = random.uniform(0.5, 1.5) / total_weight  # 加入随机性
+        
         return {
-            'long_threshold': random.uniform(0.05, 0.15),  # 降低50%
-            'short_threshold': random.uniform(-0.15, -0.05),  # 降低50%
-            'max_position': random.uniform(0.5, 1.0),
-            'stop_loss': random.uniform(0.03, 0.08),
-            'take_profit': random.uniform(0.05, 0.15),
-            'holding_period': random.randint(300, 3600),  # 5分钟到60分钟
-            'risk_aversion': random.uniform(0.5, 1.5)
+            'long_threshold': long_threshold,
+            'short_threshold': short_threshold,
+            'max_position': max_position,
+            'stop_loss': stop_loss,
+            'take_profit': take_profit,
+            'holding_period': holding_period,
+            'risk_aversion': risk_aversion,
+            # 新增参数
+            'volatility_adjustment': volatility_adjustment,
+            'market_regime_sensitivity': market_regime_sensitivity,
+            'indicator_weights': {
+                'momentum': momentum_weight * normalization_factor,
+                'rsi': rsi_weight * normalization_factor,
+                'macd': macd_weight * normalization_factor,
+                'bollinger': bollinger_weight * normalization_factor
+            }
         }
     
     def update(self, market_data: dict, regime: str):
         """
         更新Agent状态并生成交易信号
         
-        这是Agent的“大脑”，每个更新周期（默认60秒）都会调用一次。
+        这是Agent的"大脑"，每个更新周期（默认60秒）都会调用一次。
         
         工作流程：
         1. 更新持仓盈亏（基于最新市场价格）
@@ -123,14 +180,142 @@ class LiveAgent:
             market_data: 市场数据，包含价格、成交量等
             regime: 市场状态 (strong_bull/weak_bull/sideways/weak_bear/strong_bear)
         """
+        # 强制记录update方法被调用，确保能看到代理更新
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        
+        # 详细记录market_data参数
+        market_data_type = type(market_data)
+        market_data_keys = []
+        has_candles = False
+        candles_count = 0
+        has_spot = False
+        has_futures = False
+        
+        if isinstance(market_data, dict):
+            market_data_keys = list(market_data.keys())
+            has_spot = 'spot' in market_data
+            has_futures = 'futures' in market_data
+            has_candles = 'candles' in market_data
+            if has_candles:
+                candles_count = len(market_data['candles'])
+        
+        print(f"\n{'='*80}")
+        print(f"[{timestamp}] [{self.agent_id}] LIVE AGENT UPDATE CALLED")
+        print(f"[{timestamp}] [{self.agent_id}] 市场状态: {regime}")
+        print(f"[{timestamp}] [{self.agent_id}] Market Data Type: {market_data_type}")
+        print(f"[{timestamp}] [{self.agent_id}] Market Data Keys: {market_data_keys}")
+        print(f"[{timestamp}] [{self.agent_id}] Has Spot Data: {has_spot}")
+        print(f"[{timestamp}] [{self.agent_id}] Has Futures Data: {has_futures}")
+        print(f"[{timestamp}] [{self.agent_id}] Has Candles: {has_candles}")
+        print(f"[{timestamp}] [{self.agent_id}] Candles Count: {candles_count}")
+        print(f"{'='*80}\n")
+        
+        # 确保立即刷新输出
+        import sys
+        sys.stdout.flush()
+        
+        # 强制在方法开头就记录final_signal_strength - 使用简单可靠的方式
+        try:
+            # 使用固定值进行测试
+            test_signal_strength = 0.75
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            
+            # 1. 标准输出 - 简化格式，避免编码问题
+            print(f"[{timestamp}] [{self.agent_id}] FINAL SIGNAL STRENGTH = {test_signal_strength}")
+            print(f"[{timestamp}] [{self.agent_id}] THIS IS A FORCED LOG TEST")
+            sys.stdout.flush()
+            
+            # 2. 写入专用文件 - 使用简单格式和绝对路径
+            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'final_signal_strength.log')
+            try:
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(f"[{timestamp}] [{self.agent_id}] FINAL_SIGNAL_STRENGTH={test_signal_strength}\n")
+                print(f"[{timestamp}] [{self.agent_id}] 成功写入: {log_path}")
+            except Exception as e:
+                print(f"写入final_signal_strength.log失败: {e}", file=sys.stderr)
+                
+            # 3. 记录到日志系统
+            logger.info(f"[{self.agent_id}] FINAL_SIGNAL_STRENGTH = {test_signal_strength}")
+            
+        except Exception as e:
+            print(f"方法开头强制记录失败: {e}", file=sys.stderr)
+            sys.stderr.flush()
+        
+        # 强制写入日志文件
+        try:
+            with open('signal_monitor_log.txt', 'a', encoding='utf-8') as f:
+                f.write(f"\n{'='*80}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] LIVE AGENT UPDATE CALLED")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] 市场状态: {regime}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] Market Data Type: {market_data_type}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] Market Data Keys: {market_data_keys}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] Has Spot Data: {has_spot}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] Has Futures Data: {has_futures}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] Has Candles: {has_candles}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] Candles Count: {candles_count}")
+                
+                # 如果有K线数据，记录前几条样本
+                if has_candles and candles_count > 0:
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] Candles Sample (first 2):")
+                    for i, candle in enumerate(market_data['candles'][:2]):
+                        f.write(f"\n[{timestamp}] [{self.agent_id}] Candle {i}: {candle[:3]}...")  # 只记录前几个元素
+                
+                f.write(f"\n{'='*80}")
+        except Exception as e:
+            print(f"写入update方法日志失败: {e}")
+        
         if not self.is_alive:
+            print(f"[{self.agent_id}] 代理已死亡，跳过更新")
             return
         
         # 更新持仓PnL
         self._update_positions_pnl(market_data)
         
         # 生成交易信号
+        print(f"[{self.agent_id}] 开始生成交易信号...")
         self.pending_signals = self._generate_signals(market_data, regime)
+        print(f"[{self.agent_id}] 信号生成完成，信号数量: {len(self.pending_signals)}")
+        
+        # 强制记录final_signal_strength - 不依赖pending_signals是否为空
+        try:
+            # 获取K线数据
+            candles = market_data.get('candles', [])
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            
+            # 强制生成一个信号强度值用于记录
+            signal_strength = 0.0
+            
+            # 尝试从信号中提取强度信息
+            if self.pending_signals:
+                for signal in self.pending_signals:
+                    if 'strength' in signal:
+                        signal_strength = signal['strength']
+                        break
+            
+            # 简化日志记录逻辑
+            print(f"[{timestamp}] [{self.agent_id}] FINAL SIGNAL STRENGTH = {signal_strength}")
+            print(f"[{timestamp}] [{self.agent_id}] 信号数量: {len(self.pending_signals)}")
+            print(f"[{timestamp}] [{self.agent_id}] K线数量: {len(candles)}")
+            print(f"[{timestamp}] [{self.agent_id}] 市场状态: {regime}")
+            sys.stdout.flush()
+            
+            # 使用logger记录
+            logger.info(f"[{self.agent_id}] FINAL_SIGNAL_STRENGTH = {signal_strength}")
+            
+            # 写入专用文件
+            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'final_signal_strength.log')
+            try:
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(f"[{timestamp}] [{self.agent_id}] FINAL_SIGNAL_STRENGTH={signal_strength}\n")
+                    f.write(f"[{timestamp}] [{self.agent_id}] 信号数量: {len(self.pending_signals)}\n")
+            except Exception as e:
+                print(f"写入final_signal_strength.log失败: {e}", file=sys.stderr)
+                sys.stderr.flush()
+                
+        except Exception as e:
+            print(f"记录final_signal_strength失败: {e}", file=sys.stderr)
+            sys.stderr.flush()
+            logger.error(f"[{self.agent_id}] 记录final_signal_strength失败: {e}")
     
     def _update_positions_pnl(self, market_data: dict):
         """更新持仓盈亏"""
@@ -195,17 +380,120 @@ class LiveAgent:
         Returns:
             交易信号列表
         """
+        # 方法调用开始日志 - 使用绝对路径确保日志位置正确
+        import os
+        log_dir = os.path.dirname(os.path.abspath(__file__))
+        log_path = os.path.join(log_dir, 'signal_monitor_log.txt')
+        
+        # 立即输出到标准输出，确保能看到
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        print(f"\n{'='*80}")
+        print(f"[{timestamp}] [{self.agent_id}] _generate_signals方法被调用")
+        print(f"[{timestamp}] [{self.agent_id}] 市场状态: {regime}")
+        print(f"[{timestamp}] [{self.agent_id}] 日志文件路径: {log_path}")
+        print(f"{'='*80}\n")
+        
+        # 确保立即刷新输出
+        import sys
+        sys.stdout.flush()
+        
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(f"\n{'='*80}")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] _generate_signals方法被调用")
+                f.write(f"\n[{timestamp}] [{self.agent_id}] 市场状态: {regime}")
+        except Exception as e:
+            print(f"写入方法调用日志失败: {e}")
+        
+        logger.critical(f"[{self.agent_id}] CRITICAL: _generate_signals方法被调用，市场状态: {regime}")
+        
         signals = []
+        final_signal_strength = 0.0  # 初始化默认值
         
         # 检查是否有足够的K线数据
         candles = market_data.get('candles', [])
+        
+        # 记录K线数据情况
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(f"\n[{datetime.now()}] [{self.agent_id}] K线数据数量: {len(candles)}")
+                if len(candles) < 100:
+                    f.write(f"\n[{datetime.now()}] [{self.agent_id}] K线数据不足100条")
+        except Exception as e:
+            print(f"写入K线数据日志失败: {e}")
+        
+        print(f"[{self.agent_id}] K线数据数量: {len(candles)}")
+        logger.critical(f"[{self.agent_id}] CRITICAL: K线数据数量: {len(candles)}")
+        
+        # 强制记录final_signal_strength，无论K线数据是否充足
+        def log_signal_strength(signal_strength, reason="默认值"):
+            """辅助函数：使用多种方式记录信号强度"""
+            ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            
+            # 方式1: 标准输出（最高优先级）
+            print(f"\n{'#'*80}")
+            print(f"{'#'*20} 🔔 [{ts}] [{self.agent_id}] FINAL SIGNAL STRENGTH = {signal_strength:.4f} 🔔 {'#'*20}")
+            print(f"{'#'*20} [{ts}] [{self.agent_id}] 原因: {reason} {'#'*20}")
+            print(f"{'#'*80}\n")
+            sys.stdout.flush()
+            
+            # 方式2: 多种日志级别，提高INFO级别并确保在主要日志中看到
+            logger.critical(f"[{self.agent_id}] CRITICAL: 🔔 FINAL SIGNAL STRENGTH = {signal_strength:.4f}, 原因: {reason}")
+            logger.error(f"[{self.agent_id}] ERROR: FINAL SIGNAL STRENGTH = {signal_strength:.4f}")
+            logger.warning(f"[{self.agent_id}] WARNING: FINAL SIGNAL STRENGTH = {signal_strength:.4f}")
+            logger.info(f"[{self.agent_id}] INFO: 🔍 FINAL SIGNAL STRENGTH CALCULATION 🔍")
+            logger.info(f"[{self.agent_id}] INFO: 🔔 FINAL SIGNAL STRENGTH = {signal_strength:.4f}, 原因: {reason}")
+            
+            # 方式3: 信号监控日志文件 - 使用更醒目的标记
+            try:
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(f"\n{'*'*80}")
+                    f.write(f"\n[{ts}] [{self.agent_id}] 🚨 FINAL SIGNAL STRENGTH = {signal_strength:.4f} 🚨")
+                    f.write(f"\n[{ts}] [{self.agent_id}] 原因: {reason}")
+                    f.write(f"\n[{ts}] [{self.agent_id}] K线数量: {len(candles)}")
+                    f.write("\n" + "*"*80)
+            except Exception as e:
+                print(f"写入信号日志失败: {e}")
+                
+            # 方式4: 备用日志文件
+            try:
+                backup_log = os.path.join(os.getcwd(), 'backup_signal_log.txt')
+                with open(backup_log, 'a', encoding='utf-8') as f:
+                    f.write(f"\n[{ts}] [{self.agent_id}] 🚨 FINAL SIGNAL STRENGTH = {signal_strength:.4f}, 原因: {reason} 🚨")
+            except Exception as e2:
+                print(f"备用日志写入失败: {e2}")
+            
+            # 方式5: 额外的debug_log.txt确保捕获
+            try:
+                debug_log = os.path.join(os.getcwd(), 'debug_log.txt')
+                with open(debug_log, 'a', encoding='utf-8') as f:
+                    f.write(f"[{ts}] [{self.agent_id}] 🚨 FINAL SIGNAL STRENGTH = {signal_strength:.4f}, 原因: {reason} 🚨\n")
+            except Exception as e3:
+                print(f"写入debug日志失败: {e3}")
+        
+        # 先记录初始的final_signal_strength
+        log_signal_strength(final_signal_strength, "方法开始初始化")
+        
         if len(candles) < 100:  # 增加所需的K线数量，以支持更多技术指标计算
+            print(f"[{self.agent_id}] K线数据不足100条，无法生成信号")
+            logger.critical(f"[{self.agent_id}] CRITICAL: K线数据不足100条 ({len(candles)}条)，无法生成信号")
+            log_signal_strength(final_signal_strength, "K线数据不足")
             return signals
         
         # 提取价格数据
         close_prices = np.array([float(c[4]) for c in candles[-100:]])
         high_prices = np.array([float(c[2]) for c in candles[-100:]])
         low_prices = np.array([float(c[3]) for c in candles[-100:]])
+        
+        # 计算波动率（使用ATR指标的简化版本）
+        true_ranges = np.maximum(
+            high_prices[1:] - low_prices[1:],
+            np.maximum(
+                np.abs(high_prices[1:] - close_prices[:-1]),
+                np.abs(low_prices[1:] - close_prices[:-1])
+            )
+        )
+        volatility = np.mean(true_ranges[-20:]) / np.mean(close_prices[-20:])  # 归一化波动率
         
         # 计算技术指标
         # 1. 均线动量
@@ -265,40 +553,57 @@ class LiveAgent:
         bb_width = (upper_band - lower_band) / sma20
         bb_position = (close_prices[-1] - lower_band) / bb_width
         
-        # 根据市场状态调整阈值
+        # 根据市场状态调整阈值，并应用市场状态敏感度
         regime_config = self.config['market_regime']['regimes'].get(regime, {'long': 0.5, 'short': 0.5})
         long_bias = regime_config['long']
         short_bias = regime_config['short']
+        
+        # 应用市场状态敏感度基因参数
+        market_sensitivity = self.gene.get('market_state_sensitivity', 1.0)
+        long_threshold = self.gene['long_threshold'] * (2 - long_bias * market_sensitivity)
+        short_threshold = self.gene['short_threshold'] * (2 - short_bias * market_sensitivity)
         
         # 综合信号计算
         final_signal_strength = 0.0
         signal_components = []
         
         # 动量信号
-        if momentum > self.gene['long_threshold'] * (2 - long_bias):
+        if momentum > long_threshold:
             # 限制动量信号范围
             momentum_signal = momentum * long_bias
             momentum_signal = max(-0.8, min(0.8, momentum_signal))
+            # 应用指标权重
+            momentum_weight = self.gene.get('indicator_weights', {}).get('momentum', 1.0)
+            momentum_signal *= momentum_weight
             signal_components.append(momentum_signal)
-            logger.debug(f"[{self.agent_id}] 动量信号: {momentum_signal:.4f}")
-        elif momentum < self.gene['short_threshold'] * (2 - short_bias):
+            logger.debug(f"[{self.agent_id}] 动量信号: {momentum_signal:.4f} (权重: {momentum_weight})")
+        elif momentum < short_threshold:
             # 限制动量信号范围
             momentum_signal = momentum * short_bias
             momentum_signal = max(-0.8, min(0.8, momentum_signal))
+            # 应用指标权重
+            momentum_weight = self.gene.get('indicator_weights', {}).get('momentum', 1.0)
+            momentum_signal *= momentum_weight
             signal_components.append(momentum_signal)
-            logger.debug(f"[{self.agent_id}] 动量信号: {momentum_signal:.4f}")
+            logger.debug(f"[{self.agent_id}] 动量信号: {momentum_signal:.4f} (权重: {momentum_weight})")
         
         # RSI信号 (超买超卖)
         if rsi < 30:  # 超卖
             rsi_signal = 0.2 * (30 - rsi) / 30
             rsi_signal = min(0.8, rsi_signal)  # 限制最大值为0.8
+            # 应用指标权重
+            rsi_weight = self.gene.get('indicator_weights', {}).get('rsi', 1.0)
+            rsi_signal *= rsi_weight
             signal_components.append(rsi_signal)
-            logger.debug(f"[{self.agent_id}] RSI信号: {rsi_signal:.4f}")
+            logger.debug(f"[{self.agent_id}] RSI信号: {rsi_signal:.4f} (权重: {rsi_weight})")
         elif rsi > 70:  # 超买
             rsi_signal = -0.2 * (rsi - 70) / 30
             rsi_signal = max(-0.8, rsi_signal)  # 限制最小值为-0.8
+            # 应用指标权重
+            rsi_weight = self.gene.get('indicator_weights', {}).get('rsi', 1.0)
+            rsi_signal *= rsi_weight
             signal_components.append(rsi_signal)
-            logger.debug(f"[{self.agent_id}] RSI信号: {rsi_signal:.4f}")
+            logger.debug(f"[{self.agent_id}] RSI信号: {rsi_signal:.4f} (权重: {rsi_weight})")
         
         # MACD信号 - 优化计算以避免异常值
         if sma20 > 0:  # 确保sma20有效
@@ -314,8 +619,11 @@ class LiveAgent:
             macd_signal = 0.2 * raw_macd_signal
             macd_signal = max(-0.8, min(0.8, macd_signal))  # 进一步限制范围，避免单个组件影响过大
             
+            # 应用指标权重
+            macd_weight = self.gene.get('indicator_weights', {}).get('macd', 1.0)
+            macd_signal *= macd_weight
             signal_components.append(macd_signal)
-            logger.debug(f"[{self.agent_id}] MACD信号计算: macd_hist={macd_hist:.6f}, sma20={sma20:.6f}, 信号={macd_signal:.4f}")
+            logger.debug(f"[{self.agent_id}] MACD信号计算: macd_hist={macd_hist:.6f}, sma20={sma20:.6f}, 信号={macd_signal:.4f} (权重: {macd_weight})")
         else:
             signal_components.append(0.0)
             logger.debug(f"[{self.agent_id}] MACD信号计算: SMA20无效，使用默认值0")
@@ -324,96 +632,211 @@ class LiveAgent:
         if bb_position < 0.3:  # 接近下轨
             bb_signal = 0.2 * (0.3 - bb_position) / 0.3
             bb_signal = min(0.8, bb_signal)  # 限制最大值为0.8
+            # 应用指标权重
+            bb_weight = self.gene.get('indicator_weights', {}).get('bollinger', 1.0)
+            bb_signal *= bb_weight
             signal_components.append(bb_signal)
-            logger.debug(f"[{self.agent_id}] 布林带信号: {bb_signal:.4f}")
+            logger.debug(f"[{self.agent_id}] 布林带信号: {bb_signal:.4f} (权重: {bb_weight})")
         elif bb_position > 0.7:  # 接近上轨
             bb_signal = -0.2 * (bb_position - 0.7) / 0.3
             bb_signal = max(-0.8, bb_signal)  # 限制最小值为-0.8
+            # 应用指标权重
+            bb_weight = self.gene.get('indicator_weights', {}).get('bollinger', 1.0)
+            bb_signal *= bb_weight
             signal_components.append(bb_signal)
-            logger.debug(f"[{self.agent_id}] 布林带信号: {bb_signal:.4f}")
+            logger.debug(f"[{self.agent_id}] 布林带信号: {bb_signal:.4f} (权重: {bb_weight})")
+        
+        # 强制写入信号监控日志文件
+        try:
+            with open('signal_monitor_log.txt', 'a', encoding='utf-8') as f:
+                f.write(f"\n[{datetime.now()}] [{self.agent_id}] 开始计算信号强度，信号组件数量: {len(signal_components)}")
+                f.write(f"\n[{datetime.now()}] [{self.agent_id}] 组件内容: {signal_components}")
+        except Exception as e:
+            print(f"写入信号监控日志失败: {e}")
+        
+        # 标准输出和日志
+        print(f"[{self.agent_id}] 开始计算信号强度，信号组件数量: {len(signal_components)}")
+        logger.critical(f"[{self.agent_id}] DEBUG: 信号组件数量: {len(signal_components)}, 组件内容: {signal_components}")
         
         # 计算最终信号强度
         if signal_components:
-            # 记录每个信号组件的值用于调试
+            # 记录每个信号组件的值用于调试 - 使用更醒目的输出
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
             component_types = ['动量', 'RSI', 'MACD', '布林带']
             component_values = signal_components[:4]  # 确保不超过4个组件
             debug_info = ', '.join([f"{t}: {v:.4f}" for t, v in zip(component_types, component_values)])
-            logger.info(f"[{self.agent_id}] 信号组件: {debug_info}")
+            logger.debug(f"[{self.agent_id}] 信号组件: {debug_info}")
+            print(f"\n{'='*80}")
+            print(f"[{timestamp}] [{self.agent_id}] SIGNAL COMPONENTS DETAILS")
+            print(f"[{timestamp}] [{self.agent_id}] {debug_info}")
+            print(f"[{timestamp}] [{self.agent_id}] 组件总数: {len(signal_components)}")
+            print(f"{'='*80}\n")
+            sys.stdout.flush()
             
             # 计算原始平均信号强度
             raw_mean = np.mean(signal_components)
+            print(f"[{self.agent_id}] 原始均值: {raw_mean:.4f}")
             
-            # 添加信号平滑处理，避免直接达到边界值
-            # 使用tanh函数进行非线性转换，使信号更平滑地接近边界
-            # 调整参数确保最大值约为1.8，最小值约为-1.8，避免直接达到±2.0
-            final_signal_strength = 1.8 * np.tanh(raw_mean / 1.5)
+            # 应用波动率调整因子 - 优化版：减少过度抑制
+            volatility_adjustment = self.gene.get('volatility_adjustment', 1.0)
+            # 使用更平衡的公式，减少对信号强度的过度抑制
+            # 通过平方根变换使波动率的影响更加平滑
+            adjusted_volatility = min(volatility * volatility_adjustment, 1.0)  # 限制最大调整幅度
+            volatility_factor = 1.0 - (np.sqrt(adjusted_volatility) * 0.5)  # 平方根变换，降低抑制程度
+            volatility_factor = max(0.6, min(1.8, volatility_factor))  # 扩大范围，允许更强的信号放大
+            
+            # 应用波动率调整
+            final_signal_strength = raw_mean * volatility_factor
+            print(f"[{self.agent_id}] 应用波动率调整后的信号强度: {final_signal_strength:.4f} (波动率: {volatility:.4f}, 调整因子: {volatility_adjustment:.4f}, 缩放系数: {volatility_factor:.4f})")
             
             # 仍然保留边界检查作为最后保障
             final_signal_strength = max(-1.9, min(1.9, final_signal_strength))
-            
-            # 计算信号强度变化率（如果有历史数据）
-            if hasattr(self, 'prev_signal_strength'):
-                signal_change = final_signal_strength - self.prev_signal_strength
-                logger.info(f"[{self.agent_id}] 信号强度变化: {signal_change:.4f}")
-                # 如果信号变化剧烈，添加警告
-                if abs(signal_change) > 1.0:
-                    logger.warning(f"[{self.agent_id}] 信号强度剧烈变化: {signal_change:.4f}")
+            print(f"[{self.agent_id}] 边界检查后的信号强度: {final_signal_strength:.4f}")
             
             # 存储当前信号强度用于下次比较
+            if hasattr(self, 'prev_signal_strength'):
+                signal_change = final_signal_strength - self.prev_signal_strength
+                logger.debug(f"[{self.agent_id}] 信号强度变化: {signal_change:.4f}")
             self.prev_signal_strength = final_signal_strength
             
-            # 如果信号强度接近边界，记录详细信息
-            if abs(final_signal_strength) > 1.7:
-                logger.warning(f"[{self.agent_id}] 信号强度接近边界: {final_signal_strength:.4f}, 原始均值: {raw_mean:.4f}")
-                # 记录所有信号组件的详细信息
-                logger.warning(f"[{self.agent_id}] 信号组件详情: {signal_components}")
+            # 强制输出最终信号强度，使用多种日志级别和直接打印
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            logger.critical(f"[{self.agent_id}] CRITICAL: FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
+            logger.error(f"[{self.agent_id}] ERROR: FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
+            logger.warning(f"[{self.agent_id}] WARNING: FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
+            logger.info(f"[{self.agent_id}] INFO: FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
+            logger.debug(f"[{self.agent_id}] DEBUG: FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
             
-            # 添加日志系统记录，确保信号强度被记录
-            logger.info(f"[{self.agent_id}] 信号强度: {final_signal_strength:.4f}, 原始均值: {raw_mean:.4f}, 组件数: {len(signal_components)}")
-            # 同时保留直接打印到终端
-            print(f"[{self.agent_id}] 信号强度: {final_signal_strength:.4f}, 组件数: {len(signal_components)}")
+            # 强制输出到标准输出，无论日志配置如何，使用更醒目的格式
+            print(f"\n{'*'*80}")
+            print(f"{'*'*20} [{timestamp}] [{self.agent_id}] FINAL SIGNAL STRENGTH = {final_signal_strength:.4f} {'*'*20}")
+            print(f"{'*'*80}\n")
+            
+            # 确保输出立即显示
+            import sys
+            sys.stdout.flush()
+            
+            # 将最终信号强度写入监控日志文件，使用明确的文件路径
+            try:
+                log_file = 'signal_monitor_log.txt'
+                with open(log_file, 'a', encoding='utf-8') as f:
+                    f.write(f"\n{'*'*80}")
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] 原始均值: {raw_mean:.4f}, 组件数: {len(signal_components)}")
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] 信号组件详情: {signal_components}")
+                    f.write("\n" + "*"*80)
+                print(f"[{timestamp}] [{self.agent_id}] 最终信号强度已写入日志文件: {log_file}")
+            except Exception as e:
+                print(f"写入最终信号强度日志失败: {e}")
+                # 尝试使用备用日志文件路径
+                try:
+                    backup_log = os.path.join(os.getcwd(), 'backup_signal_log.txt')
+                    with open(backup_log, 'a', encoding='utf-8') as f:
+                        f.write(f"\n[{timestamp}] [{self.agent_id}] FINAL SIGNAL STRENGTH = {final_signal_strength:.4f}")
+                    print(f"备用日志已写入: {backup_log}")
+                except Exception as e2:
+                    print(f"备用日志写入也失败: {e2}")
         else:
             final_signal_strength = 0.0
-            logger.warning(f"[{self.agent_id}] 没有生成有效信号组件，信号强度设为0")
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            logger.critical(f"[{self.agent_id}] CRITICAL: 没有生成有效信号组件，信号强度设为0.0")
+            print(f"\n{'*'*80}")
+            print(f"{'*'*20} [{timestamp}] [{self.agent_id}] 没有生成有效信号组件，信号强度设为0.0 {'*'*20}")
+            print(f"{'*'*80}\n")
+            
+            # 将无信号情况写入监控日志文件，使用绝对路径
+            try:
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(f"\n{'*'*80}")
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] 没有生成有效信号组件，信号强度设为0.0")
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] 技术指标值: momentum={momentum:.4f}, rsi={rsi:.4f}, macd_hist={macd_hist:.6f}, bb_position={bb_position:.4f}")
+                    f.write(f"\n[{timestamp}] [{self.agent_id}] 基因参数: long_threshold={self.gene['long_threshold']}, short_threshold={self.gene['short_threshold']}")
+                    f.write("\n" + "*"*80)
+                print(f"[{timestamp}] [{self.agent_id}] 无信号状态已写入日志文件: {log_path}")
+            except Exception as e:
+                print(f"写入无信号日志失败: {e}")
             # 重置历史记录
             if hasattr(self, 'prev_signal_strength'):
                 delattr(self, 'prev_signal_strength')
         
-        # 生成交易信号
-        # 使用基因中的阈值，让每个Agent有不同的交易风格
-        long_threshold = max(0.08, self.gene['long_threshold'])  # 最低0.08
-        short_threshold = min(-0.08, self.gene['short_threshold'])  # 最低-0.08
-        if final_signal_strength > long_threshold:      
-            # 做多信号
-            signals.append({
-                'action': 'open',
-                'side': 'long',
-                'symbol': self.config['markets']['spot']['symbol'],
-                'market': 'spot',
-                'strength': min(1.0, final_signal_strength * long_bias),
-                'indicators': {
-                    'momentum': momentum,
-                    'rsi': rsi,
-                    'macd_hist': macd_hist,
-                    'bb_position': bb_position
-                }
-            })
+        # 生成交易信号 - 增强版：趋势跟踪与灵活信号确认
+        # 移除固定最低阈值限制，使用基因中定义的值
+        long_threshold = self.gene['long_threshold']
+        short_threshold = self.gene['short_threshold']
         
-        elif final_signal_strength < short_threshold:  
-            # 做空信号（只在合约市场）
-            signals.append({
-                'action': 'open',
-                'side': 'short',
-                'symbol': self.config['markets']['futures']['symbol'],
-                'market': 'futures',
-                'strength': min(1.0, abs(final_signal_strength) * short_bias),
-                'indicators': {
-                    'momentum': momentum,
-                    'rsi': rsi,
-                    'macd_hist': macd_hist,
-                    'bb_position': bb_position
-                }
-            })
+        # 添加趋势跟踪机制 - 计算中期趋势
+        if len(close_prices) >= 50:
+            # 使用50日均线判断中期趋势
+            sma50 = np.mean(close_prices[-50:])
+            sma20 = np.mean(close_prices[-20:])
+            # 趋势强度：1.0为强烈多头，-1.0为强烈空头
+            trend_strength = min(1.0, max(-1.0, (sma20 - sma50) / sma50 * 100))
+        else:
+            trend_strength = 0.0
+        
+        # 灵活信号确认机制
+        signal_confirmed = False
+        confirmation_factor = 1.0
+        
+        # 同向趋势确认：与趋势同向的信号更容易被确认
+        if trend_strength > 0.2 and final_signal_strength > long_threshold:
+            # 多头趋势且有多头信号，降低确认门槛
+            confirmation_factor = 0.8
+            signal_confirmed = final_signal_strength > (long_threshold * confirmation_factor)
+        elif trend_strength < -0.2 and final_signal_strength < short_threshold:
+            # 空头趋势且有空头信号，降低确认门槛
+            confirmation_factor = 0.8
+            signal_confirmed = final_signal_strength < (short_threshold * confirmation_factor)
+        elif abs(trend_strength) < 0.1:
+            # 横盘市场，需要更强的信号确认
+            confirmation_factor = 1.2
+            signal_confirmed = (final_signal_strength > (long_threshold * confirmation_factor)) or \
+                              (final_signal_strength < (short_threshold * confirmation_factor))
+        else:
+            # 基本确认逻辑
+            signal_confirmed = (final_signal_strength > long_threshold) or (final_signal_strength < short_threshold)
+        
+        # 记录趋势和确认信息
+        logger.debug(f"[{self.agent_id}] 趋势强度: {trend_strength:.4f}, 确认因子: {confirmation_factor:.2f}, 信号确认: {signal_confirmed}")
+        
+        # 生成交易信号
+        if signal_confirmed:
+            if final_signal_strength > long_threshold * confirmation_factor:
+                # 做多信号
+                # 结合趋势强度调整信号强度
+                combined_strength = min(1.0, final_signal_strength * (1.0 + abs(trend_strength) * 0.3))
+                signals.append({
+                    'action': 'open',
+                    'side': 'long',
+                    'symbol': self.config['markets']['spot']['symbol'],
+                    'market': 'spot',
+                    'strength': combined_strength * long_bias,
+                    'indicators': {
+                        'momentum': momentum,
+                        'rsi': rsi,
+                        'macd_hist': macd_hist,
+                        'bb_position': bb_position,
+                        'trend_strength': trend_strength
+                    }
+                })
+            elif final_signal_strength < short_threshold * confirmation_factor:
+                # 做空信号（只在合约市场）
+                # 结合趋势强度调整信号强度
+                combined_strength = min(1.0, abs(final_signal_strength) * (1.0 + abs(trend_strength) * 0.3))
+                signals.append({
+                    'action': 'open',
+                    'side': 'short',
+                    'symbol': self.config['markets']['futures']['symbol'],
+                    'market': 'futures',
+                    'strength': combined_strength * short_bias,
+                    'indicators': {
+                        'momentum': momentum,
+                        'rsi': rsi,
+                        'macd_hist': macd_hist,
+                        'bb_position': bb_position,
+                        'trend_strength': trend_strength
+                    }
+                })
         
         # 检查止损/止盈
         for symbol, pos in list(self.positions.items()):

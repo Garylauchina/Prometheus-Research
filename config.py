@@ -8,7 +8,7 @@ Config - 配置模块
 CONFIG_V3 = {
     # 系统级配置
     'initial_capital': 10000,  # Round 9: 与v2.5公平对比
-    'initial_agents': 20,  # 优化：从10增加到20
+    'initial_agents': 3,  # 修改为3个初始Agent
     'trading_fee': 0.001,  # Round 10: OKX taker fee 0.1% (correct rate)
     
     # 智能体管理器配置

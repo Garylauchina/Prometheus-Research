@@ -8,7 +8,7 @@ import copy
 CONFIG_MULTI_MARKET = {
     # 系统配置
     'initial_capital': 10000,  # 总初始资金
-    'initial_agents': 20,
+    'initial_agents': 3,
     
     # 市场配置
     'markets': {

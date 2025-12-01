@@ -38,6 +38,10 @@ def setup_logging(config):
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, config['logging']['level']))
     
+    # 禁用httpx库的INFO级别日志，只显示WARNING及以上级别的日志
+    httpx_logger = logging.getLogger('httpx')
+    httpx_logger.setLevel(logging.WARNING)
+    
     # 清除现有handler
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)

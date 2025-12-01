@@ -6,7 +6,7 @@ import os
 CONFIG_VIRTUAL_TRADING = {
     # 基础配置
     'initial_capital': 5000,  # $5,000 USDT
-    'initial_agents': 8,      # 增加到8个初始agent，提高多样性
+    'initial_agents': 3,      # 修改为3个初始agent
     'max_agents': 15,         # 增加到15个最大agent
     
     # 市场配置

@@ -237,6 +237,124 @@ class LiveTradingSystem:
             'deaths': 0
         }
         
+        # 基因种子库 - 预先定义一些表现良好的基因配置
+        self.gene_seed_pool = [
+            # 趋势跟踪型基因
+            {
+                'long_threshold': 0.08,
+                'short_threshold': -0.08,
+                'max_position': 0.8,
+                'stop_loss': 0.05,
+                'take_profit': 0.12,
+                'holding_period': 1800,
+                'risk_aversion': 0.8,
+                'volatility_adjustment': 0.7,
+                'market_state_sensitivity': 1.2,
+                'indicator_weights': {
+                    'momentum': 1.5,
+                    'rsi': 0.8,
+                    'macd': 1.2,
+                    'bollinger': 0.5
+                }
+            },
+            # 均值回归型基因
+            {
+                'long_threshold': 0.05,
+                'short_threshold': -0.05,
+                'max_position': 0.6,
+                'stop_loss': 0.04,
+                'take_profit': 0.08,
+                'holding_period': 600,
+                'risk_aversion': 1.2,
+                'volatility_adjustment': 1.5,
+                'market_state_sensitivity': 0.8,
+                'indicator_weights': {
+                    'momentum': 0.6,
+                    'rsi': 1.5,
+                    'macd': 0.8,
+                    'bollinger': 1.7
+                }
+            },
+            # 平衡型基因
+            {
+                'long_threshold': 0.06,
+                'short_threshold': -0.06,
+                'max_position': 0.7,
+                'stop_loss': 0.05,
+                'take_profit': 0.10,
+                'holding_period': 1200,
+                'risk_aversion': 1.0,
+                'volatility_adjustment': 1.0,
+                'market_state_sensitivity': 1.0,
+                'indicator_weights': {
+                    'momentum': 1.0,
+                    'rsi': 1.0,
+                    'macd': 1.0,
+                    'bollinger': 1.0
+                }
+            },
+            # 高风险高回报型基因 - 调整后更易触发交易
+            {
+                'long_threshold': 0.06,
+                'short_threshold': -0.06,
+                'max_position': 0.9,
+                'stop_loss': 0.07,
+                'take_profit': 0.15,
+                'holding_period': 900,
+                'risk_aversion': 0.6,
+                'volatility_adjustment': 0.5,
+                'market_state_sensitivity': 1.5,
+                'indicator_weights': {
+                    'momentum': 1.8,
+                    'rsi': 0.6,
+                    'macd': 1.4,
+                    'bollinger': 0.7
+                }
+            },
+            # 保守型基因
+            {
+                'long_threshold': 0.04,
+                'short_threshold': -0.04,
+                'max_position': 0.5,
+                'stop_loss': 0.03,
+                'take_profit': 0.06,
+                'holding_period': 2400,
+                'risk_aversion': 1.5,
+                'volatility_adjustment': 1.8,
+                'market_state_sensitivity': 0.6,
+                'indicator_weights': {
+                    'momentum': 0.8,
+                    'rsi': 1.2,
+                    'macd': 0.9,
+                    'bollinger': 1.1
+                }
+            }
+        ]
+        
+        # 基因种子使用配置
+        self.gene_seed_config = {
+            'use_seed_probability': config.get('gene_pool', {}).get('use_seed_probability', 0.3),  # 30%概率使用种子
+            'seed_mutation_rate': config.get('gene_pool', {}).get('seed_mutation_rate', 0.2)  # 种子基因变异率
+        }
+        
+        # 基因多样性监测配置
+        self.diversity_monitor_config = {
+            'monitor_interval': config.get('diversity_monitor', {}).get('interval', 3600),  # 监测间隔（秒）
+            'min_diversity_threshold': config.get('diversity_monitor', {}).get('min_threshold', 0.2),  # 最小多样性阈值
+            'max_similarity_threshold': config.get('diversity_monitor', {}).get('max_similarity', 0.8),  # 最大相似度阈值
+            'diversity_recovery_action': config.get('diversity_monitor', {}).get('recovery_action', 'introduce_random')  # 恢复措施
+        }
+        
+        # 多样性监测状态
+        self.diversity_stats = {
+            'last_monitor_time': None,
+            'average_distance': 0.0,
+            'minimum_distance': 0.0,
+            'max_similarity': 0.0,
+            'diversity_history': [],
+            'recovery_actions_taken': 0
+        }
+        
         # 运行状态
         self.running = False
         self.stop_requested = False
@@ -450,6 +568,10 @@ class LiveTradingSystem:
     def initialize_agents(self):
         """初始化交易代理"""
         logger.info(f"正在初始化 {self.config['initial_agents']} 个交易代理...")
+        logger.info(f"基因种子配置: 使用概率={self.gene_seed_config['use_seed_probability']}, 变异率={self.gene_seed_config['seed_mutation_rate']}")
+        
+        import random
+        import numpy as np
         
         for i in range(self.config['initial_agents']):
             # 从资金池分配资金
@@ -458,10 +580,48 @@ class LiveTradingSystem:
             )
             
             if capital > 0:
+                # 决定是否使用基因种子
+                use_seed = random.random() < self.gene_seed_config['use_seed_probability']
+                gene = None
+                
+                if use_seed and self.gene_seed_pool:
+                    # 从种子库中随机选择一个基因
+                    gene = random.choice(self.gene_seed_pool).copy()
+                    
+                    # 应用变异
+                    if random.random() < self.gene_seed_config['seed_mutation_rate']:
+                        # 对基因参数进行小幅度变异
+                        for param in gene:
+                            if param == 'indicator_weights':
+                                # 处理指标权重的变异
+                                for weight_param in gene[param]:
+                                    gene[param][weight_param] *= np.random.normal(1.0, 0.1)  # 正态分布变异
+                                    gene[param][weight_param] = max(0.1, min(2.0, gene[param][weight_param]))  # 限制范围
+                            else:
+                                # 对其他参数进行变异
+                                gene[param] *= np.random.normal(1.0, 0.1)  # 正态分布变异
+                                
+                                # 确保参数在合理范围内
+                                if param == 'max_position':
+                                    gene[param] = max(0.1, min(1.0, gene[param]))
+                                elif param in ['long_threshold', 'take_profit']:
+                                    gene[param] = max(0.01, min(0.2, gene[param]))
+                                elif param in ['short_threshold', 'stop_loss']:
+                                    gene[param] = min(-0.01, max(-0.2, gene[param]))
+                                elif param == 'holding_period':
+                                    gene[param] = max(60, min(7200, gene[param]))
+                                elif param in ['risk_aversion', 'volatility_adjustment', 'market_state_sensitivity']:
+                                    gene[param] = max(0.1, min(2.0, gene[param]))
+                    
+                    logger.info(f"代理 {i+1} 使用基因种子（变异: {random.random() < self.gene_seed_config['seed_mutation_rate']}")
+                else:
+                    logger.info(f"代理 {i+1} 使用随机生成的基因")
+                
                 agent = LiveAgent(
                     agent_id=f"agent_{i+1}",
                     initial_capital=capital,
-                    config=self.config
+                    config=self.config,
+                    gene=gene  # 如果gene为None，LiveAgent会生成随机基因
                 )
                 self.agents.append(agent)
                 logger.info(f"创建代理 {agent.agent_id}，分配资金 ${capital:.2f}")
@@ -541,6 +701,135 @@ class LiveTradingSystem:
                 
                 # 3. 更新所有交易代理
                 self._update_agents(market_data, regime)
+                
+                # 4. 计算并记录交易信心指数（基于市场数据和技术指标）
+                try:
+                    # 导入numpy用于计算
+                    import numpy as np
+                    
+                    # 计算基于市场数据的交易信心指数
+                    def calculate_market_confidence(market_data):
+                        # 检查是否有足够的K线数据
+                        candles = market_data.get('candles', [])
+                        
+                        if len(candles) < 100:
+                            logger.warning(f"K线数据不足100条 ({len(candles)}条)，无法计算完整的技术指标")
+                            return 0.0, "K线数据不足"
+                        
+                        # 提取价格数据
+                        close_prices = np.array([float(c[4]) for c in candles[-100:]])
+                        high_prices = np.array([float(c[2]) for c in candles[-100:]])
+                        low_prices = np.array([float(c[3]) for c in candles[-100:]])
+                        
+                        # 计算技术指标
+                        # 1. 均线动量
+                        short_ma = np.mean(close_prices[-5:])
+                        long_ma = np.mean(close_prices[-20:])
+                        momentum = (short_ma - long_ma) / long_ma
+                        
+                        # 2. RSI (Relative Strength Index)
+                        delta = np.diff(close_prices)
+                        gain = np.where(delta > 0, delta, 0)
+                        loss = np.where(delta < 0, -delta, 0)
+                        
+                        avg_gain = np.mean(gain[-14:])
+                        avg_loss = np.mean(loss[-14:])
+                        
+                        if np.isnan(avg_gain) or np.isnan(avg_loss) or avg_loss == 0:
+                            rsi = 50  # 默认值
+                        else:
+                            rs = avg_gain / avg_loss
+                            rsi = 100 - (100 / (1 + rs))
+                        
+                        # 3. MACD (Moving Average Convergence Divergence)
+                        def exponential_moving_average(data, span):
+                            alpha = 2 / (span + 1)
+                            weights = (1 - alpha) ** np.arange(len(data)-1, -1, -1)
+                            weights /= weights.sum()
+                            return np.dot(data, weights)
+                        
+                        prices_needed = max(12, 26)
+                        recent_prices = close_prices[-prices_needed:]
+                        
+                        ema12 = exponential_moving_average(recent_prices, 12)
+                        ema26 = exponential_moving_average(recent_prices, 26)
+                        macd_line = ema12 - ema26
+                        
+                        if len(close_prices) > 34:
+                            macd_values = [exponential_moving_average(close_prices[-i-26:-i], 12) - 
+                                          exponential_moving_average(close_prices[-i-26:-i], 26) 
+                                          for i in range(5)]
+                            signal_line = exponential_moving_average(np.array(macd_values), 9)
+                            macd_hist = macd_line - signal_line
+                        else:
+                            macd_hist = macd_line
+                        
+                        # 4. Bollinger Bands
+                        sma20 = np.mean(close_prices[-20:])
+                        std20 = np.std(close_prices[-20:])
+                        upper_band = sma20 + (2 * std20)
+                        lower_band = sma20 - (2 * std20)
+                        bb_width = (upper_band - lower_band) / sma20 if sma20 > 0 else 0.01
+                        bb_position = (close_prices[-1] - lower_band) / bb_width if bb_width > 0 else 0.5
+                        
+                        # 综合信号计算 - 使用系统级默认权重
+                        signal_components = []
+                        
+                        # 动量信号
+                        if abs(momentum) > 0.01:  # 只有当动量足够显著时才考虑
+                            momentum_signal = momentum
+                            momentum_signal = max(-0.8, min(0.8, momentum_signal))
+                            signal_components.append(momentum_signal)
+                        
+                        # RSI信号
+                        if rsi < 30 or rsi > 70:
+                            if rsi < 30:  # 超卖
+                                rsi_signal = 0.2 * (30 - rsi) / 30
+                            else:  # 超买
+                                rsi_signal = -0.2 * (rsi - 70) / 30
+                            rsi_signal = max(-0.8, min(0.8, rsi_signal))
+                            signal_components.append(rsi_signal)
+                        
+                        # MACD信号
+                        if sma20 > 0:
+                            normalization_factor = max(sma20 * 0.01, 0.1)
+                            raw_macd_signal = macd_hist / normalization_factor
+                            raw_macd_signal = max(-5.0, min(5.0, raw_macd_signal))
+                            macd_signal = 0.2 * raw_macd_signal
+                            macd_signal = max(-0.8, min(0.8, macd_signal))
+                            signal_components.append(macd_signal)
+                        
+                        # 布林带信号
+                        if bb_position < 0.3 or bb_position > 0.7:
+                            if bb_position < 0.3:
+                                bb_signal = 0.2 * (0.3 - bb_position) / 0.3
+                            else:
+                                bb_signal = -0.2 * (bb_position - 0.7) / 0.3
+                            bb_signal = max(-0.8, min(0.8, bb_signal))
+                            signal_components.append(bb_signal)
+                        
+                        # 计算最终信心指数
+                        if signal_components:
+                            # 简单平均作为综合指数
+                            confidence_index = sum(signal_components) / len(signal_components)
+                            # 确保范围在[-1, 1]之间
+                            confidence_index = max(-1.0, min(1.0, confidence_index))
+                            reason = f"基于{len(signal_components)}个技术指标计算 (动量, RSI, MACD, 布林带)"
+                        else:
+                            confidence_index = 0.0
+                            reason = "无明显技术指标信号"
+                        
+                        return confidence_index, reason
+                    
+                    # 调用计算函数
+                    trading_confidence, confidence_reason = calculate_market_confidence(market_data)
+                    
+                    # 记录交易信心指数
+                    logger.info(f"交易信心指数: {trading_confidence:.4f} ({confidence_reason})")
+                    
+                except Exception as e:
+                    logger.error(f"计算交易信心指数失败: {e}")
+                    logger.info(f"交易信心指数: 0.0 (计算出错)")
                 
                 # 4. 执行交易
                 self._execute_trades()
@@ -1651,10 +1940,11 @@ class LiveTradingSystem:
             # 数据准备失败时，降级到基本串行更新模式
             for agent in active_agents:
                 try:
-                    # 使用有限的市场数据进行更新
+                    # 使用有限的市场数据进行更新，保持正确的参数顺序
                     basic_price = market_data.get('spot', {}).get('price', 0)
                     if basic_price > 0:
-                        agent.update({}, basic_price, regime)
+                        basic_market_data = {'spot': {'price': basic_price}, 'futures': {'price': basic_price}}
+                        agent.update(basic_market_data, regime)
                         agent.last_update_time = datetime.now()
                 except Exception as inner_e:
                     logger.error(f"基本更新代理 {getattr(agent, 'agent_id', 'unknown')} 失败: {inner_e}")
@@ -1790,7 +2080,18 @@ class LiveTradingSystem:
                     import signal
                     
                     def update_with_timeout_serial():
-                        agent.update(market_features, formatted_market_data['price'], regime)
+                        # 使用与并发模式相同的市场数据格式，包含完整的K线数据
+                        market_data = {
+                            'spot': {'price': formatted_market_data['price']},
+                            'futures': {'price': formatted_market_data['price']},
+                            'features': market_features,
+                            'candles': formatted_market_data.get('candles', [])  # 确保包含K线数据
+                        }
+                        # 添加详细日志记录market_data内容
+                        logger.debug(f"串行模式 - 准备更新代理 {getattr(agent, 'agent_id', 'unknown')} 的市场数据: ")
+                        logger.debug(f"  - 蜡烛图数据数量: {len(market_data.get('candles', []))}")
+                        logger.debug(f"  - 价格: {market_data.get('spot', {}).get('price')}")
+                        agent.update(market_data, regime)
                         agent.last_update_time = datetime.now()
                     
                     # 简单的超时控制（不使用signal，以兼容Windows）
@@ -2658,10 +2959,230 @@ class LiveTradingSystem:
         logger.info(f"总交易次数: {self.stats['total_trades']}")
         logger.info(f"代理出生数: {self.stats['births']}, 代理死亡数: {self.stats['deaths']}")
     
+    def _calculate_gene_distance(self, gene1, gene2):
+        """
+        计算两个基因之间的欧氏距离
+        
+        Args:
+            gene1: 第一个基因字典
+            gene2: 第二个基因字典
+            
+        Returns:
+            float: 归一化的欧氏距离（0表示完全相同，1表示完全不同）
+        """
+        import numpy as np
+        
+        # 提取主要参数作为特征向量
+        features1 = []
+        features2 = []
+        
+        # 主要参数
+        main_params = ['long_threshold', 'short_threshold', 'max_position', 
+                       'stop_loss', 'take_profit', 'holding_period', 'risk_aversion',
+                       'volatility_adjustment', 'market_state_sensitivity']
+        
+        for param in main_params:
+            if param in gene1 and param in gene2:
+                val1 = gene1[param]
+                val2 = gene2[param]
+                
+                # 对于不同参数进行适当的归一化
+                if param == 'holding_period':
+                    # 对时间参数进行对数归一化
+                    val1 = np.log(val1 + 1)
+                    val2 = np.log(val2 + 1)
+                elif param in ['long_threshold', 'short_threshold', 'stop_loss', 'take_profit']:
+                    # 对阈值参数进行缩放
+                    val1 *= 10
+                    val2 *= 10
+                
+                features1.append(val1)
+                features2.append(val2)
+        
+        # 处理指标权重
+        if 'indicator_weights' in gene1 and 'indicator_weights' in gene2:
+            weights1 = gene1['indicator_weights']
+            weights2 = gene2['indicator_weights']
+            
+            # 确保使用相同的顺序
+            weight_keys = sorted(set(weights1.keys()).intersection(weights2.keys()))
+            for key in weight_keys:
+                features1.append(weights1[key])
+                features2.append(weights2[key])
+        
+        if not features1 or not features2:
+            return 0.0  # 无法计算距离
+        
+        # 转换为numpy数组
+        vec1 = np.array(features1)
+        vec2 = np.array(features2)
+        
+        # 计算欧氏距离
+        distance = np.linalg.norm(vec1 - vec2)
+        
+        # 归一化距离（考虑特征向量的最大可能距离）
+        max_possible_distance = np.linalg.norm(np.ones_like(vec1) * 10)  # 估计的最大可能距离
+        normalized_distance = min(1.0, distance / (max_possible_distance + 1e-10))
+        
+        return normalized_distance
+    
+    def _monitor_gene_diversity(self):
+        """
+        监测基因多样性，计算代理之间的相似度
+        
+        Returns:
+            dict: 多样性统计信息
+        """
+        if len(self.agents) < 2:
+            return {
+                'average_distance': 1.0,
+                'minimum_distance': 1.0,
+                'max_similarity': 0.0,
+                'message': '代理数量不足，无法计算多样性'
+            }
+        
+        import numpy as np
+        
+        distances = []
+        similarities = []
+        
+        # 计算所有代理对之间的距离
+        for i in range(len(self.agents)):
+            for j in range(i + 1, len(self.agents)):
+                distance = self._calculate_gene_distance(
+                    self.agents[i].gene, 
+                    self.agents[j].gene
+                )
+                distances.append(distance)
+                similarities.append(1.0 - distance)  # 相似度 = 1 - 距离
+        
+        # 计算统计信息
+        avg_distance = np.mean(distances) if distances else 0.0
+        min_distance = np.min(distances) if distances else 0.0
+        max_similarity = np.max(similarities) if similarities else 0.0
+        
+        # 更新历史记录
+        self.diversity_stats['average_distance'] = avg_distance
+        self.diversity_stats['minimum_distance'] = min_distance
+        self.diversity_stats['max_similarity'] = max_similarity
+        self.diversity_stats['last_monitor_time'] = datetime.now()
+        
+        # 保存历史数据（限制长度）
+        self.diversity_stats['diversity_history'].append({
+            'timestamp': datetime.now(),
+            'average_distance': avg_distance,
+            'minimum_distance': min_distance,
+            'max_similarity': max_similarity,
+            'agent_count': len(self.agents)
+        })
+        
+        # 保持历史记录不超过100条
+        if len(self.diversity_stats['diversity_history']) > 100:
+            self.diversity_stats['diversity_history'] = self.diversity_stats['diversity_history'][-100:]
+        
+        # 记录日志
+        logger.info(f"基因多样性监测: 平均距离={avg_distance:.4f}, 最小距离={min_distance:.4f}, 最大相似度={max_similarity:.4f}")
+        
+        # 检查是否需要采取恢复措施
+        if avg_distance < self.diversity_monitor_config['min_diversity_threshold'] or \
+           max_similarity > self.diversity_monitor_config['max_similarity_threshold']:
+            self._take_diversity_recovery_action()
+        
+        return {
+            'average_distance': avg_distance,
+            'minimum_distance': min_distance,
+            'max_similarity': max_similarity
+        }
+    
+    def _take_diversity_recovery_action(self):
+        """
+        当基因多样性不足时采取恢复措施
+        """
+        action = self.diversity_monitor_config['diversity_recovery_action']
+        logger.warning(f"基因多样性不足，采取恢复措施: {action}")
+        
+        self.diversity_stats['recovery_actions_taken'] += 1
+        
+        if action == 'introduce_random':
+            # 引入新的随机代理
+            new_agent_count = max(2, len(self.agents) // 10)  # 引入代理总数的10%，最少2个
+            logger.info(f"引入 {new_agent_count} 个新的随机代理以增加多样性")
+            
+            for i in range(new_agent_count):
+                capital = self.capital_manager.allocate_capital(
+                    self.config['capital_manager']['min_agent_capital']
+                )
+                
+                if capital > 0:
+                    # 创建新代理，不使用种子基因
+                    agent = LiveAgent(
+                        agent_id=f"diversity_agent_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}",
+                        initial_capital=capital,
+                        config=self.config,
+                        gene=None  # 强制生成随机基因
+                    )
+                    self.agents.append(agent)
+                    logger.info(f"创建多样性恢复代理 {agent.agent_id}，分配资金 ${capital:.2f}")
+        
+        elif action == 'cull_similar':
+            # 淘汰最相似的代理
+            if len(self.agents) > 3:  # 确保至少保留3个代理
+                similar_pairs = []
+                
+                # 找出所有相似的代理对
+                for i in range(len(self.agents)):
+                    for j in range(i + 1, len(self.agents)):
+                        similarity = 1.0 - self._calculate_gene_distance(
+                            self.agents[i].gene,
+                            self.agents[j].gene
+                        )
+                        similar_pairs.append((similarity, i, j))
+                
+                # 按相似度排序
+                similar_pairs.sort(reverse=True)
+                
+                # 标记要淘汰的代理（保留表现较好的那个）
+                to_remove = set()
+                for similarity, i, j in similar_pairs:
+                    if i not in to_remove and j not in to_remove and similarity > 0.8:
+                        # 比较两个代理的表现，移除表现较差的
+                        agent_i = self.agents[i]
+                        agent_j = self.agents[j]
+                        
+                        # 简化的表现评估：比较ROI
+                        if hasattr(agent_i, 'roi') and hasattr(agent_j, 'roi'):
+                            if agent_i.roi < agent_j.roi:
+                                to_remove.add(i)
+                            else:
+                                to_remove.add(j)
+                
+                # 移除标记的代理
+                for idx in sorted(to_remove, reverse=True):
+                    agent = self.agents[idx]
+                    logger.info(f"移除相似代理 {agent.agent_id} 以增加多样性")
+                    # 释放资金
+                    self.capital_manager.release_capital(agent.capital)
+                    del self.agents[idx]
+        
+        # 发送多样性警告
+        self.alert_system.send_alert(
+            level='WARNING',
+            title='基因多样性警告',
+            message=f"系统基因多样性低于阈值，已采取恢复措施: {action}",
+            details={
+                'average_distance': self.diversity_stats['average_distance'],
+                'minimum_distance': self.diversity_stats['minimum_distance'],
+                'max_similarity': self.diversity_stats['max_similarity'],
+                'recovery_actions_taken': self.diversity_stats['recovery_actions_taken']
+            }
+        )
+    
     def _monitoring_loop(self):
         """监控系统循环"""
         logger.info("监控循环已启动")
         monitoring_interval = self.config.get('monitoring', {}).get('interval', 60)  # 默认60秒
+        # 初始化最后多样性监测时间
+        self.diversity_stats['last_monitor_time'] = datetime.now()
         
         while self.running:
             try:
@@ -2726,6 +3247,12 @@ class LiveTradingSystem:
                         'API连接异常',
                         self.health_monitor.get_health_status()
                     )
+                
+                # 检查基因多样性（根据配置的间隔）
+                if self.diversity_stats['last_monitor_time'] and \
+                   (datetime.now() - self.diversity_stats['last_monitor_time']).total_seconds() > \
+                   self.diversity_monitor_config['monitor_interval']:
+                    self._monitor_gene_diversity()
                     
             except Exception as e:
                 logger.error(f"监控循环错误: {e}")

@@ -169,32 +169,54 @@ class SystemMonitor:
         if len(self.trade_statistics) > 500:
             self.trade_statistics = self.trade_statistics[-500:]
     
-    def record_agent_metrics(self, agent_id: int, metrics: Dict):
+    def record_agent_metrics(self, agent_id, metrics: Dict):
         """
         记录代理性能指标
         
         Args:
-            agent_id: 代理ID
-            metrics: 代理指标
+            agent_id: 代理ID（可以是单个ID或包含多个代理信息的列表）
+            metrics: 代理指标（当agent_id为列表时，此参数会被忽略）
                 - roi: 回报率
                 - trade_count: 交易次数
                 - win_rate: 胜率
                 - max_drawdown: 最大回撤
                 - is_alive: 是否存活
         """
-        # 确保agent_id始终是可哈希的类型（避免列表作为字典键）
+        # 处理列表类型的agent_id，支持批量记录多个代理的指标
         if isinstance(agent_id, list):
-            # 将列表转换为字符串，确保可哈希
-            agent_id_str = str(agent_id)
-            logger.warning(f"检测到列表类型的agent_id，已转换为字符串: {agent_id_str}")
-            agent_id = agent_id_str
-        
-        agent_data = {
-            'timestamp': datetime.now().isoformat(),
-            'agent_id': agent_id,
-            **metrics
-        }
-        self.agent_metrics.append(agent_data)
+            logger.info(f"接收到包含{len(agent_id)}个代理信息的列表，开始批量记录指标")
+            for agent_info in agent_id:
+                # 检查每个元素是否包含必要的信息
+                if isinstance(agent_info, dict) and 'agent_id' in agent_info:
+                    # 使用字典中的agent_id作为ID，其余键值对作为指标
+                    individual_agent_id = agent_info['agent_id']
+                    individual_metrics = {k: v for k, v in agent_info.items() if k != 'agent_id'}
+                    
+                    agent_data = {
+                        'timestamp': datetime.now().isoformat(),
+                        'agent_id': individual_agent_id,
+                        **individual_metrics
+                    }
+                    self.agent_metrics.append(agent_data)
+                else:
+                    # 对于不是字典或没有agent_id的元素，转换为字符串并记录警告
+                    logger.warning(f"列表中包含格式不正确的代理信息: {agent_info}，已转换为字符串")
+                    individual_agent_id = str(agent_info)
+                    
+                    agent_data = {
+                        'timestamp': datetime.now().isoformat(),
+                        'agent_id': individual_agent_id,
+                        'format_error': True
+                    }
+                    self.agent_metrics.append(agent_data)
+        else:
+            # 处理单个代理ID的情况
+            agent_data = {
+                'timestamp': datetime.now().isoformat(),
+                'agent_id': str(agent_id) if not isinstance(agent_id, (str, int)) else agent_id,
+                **metrics
+            }
+            self.agent_metrics.append(agent_data)
         
         # 限制存储的数据量
         if len(self.agent_metrics) > 10000:
