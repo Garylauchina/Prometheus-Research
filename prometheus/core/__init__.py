@@ -12,6 +12,7 @@ from .gene_pool import GenePool, GeneRecord
 from .medal_system import MedalSystem, Medal, MedalType
 from .nirvana_system import NirvanaSystem, NirvanaEvent, NirvanaReason
 from .llm_oracle import LLMOracle, HumanOracle
+from .bulletin_board import BulletinBoardSystem, Bulletin, BulletinType, Priority
 
 __all__ = [
     # 主脑
@@ -47,5 +48,11 @@ __all__ = [
     # 决策系统
     'LLMOracle',
     'HumanOracle',
+    
+    # 公告板系统
+    'BulletinBoardSystem',
+    'Bulletin',
+    'BulletinType',
+    'Priority',
 ]
 

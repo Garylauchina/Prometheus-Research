@@ -9,6 +9,7 @@ from datetime import datetime
 from enum import Enum
 import logging
 import numpy as np
+from .bulletin_board import AgentBulletinProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -175,6 +176,9 @@ class AgentV4:
         self.last_stand_start_time: Optional[datetime] = None
         self.last_stand_initial_capital: Optional[float] = None
         
+        # 公告板处理器（新增）
+        self.bulletin_processor = AgentBulletinProcessor(self)
+        
         logger.info(f"Agent {agent_id} 诞生，初始资金: {initial_capital}, 性格: {self.personality}")
     
     def _generate_random_gene(self) -> Dict:
@@ -198,6 +202,22 @@ class AgentV4:
                 'momentum': np.random.uniform(0.1, 0.4),
                 'volatility': np.random.uniform(0.1, 0.4),
                 'volume': np.random.uniform(0.1, 0.3)
+            },
+            
+            # 信号融合权重（新增）
+            'signal_weights': {
+                'technical': np.random.uniform(0.3, 0.7),   # 技术分析
+                'opponent': np.random.uniform(0.2, 0.6),    # 对手分析
+                'bulletin': np.random.uniform(0.0, 0.5),    # 公告板信号
+                'emotion': np.random.uniform(0.1, 0.4)      # 情绪状态
+            },
+            
+            # 公告板敏感度（新增）
+            'bulletin_sensitivity': {
+                'global': np.random.uniform(0.0, 1.0),      # 主脑战略
+                'market': np.random.uniform(0.0, 1.0),      # 市场事件
+                'system': np.random.uniform(0.0, 1.0),      # 系统风险
+                'social': np.random.uniform(0.0, 1.0)       # 社交信号
             }
         }
     
@@ -454,7 +474,7 @@ class AgentV4:
     
     def _generate_trading_signal(self, market_data: Dict) -> Optional[Dict]:
         """
-        根据市场数据生成交易信号
+        根据市场数据生成交易信号（多信号融合）
         
         Args:
             market_data: 市场数据
@@ -462,14 +482,132 @@ class AgentV4:
         Returns:
             Optional[Dict]: 交易信号
         """
-        # TODO: 实现具体的信号生成逻辑
-        # 这里应该基于：
-        # - self.gene（交易策略参数）
-        # - market_data（市场数据）
-        # - self.emotion（情绪状态）
-        # - self.personality（性格特质）
+        # 收集所有信号源
+        signals = {}
         
-        return None
+        # 1. 技术分析信号
+        signals['technical'] = self._analyze_technical(market_data)
+        
+        # 2. 对手分析信号
+        signals['opponent'] = self._analyze_opponent(market_data)
+        
+        # 3. 公告板信号（新增）
+        bulletins = market_data.get('bulletins', [])
+        signals['bulletin'] = self.bulletin_processor.process_bulletins(bulletins)
+        
+        # 4. 情绪偏差
+        signals['emotion'] = self._get_emotional_bias()
+        
+        # 多信号融合
+        final_signal = self._integrate_signals(signals)
+        
+        # 根据信号强度决策
+        if final_signal > 0.5:
+            return self._create_buy_signal(final_signal, market_data)
+        elif final_signal < -0.5:
+            return self._create_sell_signal(final_signal, market_data)
+        else:
+            return None  # 不交易
+    
+    def _integrate_signals(self, signals: Dict[str, float]) -> float:
+        """
+        多信号融合
+        
+        Args:
+            signals: 各种信号字典
+            
+        Returns:
+            float: 综合信号 (-1到1)
+        """
+        weights = self.gene.get('signal_weights', {
+            'technical': 0.5,
+            'opponent': 0.3,
+            'bulletin': 0.1,
+            'emotion': 0.1
+        })
+        
+        # 加权平均
+        final_signal = (
+            signals.get('technical', 0.0) * weights.get('technical', 0.5) +
+            signals.get('opponent', 0.0) * weights.get('opponent', 0.3) +
+            signals.get('bulletin', 0.0) * weights.get('bulletin', 0.1) +
+            signals.get('emotion', 0.0) * weights.get('emotion', 0.1)
+        )
+        
+        # 归一化
+        total_weight = sum(weights.values())
+        if total_weight > 0:
+            final_signal /= total_weight
+        
+        # 限制范围
+        return max(-1.0, min(1.0, final_signal))
+    
+    def _analyze_technical(self, market_data: Dict) -> float:
+        """
+        技术分析（简化版）
+        
+        Returns:
+            float: -1到1的信号
+        """
+        # TODO: 实现真实的技术分析
+        # 这里返回随机信号作为占位
+        return np.random.uniform(-1.0, 1.0)
+    
+    def _analyze_opponent(self, market_data: Dict) -> float:
+        """
+        对手分析（简化版）
+        
+        Returns:
+            float: -1到1的信号
+        """
+        # TODO: 实现真实的对手分析
+        # 这里返回随机信号作为占位
+        return np.random.uniform(-1.0, 1.0)
+    
+    def _get_emotional_bias(self) -> float:
+        """
+        获取情绪偏差
+        
+        Returns:
+            float: -1到1的偏差
+        """
+        # 情绪对交易的影响
+        fear_impact = -self.emotion.fear * 0.5
+        confidence_impact = self.emotion.confidence * 0.3
+        despair_impact = -self.emotion.despair * 0.7
+        
+        return fear_impact + confidence_impact + despair_impact
+    
+    def _create_buy_signal(self, signal_strength: float, market_data: Dict) -> Dict:
+        """创建买入信号"""
+        # 根据情绪调整仓位
+        position_size = self.gene['max_position_size']
+        if self.emotion.confidence > 0.7:
+            position_size *= 1.2  # 信心强时加仓
+        if self.emotion.fear > 0.6:
+            position_size *= 0.5  # 恐惧时减仓
+        
+        return {
+            'action': 'BUY',
+            'signal_strength': signal_strength,
+            'position_size': min(position_size, 1.0),
+            'stop_loss': self.gene.get('stop_loss', 0.05),
+            'take_profit': self.gene.get('take_profit', 0.10)
+        }
+    
+    def _create_sell_signal(self, signal_strength: float, market_data: Dict) -> Dict:
+        """创建卖出信号"""
+        position_size = self.gene['max_position_size']
+        if self.emotion.fear > 0.7:
+            position_size *= 1.5  # 恐惧时加大卖出
+        
+        return {
+            'action': 'SELL',
+            'signal_strength': abs(signal_strength),
+            'position_size': min(position_size, 1.0),
+            'stop_loss': self.gene.get('stop_loss', 0.05),
+            'take_profit': self.gene.get('take_profit', 0.10)
+        }
     
     def close_all_positions(self):
         """平掉所有持仓"""
