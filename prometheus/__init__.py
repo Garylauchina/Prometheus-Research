@@ -1,23 +1,23 @@
 """
-Prometheus v3.0 - AI驱动加密货币交易系统
+Prometheus v4.0 - AI驱动加密货币交易系统
 
 基于遗传算法和多Agent进化的自动化交易系统
 
 Author: Prometheus Team
-Version: 3.0
+Version: 4.0
 License: MIT
 """
 
-__version__ = "3.1.0"
+__version__ = "4.0.0"
 __author__ = "Prometheus Team"
 __license__ = "MIT"
 
 # 版本信息
 VERSION_INFO = {
-    'major': 3,
-    'minor': 1,
+    'major': 4,
+    'minor': 0,
     'patch': 0,
-    'release': 'stable'
+    'release': 'dev'
 }
 
 def get_version():
