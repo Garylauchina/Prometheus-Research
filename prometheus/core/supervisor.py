@@ -14,6 +14,8 @@ import pandas as pd
 from .medal_system import MedalSystem
 from .indicator_calculator import IndicatorCalculator, TechnicalIndicators
 from .market_state_analyzer import MarketStateAnalyzer, MarketState
+from .ledger_system import PublicLedger, AgentAccountSystem, Role
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +118,16 @@ class Supervisor:
         # 死亡历史（用于环境压力计算）
         self.death_history: List[Dict] = []
         
-        logger.info("监督者已初始化（完整版：市场分析 + Agent监控 + 风险管理）")
+        # ===== 双账簿系统 =====
+        self.public_ledger = PublicLedger()  # 公共账簿（只有一本）
+        self.agent_accounts: Dict[str, AgentAccountSystem] = {}  # Agent账户系统
+        
+        # ===== 运营组件（用于主循环）=====
+        self.okx_trading = None  # OKX交易接口
+        self.mastermind = None  # Mastermind组件
+        self.config = None  # 配置
+        
+        logger.info("监督者已初始化（完整运营系统：市场分析 + Agent监控 + 双账簿系统）")
     
     def calculate_despair_index(self,
                                 consecutive_losses: int,
@@ -732,4 +743,796 @@ class Supervisor:
             })
             
             logger.info(f"Agent {getattr(agent, 'agent_id', 'unknown')} 已从监督系统注销（死亡）")
+    
+    # ========== 虚拟账户管理系统（新增）==========
+    
+    def initialize_virtual_accounts(self, agents: List[Any], initial_capital_per_agent: float = 10000):
+        """
+        初始化Agent虚拟账户系统
+        
+        Args:
+            agents: Agent列表
+            initial_capital_per_agent: 每个Agent的初始虚拟资金
+        """
+        for agent in agents:
+            agent_id = getattr(agent, 'agent_id', 'unknown')
+            
+            self.agent_virtual_portfolios[agent_id] = {
+                'agent_id': agent_id,
+                'virtual_capital': initial_capital_per_agent,
+                'initial_capital': initial_capital_per_agent,
+                'virtual_positions': [],  # 虚拟持仓列表
+                'virtual_trades': [],     # 虚拟交易历史
+                'total_pnl': 0.0,
+                'realized_pnl': 0.0,
+                'unrealized_pnl': 0.0,
+                'trade_count': 0,
+                'win_count': 0,
+                'loss_count': 0,
+                'win_rate': 0.0,
+                'personality': {
+                    'aggression': getattr(agent.personality, 'aggression', 0.5) if hasattr(agent, 'personality') else 0.5,
+                    'risk_tolerance': getattr(agent.personality, 'risk_tolerance', 0.5) if hasattr(agent, 'personality') else 0.5,
+                    'adaptability': getattr(agent.personality, 'adaptability', 0.5) if hasattr(agent, 'personality') else 0.5
+                },
+                'created_at': datetime.now()
+            }
+        
+        logger.info(f"✅ 虚拟账户系统已初始化: {len(agents)}个Agent，每个{initial_capital_per_agent} USDT")
+    
+    def record_virtual_trade(self, agent_id: str, trade_type: str, price: float, amount: float, confidence: float = 0.0):
+        """
+        记录Agent的虚拟交易
+        
+        Args:
+            agent_id: Agent ID
+            trade_type: 交易类型 ('buy' or 'sell')
+            price: 交易价格
+            amount: 交易数量
+            confidence: 交易信心度
+        """
+        if agent_id not in self.agent_virtual_portfolios:
+            logger.warning(f"Agent {agent_id} 未注册虚拟账户")
+            return
+        
+        portfolio = self.agent_virtual_portfolios[agent_id]
+        
+        # 检查是否有持仓
+        has_position = len(portfolio['virtual_positions']) > 0
+        
+        if trade_type == 'buy' and not has_position:
+            # 虚拟开多
+            portfolio['virtual_positions'].append({
+                'side': 'long',
+                'entry_price': price,
+                'amount': amount,
+                'entry_time': datetime.now(),
+                'confidence': confidence
+            })
+            portfolio['trade_count'] += 1
+            logger.debug(f"Agent {agent_id} 虚拟开多: {amount} @ ${price}")
+            
+        elif trade_type == 'sell' and has_position:
+            # 虚拟平仓
+            for pos in portfolio['virtual_positions']:
+                if pos['side'] == 'long':
+                    # 计算盈亏
+                    pnl = (price - pos['entry_price']) * pos['amount']
+                    portfolio['realized_pnl'] += pnl
+                    portfolio['total_pnl'] += pnl
+                    portfolio['virtual_capital'] += pnl
+                    
+                    if pnl > 0:
+                        portfolio['win_count'] += 1
+                    else:
+                        portfolio['loss_count'] += 1
+                    
+                    # 更新胜率
+                    if portfolio['trade_count'] > 0:
+                        portfolio['win_rate'] = portfolio['win_count'] / portfolio['trade_count']
+                    
+                    # 计算持仓时间
+                    holding_time = (datetime.now() - pos['entry_time']).total_seconds() / 60
+                    
+                    # 记录交易
+                    portfolio['virtual_trades'].append({
+                        'entry_price': pos['entry_price'],
+                        'exit_price': price,
+                        'amount': pos['amount'],
+                        'pnl': pnl,
+                        'pnl_pct': (pnl / (pos['entry_price'] * pos['amount'])) * 100,
+                        'holding_time_minutes': holding_time,
+                        'entry_confidence': pos['confidence'],
+                        'entry_time': pos['entry_time'],
+                        'exit_time': datetime.now()
+                    })
+                    
+                    logger.debug(f"Agent {agent_id} 虚拟平仓: PnL=${pnl:.2f}")
+            
+            # 清空持仓
+            portfolio['virtual_positions'] = []
+    
+    def calculate_unrealized_pnl(self, current_price: float):
+        """
+        计算所有Agent的未实现盈亏
+        
+        Args:
+            current_price: 当前市场价格
+        """
+        for agent_id, portfolio in self.agent_virtual_portfolios.items():
+            unrealized = 0.0
+            for pos in portfolio['virtual_positions']:
+                if pos['side'] == 'long':
+                    unrealized += (current_price - pos['entry_price']) * pos['amount']
+            
+            portfolio['unrealized_pnl'] = unrealized
+    
+    def rank_agent_performance(self) -> List[Tuple[str, Dict]]:
+        """
+        对Agent表现进行排名
+        
+        Returns:
+            List[Tuple]: (agent_id, performance_data)按表现降序排列
+        """
+        rankings = []
+        
+        for agent_id, portfolio in self.agent_virtual_portfolios.items():
+            # 计算综合表现得分
+            capital_ratio = portfolio['virtual_capital'] / portfolio['initial_capital']
+            win_rate = portfolio['win_rate']
+            trade_count = portfolio['trade_count']
+            
+            # 综合得分：资金增长 * 0.6 + 胜率 * 0.3 + 交易活跃度 * 0.1
+            performance_score = (
+                (capital_ratio - 1) * 0.6 +
+                win_rate * 0.3 +
+                min(trade_count / 10, 1.0) * 0.1
+            )
+            
+            performance_data = {
+                'agent_id': agent_id,
+                'score': performance_score,
+                'capital': portfolio['virtual_capital'],
+                'capital_ratio': capital_ratio,
+                'total_pnl': portfolio['total_pnl'],
+                'win_rate': win_rate,
+                'trade_count': trade_count,
+                'win_count': portfolio['win_count'],
+                'loss_count': portfolio['loss_count'],
+                'personality': portfolio['personality']
+            }
+            
+            rankings.append((agent_id, performance_data))
+        
+        # 按综合得分降序排列
+        rankings.sort(key=lambda x: x[1]['score'], reverse=True)
+        
+        self.agent_performance_rankings = rankings
+        logger.info(f"Agent表现排名已更新: {len(rankings)}个Agent")
+        
+        return rankings
+    
+    def publish_agent_performance_report(self):
+        """发布Agent表现报告到公告板"""
+        if not self.bulletin_board:
+            return
+        
+        # 更新排名
+        rankings = self.rank_agent_performance()
+        
+        if not rankings:
+            logger.warning("没有Agent表现数据，跳过发布")
+            return
+        
+        # 提取前3名和后3名
+        top_3 = rankings[:3]
+        bottom_3 = rankings[-3:] if len(rankings) > 3 else []
+        
+        # 计算平均表现
+        avg_win_rate = np.mean([r[1]['win_rate'] for r in rankings])
+        avg_pnl = np.mean([r[1]['total_pnl'] for r in rankings])
+        avg_capital_ratio = np.mean([r[1]['capital_ratio'] for r in rankings])
+        
+        # 发布公告
+        self.bulletin_board.post(
+            tier='system',
+            title='📊 Agent表现报告',
+            content={
+                'type': 'AGENT_PERFORMANCE',
+                'timestamp': datetime.now().isoformat(),
+                'total_agents': len(rankings),
+                'top_performers': [
+                    {
+                        'agent_id': r[0],
+                        'rank': i + 1,
+                        'capital': r[1]['capital'],
+                        'pnl': r[1]['total_pnl'],
+                        'win_rate': r[1]['win_rate'],
+                        'trade_count': r[1]['trade_count']
+                    }
+                    for i, r in enumerate(top_3)
+                ],
+                'bottom_performers': [
+                    {
+                        'agent_id': r[0],
+                        'rank': len(rankings) - bottom_3.index(r),
+                        'capital': r[1]['capital'],
+                        'pnl': r[1]['total_pnl'],
+                        'win_rate': r[1]['win_rate'],
+                        'trade_count': r[1]['trade_count']
+                    }
+                    for r in bottom_3
+                ] if bottom_3 else [],
+                'population_stats': {
+                    'avg_win_rate': avg_win_rate,
+                    'avg_pnl': avg_pnl,
+                    'avg_capital_ratio': avg_capital_ratio
+                },
+                'recommendations': self._generate_performance_recommendations(rankings)
+            },
+            publisher='Supervisor',
+            priority='normal'
+        )
+        
+        logger.info(f"📊 Agent表现报告已发布: Top1={top_3[0][0] if top_3 else 'N/A'}, "
+                   f"Avg胜率={avg_win_rate:.2%}")
+    
+    def _generate_performance_recommendations(self, rankings: List[Tuple]) -> List[str]:
+        """生成表现建议"""
+        recommendations = []
+        
+        if not rankings:
+            return recommendations
+        
+        # 检查是否有明显的优胜者
+        if len(rankings) >= 3:
+            top_performer = rankings[0][1]
+            avg_score = np.mean([r[1]['score'] for r in rankings])
+            
+            if top_performer['score'] > avg_score * 1.5:
+                recommendations.append(f"🌟 Agent {rankings[0][0]} 表现突出，建议重点关注其策略")
+        
+        # 检查是否有失败者
+        bottom_performer = rankings[-1][1]
+        if bottom_performer['capital_ratio'] < 0.5:
+            recommendations.append(f"⚠️ Agent {rankings[-1][0]} 资金损失超50%，建议重新评估策略")
+        
+        # 整体表现评估
+        avg_win_rate = np.mean([r[1]['win_rate'] for r in rankings])
+        if avg_win_rate < 0.4:
+            recommendations.append("⚠️ 整体胜率偏低，建议调整市场分析或入场条件")
+        elif avg_win_rate > 0.6:
+            recommendations.append("✅ 整体表现良好，可考虑适当增加仓位")
+        
+        return recommendations
+    
+    def get_agent_portfolio(self, agent_id: str) -> Optional[Dict]:
+        """
+        获取Agent的虚拟账户信息
+        
+        Args:
+            agent_id: Agent ID
+            
+        Returns:
+            Dict: 虚拟账户信息，如果不存在则返回None
+        """
+        return self.agent_virtual_portfolios.get(agent_id)
+    
+    def get_all_portfolios(self) -> Dict[str, Dict]:
+        """获取所有Agent的虚拟账户信息"""
+        return self.agent_virtual_portfolios
+    
+    def print_performance_summary(self):
+        """打印Agent表现摘要（用于日志）"""
+        rankings = self.rank_agent_performance()
+        
+        if not rankings:
+            logger.info("暂无Agent表现数据")
+            return
+        
+        logger.info("\n" + "="*60)
+        logger.info("📊 Agent表现排名")
+        logger.info("="*60)
+        
+        for i, (agent_id, data) in enumerate(rankings[:10], 1):  # 只显示前10名
+            capital_change = (data['capital_ratio'] - 1) * 100
+            logger.info(
+                f"  {i:2d}. {agent_id}: "
+                f"资金${data['capital']:.2f} ({capital_change:+.1f}%), "
+                f"胜率{data['win_rate']:.1%}, "
+                f"交易{data['trade_count']}笔"
+            )
+        
+        if len(rankings) > 10:
+            logger.info(f"  ... 还有{len(rankings)-10}个Agent")
+        
+        logger.info("="*60)
+    
+    # ========== 实际持仓跟踪系统（新增）==========
+    
+    def set_okx_trading(self, okx_trading):
+        """注入OKX交易接口"""
+        self.okx_trading = okx_trading
+        logger.info("OKX交易接口已注入到Supervisor")
+    
+    def initialize_agent_real_positions(self, agents: List[Any]):
+        """
+        初始化Agent实际持仓跟踪
+        
+        Args:
+            agents: Agent列表
+        """
+        for agent in agents:
+            agent_id = getattr(agent, 'agent_id', 'unknown')
+            self.agent_real_positions[agent_id] = {
+                'has_position': False,
+                'amount': 0.0,
+                'entry_price': 0.0,
+                'entry_time': None,
+                'symbol': 'BTC/USDT:USDT'
+            }
+        
+        logger.info(f"✅ 实际持仓跟踪已初始化: {len(agents)}个Agent")
+    
+    def receive_trade_request(self, agent_id: str, signal: str, confidence: float, current_price: float) -> bool:
+        """
+        接收Agent的交易请求并执行
+        
+        这是Supervisor作为"运营者"的核心方法
+        
+        Args:
+            agent_id: Agent ID
+            signal: 交易信号 ('buy' or 'sell')
+            confidence: 信心度
+            current_price: 当前价格
+            
+        Returns:
+            bool: 是否执行成功
+        """
+        if not self.okx_trading:
+            logger.error("OKX交易接口未注入，无法执行交易")
+            return False
+        
+        # 1. 记录虚拟交易（所有请求都记录）
+        self.record_virtual_trade(
+            agent_id=agent_id,
+            trade_type=signal,
+            price=current_price,
+            amount=0.01,
+            confidence=confidence
+        )
+        
+        # 2. 检查是否可以执行实际交易
+        position = self.agent_real_positions.get(agent_id, {'has_position': False})
+        
+        if signal == 'buy':
+            if not position['has_position']:
+                return self._execute_buy(agent_id, current_price, confidence)
+            else:
+                logger.debug(f"{agent_id}: 已有持仓，拒绝开仓请求")
+                return False
+        
+        elif signal == 'sell':
+            if position['has_position']:
+                return self._execute_sell(agent_id, current_price, confidence)
+            else:
+                logger.debug(f"{agent_id}: 无持仓，拒绝平仓请求")
+                return False
+        
+        return False
+    
+    def _execute_buy(self, agent_id: str, current_price: float, confidence: float) -> bool:
+        """执行开仓（Supervisor执行交易）"""
+        amount = 0.01
+        
+        try:
+            order = self.okx_trading.place_market_order(
+                symbol='BTC/USDT:USDT',
+                side='buy',
+                amount=amount,
+                reduce_only=False,
+                pos_side='long'
+            )
+            
+            if order:
+                # 更新实际持仓状态
+                self.agent_real_positions[agent_id] = {
+                    'has_position': True,
+                    'amount': amount,
+                    'entry_price': current_price,
+                    'entry_time': datetime.now(),
+                    'symbol': 'BTC/USDT:USDT'
+                }
+                
+                logger.info(f"✅ {agent_id}: Supervisor执行开多 {amount} BTC (信心:{confidence:.2f})")
+                return True
+        except Exception as e:
+            logger.error(f"❌ {agent_id}: 开仓失败 - {e}")
+        
+        return False
+    
+    def _execute_sell(self, agent_id: str, current_price: float, confidence: float) -> bool:
+        """执行平仓（Supervisor执行交易）"""
+        position = self.agent_real_positions[agent_id]
+        amount = position['amount']
+        
+        try:
+            order = self.okx_trading.place_market_order(
+                symbol='BTC/USDT:USDT',
+                side='sell',
+                amount=amount,
+                reduce_only=True,
+                pos_side='long'
+            )
+            
+            if order:
+                # 计算盈亏
+                pnl = (current_price - position['entry_price']) * amount
+                
+                # 更新实际持仓状态
+                self.agent_real_positions[agent_id] = {
+                    'has_position': False,
+                    'amount': 0.0,
+                    'entry_price': 0.0,
+                    'entry_time': None,
+                    'symbol': ''
+                }
+                
+                logger.info(f"✅ {agent_id}: Supervisor执行平仓 {amount} BTC (盈亏:${pnl:.2f})")
+                return True
+        except Exception as e:
+            logger.error(f"❌ {agent_id}: 平仓失败 - {e}")
+        
+        return False
+    
+    def get_agent_position_status(self, agent_id: str) -> Dict:
+        """获取Agent持仓状态"""
+        return self.agent_real_positions.get(agent_id, {'has_position': False})
+    
+    # ========== 完整运营系统（新增：主循环）==========
+    
+    def set_components(self, okx_trading, mastermind, agents, config):
+        """
+        注入运营所需组件
+        
+        Args:
+            okx_trading: OKX交易接口
+            mastermind: Mastermind组件
+            agents: Agent列表
+            config: 配置
+        """
+        self.okx_trading = okx_trading
+        self.mastermind = mastermind
+        self.agents = agents
+        self.config = config
+        
+        # 为每个Agent创建账户系统
+        initial_capital = config.get('initial_capital_per_agent', 10000)
+        for agent in agents:
+            agent_id = getattr(agent, 'agent_id', 'unknown')
+            account_system = AgentAccountSystem(
+                agent_id=agent_id,
+                initial_capital=initial_capital,
+                public_ledger=self.public_ledger
+            )
+            self.agent_accounts[agent_id] = account_system
+            
+            # 将账户系统注入Agent
+            agent.account = account_system
+        
+        logger.info(f"✅ Supervisor完整运营系统已配置：{len(agents)}个Agent")
+    
+    def run(self, duration_minutes=None, check_interval=60):
+        """
+        Supervisor主循环（完整运营系统）
+        
+        这是Supervisor作为"完整运营系统"的核心方法
+        
+        Args:
+            duration_minutes: 运行时长（分钟），None表示不限时
+            check_interval: 检查间隔（秒）
+        """
+        from datetime import timedelta
+        import ccxt
+        
+        logger.info("="*70)
+        logger.info("🏃 Supervisor完整运营系统启动")
+        logger.info(f"   - Agent数量: {len(self.agents)}")
+        logger.info(f"   - 检查间隔: {check_interval}秒")
+        logger.info(f"   - 运行时长: {'不限时' if duration_minutes is None else f'{duration_minutes}分钟'}")
+        logger.info("="*70)
+        
+        print(f"\n{'='*70}")
+        print(f"🏃 Supervisor完整运营系统启动")
+        print(f"   Agent数量: {len(self.agents)}")
+        print(f"   检查间隔: {check_interval}秒")
+        if duration_minutes:
+            print(f"   运行时长: {duration_minutes}分钟")
+        else:
+            print(f"   运行时长: 不限时 (按Ctrl+C停止)")
+        print(f"{'='*70}\n")
+        
+        start_time = datetime.now()
+        end_time = start_time + timedelta(minutes=duration_minutes) if duration_minutes else None
+        cycle_count = 0
+        
+        try:
+            while True:
+                # 检查是否超时
+                if end_time and datetime.now() >= end_time:
+                    print("\n⏰ 运行时间已到，正常结束")
+                    break
+                
+                cycle_count += 1
+                current_time = datetime.now()
+                
+                print(f"\n{'='*70}")
+                print(f"  🔄 周期 {cycle_count} | {current_time.strftime('%H:%M:%S')}")
+                print(f"{'='*70}")
+                
+                try:
+                    # 1. 获取市场数据
+                    market_data = self._fetch_market_data_from_okx()
+                    if market_data is None or len(market_data) < 25:
+                        print("⚠️  市场数据不足，等待下一周期...")
+                        time.sleep(check_interval)
+                        continue
+                    
+                    current_price = market_data['close'].iloc[-1]
+                    print(f"\n📊 当前价格: ${current_price:.2f}")
+                    
+                    # 2. Supervisor分析市场并发布
+                    self.comprehensive_monitoring(market_data)
+                    
+                    # 3. Mastermind战略决策（每5个周期）
+                    if cycle_count % 5 == 0 and self.mastermind:
+                        self._execute_mastermind_strategy(market_data)
+                    
+                    # 4. 收集Agent决策
+                    print(f"\n🤖 【Agents】自主决策模式")
+                    agent_decisions = []
+                    for agent in self.agents:
+                        try:
+                            decision = agent.decide()
+                            if decision and isinstance(decision, dict):
+                                agent_decisions.append({
+                                    'agent_id': agent.agent_id,
+                                    'signal': decision.get('signal'),
+                                    'confidence': decision.get('confidence', 0.5),
+                                    'reason': decision.get('reason', '')
+                                })
+                        except Exception as e:
+                            logger.error(f"Agent {agent.agent_id} 决策失败: {e}")
+                    
+                    # 统计决策
+                    buy_count = sum(1 for d in agent_decisions if d['signal'] == 'buy')
+                    sell_count = sum(1 for d in agent_decisions if d['signal'] == 'sell')
+                    wait_count = len(agent_decisions) - buy_count - sell_count
+                    
+                    print(f"\n   📊 Agent决策分布:")
+                    print(f"      🟢 做多: {buy_count}个Agent")
+                    print(f"      🔴 做空/平仓: {sell_count}个Agent")
+                    print(f"      ⚪ 观望: {wait_count}个Agent")
+                    
+                    # 5. Supervisor接收并执行交易请求
+                    print(f"\n💼 【交易执行】Supervisor接收Agent请求")
+                    executed_count = 0
+                    for decision in agent_decisions:
+                        if decision['signal']:
+                            success = self._receive_and_execute_trade(
+                                agent_id=decision['agent_id'],
+                                signal=decision['signal'],
+                                confidence=decision['confidence'],
+                                current_price=current_price
+                            )
+                            if success:
+                                executed_count += 1
+                    
+                    if executed_count == 0:
+                        print(f"   ⏸️  本周期无交易执行")
+                    else:
+                        print(f"   ✅ 执行了{executed_count}笔交易")
+                    
+                    # 6. 更新虚拟盈亏
+                    self._update_unrealized_pnl(current_price)
+                    
+                    # 7. 发布Agent表现报告（每5个周期）
+                    if cycle_count % 5 == 0:
+                        self._publish_performance_report()
+                    
+                    # 8. 等待下一周期
+                    print(f"\n⏸️  等待 {check_interval}秒...")
+                    time.sleep(check_interval)
+                
+                except KeyboardInterrupt:
+                    raise  # 向外抛出，由外层捕获
+                except Exception as e:
+                    logger.error(f"周期 {cycle_count} 执行失败: {e}", exc_info=True)
+                    print(f"⚠️  周期执行失败: {e}")
+                    time.sleep(check_interval)
+        
+        except KeyboardInterrupt:
+            print("\n\n⚠️  运营被用户中断")
+        
+        # 最终总结
+        print(f"\n{'='*70}")
+        print(f"🏁 Supervisor运营结束")
+        print(f"{'='*70}")
+        self._print_final_summary()
+    
+    def _fetch_market_data_from_okx(self):
+        """从OKX获取市场数据"""
+        try:
+            # 获取K线数据
+            ohlcv = self.okx_trading.exchange.fetch_ohlcv(
+                'BTC/USDT:USDT',
+                timeframe='15m',
+                limit=100
+            )
+            
+            # 转换为DataFrame
+            df = pd.DataFrame(
+                ohlcv,
+                columns=['timestamp', 'open', 'high', 'low', 'close', 'volume']
+            )
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            
+            return df
+        except Exception as e:
+            logger.error(f"获取市场数据失败: {e}")
+            return None
+    
+    def _execute_mastermind_strategy(self, market_data):
+        """执行Mastermind战略决策"""
+        if not self.mastermind or not self.bulletin_board:
+            return
+        
+        try:
+            # Mastermind读取公共账簿（只读权限）
+            top_performers = self.public_ledger.get_top_performers(
+                limit=5, 
+                caller_role=Role.MASTERMIND
+            )
+            
+            # Mastermind制定战略
+            strategy = self.mastermind.make_decision(
+                market_data=market_data,
+                current_market_state=self.current_market_state,
+                top_performers=top_performers
+            )
+            
+            # 发布战略公告
+            if strategy:
+                self.bulletin_board.publish('mastermind', strategy)
+                logger.info(f"🧠 Mastermind发布战略: {strategy.get('type', 'unknown')}")
+        except Exception as e:
+            logger.error(f"Mastermind战略决策失败: {e}")
+    
+    def _receive_and_execute_trade(self, agent_id, signal, confidence, current_price):
+        """接收并执行Agent的交易请求"""
+        account = self.agent_accounts.get(agent_id)
+        if not account:
+            logger.error(f"{agent_id}: 账户不存在")
+            return False
+        
+        # 检查持仓状态（从私有账簿）
+        status = account.get_status_for_decision(
+            current_price,
+            caller_role=Role.SUPERVISOR,
+            caller_id='system'
+        )
+        
+        try:
+            if signal == 'buy':
+                if status['has_position']:
+                    logger.debug(f"{agent_id}: 已有持仓，拒绝买入")
+                    return False
+                
+                # 执行买入
+                order = self.okx_trading.place_market_order(
+                    symbol='BTC/USDT:USDT',
+                    side='buy',
+                    amount=0.01,
+                    reduce_only=False,
+                    pos_side='long'
+                )
+                
+                if order:
+                    # 更新账簿（同时更新私有和公共）
+                    account.record_trade(
+                        trade_type='buy',
+                        amount=0.01,
+                        price=current_price,
+                        confidence=confidence,
+                        is_real=True,
+                        caller_role=Role.SUPERVISOR
+                    )
+                    logger.info(f"✅ {agent_id}: 开多 0.01 BTC @ ${current_price:.2f}")
+                    return True
+            
+            elif signal == 'sell':
+                if not status['has_position']:
+                    logger.debug(f"{agent_id}: 无持仓，拒绝卖出")
+                    return False
+                
+                # 执行卖出
+                order = self.okx_trading.place_market_order(
+                    symbol='BTC/USDT:USDT',
+                    side='sell',
+                    amount=0.01,
+                    reduce_only=True,
+                    pos_side='long'
+                )
+                
+                if order:
+                    # 更新账簿
+                    account.record_trade(
+                        trade_type='sell',
+                        amount=0.01,
+                        price=current_price,
+                        confidence=confidence,
+                        is_real=True,
+                        caller_role=Role.SUPERVISOR
+                    )
+                    logger.info(f"✅ {agent_id}: 平仓 0.01 BTC @ ${current_price:.2f}")
+                    return True
+        
+        except Exception as e:
+            logger.error(f"{agent_id}: 交易执行失败 - {e}")
+        
+        return False
+    
+    def _update_unrealized_pnl(self, current_price):
+        """更新所有Agent的未实现盈亏"""
+        for agent_id, account in self.agent_accounts.items():
+            try:
+                account.private_ledger.calculate_unrealized_pnl(current_price)
+            except Exception as e:
+                logger.error(f"更新{agent_id}未实现盈亏失败: {e}")
+    
+    def _publish_performance_report(self):
+        """发布Agent表现报告"""
+        try:
+            # 从公共账簿获取统计
+            top_performers = self.public_ledger.get_top_performers(
+                limit=10,
+                caller_role=Role.SUPERVISOR
+            )
+            
+            print(f"\n{'='*60}")
+            print(f"📊 Agent表现排名 (Top 5)")
+            print(f"{'='*60}")
+            
+            for i, (agent_id, stats) in enumerate(top_performers[:5], 1):
+                pnl = stats.get('total_pnl', 0)
+                win_rate = stats.get('win_rate', 0)
+                trade_count = stats.get('trade_count', 0)
+                print(f"  {i}. {agent_id}: PnL=${pnl:.2f}, 胜率{win_rate:.1%}, {trade_count}笔")
+            
+            print(f"{'='*60}")
+        
+        except Exception as e:
+            logger.error(f"发布表现报告失败: {e}")
+    
+    def _print_final_summary(self):
+        """打印最终总结"""
+        try:
+            all_stats = self.public_ledger.get_all_agent_stats(
+                caller_role=Role.SUPERVISOR
+            )
+            
+            print(f"\n{'='*70}")
+            print(f"📊 最终统计")
+            print(f"{'='*70}")
+            print(f"活跃Agent: {len(all_stats)}")
+            
+            if all_stats:
+                total_pnl = sum(stats.get('total_pnl', 0) for stats in all_stats.values())
+                avg_pnl = total_pnl / len(all_stats)
+                print(f"总盈亏: ${total_pnl:.2f}")
+                print(f"平均盈亏: ${avg_pnl:.2f}")
+            
+            print(f"{'='*70}")
+        except Exception as e:
+            logger.error(f"打印最终总结失败: {e}")
 

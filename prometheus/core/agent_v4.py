@@ -1029,8 +1029,8 @@ class AgentV4:
         content = bulletin.get('content', {})
         tier = bulletin.get('tier', '')
         
-        # 基础信心度（基于性格）
-        base_confidence = self.personality.confidence
+        # 基础信心度（基于性格：乐观度+纪律性）
+        base_confidence = (self.personality.optimism + self.personality.discipline) / 2
         
         # 战略公告（主脑）- 权威性高
         if tier == 'strategic':
@@ -1047,8 +1047,8 @@ class AgentV4:
         
         # 系统公告（监督者）- 警告性
         elif tier == 'system':
-            # 根据风险偏好决定
-            risk_aversion = 1 - self.personality.risk_appetite
+            # 根据风险承受度决定
+            risk_aversion = 1 - self.personality.risk_tolerance
             accept_threshold = 1 - risk_aversion
             confidence_boost = 0.15
         
@@ -1075,11 +1075,14 @@ class AgentV4:
         else:
             action = 'ignore'
         
+        # 计算基础信心
+        base_confidence = (self.personality.optimism + self.personality.discipline) / 2
+        
         return {
             'accept': accept,
             'confidence': final_confidence,
             'action': action,
-            'reason': f"基于性格({self.personality.confidence:.2f})和基因决策"
+            'reason': f"基于性格({base_confidence:.2f})和基因决策"
         }
     
     def process_bulletins_and_decide(self) -> Dict:
