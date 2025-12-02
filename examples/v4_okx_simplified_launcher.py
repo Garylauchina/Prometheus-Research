@@ -10,17 +10,32 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from prometheus.core.supervisor import Supervisor
 from prometheus.core.mastermind import Mastermind
 from prometheus.core.bulletin_board_v4 import BulletinBoardV4
-from prometheus.agents.live_agent_v4 import LiveAgentV4
+from prometheus.core.agent_v4 import AgentV4
 from prometheus.core.gene import Gene
-from config.okx_config import OKX_CONFIG, TEST_CONFIG
+from config.okx_config import OKX_PAPER_TRADING, TEST_CONFIG
 import ccxt
 import logging
 
+# 彻夜运行模式：只输出关键信息
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.WARNING,  # 全局WARNING级别，减少冗余日志
+    format='%(asctime)s - %(levelname)s - %(message)s'  # 简化格式
 )
+
+# 设置关键模块的日志级别
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)  # 启动器保持INFO
+
+# 其他模块降低到WARNING
+logging.getLogger('prometheus.core.supervisor').setLevel(logging.INFO)
+logging.getLogger('prometheus.core.bulletin_board_v4').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.agent_v4').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.market_state_analyzer').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.ledger_system').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.mastermind').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.indicator_calculator').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.medal_system').setLevel(logging.WARNING)
+logging.getLogger('prometheus.core.trading_permissions').setLevel(logging.WARNING)
 
 
 class OKXPaperTrading:
@@ -28,14 +43,14 @@ class OKXPaperTrading:
     
     def __init__(self):
         self.exchange = ccxt.okx({
-            'apiKey': OKX_CONFIG['api_key'],
-            'secret': OKX_CONFIG['secret_key'],
-            'password': OKX_CONFIG['passphrase'],
+            'apiKey': OKX_PAPER_TRADING['api_key'],
+            'secret': OKX_PAPER_TRADING['api_secret'],
+            'password': OKX_PAPER_TRADING['passphrase'],
             'enableRateLimit': True,
             'options': {'defaultType': 'swap'}
         })
         self.exchange.set_sandbox_mode(True)
-        logger.info("✅ OKX模拟盘已连接")
+        logger.info("OKX模拟盘已连接")
     
     def place_market_order(self, symbol, side, amount, reduce_only=False, pos_side=None):
         """下市价单"""
@@ -57,8 +72,9 @@ class OKXPaperTrading:
                 params=params
             )
             
+            # 只在日志文件中记录，不输出到控制台
             action = "平仓" if reduce_only else "开仓"
-            logger.info(f"✅ {action} {side} {amount} {symbol} 成功")
+            # logger.info不再输出（已设为WARNING级别）
             return order
         
         except Exception as e:
@@ -84,9 +100,8 @@ class OKXPaperTrading:
                         reduce_only=True,
                         pos_side=pos_side
                     )
-                    logger.info(f"✅ 已平仓: {side} {contracts} BTC")
             
-            logger.info("✅ 所有持仓已清理")
+            logger.info("所有持仓已清理")
         except Exception as e:
             logger.error(f"清理持仓失败: {e}")
 
@@ -103,19 +118,27 @@ class PrometheusLauncher:
     
     def __init__(self, config):
         """初始化启动器"""
-        logger.info("="*70)
-        logger.info("  Prometheus v4.0 - 简化启动器")
-        logger.info("="*70)
+        logger.info("Prometheus v4.0 - 彻夜运行模式")
         
         self.config = config
         
-        # 1. 创建OKX交易接口
-        logger.info("1. 创建OKX交易接口...")
+        # 创建日志目录
+        import os
+        from datetime import datetime
+        log_dir = config.get('log_dir', 'logs/live_trading')
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # 生成日志文件名
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.log_file = os.path.join(log_dir, f'okx_live_{timestamp}.txt')
+        
+        logger.info(f"日志: {self.log_file}")
+        
+        # 1. 创建OKX交易接口并清理持仓
         self.okx = OKXPaperTrading()
-        self.okx.close_all_positions()  # 清理持仓
+        self.okx.close_all_positions()
         
         # 2. 创建系统组件
-        logger.info("2. 创建系统组件...")
         self.bulletin_board = BulletinBoardV4()
         
         self.mastermind = Mastermind(
@@ -129,11 +152,9 @@ class PrometheusLauncher:
         )
         
         # 3. 创建Agent群体
-        logger.info(f"3. 创建Agent群体 ({config['agent_count']}个)...")
         self.agents = self._create_agents(config['agent_count'])
         
         # 4. 配置Supervisor
-        logger.info("4. 配置Supervisor...")
         self.supervisor.set_components(
             okx_trading=self.okx,
             mastermind=self.mastermind,
@@ -141,8 +162,7 @@ class PrometheusLauncher:
             config=config
         )
         
-        logger.info("✅ 所有组件已初始化")
-        logger.info("="*70)
+        logger.info(f"系统初始化完成: {config['agent_count']}个Agent")
     
     def _create_agents(self, count):
         """创建Agent群体"""
@@ -151,28 +171,26 @@ class PrometheusLauncher:
         for i in range(count):
             agent_id = f"LiveAgent_{i+1:02d}"
             
-            # 创建基因
-            gene = Gene.create_genesis_gene(agent_id)
+            # 创建基因（随机）
+            gene = Gene.random()
             
-            # 创建个性
-            personality = {
-                'risk_tolerance': 0.5 + (i * 0.05),
-                'optimism': 0.5 + (i * 0.03),
-                'discipline': 0.7 + (i * 0.02),
-            }
+            # 将Gene对象转换为字典（Agent代码期望字典格式）
+            gene_dict = gene.to_dict()
+            
+            # 创建个性（AgentV4会自动生成随机个性，不需要传入）
+            # personality参数在AgentV4中是可选的，会自动生成
             
             # 创建Agent
-            agent = LiveAgentV4(
+            agent = AgentV4(
                 agent_id=agent_id,
-                gene=gene,
-                personality=personality,
+                gene=gene_dict,  # 传入字典格式的基因
+                personality=None,  # 让Agent自己生成随机个性
                 initial_capital=10000,
                 bulletin_board=self.bulletin_board
             )
             
             agents.append(agent)
         
-        logger.info(f"✅ 创建了{count}个Agent")
         return agents
     
     def run(self, duration_minutes=None, check_interval=60):
@@ -183,23 +201,23 @@ class PrometheusLauncher:
             duration_minutes: 运行时长（分钟）
             check_interval: 检查间隔（秒）
         """
-        logger.info("启动Supervisor运营系统...")
-        
-        # 委托给Supervisor运营
+        # 委托给Supervisor运营（减少启动日志）
         self.supervisor.run(
             duration_minutes=duration_minutes,
-            check_interval=check_interval
+            check_interval=check_interval,
+            log_file=self.log_file
         )
 
 
 def main():
     """主函数"""
-    # 配置
+    # 配置（优化版）
     config = {
         'agent_count': TEST_CONFIG.get('agent_count', 10),
         'initial_capital_per_agent': 10000,
-        'duration_minutes': TEST_CONFIG.get('duration_minutes'),
-        'check_interval': TEST_CONFIG.get('check_interval', 120),
+        'duration_minutes': None,  # 无限运行，直到按Ctrl+C
+        'check_interval': 20,  # 20秒间隔（快速迭代）
+        'log_dir': 'logs/live_trading'  # 日志目录
     }
     
     # 创建启动器

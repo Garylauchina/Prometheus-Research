@@ -172,6 +172,24 @@ class PrivateLedger:
             return self.real_position.get_unrealized_pnl(current_price)
         return 0.0
     
+    def calculate_unrealized_pnl(self, current_price: float):
+        """
+        计算并更新未实现盈亏（Supervisor调用）
+        
+        这是一个便捷方法，计算结果存储在内部状态中
+        """
+        # 计算虚拟持仓的未实现盈亏
+        unrealized = 0.0
+        if self.virtual_position:
+            unrealized += self.virtual_position.get_unrealized_pnl(current_price)
+        
+        # 实际持仓的未实现盈亏
+        if self.real_position:
+            unrealized += self.real_position.get_unrealized_pnl(current_price)
+        
+        # 可以存储到统计数据中
+        # self.unrealized_pnl = unrealized  # 如果需要存储
+    
     def get_balance(self) -> float:
         """获取可用资金"""
         return self.virtual_capital

@@ -1024,7 +1024,7 @@ class AgentV4:
             Dict: 解读结果
                 - accept: 是否接受公告建议
                 - confidence: 信心度 (0-1)
-                - action: 拟采取的行动
+                - signal: 交易信号 'buy'/'sell'/None
         """
         content = bulletin.get('content', {})
         tier = bulletin.get('tier', '')
@@ -1041,7 +1041,7 @@ class AgentV4:
         # 市场公告（监督者）- 信息性
         elif tier == 'market':
             # 根据市场敏感度决定
-            market_sensitivity = self.gene.get('market_sensitivity', 0.5)
+            market_sensitivity = getattr(self.gene, 'market_sensitivity', 0.5)
             accept_threshold = 1 - market_sensitivity
             confidence_boost = 0.1
         
@@ -1062,43 +1062,72 @@ class AgentV4:
         # 决定是否接受
         accept = final_confidence > accept_threshold
         
-        # 决定行动
+        # 生成交易信号（基于市场状态和性格）
+        signal = None
         if accept:
-            if tier == 'strategic':
-                action = 'adjust_strategy'
-            elif tier == 'market':
-                action = 'analyze_opportunity'
+            # 从公告内容中提取市场状态
+            market_state = content.get('market_state', {})
+            trend = market_state.get('trend', 'sideways')
+            momentum = market_state.get('momentum', 'neutral')
+            recommendation = market_state.get('recommendation', '')
+            
+            # 基于性格和市场状态生成信号
+            if tier == 'market':
+                # 中等以上乐观 + 上涨趋势 → 买入
+                if self.personality.optimism >= 0.5 and '上升' in trend:
+                    signal = 'buy'
+                # 悲观派 + 下跌趋势 → 卖出
+                elif self.personality.optimism < 0.4 and '下降' in trend:
+                    signal = 'sell'
+                # 激进派 + 上涨趋势（即使超买也敢买）→ 买入
+                elif self.personality.aggression > 0.7 and '上升' in trend:
+                    signal = 'buy'
+                # 保守派 + 超卖 → 买入（抄底）
+                elif self.personality.aggression < 0.4 and momentum in ['超卖', '严重超卖']:
+                    signal = 'buy'
+            
+            elif tier == 'strategic':
+                # 主脑战略公告，根据推荐采取行动
+                if 'buy' in recommendation.lower() or '买' in recommendation:
+                    signal = 'buy'
+                elif 'sell' in recommendation.lower() or '卖' in recommendation:
+                    signal = 'sell'
+            
             elif tier == 'system':
-                action = 'reduce_risk'
-            else:
-                action = 'monitor'
-        else:
-            action = 'ignore'
-        
-        # 计算基础信心
-        base_confidence = (self.personality.optimism + self.personality.discipline) / 2
+                # 系统警告，倾向于平仓或减仓
+                if '风险' in str(content) or 'risk' in str(content).lower():
+                    signal = 'sell'  # 风险警告 → 平仓
         
         return {
             'accept': accept,
             'confidence': final_confidence,
-            'action': action,
-            'reason': f"基于性格({base_confidence:.2f})和基因决策"
+            'signal': signal,
+            'reason': f"基于性格(乐观{self.personality.optimism:.2f}/激进{self.personality.aggression:.2f})和市场分析"
         }
+    
+    def decide(self) -> Dict:
+        """
+        决策方法（Supervisor调用的统一接口）
+        
+        Returns:
+            Dict: 决策结果 {'signal': 'buy'/'sell'/None, 'confidence': float, 'reason': str}
+        """
+        return self.process_bulletins_and_decide()
     
     def process_bulletins_and_decide(self) -> Dict:
         """
         读取并处理所有公告，做出综合决策
         
         Returns:
-            Dict: 决策结果
+            Dict: 决策结果 {'signal': 'buy'/'sell'/None, 'confidence': float, 'reason': str}
         """
         # 1. 读取公告
         bulletins = self.read_bulletins(limit=10)
         
         if not bulletins:
             return {
-                'decision': 'no_info',
-                'action': 'hold',
+                'signal': None,
+                'confidence': 0,
                 'reason': '无公告信息'
             }
         
@@ -1118,17 +1147,18 @@ class AgentV4:
         
         if not accepted_bulletins:
             return {
-                'decision': 'all_rejected',
-                'action': 'hold',
+                'signal': None,
+                'confidence': 0,
                 'reason': '所有公告均未接受'
             }
         
         # 4. 根据接受的公告做出决策
         # 优先级：战略 > 系统 > 市场
-        strategic = [b for b in accepted_bulletins if b['tier'] == 'strategic']
-        system = [b for b in accepted_bulletins if b['tier'] == 'system']
-        market = [b for b in accepted_bulletins if b['tier'] == 'market']
+        strategic = [b for b in accepted_bulletins if b['tier'] == 'strategic' and b.get('signal')]
+        system = [b for b in accepted_bulletins if b['tier'] == 'system' and b.get('signal')]
+        market = [b for b in accepted_bulletins if b['tier'] == 'market' and b.get('signal')]
         
+        # 选择最高优先级且有交易信号的公告
         if strategic:
             primary = strategic[0]
         elif system:
@@ -1136,15 +1166,16 @@ class AgentV4:
         elif market:
             primary = market[0]
         else:
-            primary = accepted_bulletins[0]
+            # 没有任何交易信号
+            return {
+                'signal': None,
+                'confidence': 0,
+                'reason': f"接受了{len(accepted_bulletins)}条公告，但无交易信号"
+            }
         
         return {
-            'decision': 'bulletin_guided',
-            'action': primary['action'],
-            'primary_bulletin': primary['bulletin_id'],
-            'accepted_count': len(accepted_bulletins),
-            'total_count': len(bulletins),
+            'signal': primary['signal'],
             'confidence': primary['confidence'],
-            'reason': f"接受了 {len(accepted_bulletins)}/{len(bulletins)} 条公告，主要依据: {primary['title']}"
+            'reason': f"{primary['tier']}公告: {primary['title'][:20]}... ({primary['reason']})"
         }
 

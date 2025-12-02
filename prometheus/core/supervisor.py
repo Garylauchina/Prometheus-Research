@@ -1,7 +1,7 @@
 """
 监督者 (Supervisor) - Prometheus v4.0
-系统的观察者和评估者，负责监控 Agent 和施加环境压力
-v4.0: 集成奖章制度 + 市场分析功能（整合MarketAnalyzer）
+系统的观察者和评估者,负责监控 Agent 和施加环境压力
+v4.0: 集成奖章制度 + 市场分析功能(整合MarketAnalyzer)
 """
 
 from typing import Dict, List, Optional, Tuple, Any
@@ -57,7 +57,7 @@ class Supervisor:
     监督者 - 系统的观察者和评估者
     
     职责：
-    1. 市场分析（整合MarketAnalyzer）⭐
+    1. 市场分析(整合MarketAnalyzer)⭐
        - 计算技术指标
        - 分析市场状态
        - 发布市场公告
@@ -98,7 +98,7 @@ class Supervisor:
         self.suicide_threshold = suicide_threshold
         self.last_stand_threshold = last_stand_threshold
         
-        # 市场分析模块（整合）⭐
+        # 市场分析模块(整合)⭐
         self.indicator_calculator = IndicatorCalculator(indicator_config)
         self.market_state_analyzer = MarketStateAnalyzer()
         
@@ -115,19 +115,31 @@ class Supervisor:
         # 奖章系统
         self.medal_system = MedalSystem()
         
-        # 死亡历史（用于环境压力计算）
+        # 死亡历史(用于环境压力计算)
         self.death_history: List[Dict] = []
         
         # ===== 双账簿系统 =====
-        self.public_ledger = PublicLedger()  # 公共账簿（只有一本）
+        self.public_ledger = PublicLedger()  # 公共账簿(只有一本)
         self.agent_accounts: Dict[str, AgentAccountSystem] = {}  # Agent账户系统
         
-        # ===== 运营组件（用于主循环）=====
+        # ===== 兼容旧代码：模拟旧的agent_virtual_portfolios =====
+        # 这是一个property,动态生成旧格式的portfolio数据
+        self._legacy_mode = True
+        
+        # ===== 运营组件(用于主循环)=====
         self.okx_trading = None  # OKX交易接口
         self.mastermind = None  # Mastermind组件
         self.config = None  # 配置
         
-        logger.info("监督者已初始化（完整运营系统：市场分析 + Agent监控 + 双账簿系统）")
+        logger.info("监督者已初始化(完整运营系统：市场分析 + Agent监控 + 双账簿系统)")
+    
+    @property
+    def agent_virtual_portfolios(self) -> Dict[str, Dict]:
+        """兼容属性：动态生成旧格式的portfolio数据"""
+        portfolios = {}
+        for agent_id, account in self.agent_accounts.items():
+            portfolios[agent_id] = self._get_legacy_portfolio(agent_id)
+        return portfolios
     
     def calculate_despair_index(self,
                                 consecutive_losses: int,
@@ -142,7 +154,7 @@ class Supervisor:
         - 连续亏损情况
         - 资金损失程度
         - 市场适应能力
-        - 生存时长（太短或太长都可能增加绝望）
+        - 生存时长(太短或太长都可能增加绝望)
         - 环境压力
         
         Args:
@@ -153,7 +165,7 @@ class Supervisor:
             environmental_pressure: 环境压力 (0-2)
             
         Returns:
-            float: 绝望指数 (0-1)，越高越绝望
+            float: 绝望指数 (0-1),越高越绝望
         """
         # 1. 连续亏损因子 (0-1)
         loss_factor = min(consecutive_losses / 15.0, 1.0)  # 15次连亏 = 1.0
@@ -166,7 +178,7 @@ class Supervisor:
         fitness_factor = 1 - fitness_score  # 适应度越低越高
         
         # 4. 生存时长因子 (0-1)
-        # 太短（还没适应）或太长（长期表现差）都增加绝望
+        # 太短(还没适应)或太长(长期表现差)都增加绝望
         if days_alive < 7:
             time_factor = 0.3  # 新生 Agent 不容易绝望
         elif days_alive < 30:
@@ -177,7 +189,7 @@ class Supervisor:
         # 5. 环境压力因子
         pressure_factor = environmental_pressure / 2.0  # 归一化到 0-1
         
-        # 综合计算（加权平均）
+        # 综合计算(加权平均)
         despair_index = (
             loss_factor * 0.3 +
             capital_factor * 0.35 +
@@ -197,7 +209,7 @@ class Supervisor:
         """
         计算 Agent 的濒危指数
         
-        濒危但尚未绝望，评估是否适合拼死一搏
+        濒危但尚未绝望,评估是否适合拼死一搏
         
         Args:
             capital_ratio: 当前资金/初始资金
@@ -207,20 +219,20 @@ class Supervisor:
             personality_aggression: 性格激进度 (0-1)
             
         Returns:
-            float: 濒危指数 (0-1)，越高越适合拼搏
+            float: 濒危指数 (0-1),越高越适合拼搏
         """
         # 1. 资金危机因子
         if capital_ratio > 0.5:
-            capital_crisis = 0.0  # 资金充足，不需要拼搏
+            capital_crisis = 0.0  # 资金充足,不需要拼搏
         elif capital_ratio > 0.3:
             capital_crisis = (0.5 - capital_ratio) / 0.2  # 0.3-0.5 线性增长
         else:
             capital_crisis = 1.0  # 资金严重不足
         
-        # 2. 趋势因子（下降趋势增加拼搏意愿）
+        # 2. 趋势因子(下降趋势增加拼搏意愿)
         trend_factor = max(0, -recent_trend)  # 只有下降趋势才触发
         
-        # 3. 机会因子（有好机会才值得拼搏）
+        # 3. 机会因子(有好机会才值得拼搏)
         opportunity_factor = market_opportunity
         
         # 4. 意志因子
@@ -353,7 +365,7 @@ class Supervisor:
         avg_fitness = np.mean([r.fitness_score for r in reports])
         avg_despair = np.mean([r.despair_index for r in reports])
         
-        # 计算多样性（基因或策略的标准差）
+        # 计算多样性(基因或策略的标准差)
         fitness_std = np.std([r.fitness_score for r in reports])
         diversity = min(fitness_std * 2, 1.0)  # 归一化到 0-1
         
@@ -445,7 +457,7 @@ class Supervisor:
             'population_snapshots': len(self.population_statistics)
         }
     
-    # ========== 市场分析模块（新增）==========
+    # ========== 市场分析模块(新增)==========
     
     def analyze_market_and_publish(self, market_data: pd.DataFrame):
         """
@@ -454,10 +466,10 @@ class Supervisor:
         整合原MarketAnalyzer的功能
         
         Args:
-            market_data: 市场数据（OHLCV格式）
+            market_data: 市场数据(OHLCV格式)
         """
         try:
-            # 1. 计算技术指标（一次性）
+            # 1. 计算技术指标(一次性)
             self.current_indicators = self.indicator_calculator.calculate_all(market_data)
             
             # 2. 分析市场状态
@@ -492,7 +504,8 @@ class Supervisor:
                     publisher='Supervisor',
                     priority='normal'
                 )
-                logger.info(f"📊 市场分析已发布: {self.current_market_state.trend.value}")
+                # 彻夜运行：减少重复日志
+                # logger.info(f"📊 市场分析已发布: {self.current_market_state.trend.value}")
             
         except Exception as e:
             logger.error(f"市场分析失败: {e}")
@@ -500,10 +513,10 @@ class Supervisor:
     
     def calculate_environment_pressure_comprehensive(self) -> float:
         """
-        计算环境压力（综合版）
+        计算环境压力(综合版)
         
         现在可以同时使用：
-        - 市场技术指标（market difficulty）
+        - 市场技术指标(market difficulty)
         - Agent群体表现
         - 死亡率
         
@@ -571,7 +584,8 @@ class Supervisor:
             priority='high' if pressure > 0.7 else 'normal'
         )
         
-        logger.info(f"🌍 环境状态已发布: 压力={pressure:.2f}")
+        # 彻夜运行：减少重复日志
+        # logger.info(f"🌍 环境状态已发布: 压力={pressure:.2f}")
     
     def _get_pressure_level(self, pressure: float) -> str:
         """获取压力等级描述"""
@@ -589,31 +603,32 @@ class Supervisor:
     def _get_environment_recommendation(self, pressure: float) -> str:
         """获取环境建议"""
         if pressure > 0.8:
-            return "⚠️ 极端环境，建议降低仓位，严控风险"
+            return "⚠️ 极端环境,建议降低仓位,严控风险"
         elif pressure > 0.6:
-            return "⚠️ 高压环境，建议谨慎交易"
+            return "⚠️ 高压环境,建议谨慎交易"
         elif pressure > 0.4:
-            return "正常环境，可正常交易"
+            return "正常环境,可正常交易"
         else:
-            return "良好环境，可适当增加仓位"
+            return "良好环境,可适当增加仓位"
     
-    # ========== 综合监控（一次性完成所有工作）==========
+    # ========== 综合监控(一次性完成所有工作)==========
     
     def comprehensive_monitoring(self, market_data: pd.DataFrame):
         """
-        综合监控（核心方法）
+        综合监控(核心方法)
         
         一次性完成：
         1. 市场分析 → 发布市场公告
         2. Agent监控 → 更新权限/奖章
         3. 环境分析 → 发布系统公告
-        4. 风险警告（如需要）
+        4. 风险警告(如需要)
         
         Args:
             market_data: 市场数据
         """
-        logger.info("=" * 50)
-        logger.info("开始综合监控...")
+        # 彻夜运行模式：移除重复的监控日志
+        # logger.info("=" * 50)
+        # logger.info("开始综合监控...")
         
         # 1. 市场分析
         self.analyze_market_and_publish(market_data)
@@ -631,8 +646,8 @@ class Supervisor:
         # 5. 英灵殿审核
         self._review_for_valhalla()
         
-        logger.info("综合监控完成")
-        logger.info("=" * 50)
+        # logger.info("综合监控完成")
+        # logger.info("=" * 50)
     
     def _monitor_and_update_agents(self):
         """监控并更新所有Agent"""
@@ -658,11 +673,11 @@ class Supervisor:
             
             health_report = self.evaluate_agent(agent_data, self.environment_pressure)
             
-            # 权限更新（如果有交易权限系统）
+            # 权限更新(如果有交易权限系统)
             if self.trading_permission_system and hasattr(agent, 'permission_level'):
                 self._update_agent_permission(agent, health_report)
             
-            # 奖章评估（已在evaluate_agent中完成）
+            # 奖章评估(已在evaluate_agent中完成)
     
     def _update_agent_permission(self, agent, health_report):
         """更新Agent交易权限"""
@@ -686,7 +701,7 @@ class Supervisor:
                 'type': 'RISK_WARNING',
                 'level': 'HIGH',
                 'pressure': self.environment_pressure,
-                'message': f"环境压力过高（{self.environment_pressure:.2f}），请注意风险控制",
+                'message': f"环境压力过高({self.environment_pressure:.2f}),请注意风险控制",
                 'recommendations': [
                     "降低仓位至50%以下",
                     "收紧止损位",
@@ -720,8 +735,8 @@ class Supervisor:
                 
                 # 检查是否已入选
                 if not self.valhalla.is_inducted(agent_id):
-                    logger.info(f"🏛️ Agent {agent_id} 符合英灵殿条件（{medal_count}枚奖章）")
-                    # 可以在这里触发入选，或等待Mastermind决策
+                    logger.info(f"🏛️ Agent {agent_id} 符合英灵殿条件({medal_count}枚奖章)")
+                    # 可以在这里触发入选,或等待Mastermind决策
     
     def register_agent(self, agent):
         """注册Agent到监督系统"""
@@ -730,7 +745,7 @@ class Supervisor:
             logger.info(f"Agent {getattr(agent, 'agent_id', 'unknown')} 已注册到监督系统")
     
     def unregister_agent(self, agent):
-        """注销Agent（死亡时）"""
+        """注销Agent(死亡时)"""
         if agent in self.agents:
             self.agents.remove(agent)
             
@@ -742,47 +757,68 @@ class Supervisor:
                 'total_pnl': getattr(agent, 'total_pnl', 0)
             })
             
-            logger.info(f"Agent {getattr(agent, 'agent_id', 'unknown')} 已从监督系统注销（死亡）")
+            logger.info(f"Agent {getattr(agent, 'agent_id', 'unknown')} 已从监督系统注销(死亡)")
     
-    # ========== 虚拟账户管理系统（新增）==========
+    # ========== 虚拟账户管理系统(新增)==========
     
     def initialize_virtual_accounts(self, agents: List[Any], initial_capital_per_agent: float = 10000):
         """
-        初始化Agent虚拟账户系统
+        初始化Agent虚拟账户系统(兼容旧代码)
+        
+        新架构使用AgentAccountSystem,这个方法保留用于兼容性
         
         Args:
             agents: Agent列表
             initial_capital_per_agent: 每个Agent的初始虚拟资金
         """
+        # 使用新的双账簿系统
         for agent in agents:
             agent_id = getattr(agent, 'agent_id', 'unknown')
             
-            self.agent_virtual_portfolios[agent_id] = {
-                'agent_id': agent_id,
-                'virtual_capital': initial_capital_per_agent,
-                'initial_capital': initial_capital_per_agent,
-                'virtual_positions': [],  # 虚拟持仓列表
-                'virtual_trades': [],     # 虚拟交易历史
-                'total_pnl': 0.0,
-                'realized_pnl': 0.0,
-                'unrealized_pnl': 0.0,
-                'trade_count': 0,
-                'win_count': 0,
-                'loss_count': 0,
-                'win_rate': 0.0,
-                'personality': {
-                    'aggression': getattr(agent.personality, 'aggression', 0.5) if hasattr(agent, 'personality') else 0.5,
-                    'risk_tolerance': getattr(agent.personality, 'risk_tolerance', 0.5) if hasattr(agent, 'personality') else 0.5,
-                    'adaptability': getattr(agent.personality, 'adaptability', 0.5) if hasattr(agent, 'personality') else 0.5
-                },
-                'created_at': datetime.now()
-            }
+            # 创建账户系统
+            if agent_id not in self.agent_accounts:
+                account_system = AgentAccountSystem(
+                    agent_id=agent_id,
+                    initial_capital=initial_capital_per_agent,
+                    public_ledger=self.public_ledger
+                )
+                self.agent_accounts[agent_id] = account_system
+                
+                # 注入到Agent
+                if hasattr(agent, 'account'):
+                    agent.account = account_system
         
-        logger.info(f"✅ 虚拟账户系统已初始化: {len(agents)}个Agent，每个{initial_capital_per_agent} USDT")
+        logger.info(f"✅ 虚拟账户系统已初始化: {len(agents)}个Agent,每个{initial_capital_per_agent} USDT")
+        
+        # 保留旧的字典格式用于兼容(映射到新系统)
+        # 这样旧代码调用agent_virtual_portfolios时不会报错
+        # 注意：这是临时兼容方案,建议迁移到新API
+        pass
+    
+    def _get_legacy_portfolio(self, agent_id: str) -> Dict:
+        """获取旧格式的portfolio(用于兼容)"""
+        account = self.agent_accounts.get(agent_id)
+        if not account:
+            return None
+        
+        status = account.private_ledger.get_summary(0, Role.SUPERVISOR, 'system')
+        
+        # 转换为旧格式
+        return {
+            'agent_id': agent_id,
+            'virtual_capital': status['balance'],
+            'initial_capital': account.private_ledger.initial_capital,
+            'virtual_positions': [],  # 简化
+            'total_pnl': status['total_pnl'],
+            'trade_count': status['trade_count'],
+            'win_rate': status['win_rate']
+        }
     
     def record_virtual_trade(self, agent_id: str, trade_type: str, price: float, amount: float, confidence: float = 0.0):
         """
-        记录Agent的虚拟交易
+        记录Agent的虚拟交易(兼容旧代码)
+        
+        新架构使用AgentAccountSystem.record_trade,这个方法保留用于兼容性
         
         Args:
             agent_id: Agent ID
@@ -791,15 +827,28 @@ class Supervisor:
             amount: 交易数量
             confidence: 交易信心度
         """
-        if agent_id not in self.agent_virtual_portfolios:
-            logger.warning(f"Agent {agent_id} 未注册虚拟账户")
+        account = self.agent_accounts.get(agent_id)
+        if not account:
+            logger.warning(f"Agent {agent_id} 未注册账户")
             return
         
-        portfolio = self.agent_virtual_portfolios[agent_id]
+        # 委托给新的账簿系统
+        account.record_trade(
+            trade_type=trade_type,
+            amount=amount,
+            price=price,
+            confidence=confidence,
+            is_real=False,  # 虚拟交易
+            caller_role=Role.SUPERVISOR
+        )
         
-        # 检查是否有持仓
-        has_position = len(portfolio['virtual_positions']) > 0
+        logger.debug(f"Agent {agent_id} 虚拟交易已记录")
         
+        # 旧代码已移除,由新账簿系统处理
+        return
+        
+        # 以下是废弃代码,保留用于参考
+        """
         if trade_type == 'buy' and not has_position:
             # 虚拟开多
             portfolio['virtual_positions'].append({
@@ -851,21 +900,23 @@ class Supervisor:
             
             # 清空持仓
             portfolio['virtual_positions'] = []
+        """
     
     def calculate_unrealized_pnl(self, current_price: float):
         """
-        计算所有Agent的未实现盈亏
+        计算所有Agent的未实现盈亏(兼容旧代码)
+        
+        新架构使用PrivateLedger.calculate_unrealized_pnl
         
         Args:
             current_price: 当前市场价格
         """
-        for agent_id, portfolio in self.agent_virtual_portfolios.items():
-            unrealized = 0.0
-            for pos in portfolio['virtual_positions']:
-                if pos['side'] == 'long':
-                    unrealized += (current_price - pos['entry_price']) * pos['amount']
-            
-            portfolio['unrealized_pnl'] = unrealized
+        for agent_id, account in self.agent_accounts.items():
+            # 委托给账户系统
+            try:
+                account.private_ledger.calculate_unrealized_pnl(current_price)
+            except Exception as e:
+                logger.error(f"计算{agent_id}未实现盈亏失败: {e}")
     
     def rank_agent_performance(self) -> List[Tuple[str, Dict]]:
         """
@@ -921,7 +972,7 @@ class Supervisor:
         rankings = self.rank_agent_performance()
         
         if not rankings:
-            logger.warning("没有Agent表现数据，跳过发布")
+            logger.warning("没有Agent表现数据,跳过发布")
             return
         
         # 提取前3名和后3名
@@ -990,19 +1041,19 @@ class Supervisor:
             avg_score = np.mean([r[1]['score'] for r in rankings])
             
             if top_performer['score'] > avg_score * 1.5:
-                recommendations.append(f"🌟 Agent {rankings[0][0]} 表现突出，建议重点关注其策略")
+                recommendations.append(f"🌟 Agent {rankings[0][0]} 表现突出,建议重点关注其策略")
         
         # 检查是否有失败者
         bottom_performer = rankings[-1][1]
         if bottom_performer['capital_ratio'] < 0.5:
-            recommendations.append(f"⚠️ Agent {rankings[-1][0]} 资金损失超50%，建议重新评估策略")
+            recommendations.append(f"⚠️ Agent {rankings[-1][0]} 资金损失超50%,建议重新评估策略")
         
         # 整体表现评估
         avg_win_rate = np.mean([r[1]['win_rate'] for r in rankings])
         if avg_win_rate < 0.4:
-            recommendations.append("⚠️ 整体胜率偏低，建议调整市场分析或入场条件")
+            recommendations.append("⚠️ 整体胜率偏低,建议调整市场分析或入场条件")
         elif avg_win_rate > 0.6:
-            recommendations.append("✅ 整体表现良好，可考虑适当增加仓位")
+            recommendations.append("✅ 整体表现良好,可考虑适当增加仓位")
         
         return recommendations
     
@@ -1014,7 +1065,7 @@ class Supervisor:
             agent_id: Agent ID
             
         Returns:
-            Dict: 虚拟账户信息，如果不存在则返回None
+            Dict: 虚拟账户信息,如果不存在则返回None
         """
         return self.agent_virtual_portfolios.get(agent_id)
     
@@ -1023,7 +1074,7 @@ class Supervisor:
         return self.agent_virtual_portfolios
     
     def print_performance_summary(self):
-        """打印Agent表现摘要（用于日志）"""
+        """打印Agent表现摘要(用于日志)"""
         rankings = self.rank_agent_performance()
         
         if not rankings:
@@ -1048,7 +1099,7 @@ class Supervisor:
         
         logger.info("="*60)
     
-    # ========== 实际持仓跟踪系统（新增）==========
+    # ========== 实际持仓跟踪系统(新增)==========
     
     def set_okx_trading(self, okx_trading):
         """注入OKX交易接口"""
@@ -1090,10 +1141,10 @@ class Supervisor:
             bool: 是否执行成功
         """
         if not self.okx_trading:
-            logger.error("OKX交易接口未注入，无法执行交易")
+            logger.error("OKX交易接口未注入,无法执行交易")
             return False
         
-        # 1. 记录虚拟交易（所有请求都记录）
+        # 1. 记录虚拟交易(所有请求都记录)
         self.record_virtual_trade(
             agent_id=agent_id,
             trade_type=signal,
@@ -1109,20 +1160,20 @@ class Supervisor:
             if not position['has_position']:
                 return self._execute_buy(agent_id, current_price, confidence)
             else:
-                logger.debug(f"{agent_id}: 已有持仓，拒绝开仓请求")
+                logger.debug(f"{agent_id}: 已有持仓,拒绝开仓请求")
                 return False
         
         elif signal == 'sell':
             if position['has_position']:
                 return self._execute_sell(agent_id, current_price, confidence)
             else:
-                logger.debug(f"{agent_id}: 无持仓，拒绝平仓请求")
+                logger.debug(f"{agent_id}: 无持仓,拒绝平仓请求")
                 return False
         
         return False
     
     def _execute_buy(self, agent_id: str, current_price: float, confidence: float) -> bool:
-        """执行开仓（Supervisor执行交易）"""
+        """执行开仓(Supervisor执行交易)"""
         amount = 0.01
         
         try:
@@ -1152,7 +1203,7 @@ class Supervisor:
         return False
     
     def _execute_sell(self, agent_id: str, current_price: float, confidence: float) -> bool:
-        """执行平仓（Supervisor执行交易）"""
+        """执行平仓(Supervisor执行交易)"""
         position = self.agent_real_positions[agent_id]
         amount = position['amount']
         
@@ -1189,7 +1240,14 @@ class Supervisor:
         """获取Agent持仓状态"""
         return self.agent_real_positions.get(agent_id, {'has_position': False})
     
-    # ========== 完整运营系统（新增：主循环）==========
+    # ========== 完整运营系统(新增：主循环)==========
+    
+    def _log_print(self, message):
+        """同时输出到控制台和日志文件"""
+        print(message)
+        if hasattr(self, 'log_handler') and self.log_handler:
+            self.log_handler.write(message + '\n')
+            self.log_handler.flush()
     
     def set_components(self, okx_trading, mastermind, agents, config):
         """
@@ -1222,35 +1280,45 @@ class Supervisor:
         
         logger.info(f"✅ Supervisor完整运营系统已配置：{len(agents)}个Agent")
     
-    def run(self, duration_minutes=None, check_interval=60):
+    def run(self, duration_minutes=None, check_interval=60, log_file=None):
         """
-        Supervisor主循环（完整运营系统）
+        Supervisor主循环(完整运营系统)
         
         这是Supervisor作为"完整运营系统"的核心方法
         
         Args:
-            duration_minutes: 运行时长（分钟），None表示不限时
-            check_interval: 检查间隔（秒）
+            duration_minutes: 运行时长(分钟),None表示不限时
+            check_interval: 检查间隔(秒)
+            log_file: 日志文件路径
         """
         from datetime import timedelta
         import ccxt
+        import sys
         
-        logger.info("="*70)
-        logger.info("🏃 Supervisor完整运营系统启动")
-        logger.info(f"   - Agent数量: {len(self.agents)}")
-        logger.info(f"   - 检查间隔: {check_interval}秒")
-        logger.info(f"   - 运行时长: {'不限时' if duration_minutes is None else f'{duration_minutes}分钟'}")
-        logger.info("="*70)
-        
-        print(f"\n{'='*70}")
-        print(f"🏃 Supervisor完整运营系统启动")
-        print(f"   Agent数量: {len(self.agents)}")
-        print(f"   检查间隔: {check_interval}秒")
-        if duration_minutes:
-            print(f"   运行时长: {duration_minutes}分钟")
+        # 设置日志输出
+        self.log_file = log_file
+        if log_file:
+            # 同时输出到文件和控制台
+            self.log_handler = open(log_file, 'w', encoding='utf-8', buffering=1)
+            logger.info(f"📝 日志文件: {log_file}")
         else:
-            print(f"   运行时长: 不限时 (按Ctrl+C停止)")
-        print(f"{'='*70}\n")
+            self.log_handler = None
+        
+        # 彻夜运行：简化启动日志
+        logger.info(f"Supervisor启动: {len(self.agents)}个Agent, 间隔{check_interval}秒")
+        
+        # 输出到控制台和日志文件
+        self._log_print(f"\n{'='*70}")
+        self._log_print(f"🏃 Supervisor完整运营系统启动")
+        self._log_print(f"   Agent数量: {len(self.agents)}")
+        self._log_print(f"   检查间隔: {check_interval}秒")
+        if duration_minutes:
+            self._log_print(f"   运行时长: {duration_minutes}分钟")
+        else:
+            self._log_print(f"   运行时长: 不限时 (按Ctrl+C停止)")
+        if log_file:
+            self._log_print(f"   日志文件: {log_file}")
+        self._log_print(f"{'='*70}\n")
         
         start_time = datetime.now()
         end_time = start_time + timedelta(minutes=duration_minutes) if duration_minutes else None
@@ -1260,36 +1328,36 @@ class Supervisor:
             while True:
                 # 检查是否超时
                 if end_time and datetime.now() >= end_time:
-                    print("\n⏰ 运行时间已到，正常结束")
+                    self._log_print("\n⏰ 运行时间已到,正常结束")
                     break
                 
                 cycle_count += 1
                 current_time = datetime.now()
                 
-                print(f"\n{'='*70}")
-                print(f"  🔄 周期 {cycle_count} | {current_time.strftime('%H:%M:%S')}")
-                print(f"{'='*70}")
+                self._log_print(f"\n{'='*70}")
+                self._log_print(f"  🔄 周期 {cycle_count} | {current_time.strftime('%H:%M:%S')}")
+                self._log_print(f"{'='*70}")
                 
                 try:
                     # 1. 获取市场数据
                     market_data = self._fetch_market_data_from_okx()
                     if market_data is None or len(market_data) < 25:
-                        print("⚠️  市场数据不足，等待下一周期...")
+                        self._log_print("⚠️  市场数据不足,等待下一周期...")
                         time.sleep(check_interval)
                         continue
                     
                     current_price = market_data['close'].iloc[-1]
-                    print(f"\n📊 当前价格: ${current_price:.2f}")
+                    self._log_print(f"\n📊 当前价格: ${current_price:.2f}")
                     
                     # 2. Supervisor分析市场并发布
                     self.comprehensive_monitoring(market_data)
                     
-                    # 3. Mastermind战略决策（每5个周期）
+                    # 3. Mastermind战略决策(每5个周期)
                     if cycle_count % 5 == 0 and self.mastermind:
                         self._execute_mastermind_strategy(market_data)
                     
                     # 4. 收集Agent决策
-                    print(f"\n🤖 【Agents】自主决策模式")
+                    self._log_print(f"\n🤖 【Agents】自主决策模式")
                     agent_decisions = []
                     for agent in self.agents:
                         try:
@@ -1309,13 +1377,13 @@ class Supervisor:
                     sell_count = sum(1 for d in agent_decisions if d['signal'] == 'sell')
                     wait_count = len(agent_decisions) - buy_count - sell_count
                     
-                    print(f"\n   📊 Agent决策分布:")
-                    print(f"      🟢 做多: {buy_count}个Agent")
-                    print(f"      🔴 做空/平仓: {sell_count}个Agent")
-                    print(f"      ⚪ 观望: {wait_count}个Agent")
+                    self._log_print(f"\n   📊 Agent决策分布:")
+                    self._log_print(f"      🟢 做多: {buy_count}个Agent")
+                    self._log_print(f"      🔴 做空/平仓: {sell_count}个Agent")
+                    self._log_print(f"      ⚪ 观望: {wait_count}个Agent")
                     
                     # 5. Supervisor接收并执行交易请求
-                    print(f"\n💼 【交易执行】Supervisor接收Agent请求")
+                    self._log_print(f"\n💼 【交易执行】Supervisor接收Agent请求")
                     executed_count = 0
                     for decision in agent_decisions:
                         if decision['signal']:
@@ -1329,36 +1397,41 @@ class Supervisor:
                                 executed_count += 1
                     
                     if executed_count == 0:
-                        print(f"   ⏸️  本周期无交易执行")
+                        self._log_print(f"   ⏸️  本周期无交易执行")
                     else:
-                        print(f"   ✅ 执行了{executed_count}笔交易")
+                        self._log_print(f"   ✅ 执行了{executed_count}笔交易")
                     
                     # 6. 更新虚拟盈亏
                     self._update_unrealized_pnl(current_price)
                     
-                    # 7. 发布Agent表现报告（每5个周期）
+                    # 7. 发布Agent表现报告(每5个周期)
                     if cycle_count % 5 == 0:
                         self._publish_performance_report()
                     
                     # 8. 等待下一周期
-                    print(f"\n⏸️  等待 {check_interval}秒...")
+                    self._log_print(f"\n⏸️  等待 {check_interval}秒...")
                     time.sleep(check_interval)
                 
                 except KeyboardInterrupt:
-                    raise  # 向外抛出，由外层捕获
+                    raise  # 向外抛出,由外层捕获
                 except Exception as e:
                     logger.error(f"周期 {cycle_count} 执行失败: {e}", exc_info=True)
-                    print(f"⚠️  周期执行失败: {e}")
+                    self._log_print(f"⚠️  周期执行失败: {e}")
                     time.sleep(check_interval)
         
         except KeyboardInterrupt:
-            print("\n\n⚠️  运营被用户中断")
+            self._log_print("\n\n⚠️  运营被用户中断")
         
         # 最终总结
-        print(f"\n{'='*70}")
-        print(f"🏁 Supervisor运营结束")
-        print(f"{'='*70}")
+        self._log_print(f"\n{'='*70}")
+        self._log_print(f"🏁 Supervisor运营结束")
+        self._log_print(f"{'='*70}")
         self._print_final_summary()
+        
+        # 关闭日志文件
+        if hasattr(self, 'log_handler') and self.log_handler:
+            self.log_handler.close()
+            logger.info(f"📝 日志已保存: {self.log_file}")
     
     def _fetch_market_data_from_okx(self):
         """从OKX获取市场数据"""
@@ -1388,7 +1461,7 @@ class Supervisor:
             return
         
         try:
-            # Mastermind读取公共账簿（只读权限）
+            # Mastermind读取公共账簿(只读权限)
             top_performers = self.public_ledger.get_top_performers(
                 limit=5, 
                 caller_role=Role.MASTERMIND
@@ -1415,7 +1488,7 @@ class Supervisor:
             logger.error(f"{agent_id}: 账户不存在")
             return False
         
-        # 检查持仓状态（从私有账簿）
+        # 检查持仓状态(从私有账簿)
         status = account.get_status_for_decision(
             current_price,
             caller_role=Role.SUPERVISOR,
@@ -1425,7 +1498,7 @@ class Supervisor:
         try:
             if signal == 'buy':
                 if status['has_position']:
-                    logger.debug(f"{agent_id}: 已有持仓，拒绝买入")
+                    logger.debug(f"{agent_id}: 已有持仓,拒绝买入")
                     return False
                 
                 # 执行买入
@@ -1438,7 +1511,7 @@ class Supervisor:
                 )
                 
                 if order:
-                    # 更新账簿（同时更新私有和公共）
+                    # 更新账簿(同时更新私有和公共)
                     account.record_trade(
                         trade_type='buy',
                         amount=0.01,
@@ -1452,7 +1525,7 @@ class Supervisor:
             
             elif signal == 'sell':
                 if not status['has_position']:
-                    logger.debug(f"{agent_id}: 无持仓，拒绝卖出")
+                    logger.debug(f"{agent_id}: 无持仓,拒绝卖出")
                     return False
                 
                 # 执行卖出
@@ -1499,17 +1572,17 @@ class Supervisor:
                 caller_role=Role.SUPERVISOR
             )
             
-            print(f"\n{'='*60}")
-            print(f"📊 Agent表现排名 (Top 5)")
-            print(f"{'='*60}")
+            self._log_print(f"\n{'='*60}")
+            self._log_print(f"📊 Agent表现排名 (Top 5)")
+            self._log_print(f"{'='*60}")
             
             for i, (agent_id, stats) in enumerate(top_performers[:5], 1):
                 pnl = stats.get('total_pnl', 0)
                 win_rate = stats.get('win_rate', 0)
                 trade_count = stats.get('trade_count', 0)
-                print(f"  {i}. {agent_id}: PnL=${pnl:.2f}, 胜率{win_rate:.1%}, {trade_count}笔")
+                self._log_print(f"  {i}. {agent_id}: PnL=${pnl:.2f}, 胜率{win_rate:.1%}, {trade_count}笔")
             
-            print(f"{'='*60}")
+            self._log_print(f"{'='*60}")
         
         except Exception as e:
             logger.error(f"发布表现报告失败: {e}")
@@ -1521,18 +1594,18 @@ class Supervisor:
                 caller_role=Role.SUPERVISOR
             )
             
-            print(f"\n{'='*70}")
-            print(f"📊 最终统计")
-            print(f"{'='*70}")
-            print(f"活跃Agent: {len(all_stats)}")
+            self._log_print(f"\n{'='*70}")
+            self._log_print(f"📊 最终统计")
+            self._log_print(f"{'='*70}")
+            self._log_print(f"活跃Agent: {len(all_stats)}")
             
             if all_stats:
                 total_pnl = sum(stats.get('total_pnl', 0) for stats in all_stats.values())
                 avg_pnl = total_pnl / len(all_stats)
-                print(f"总盈亏: ${total_pnl:.2f}")
-                print(f"平均盈亏: ${avg_pnl:.2f}")
+                self._log_print(f"总盈亏: ${total_pnl:.2f}")
+                self._log_print(f"平均盈亏: ${avg_pnl:.2f}")
             
-            print(f"{'='*70}")
+            self._log_print(f"{'='*70}")
         except Exception as e:
             logger.error(f"打印最终总结失败: {e}")
 
