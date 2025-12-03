@@ -6,6 +6,7 @@
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
+from datetime import datetime, timedelta
 import logging
 from .llm_oracle import LLMOracle, HumanOracle
 
@@ -322,6 +323,684 @@ class Mastermind:
         logger.info(f"战略决策完成 [{decision_source}]: {decision}")
         return decision
     
+    def make_decision(self, market_data=None, current_market_state=None, 
+                      top_performers=None, prophecy_type='minor') -> Optional[Dict]:
+        """
+        先知占卜统一接口（供Supervisor调用）
+        
+        Args:
+            market_data: 市场数据
+            current_market_state: 当前市场状态
+            top_performers: 表现最好的Agent列表
+            prophecy_type: 'grand'(大预言) 或 'minor'(小预言)
+            
+        Returns:
+            Dict: 占卜结果
+        """
+        if prophecy_type == 'grand':
+            return self.grand_prophecy(market_data, current_market_state, top_performers)
+        else:
+            return self.minor_prophecy(market_data, current_market_state, top_performers)
+    
+    def evaluate_environmental_pressure(self, market_data=None, current_market_state=None,
+                                       agent_performance_stats=None) -> float:
+        """
+        评估环境压力指数（v4.1 OGAE系统）
+        
+        环境压力指数用于触发进化系统的自适应调整。
+        压力越高，进化系统变异率越高，淘汰率越低，以快速适应环境变化。
+        
+        Args:
+            market_data: 市场历史数据
+            current_market_state: 当前市场状态
+            agent_performance_stats: Agent表现统计 {avg_pnl, losing_ratio, avg_drawdown, etc.}
+        
+        Returns:
+            float: 环境压力指数（0-1）
+                0.0-0.3: 低压力（平静如水🌊）
+                0.3-0.6: 中压力（波涛渐起⚡）
+                0.6-0.8: 高压力（狂风暴雨🌪️）
+                0.8-1.0: 极端压力（末日浩劫💀）
+        """
+        import numpy as np
+        
+        pressure_factors = {}
+        
+        try:
+            # ========== 因素1：市场波动率（30%权重）==========
+            if market_data is not None and hasattr(market_data, 'close'):
+                # 计算最近的价格波动率
+                returns = market_data['close'].pct_change().dropna()
+                if len(returns) > 0:
+                    volatility = returns.std()
+                    # 归一化：5%以上视为高波动
+                    volatility_score = min(1.0, volatility / 0.05)
+                    pressure_factors['volatility'] = volatility_score
+                else:
+                    pressure_factors['volatility'] = 0.2
+            elif current_market_state and hasattr(current_market_state, 'volatility'):
+                # 使用MarketState中的volatility
+                vol_str = str(current_market_state.volatility).lower()
+                if 'high' in vol_str or '高' in vol_str:
+                    pressure_factors['volatility'] = 0.8
+                elif 'low' in vol_str or '低' in vol_str:
+                    pressure_factors['volatility'] = 0.2
+                else:
+                    pressure_factors['volatility'] = 0.4
+            else:
+                pressure_factors['volatility'] = 0.3
+            
+            # ========== 因素2：价格剧烈变化（25%权重）==========
+            if market_data is not None and hasattr(market_data, 'close') and len(market_data) > 1:
+                # 最近一次价格变化
+                recent_change = abs(market_data['close'].pct_change().iloc[-1])
+                # 归一化：10%以上视为剧烈变化
+                price_shock_score = min(1.0, recent_change / 0.10)
+                pressure_factors['price_shock'] = price_shock_score
+            else:
+                pressure_factors['price_shock'] = 0.2
+            
+            # ========== 因素3：趋势反转（20%权重）==========
+            trend_reversal_detected = False
+            if market_data is not None and hasattr(market_data, 'close') and len(market_data) > 10:
+                # 简单趋势反转检测：短期MA穿越长期MA
+                short_ma = market_data['close'].rolling(5).mean()
+                long_ma = market_data['close'].rolling(20).mean()
+                
+                if len(short_ma) >= 2 and len(long_ma) >= 2:
+                    # 检查最近是否发生穿越
+                    prev_above = short_ma.iloc[-2] > long_ma.iloc[-2]
+                    curr_above = short_ma.iloc[-1] > long_ma.iloc[-1]
+                    trend_reversal_detected = (prev_above != curr_above)
+            
+            pressure_factors['trend_reversal'] = 0.8 if trend_reversal_detected else 0.2
+            
+            # ========== 因素4：Agent集体表现（25%权重）==========
+            if agent_performance_stats:
+                avg_pnl = agent_performance_stats.get('avg_pnl', 0)
+                losing_ratio = agent_performance_stats.get('losing_ratio', 0)
+                avg_drawdown = agent_performance_stats.get('avg_drawdown', 0)
+                
+                # 多个负面指标叠加
+                collective_stress = 0
+                
+                # 平均盈亏严重负值
+                if avg_pnl < -5000:
+                    collective_stress += 0.4
+                elif avg_pnl < -2000:
+                    collective_stress += 0.2
+                
+                # 大部分Agent亏损
+                if losing_ratio > 0.8:
+                    collective_stress += 0.4
+                elif losing_ratio > 0.6:
+                    collective_stress += 0.2
+                
+                # 平均回撤严重
+                if avg_drawdown and avg_drawdown < -0.3:
+                    collective_stress += 0.3
+                elif avg_drawdown and avg_drawdown < -0.2:
+                    collective_stress += 0.15
+                
+                pressure_factors['collective_failure'] = min(1.0, collective_stress)
+            else:
+                pressure_factors['collective_failure'] = 0.3
+            
+            # ========== 综合压力指数 ==========
+            pressure = (
+                0.30 * pressure_factors.get('volatility', 0.3) +
+                0.25 * pressure_factors.get('price_shock', 0.2) +
+                0.20 * pressure_factors.get('trend_reversal', 0.2) +
+                0.25 * pressure_factors.get('collective_failure', 0.3)
+            )
+            
+            # 平滑处理（避免突变）
+            if hasattr(self, 'last_pressure'):
+                pressure = 0.7 * pressure + 0.3 * self.last_pressure
+            self.last_pressure = pressure
+            
+            # 压力描述
+            if pressure < 0.3:
+                pressure_desc = "平静如水🌊"
+            elif pressure < 0.6:
+                pressure_desc = "波涛渐起⚡"
+            elif pressure < 0.8:
+                pressure_desc = "狂风暴雨🌪️"
+            else:
+                pressure_desc = "末日浩劫💀"
+            
+            # 环境压力已经在小预言中输出，这里只保留debug级别详细信息
+            logger.debug(f"🌍 环境压力评估: {pressure:.2f} ({pressure_desc})")
+            logger.debug(f"   压力因素: 波动{pressure_factors.get('volatility', 0):.2f} | "
+                        f"价格{pressure_factors.get('price_shock', 0):.2f} | "
+                        f"反转{pressure_factors.get('trend_reversal', 0):.2f} | "
+                        f"集体{pressure_factors.get('collective_failure', 0):.2f}")
+            
+            return pressure
+            
+        except Exception as e:
+            logger.error(f"环境压力评估失败: {e}")
+            return 0.3  # 默认中低压力
+    
+    def minor_prophecy(self, market_data=None, current_market_state=None,
+                       top_performers=None, agent_performance_stats=None) -> Optional[Dict]:
+        """
+        小预言 (Minor Prophecy) - 每个交易周期执行
+        
+        轻量级分析，关注短期走势
+        执行频率：每3-5个交易周期（约1分钟）
+        
+        Args:
+            market_data: 市场数据 (DataFrame或Dict)
+            current_market_state: 当前市场状态
+            top_performers: 表现最好的Agent列表
+            
+        Returns:
+            Dict: 小预言结果
+        """
+        try:
+            # ========== 1. 解读市场数据 ==========
+            trend = 'neutral'
+            trend_strength = 0.5
+            momentum = 'neutral'
+            momentum_score = 0.5
+            volatility = 'normal'
+            opportunity_score = 0.5
+            
+            if current_market_state:
+                # 趋势（统一命名：强/弱上升/下降趋势）
+                if hasattr(current_market_state, 'trend'):
+                    trend_value = current_market_state.trend.value if hasattr(current_market_state.trend, 'value') else str(current_market_state.trend)
+                    if '强上升' in trend_value:
+                        trend = 'strong_bullish'
+                        trend_strength = 0.9
+                    elif '上升' in trend_value:
+                        trend = 'bullish'
+                        trend_strength = 0.7
+                    elif '强下降' in trend_value:
+                        trend = 'strong_bearish'
+                        trend_strength = 0.1
+                    elif '下降' in trend_value:
+                        trend = 'bearish'
+                        trend_strength = 0.3
+                    else:
+                        trend = 'neutral'
+                        trend_strength = 0.5
+                
+                # 动量
+                if hasattr(current_market_state, 'momentum'):
+                    momentum_value = current_market_state.momentum.value if hasattr(current_market_state.momentum, 'value') else str(current_market_state.momentum)
+                    momentum = momentum_value
+                    # momentum_score 在 MarketState 中是 0-100，需要归一化到 0-1
+                    raw_momentum_score = getattr(current_market_state, 'momentum_score', 50)
+                    momentum_score = raw_momentum_score / 100.0 if raw_momentum_score > 1 else raw_momentum_score
+                
+                # 波动率
+                if hasattr(current_market_state, 'volatility'):
+                    volatility = current_market_state.volatility.value if hasattr(current_market_state.volatility, 'value') else 'normal'
+                
+                # 机会分数（已经是 0-1 范围）
+                opportunity_score = getattr(current_market_state, 'opportunity_score', 0.5)
+            
+            # ========== 2. 先知占卜（纯预测，不给建议）==========
+            # 计算短期价格动量（最近价格变化，避免滞后）
+            recent_price_momentum = 0.5  # 默认中性
+            if market_data is not None and len(market_data) > 0:
+                try:
+                    current_price = market_data['close'].iloc[-1]
+                    # 短期：最近3根K线的价格变化
+                    if len(market_data) >= 3:
+                        price_3_ago = market_data['close'].iloc[-3]
+                        short_term_change = (current_price - price_3_ago) / price_3_ago
+                        # 归一化到0-1：-2%对应0，+2%对应1
+                        recent_price_momentum = max(0, min(1, 0.5 + short_term_change * 25))
+                except Exception as e:
+                    logger.warning(f"计算短期价格动量失败: {e}")
+            
+            # 综合评分（看涨得分：0~1，越高越看涨）
+            # 增加短期价格动量权重，降低滞后指标权重
+            bullish_score = (
+                trend_strength * 0.25 +      # 降低EMA权重（滞后指标）
+                momentum_score * 0.20 +      # 降低动量权重（滞后指标）
+                opportunity_score * 0.20 +   # 降低机会得分权重
+                recent_price_momentum * 0.35 # 增加短期价格动量权重（实时指标）
+            )
+            
+            # 走势预测（只描述市场状态，不给交易建议）
+            if bullish_score >= 0.7:
+                trend_forecast = '强烈看涨'
+                forecast_confidence = bullish_score
+            elif bullish_score >= 0.55:
+                trend_forecast = '看涨'
+                forecast_confidence = bullish_score
+            elif bullish_score <= 0.3:
+                trend_forecast = '强烈看跌'
+                forecast_confidence = 1 - bullish_score
+            elif bullish_score <= 0.45:
+                trend_forecast = '看跌'
+                forecast_confidence = 1 - bullish_score
+            else:
+                trend_forecast = '震荡'
+                forecast_confidence = 0.5
+            
+            # ========== 3. 交易量预测 ==========
+            # 基于动量和波动率预测交易量
+            if momentum_score >= 0.7 or volatility in ['高波动', '极高波动']:
+                volume_forecast = '放量'
+                volume_intensity = 'high'
+            elif momentum_score <= 0.3:
+                volume_forecast = '缩量'
+                volume_intensity = 'low'
+            else:
+                volume_forecast = '正常'
+                volume_intensity = 'normal'
+            
+            # ========== 4. 风险评估 ==========
+            risk_level = 'low'
+            risk_factors = []
+            
+            if volatility in ['高波动', '极高波动']:
+                risk_level = 'high'
+                risk_factors.append('高波动风险')
+            if '超买' in str(momentum):
+                risk_factors.append('超买回调风险')
+            if '超卖' in str(momentum):
+                risk_factors.append('超卖反弹风险')
+            if abs(bullish_score - 0.5) < 0.1:
+                risk_factors.append('方向不明确')
+            
+            if len(risk_factors) >= 2:
+                risk_level = 'high'
+            elif len(risk_factors) == 1:
+                risk_level = 'medium'
+            
+            # ========== 5. 评估环境压力（v4.1 OGAE）==========
+            environmental_pressure = self.evaluate_environmental_pressure(
+                market_data=market_data,
+                current_market_state=current_market_state,
+                agent_performance_stats=agent_performance_stats
+            )
+            
+            # 压力等级描述
+            if environmental_pressure < 0.3:
+                pressure_level = "low"
+                pressure_desc = "平静如水🌊"
+            elif environmental_pressure < 0.6:
+                pressure_level = "medium"
+                pressure_desc = "波涛渐起⚡"
+            elif environmental_pressure < 0.8:
+                pressure_level = "high"
+                pressure_desc = "狂风暴雨🌪️"
+            else:
+                pressure_level = "extreme"
+                pressure_desc = "末日浩劫💀"
+            
+            # ========== 6. 构建小预言结果 ==========
+            prophecy = {
+                'type': 'prophecy',
+                'prophecy_level': 'minor',  # 小预言
+                
+                # 走势预测
+                'trend_forecast': trend_forecast,
+                'forecast_confidence': forecast_confidence,
+                'bullish_score': bullish_score,
+                
+                # 交易量预测
+                'volume_forecast': volume_forecast,
+                'volume_intensity': volume_intensity,
+                
+                # 市场状态
+                'market_reading': {
+                    'trend': trend,
+                    'trend_strength': trend_strength,
+                    'momentum': momentum,
+                    'momentum_score': momentum_score,
+                    'volatility': volatility,
+                },
+                
+                # 风险评估
+                'risk_level': risk_level,
+                'risk_factors': risk_factors,
+                
+                # 环境压力（v4.1新增）
+                'environmental_pressure': environmental_pressure,
+                'pressure_level': pressure_level,
+                'pressure_description': pressure_desc,
+                
+                # 优秀Agent参考
+                'top_performers': [p[0] if isinstance(p, tuple) else str(p) for p in (top_performers or [])[:3]],
+                
+                # 时间戳
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            prophecy_msg = f"🔮 小预言: {trend_forecast}(信心:{forecast_confidence:.0%}) | 量能:{volume_forecast} | 风险:{risk_level} | 压力:{environmental_pressure:.2f}({pressure_desc})"
+            logger.info(prophecy_msg)
+            return prophecy
+            
+        except Exception as e:
+            logger.error(f"小预言失败: {e}")
+            return {
+                'type': 'prophecy',
+                'prophecy_level': 'minor',
+                'trend_forecast': '震荡',
+                'forecast_confidence': 0.5,
+                'bullish_score': 0.5,
+                'volume_forecast': '正常',
+                'volume_intensity': 'normal',
+                'market_reading': {
+                    'trend': '中性',
+                    'trend_strength': 0.5,
+                    'momentum': '中性',
+                    'momentum_score': 0.5,
+                    'volatility': '正常'
+                },
+                'risk_level': 'medium',
+                'risk_factors': ['信息不足'],
+                'top_performers': [],
+                'timestamp': None
+            }
+    
+    def grand_prophecy(self, market_data=None, current_market_state=None,
+                       top_performers=None, historical_data=None, agent_performance_stats=None) -> Optional[Dict]:
+        """
+        大预言 (Grand Prophecy) - 创世时和每8小时执行
+        
+        全面深度分析，关注中长期趋势
+        执行时机：创世时 + 每8小时（00:00, 08:00, 16:00）
+        
+        Args:
+            market_data: 市场数据
+            current_market_state: 当前市场状态
+            top_performers: 表现最好的Agent列表
+            historical_data: 历史数据（过去7天）
+            
+        Returns:
+            Dict: 大预言结果
+        """
+        try:
+            logger.info("="*50)
+            logger.info("📜 大预言 (Grand Prophecy) 开始")
+            logger.info("="*50)
+            
+            # ========== 1. 基础市场分析（与小预言相同）==========
+            trend = 'neutral'
+            trend_strength = 0.5
+            momentum = 'neutral'
+            momentum_score = 0.5
+            volatility = 'normal'
+            opportunity_score = 0.5
+            
+            if current_market_state:
+                # 趋势（统一命名：强/弱上升/下降趋势）
+                if hasattr(current_market_state, 'trend'):
+                    trend_value = current_market_state.trend.value if hasattr(current_market_state.trend, 'value') else str(current_market_state.trend)
+                    if '强上升' in trend_value:
+                        trend = 'strong_bullish'
+                        trend_strength = 0.9
+                    elif '上升' in trend_value:
+                        trend = 'bullish'
+                        trend_strength = 0.7
+                    elif '强下降' in trend_value:
+                        trend = 'strong_bearish'
+                        trend_strength = 0.1
+                    elif '下降' in trend_value:
+                        trend = 'bearish'
+                        trend_strength = 0.3
+                
+                if hasattr(current_market_state, 'momentum'):
+                    momentum_value = current_market_state.momentum.value if hasattr(current_market_state.momentum, 'value') else str(current_market_state.momentum)
+                    momentum = momentum_value
+                    # momentum_score 在 MarketState 中是 0-100，需要归一化到 0-1
+                    raw_momentum_score = getattr(current_market_state, 'momentum_score', 50)
+                    momentum_score = raw_momentum_score / 100.0 if raw_momentum_score > 1 else raw_momentum_score
+                
+                if hasattr(current_market_state, 'volatility'):
+                    volatility = current_market_state.volatility.value if hasattr(current_market_state.volatility, 'value') else 'normal'
+                
+                opportunity_score = getattr(current_market_state, 'opportunity_score', 0.5)
+            
+            # ========== 2. 历史数据分析（大预言特有）==========
+            historical_analysis = {
+                'change_7d': 0,
+                'change_24h': 0,
+                'high_7d': 0,
+                'low_7d': 0,
+                'avg_volume': 0,
+                'price_position': 0.5,  # 当前价格在7日区间的位置 0~1
+                'trend_consistency': 0.5,  # 趋势一致性
+            }
+            
+            if historical_data is not None:
+                try:
+                    import pandas as pd
+                    if isinstance(historical_data, pd.DataFrame) and len(historical_data) > 0:
+                        # 7日涨跌幅
+                        if 'close' in historical_data.columns:
+                            first_price = historical_data['close'].iloc[0]
+                            last_price = historical_data['close'].iloc[-1]
+                            historical_analysis['change_7d'] = (last_price - first_price) / first_price * 100
+                            
+                            # 高低点
+                            historical_analysis['high_7d'] = historical_data['close'].max()
+                            historical_analysis['low_7d'] = historical_data['close'].min()
+                            
+                            # 价格位置
+                            price_range = historical_analysis['high_7d'] - historical_analysis['low_7d']
+                            if price_range > 0:
+                                historical_analysis['price_position'] = (last_price - historical_analysis['low_7d']) / price_range
+                        
+                        # 24小时涨跌幅
+                        if len(historical_data) >= 24:
+                            price_24h_ago = historical_data['close'].iloc[-24]
+                            historical_analysis['change_24h'] = (last_price - price_24h_ago) / price_24h_ago * 100
+                        
+                        # 平均交易量
+                        if 'volume' in historical_data.columns:
+                            historical_analysis['avg_volume'] = historical_data['volume'].mean()
+                        
+                        # 趋势一致性（计算上涨天数/总天数）
+                        if 'close' in historical_data.columns:
+                            daily_changes = historical_data['close'].diff()
+                            up_days = (daily_changes > 0).sum()
+                            historical_analysis['trend_consistency'] = up_days / len(daily_changes) if len(daily_changes) > 0 else 0.5
+                        
+                        logger.info(f"   历史分析: 7日涨跌={historical_analysis['change_7d']:.1f}%, 24h涨跌={historical_analysis['change_24h']:.1f}%")
+                except Exception as e:
+                    logger.warning(f"历史数据分析异常: {e}")
+            
+            # ========== 3. 综合评分（大预言权重不同）==========
+            # 计算短期价格动量（最近价格变化）
+            recent_price_momentum = 0.5  # 默认中性
+            if historical_data is not None and len(historical_data) > 0:
+                try:
+                    current_price = historical_data['close'].iloc[-1]
+                    if len(historical_data) >= 3:
+                        price_3_ago = historical_data['close'].iloc[-3]
+                        short_term_change = (current_price - price_3_ago) / price_3_ago
+                        recent_price_momentum = max(0, min(1, 0.5 + short_term_change * 25))
+                except Exception as e:
+                    logger.warning(f"计算短期价格动量失败: {e}")
+            
+            # 大预言更看重历史趋势和一致性
+            change_7d_score = 0.5 + historical_analysis['change_7d'] / 20  # -10%~+10% -> 0~1
+            change_7d_score = max(0, min(1, change_7d_score))
+            
+            bullish_score = (
+                trend_strength * 0.20 +          # 当前趋势（降低权重）
+                momentum_score * 0.10 +          # 动量（降低权重）
+                opportunity_score * 0.10 +       # 机会分数（降低权重）
+                recent_price_momentum * 0.25 +   # 短期价格动量（新增）
+                change_7d_score * 0.20 +         # 7日涨跌
+                historical_analysis['trend_consistency'] * 0.15  # 趋势一致性
+            )
+            
+            # ========== 4. 走势预测 ==========
+            if bullish_score >= 0.75:
+                trend_forecast = '强烈看涨'
+                forecast_confidence = bullish_score
+            elif bullish_score >= 0.6:
+                trend_forecast = '看涨'
+                forecast_confidence = bullish_score
+            elif bullish_score <= 0.25:
+                trend_forecast = '强烈看跌'
+                forecast_confidence = 1 - bullish_score
+            elif bullish_score <= 0.4:
+                trend_forecast = '看跌'
+                forecast_confidence = 1 - bullish_score
+            else:
+                trend_forecast = '震荡'
+                forecast_confidence = 0.5
+            
+            # ========== 5. 交易量预测 ==========
+            if momentum_score >= 0.7 or volatility in ['高波动', '极高波动']:
+                volume_forecast = '放量'
+                volume_intensity = 'high'
+            elif momentum_score <= 0.3:
+                volume_forecast = '缩量'
+                volume_intensity = 'low'
+            else:
+                volume_forecast = '正常'
+                volume_intensity = 'normal'
+            
+            # ========== 6. 风险评估（大预言更全面）==========
+            risk_level = 'low'
+            risk_factors = []
+            
+            if volatility in ['高波动', '极高波动']:
+                risk_factors.append('高波动风险')
+            if '超买' in str(momentum):
+                risk_factors.append('超买回调风险')
+            if '超卖' in str(momentum):
+                risk_factors.append('超卖反弹风险')
+            if abs(bullish_score - 0.5) < 0.1:
+                risk_factors.append('方向不明确')
+            if abs(historical_analysis['change_7d']) > 15:
+                risk_factors.append('近期波动剧烈')
+            if historical_analysis['price_position'] > 0.9:
+                risk_factors.append('接近7日高点')
+            if historical_analysis['price_position'] < 0.1:
+                risk_factors.append('接近7日低点')
+            
+            if len(risk_factors) >= 3:
+                risk_level = 'high'
+            elif len(risk_factors) >= 1:
+                risk_level = 'medium'
+            
+            # ========== 7. 支撑位/阻力位分析（大预言特有）==========
+            support_resistance = {
+                'support_1': historical_analysis['low_7d'],
+                'support_2': historical_analysis['low_7d'] * 0.98,  # 2%下方
+                'resistance_1': historical_analysis['high_7d'],
+                'resistance_2': historical_analysis['high_7d'] * 1.02,  # 2%上方
+            }
+            
+            # ========== 8. 评估环境压力（v4.1 OGAE）==========
+            environmental_pressure = self.evaluate_environmental_pressure(
+                market_data=historical_data if historical_data is not None else market_data,
+                current_market_state=current_market_state,
+                agent_performance_stats=agent_performance_stats
+            )
+            
+            # 压力等级描述
+            if environmental_pressure < 0.3:
+                pressure_level = "low"
+                pressure_desc = "平静如水🌊"
+            elif environmental_pressure < 0.6:
+                pressure_level = "medium"
+                pressure_desc = "波涛渐起⚡"
+            elif environmental_pressure < 0.8:
+                pressure_level = "high"
+                pressure_desc = "狂风暴雨🌪️"
+            else:
+                pressure_level = "extreme"
+                pressure_desc = "末日浩劫💀"
+            
+            # ========== 9. 构建大预言结果 ==========
+            prophecy = {
+                'type': 'prophecy',
+                'prophecy_level': 'grand',  # 大预言
+                
+                # 走势预测
+                'trend_forecast': trend_forecast,
+                'forecast_confidence': forecast_confidence,
+                'bullish_score': bullish_score,
+                
+                # 交易量预测
+                'volume_forecast': volume_forecast,
+                'volume_intensity': volume_intensity,
+                
+                # 市场状态
+                'market_reading': {
+                    'trend': trend,
+                    'trend_strength': trend_strength,
+                    'momentum': momentum,
+                    'momentum_score': momentum_score,
+                    'volatility': volatility,
+                },
+                
+                # 历史分析（大预言特有）
+                'historical_analysis': historical_analysis,
+                
+                # 支撑/阻力位（大预言特有）
+                'support_resistance': support_resistance,
+                
+                # 风险评估
+                'risk_level': risk_level,
+                'risk_factors': risk_factors,
+                
+                # 环境压力（v4.1新增）
+                'environmental_pressure': environmental_pressure,
+                'pressure_level': pressure_level,
+                'pressure_description': pressure_desc,
+                
+                # 优秀Agent参考
+                'top_performers': [p[0] if isinstance(p, tuple) else str(p) for p in (top_performers or [])[:3]],
+                
+                # 时间戳
+                'timestamp': datetime.now().isoformat(),
+                
+                # 下次大预言时间（8小时后）
+                'next_grand_prophecy': (datetime.now() + timedelta(hours=8)).isoformat()
+            }
+            
+            logger.info(f"📜 大预言: {trend_forecast}(信心:{forecast_confidence:.0%})")
+            logger.info(f"   7日涨跌: {historical_analysis['change_7d']:.1f}% | 价格位置: {historical_analysis['price_position']*100:.0f}%")
+            logger.info(f"   风险等级: {risk_level} | 风险因素: {risk_factors}")
+            logger.info(f"   环境压力: {environmental_pressure:.2f} ({pressure_desc})")
+            logger.info("="*50)
+            
+            return prophecy
+            
+        except Exception as e:
+            logger.error(f"大预言失败: {e}")
+            import traceback
+            traceback.print_exc()
+            # 返回默认大预言
+            return {
+                'type': 'prophecy',
+                'prophecy_level': 'grand',
+                'trend_forecast': '震荡',
+                'forecast_confidence': 0.5,
+                'bullish_score': 0.5,
+                'volume_forecast': '正常',
+                'volume_intensity': 'normal',
+                'market_reading': {
+                    'trend': '中性',
+                    'trend_strength': 0.5,
+                    'momentum': '中性',
+                    'momentum_score': 0.5,
+                    'volatility': '正常'
+                },
+                'historical_analysis': {},
+                'support_resistance': {},
+                'risk_level': 'medium',
+                'risk_factors': ['信息不足'],
+                'top_performers': [],
+                'timestamp': datetime.now().isoformat(),
+                'next_grand_prophecy': None
+            }
+    
     def _apply_llm_suggestions(self, llm_analysis: Dict) -> GlobalStrategy:
         """
         应用LLM的策略建议
@@ -481,4 +1160,91 @@ class Mastermind:
                 publisher='Mastermind',
                 priority='high' if abs(risk_level - old_level) >= 2 else 'normal'
             )
+    
+    def generate_evolution_hints(self, market_data: Dict) -> Dict:
+        """
+        生成进化提示（v4.2 自适应进化系统）
+        
+        根据市场环境分析，为Agent进化提供建议（不是强制）
+        
+        Args:
+            market_data: 市场数据
+        
+        Returns:
+            {
+                'pressure': float,  # 环境压力
+                'regime': str,  # 市场状态
+                'suggested_traits': list,  # 建议解锁的参数
+                'reasoning': str  # 建议理由
+            }
+        """
+        # 1. 分析市场环境
+        volatility = self._calculate_volatility(market_data)
+        trend_strength = abs(market_data.get('trend_strength', 0))
+        
+        # 获取最新的环境压力
+        prophecy = self.bulletin_board.get_latest('prophecy') if self.bulletin_board else None
+        pressure = prophecy.get('environmental_pressure', 0.3) if prophecy else 0.3
+        
+        # 识别市场状态
+        regime = self._identify_market_regime(volatility, trend_strength)
+        
+        # 2. 根据环境给出建议
+        suggested_traits = []
+        reasoning = []
+        
+        # 高波动环境 → 建议波动率管理能力
+        if volatility > 0.025:
+            suggested_traits.extend(['volatility_pref', 'stop_loss_discipline'])
+            reasoning.append(f"高波动(σ={volatility:.3f})→建议波动管理能力")
+        
+        # 强趋势环境 → 建议趋势跟随能力
+        if trend_strength > 0.6:
+            suggested_traits.extend(['momentum_pref', 'bull_skill'])
+            reasoning.append(f"强趋势(强度={trend_strength:.2f})→建议趋势能力")
+        
+        # 高压力环境 → 建议防御能力
+        if pressure > 0.7:
+            suggested_traits.extend(['fear_control', 'adaptation_rate'])
+            reasoning.append(f"高压力({pressure:.2f})→建议防御能力")
+        
+        # 震荡环境 → 建议均值回归能力
+        if volatility < 0.015 and trend_strength < 0.3:
+            suggested_traits.extend(['contrarian_pref', 'position_sizing'])
+            reasoning.append("震荡市场→建议均值回归能力")
+        
+        # 去重
+        suggested_traits = list(set(suggested_traits))
+        
+        hints = {
+            'pressure': pressure,
+            'regime': regime,
+            'volatility': volatility,
+            'trend_strength': trend_strength,
+            'suggested_traits': suggested_traits,
+            'reasoning': ' | '.join(reasoning) if reasoning else '正常市场，无特殊建议'
+        }
+        
+        logger.info(f"🔮 先知进化启示: {regime} | 建议解锁: {suggested_traits}")
+        logger.debug(f"   理由: {hints['reasoning']}")
+        
+        return hints
+    
+    def _identify_market_regime(self, volatility: float, trend_strength: float) -> str:
+        """识别市场状态"""
+        if volatility > 0.03 and trend_strength > 0.7:
+            return '趋势+高波动'
+        elif volatility > 0.03:
+            return '震荡+高波动'
+        elif trend_strength > 0.7:
+            return '趋势+低波动'
+        elif volatility < 0.015 and trend_strength < 0.3:
+            return '盘整'
+        else:
+            return '正常'
+    
+    def _calculate_volatility(self, market_data: Dict) -> float:
+        """计算波动率"""
+        # 简化实现：从市场数据中提取
+        return market_data.get('volatility', 0.02)
 

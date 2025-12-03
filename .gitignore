@@ -45,6 +45,7 @@ trading_logs/
 *.pem
 config_prod.py
 secrets.py
+config/okx_config.py
 
 # Data
 *.csv

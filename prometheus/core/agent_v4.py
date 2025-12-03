@@ -148,8 +148,31 @@ class AgentV4:
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         
-        # 基因和性格
-        self.gene = gene if gene else self._generate_random_gene()
+        # 基因和性格（v4.1：支持EvolvableGene对象）
+        from prometheus.core.evolvable_gene import EvolvableGene
+        
+        if gene is None:
+            self.gene = self._generate_random_gene()
+        elif isinstance(gene, EvolvableGene):
+            # v4.1: 直接使用EvolvableGene对象
+            self.gene = gene
+        elif isinstance(gene, dict):
+            # 兼容旧版：从字典转换为EvolvableGene对象
+            # 检查是否是完整的EvolvableGene序列化字典
+            if 'active_params' in gene and 'generation' in gene:
+                # 完整的序列化字典，使用from_dict
+                self.gene = EvolvableGene.from_dict(gene)
+            else:
+                # 简单的参数字典，作为active_params使用
+                self.gene = EvolvableGene(active_params=gene, generation=0)
+        else:
+            # 未知类型，尝试作为EvolvableGene使用
+            self.gene = gene
+        
+        # 将agent_id绑定到基因（用于追溯谱系）
+        if hasattr(self.gene, 'agent_id') or isinstance(self.gene, EvolvableGene):
+            self.gene.agent_id = agent_id
+        
         self.personality = personality if personality else self._generate_random_personality()
         
         # v4.0 系统集成
@@ -199,62 +222,28 @@ class AgentV4:
         self.last_stand_start_time: Optional[datetime] = None
         self.last_stand_initial_capital: Optional[float] = None
         
+        # 止盈止损追踪变量
+        self._max_profit_pct = 0.0      # 持仓期间最高盈利百分比（追踪止盈用）
+        self._holding_periods = 0        # 持仓周期数（时间止损用）
+        
+        # 冷却期机制（防止频繁开平仓）
+        self._cooldown_periods = 0       # 平仓后的冷却周期计数
+        self._last_close_cycle = 0       # 上次平仓的周期号
+        self._last_trade_pnl = 0.0       # 最后一笔交易的盈亏
+        self._consecutive_losses = 0     # 连续亏损次数
+        self._close_reason = ''          # 平仓原因
+        
         # 公告板处理器（新增）
         self.bulletin_processor = AgentBulletinProcessor(self)
         
         logger.info(f"Agent {agent_id} 诞生，初始资金: {initial_capital}, 性格: {self.personality}")
     
-    def _generate_random_gene(self) -> Dict:
-        """生成随机交易基因"""
-        return {
-            # 交易信号阈值
-            'long_threshold': np.random.uniform(0.5, 0.8),
-            'short_threshold': np.random.uniform(0.5, 0.8),
-            
-            # 风险管理
-            'max_position_size': np.random.uniform(0.1, 0.3),
-            'stop_loss': np.random.uniform(0.02, 0.10),
-            'take_profit': np.random.uniform(0.05, 0.20),
-            
-            # 时间周期
-            'holding_period': np.random.randint(1, 48),  # 小时
-            
-            # 技术指标权重
-            'indicator_weights': {
-                'trend': np.random.uniform(0.1, 0.4),
-                'momentum': np.random.uniform(0.1, 0.4),
-                'volatility': np.random.uniform(0.1, 0.4),
-                'volume': np.random.uniform(0.1, 0.3)
-            },
-            
-            # 信号融合权重（新增）
-            'signal_weights': {
-                'technical': np.random.uniform(0.3, 0.7),   # 技术分析
-                'opponent': np.random.uniform(0.2, 0.6),    # 对手分析
-                'bulletin': np.random.uniform(0.0, 0.5),    # 公告板信号
-                'emotion': np.random.uniform(0.1, 0.4)      # 情绪状态
-            },
-            
-            # 公告板敏感度
-            'bulletin_sensitivity': {
-                'global': np.random.uniform(0.0, 1.0),      # 主脑战略
-                'market': np.random.uniform(0.0, 1.0),      # 市场事件
-                'system': np.random.uniform(0.0, 1.0),      # 系统风险
-                'social': np.random.uniform(0.0, 1.0)       # 社交信号
-            },
-            
-            # 交易品种偏好（新增）
-            'product_preference': {
-                'spot': np.random.uniform(0.0, 1.0),        # 现货偏好
-                'margin': np.random.uniform(0.0, 1.0),      # 杠杆交易偏好
-                'perpetual': np.random.uniform(0.0, 1.0),   # 永续合约偏好
-                'futures': np.random.uniform(0.0, 1.0),     # 交割合约偏好
-                'options': np.random.uniform(0.0, 1.0)      # 期权偏好
-            },
-            
-            # 杠杆倾向（新增）
-            'leverage_appetite': np.random.uniform(0.0, 1.0)  # 0=保守 1=激进
-        }
+    def _generate_random_gene(self):
+        """生成随机交易基因（v4.1：返回EvolvableGene对象）"""
+        from prometheus.core.evolvable_gene import EvolvableGene
+        # v4.1: 返回EvolvableGene对象，而不是Dict
+        # 旧版复杂的Dict基因已弃用，现在使用简化的可进化基因（3参数起步）
+        return EvolvableGene.create_genesis()
     
     def _generate_random_personality(self) -> AgentPersonality:
         """
@@ -1013,114 +1002,685 @@ class AgentV4:
         # 转换为字典方便处理
         return [b.to_dict() for b in bulletins]
     
-    def interpret_bulletin(self, bulletin: Dict) -> Dict:
+    def interpret_bulletin(self, bulletin: Dict, has_position: bool = False, 
+                           unrealized_pnl_pct: float = 0.0,
+                           position_amount: float = 0.0,
+                           balance: float = 10000.0,
+                           initial_capital: float = 10000.0,
+                           trade_count: int = 0,
+                           position_side: str = None) -> Dict:
         """
-        解读公告（基于基因和性格）
+        解读公告（基于基因、性格、持仓和资金状态）
         
         Args:
             bulletin: 公告数据
+            has_position: 是否持有仓位
+            unrealized_pnl_pct: 未实现盈亏百分比
+            position_amount: 当前持仓量（BTC）
+            balance: 当前余额
+            initial_capital: 初始资金
+            trade_count: 已交易笔数
+            position_side: 持仓方向 'long'/'short'/None
         
         Returns:
             Dict: 解读结果
                 - accept: 是否接受公告建议
                 - confidence: 信心度 (0-1)
-                - signal: 交易信号 'buy'/'sell'/None
+                - signal: 交易信号 'buy'/'sell'/'add'/'short'/'add_short'/'cover'/None
+                - reason: 决策原因
         """
+        # 计算资金使用率
+        capital_usage = 1 - (balance / initial_capital) if initial_capital > 0 else 0
+        # 设置最大持仓量限制（每个Agent最多持有0.05 BTC）
+        max_position = 0.05
+        # 设置最大资金使用率（最多使用初始资金的50%）
+        max_capital_usage = 0.5
         content = bulletin.get('content', {})
         tier = bulletin.get('tier', '')
         
         # 基础信心度（基于性格：乐观度+纪律性）
         base_confidence = (self.personality.optimism + self.personality.discipline) / 2
         
-        # 战略公告（主脑）- 权威性高
+        # 战略公告（先知占卜）- 权威性高
         if tier == 'strategic':
-            # 更倾向接受权威指令，但性格会影响
             accept_threshold = 0.3  # 较低，容易接受
             confidence_boost = 0.2
         
         # 市场公告（监督者）- 信息性
         elif tier == 'market':
-            # 根据市场敏感度决定
             market_sensitivity = getattr(self.gene, 'market_sensitivity', 0.5)
             accept_threshold = 1 - market_sensitivity
             confidence_boost = 0.1
         
         # 系统公告（监督者）- 警告性
         elif tier == 'system':
-            # 根据风险承受度决定
             risk_aversion = 1 - self.personality.risk_tolerance
             accept_threshold = 1 - risk_aversion
             confidence_boost = 0.15
-        
         else:
             accept_threshold = 0.5
             confidence_boost = 0
         
         # 计算最终信心度
         final_confidence = min(base_confidence + confidence_boost, 1.0)
-        
-        # 决定是否接受
         accept = final_confidence > accept_threshold
         
-        # 生成交易信号（基于市场状态和性格）
         signal = None
+        reason = ""
+        
         if accept:
-            # 从公告内容中提取市场状态
-            market_state = content.get('market_state', {})
-            trend = market_state.get('trend', 'sideways')
-            momentum = market_state.get('momentum', 'neutral')
-            recommendation = market_state.get('recommendation', '')
+            # ========== 先知占卜公告（strategic）- Agent自主解读 ==========
+            if tier == 'strategic' and content.get('type') == 'prophecy':
+                # 获取先知预测数据（纯预测，无建议）
+                trend_forecast = content.get('trend_forecast', '震荡')
+                forecast_confidence = content.get('forecast_confidence', 0.5)
+                bullish_score = content.get('bullish_score', 0.5)
+                volume_forecast = content.get('volume_forecast', '正常')
+                risk_level = content.get('risk_level', 'medium')
+                risk_factors = content.get('risk_factors', [])
+                
+                # ========== Agent自主解读预言 ==========
+                # 根据自己的性格来理解市场信号
+                
+                # 解读走势：不同性格对"看涨/看跌"的阈值不同
+                # 乐观派：bullish_score > 0.45 就觉得是看涨
+                # 悲观派：bullish_score > 0.6 才觉得是看涨
+                optimism_adjust = (self.personality.optimism - 0.5) * 0.15
+                personal_bullish_threshold = 0.55 - optimism_adjust  # 乐观派阈值更低
+                personal_bearish_threshold = 0.45 + optimism_adjust  # 悲观派阈值更高
+                
+                is_bullish = bullish_score >= personal_bullish_threshold
+                is_bearish = bullish_score <= personal_bearish_threshold
+                is_strong_bullish = bullish_score >= 0.7
+                is_strong_bearish = bullish_score <= 0.3
+                
+                # 解读风险：不同风险承受度对风险的反应不同
+                # 高风险承受：忽略medium风险
+                # 低风险承受：medium风险就很敏感
+                risk_sensitive = (risk_level == 'high') or (risk_level == 'medium' and self.personality.risk_tolerance < 0.4)
+                
+                # 解读交易量：激进派喜欢放量，保守派喜欢缩量
+                volume_favorable = (volume_forecast == '放量' and self.personality.aggression > 0.5) or \
+                                   (volume_forecast == '缩量' and self.personality.aggression < 0.5) or \
+                                   (volume_forecast == '正常')
+                
+                # 优化C：动态开仓门槛（低信心/高风险时提高门槛，避免频繁被手续费吃掉）
+                low_confidence_market = forecast_confidence < 0.60  # 信心不足市场
+                if low_confidence_market and not has_position:
+                    # 在不明朗市场提高开仓门槛：信心需>65%才开仓
+                    min_confidence_to_open = 0.65
+                else:
+                    min_confidence_to_open = 0.50  # 正常阈值
+                
+                if has_position:
+                    # === 已持仓：考虑加仓/减仓/清仓 ===
+                    # 确定平仓和加仓信号（根据持仓方向）
+                    is_long = position_side == 'long' or position_side is None  # 默认多仓
+                    close_signal = 'sell' if is_long else 'cover'
+                    add_signal = 'add' if is_long else 'add_short'
+                    position_type = "多仓" if is_long else "空仓"
+                    
+                    # ========== 计算个性化止盈止损阈值 ==========
+                    # 基础止盈线：保守派3%，激进派5%
+                    base_take_profit = 0.03 + self.personality.aggression * 0.02
+                    # 基础止损线：低风险承受2%，高风险承受4%
+                    base_stop_loss = 0.02 + self.personality.risk_tolerance * 0.02
+                    
+                    # 追踪止盈：记录最高盈利（使用Agent属性）
+                    if not hasattr(self, '_max_profit_pct'):
+                        self._max_profit_pct = 0.0
+                    if unrealized_pnl_pct > self._max_profit_pct:
+                        self._max_profit_pct = unrealized_pnl_pct
+                    
+                    # 持仓周期计数已移至process_bulletins_and_decide，避免每条公告都计数
+                    if not hasattr(self, '_holding_periods'):
+                        self._holding_periods = 0
+                    
+                    # ========== 1. 止盈逻辑（Agent自主判断）==========
+                    take_profit_triggered = False
+                    
+                    # 1.1 追踪止盈：曾经盈利超过5%，回撤40%则止盈
+                    if self._max_profit_pct > 0.05:
+                        trailing_threshold = self._max_profit_pct * 0.6
+                        if unrealized_pnl_pct < trailing_threshold:
+                            signal = close_signal
+                            reason = f"追踪止盈(最高{self._max_profit_pct*100:.1f}%→当前{unrealized_pnl_pct*100:.1f}%)"
+                            take_profit_triggered = True
+                    
+                    # 1.2 基础止盈：达到个性化止盈线
+                    if not take_profit_triggered and unrealized_pnl_pct > base_take_profit:
+                        adjusted_target = base_take_profit * (1 + self._holding_periods // 10 * 0.1)
+                        if unrealized_pnl_pct > adjusted_target:
+                            signal = close_signal
+                            reason = f"止盈(盈利{unrealized_pnl_pct*100:.1f}%>目标{adjusted_target*100:.1f}%)"
+                            take_profit_triggered = True
+                    
+                    # 1.3 趋势反向时主动止盈（Agent解读预言后判断）
+                    # 注：止盈阈值必须>0.1%才能覆盖双向交易费(0.05%*2=0.1%)
+                    adverse_trend = is_bearish if is_long else is_bullish
+                    if not take_profit_triggered and adverse_trend and unrealized_pnl_pct > 0.025:  # 提高到2.5%
+                        if self.personality.risk_tolerance < 0.5:  # 风险规避型主动止盈
+                            signal = close_signal
+                            reason = f"趋势{trend_forecast}+盈利{unrealized_pnl_pct*100:.1f}%，主动止盈"
+                            take_profit_triggered = True
+                    
+                    # 1.4 超高盈利强制止盈（任何人盈利>8%）
+                    if not take_profit_triggered and unrealized_pnl_pct > 0.08:
+                        signal = close_signal
+                        reason = f"超高盈利止盈({unrealized_pnl_pct*100:.1f}%)"
+                        take_profit_triggered = True
+                    
+                    # ========== 2. 止损逻辑（Agent自主判断）==========
+                    stop_loss_triggered = False
+                    
+                    if not take_profit_triggered:
+                        # 趋势反向时收紧止损（Agent自己判断趋势是否对自己不利）
+                        effective_stop_loss = base_stop_loss * 0.7 if adverse_trend else base_stop_loss
+                        
+                        # 风险敏感时进一步收紧止损
+                        if risk_sensitive:
+                            effective_stop_loss *= 0.8
+                        
+                        # 2.1 基础止损
+                        if unrealized_pnl_pct < -effective_stop_loss:
+                            signal = close_signal
+                            reason = f"止损(亏损{abs(unrealized_pnl_pct)*100:.1f}%>阈值{effective_stop_loss*100:.1f}%)"
+                            stop_loss_triggered = True
+                        
+                        # 2.2 强烈反向趋势快速止损（新增）
+                        elif (is_strong_bearish if is_long else is_strong_bullish) and unrealized_pnl_pct < -0.005:
+                            signal = close_signal
+                            reason = f"强烈{trend_forecast}+亏损{abs(unrealized_pnl_pct)*100:.1f}%，快速止损"
+                            stop_loss_triggered = True
+                        
+                        # 2.3 趋势反向+亏损（降低阈值）
+                        elif adverse_trend and unrealized_pnl_pct < -0.008:  # 从-1.5%降到-0.8%
+                            signal = close_signal
+                            reason = f"趋势{trend_forecast}+亏损{abs(unrealized_pnl_pct)*100:.1f}%"
+                            stop_loss_triggered = True
+                        
+                        # 2.4 高风险警告时止损
+                        elif risk_sensitive and unrealized_pnl_pct < -0.008:  # 从-1.0%降到-0.8%
+                            signal = close_signal
+                            reason = f"风险{risk_level}+亏损{abs(unrealized_pnl_pct)*100:.1f}%"
+                            stop_loss_triggered = True
+                        
+                        # 2.5 强制止损（任何人亏损>5%）
+                        elif unrealized_pnl_pct < -0.05:
+                            signal = close_signal
+                            reason = f"强制止损(亏损{abs(unrealized_pnl_pct)*100:.1f}%)"
+                            stop_loss_triggered = True
+                        
+                        # 2.6 时间止损
+                        elif self._holding_periods > 30 and unrealized_pnl_pct < 0.005:
+                            if self.personality.patience < 0.5:
+                                signal = close_signal
+                                reason = f"时间止损(持仓{self._holding_periods}周期)"
+                                stop_loss_triggered = True
+                    
+                    # ========== 3. 加仓逻辑（Agent自主判断）==========
+                    # 趋势有利时考虑加仓
+                    favorable_trend = is_bullish if is_long else is_bearish
+                    
+                    if not take_profit_triggered and not stop_loss_triggered:
+                        # 条件：趋势有利 + 量能配合 + 风险可控
+                        if favorable_trend and volume_favorable and not risk_sensitive:
+                            can_add = True
+                            reject_reason = ""
+                            
+                            if position_amount >= max_position:
+                                can_add = False
+                                reject_reason = f"持仓已达上限"
+                            elif capital_usage >= max_capital_usage:
+                                can_add = False
+                                reject_reason = f"资金使用率上限"
+                            elif self.personality.aggression <= 0.5:
+                                can_add = False
+                                reject_reason = "性格不够激进"
+                            elif forecast_confidence < 0.6:
+                                can_add = False
+                                reject_reason = "预测信心不足"
+                            
+                            if can_add:
+                                signal = add_signal
+                                reason = f"趋势{trend_forecast}+量能{volume_forecast}，加{position_type}"
+                            else:
+                                reason = f"放弃加仓: {reject_reason}"
+                    
+                    # 4. 趋势反向时悲观派减仓
+                    if signal is None and not take_profit_triggered and not stop_loss_triggered:
+                        if adverse_trend and self.personality.optimism < 0.4:
+                            signal = close_signal
+                            reason = f"趋势{trend_forecast}，悲观派平{position_type}"
+                    
+                    # 5. 持有
+                    if signal is None and not take_profit_triggered and not stop_loss_triggered:
+                        reason = f"维持{position_type}"
+                
+                else:
+                    # === 无持仓：Agent自主决定开仓方向 ===
+                    # 重置追踪变量
+                    self._max_profit_pct = 0.0
+                    self._holding_periods = 0
+                    
+                    # ========== Agent根据性格解读预言后自主决策 ==========
+                    
+                    # 风险过高时观望
+                    if risk_sensitive and risk_level == 'high':
+                        signal = None
+                        reason = f"风险{risk_level}({','.join(risk_factors[:2])}),观望"
+                    
+                    # === 强烈信号：大多数Agent都会跟随 ===
+                    elif is_strong_bullish:
+                        # 强烈看涨：除了极度悲观派都开多
+                        if self.personality.optimism >= 0.3:
+                            signal = 'buy'
+                            reason = f"强烈{trend_forecast}(信心{forecast_confidence:.0%})，开多"
+                        else:
+                            signal = None
+                            reason = "极度悲观派观望"
+                    
+                    elif is_strong_bearish:
+                        # 强烈看跌：除了极度乐观派都开空
+                        if self.personality.optimism <= 0.7:
+                            signal = 'short'
+                            reason = f"强烈{trend_forecast}(信心{forecast_confidence:.0%})，开空"
+                        else:
+                            signal = None
+                            reason = "极度乐观派观望"
+                    
+                    # === 普通信号：根据性格决定 ===
+                    elif is_bullish:
+                        # 优化C：检查是否满足开仓门槛
+                        if forecast_confidence < min_confidence_to_open:
+                            signal = None
+                            reason = f"{trend_forecast}但信心不足({forecast_confidence:.0%}<{min_confidence_to_open:.0%})，观望"
+                        # 看涨：乐观派和激进派开多
+                        elif self.personality.optimism >= 0.5:
+                            signal = 'buy'
+                            reason = f"{trend_forecast}，乐观派开多"
+                        elif self.personality.aggression > 0.6 and volume_favorable:
+                            signal = 'buy'
+                            reason = f"{trend_forecast}+{volume_forecast}，激进派开多"
+                        else:
+                            signal = None
+                            reason = f"{trend_forecast}但性格不匹配，观望"
+                    
+                    elif is_bearish:
+                        # 优化C：检查是否满足开仓门槛
+                        if forecast_confidence < min_confidence_to_open:
+                            signal = None
+                            reason = f"{trend_forecast}但信心不足({forecast_confidence:.0%}<{min_confidence_to_open:.0%})，观望"
+                        # 看跌：悲观派和激进派开空（降低门槛，与做多对称）
+                        elif self.personality.optimism <= 0.5:
+                            signal = 'short'
+                            reason = f"{trend_forecast}，悲观派开空"
+                        elif self.personality.aggression > 0.5 and volume_favorable:  # 从0.6降到0.5
+                            signal = 'short'
+                            reason = f"{trend_forecast}+{volume_forecast}，激进派开空"
+                        elif forecast_confidence > 0.65:  # 新增：高信心时中性派也开空
+                            signal = 'short'
+                            reason = f"{trend_forecast}(高信心{forecast_confidence:.0%})，开空"
+                        else:
+                            signal = None
+                            reason = f"{trend_forecast}但性格不匹配，观望"
+                    
+                    # === 震荡行情：只有激进派会操作 ===
+                    else:
+                        if self.personality.aggression > 0.7 and self.personality.patience < 0.4:
+                            # 激进且没耐心的人可能会博方向
+                            if self.personality.optimism > 0.5:
+                                signal = 'buy'
+                                reason = "震荡行情，激进乐观派博多"
+                            else:
+                                signal = 'short'
+                                reason = "震荡行情，激进悲观派博空"
+                        else:
+                            signal = None
+                            reason = f"震荡行情({trend_forecast})，观望"
             
-            # 基于性格和市场状态生成信号
-            if tier == 'market':
-                # 中等以上乐观 + 上涨趋势 → 买入
-                if self.personality.optimism >= 0.5 and '上升' in trend:
-                    signal = 'buy'
-                # 悲观派 + 下跌趋势 → 卖出
-                elif self.personality.optimism < 0.4 and '下降' in trend:
-                    signal = 'sell'
-                # 激进派 + 上涨趋势（即使超买也敢买）→ 买入
-                elif self.personality.aggression > 0.7 and '上升' in trend:
-                    signal = 'buy'
-                # 保守派 + 超卖 → 买入（抄底）
-                elif self.personality.aggression < 0.4 and momentum in ['超卖', '严重超卖']:
-                    signal = 'buy'
+            # ========== 市场数据公告（market）==========
+            elif tier == 'market':
+                market_state = content.get('market_state', {})
+                trend = market_state.get('trend', '')
+                momentum = market_state.get('momentum', '')
+                
+                if has_position:
+                    # 已持仓时根据市场变化决定（区分多空）
+                    is_long = position_side == 'long' or position_side is None
+                    close_signal = 'sell' if is_long else 'cover'
+                    position_type = "多仓" if is_long else "空仓"
+                    
+                    base_take_profit = 0.03 + self.personality.aggression * 0.02
+                    base_stop_loss = 0.02 + self.personality.risk_tolerance * 0.02
+                    
+                    if is_long:
+                        # 多仓：市场转跌触发止损
+                        if '下降' in trend:
+                            if self.personality.optimism < 0.4:
+                                signal = close_signal
+                                reason = "市场转跌，悲观派平多"
+                            elif unrealized_pnl_pct < -base_stop_loss * 0.7:
+                                signal = close_signal
+                                reason = f"市场转跌+亏损{abs(unrealized_pnl_pct)*100:.1f}%"
+                        # 超买触发止盈
+                        elif '超买' in momentum:
+                            if unrealized_pnl_pct > base_take_profit * 0.8:
+                                signal = close_signal
+                                reason = f"超买+盈利{unrealized_pnl_pct*100:.1f}%"
+                            elif self.personality.aggression < 0.5:
+                                signal = close_signal
+                                reason = "超买，保守派止盈"
+                    else:
+                        # 空仓：市场转涨触发止损
+                        if '上升' in trend:
+                            if self.personality.optimism > 0.6:
+                                signal = close_signal
+                                reason = "市场转涨，乐观派平空"
+                            elif unrealized_pnl_pct < -base_stop_loss * 0.7:
+                                signal = close_signal
+                                reason = f"市场转涨+亏损{abs(unrealized_pnl_pct)*100:.1f}%"
+                        # 超卖触发止盈（空仓的止盈）
+                        elif '超卖' in momentum:
+                            if unrealized_pnl_pct > base_take_profit * 0.8:
+                                signal = close_signal
+                                reason = f"超卖+盈利{unrealized_pnl_pct*100:.1f}%"
+                            elif self.personality.aggression < 0.5:
+                                signal = close_signal
+                                reason = "超卖，保守派止盈"
+                else:
+                    # 无持仓时根据趋势开仓（重置追踪变量）
+                    self._max_profit_pct = 0.0
+                    self._holding_periods = 0
+                    
+                    # 上涨趋势开多
+                    if '上升' in trend:
+                        if self.personality.optimism >= 0.5:
+                            signal = 'buy'
+                            reason = "市场上涨，乐观派开多"
+                        elif self.personality.aggression > 0.7:
+                            signal = 'buy'
+                            reason = "市场上涨，激进派开多"
+                    # 下跌趋势开空
+                    elif '下降' in trend:
+                        if self.personality.optimism <= 0.4:
+                            signal = 'short'
+                            reason = "市场下跌，悲观派开空"
+                        elif self.personality.aggression > 0.7:
+                            signal = 'short'
+                            reason = "市场下跌，激进派开空"
+                    # 超卖抄底
+                    elif '超卖' in momentum and self.personality.aggression < 0.4:
+                        signal = 'buy'
+                        reason = "超卖抄底开多"
+                    # 超买做空
+                    elif '超买' in momentum and self.personality.aggression > 0.6:
+                        signal = 'short'
+                        reason = "超买做空"
             
-            elif tier == 'strategic':
-                # 主脑战略公告，根据推荐采取行动
-                if 'buy' in recommendation.lower() or '买' in recommendation:
-                    signal = 'buy'
-                elif 'sell' in recommendation.lower() or '卖' in recommendation:
-                    signal = 'sell'
-            
+            # ========== 系统警告公告（system）==========
             elif tier == 'system':
-                # 系统警告，倾向于平仓或减仓
-                if '风险' in str(content) or 'risk' in str(content).lower():
-                    signal = 'sell'  # 风险警告 → 平仓
+                if '风险' in str(content) and has_position:
+                    if self.personality.risk_tolerance < 0.5:
+                        signal = 'sell'
+                        reason = "系统风险警告，减仓"
+        
+        if not reason:
+            reason = f"性格(乐观{self.personality.optimism:.1f}/激进{self.personality.aggression:.1f})"
         
         return {
             'accept': accept,
             'confidence': final_confidence,
             'signal': signal,
-            'reason': f"基于性格(乐观{self.personality.optimism:.2f}/激进{self.personality.aggression:.2f})和市场分析"
+            'reason': reason
         }
     
-    def decide(self) -> Dict:
+    def calculate_personal_cooldown(self, close_reason: str, last_trade_pnl: float,
+                                    trend_forecast: str, risk_level: str) -> int:
+        """
+        Agent自主计算个性化冷却期（根据性格、经历、市场状态）
+        
+        Args:
+            close_reason: 平仓原因 ('take_profit', 'stop_loss', 'time_stop', 'trend_reverse')
+            last_trade_pnl: 最后一笔交易的盈亏
+            trend_forecast: 市场趋势预测
+            risk_level: 风险等级
+            
+        Returns:
+            int: 冷却周期数（2~30）
+        """
+        # 基础冷却期：5个周期 = 100秒
+        base_cooldown = 5
+        
+        # ========== 1. 性格因子 ==========
+        # 激进度：激进派冷却短，保守派冷却长
+        # aggression=1.0 → factor=0.5 (减半)
+        # aggression=0.5 → factor=1.0 (标准)
+        # aggression=0.0 → factor=1.5 (加长50%)
+        aggression_factor = 1.5 - self.personality.aggression
+        
+        # 耐心度：没耐心想快速再战，有耐心愿意等待
+        # patience=0.0 → factor=0.6
+        # patience=0.5 → factor=0.85
+        # patience=1.0 → factor=1.1
+        patience_factor = 0.6 + self.personality.patience * 0.5
+        
+        # ========== 2. 盈亏状态因子 ==========
+        if last_trade_pnl > 10:
+            # 大赚(>$10)：判断正确，快速再入场
+            pnl_factor = 0.5
+            mood = "兴奋😊"
+        elif last_trade_pnl > 0:
+            # 小赚：适度冷却
+            pnl_factor = 0.8
+            mood = "满意😌"
+        elif last_trade_pnl > -10:
+            # 小亏(<$10)：延长冷却
+            pnl_factor = 1.3
+            mood = "沮丧😔"
+        elif last_trade_pnl > -30:
+            # 中等亏损($10~$30)：显著延长
+            pnl_factor = 1.8
+            mood = "懊恼😞"
+        else:
+            # 大亏(>$30)：长时间反思
+            pnl_factor = 2.5
+            mood = "痛苦😭"
+        
+        # ========== 3. 连续亏损惩罚（强制冷静）==========
+        if self._consecutive_losses >= 5:
+            # 连续5次亏损：可能策略失效，长时间暂停
+            loss_penalty = 3.0
+            mood = "迷茫😵"
+        elif self._consecutive_losses >= 3:
+            # 连续3次亏损：需要重新评估
+            loss_penalty = 2.0
+            mood = "困惑😕"
+        else:
+            loss_penalty = 1.0
+        
+        # ========== 4. 市场状态因子 ==========
+        market_factor = 1.0
+        
+        # 震荡市最危险，容易来回打脸
+        if trend_forecast in ['震荡', '盘整', '横盘']:
+            market_factor = 2.5  # 震荡市：延长150%
+        
+        # 风险等级调整
+        if risk_level == 'high':
+            market_factor = max(market_factor, 2.0)  # 高风险：至少延长100%
+        elif risk_level == 'medium':
+            market_factor = max(market_factor, 1.3)
+        
+        # ========== 5. 平仓原因调整 ==========
+        reason_factor = {
+            'take_profit': 0.7,      # 主动止盈：判断正确，短冷却
+            'stop_loss': 1.5,        # 止损：判断错误，延长冷却
+            'time_stop': 1.2,        # 时间止损：耐心耗尽，适度延长
+            'trend_reverse': 1.4,    # 趋势反转：需要重新观察
+            'risk_alert': 1.6,       # 风险预警：谨慎行事
+        }.get(close_reason, 1.0)
+        
+        # ========== 6. 综合计算 ==========
+        cooldown = base_cooldown * (
+            aggression_factor 
+            * patience_factor 
+            * pnl_factor 
+            * loss_penalty 
+            * market_factor 
+            * reason_factor
+        )
+        
+        # 限制范围：2~30个周期（40秒~10分钟）
+        final_cooldown = int(max(2, min(30, cooldown)))
+        
+        logger.info(
+            f"🕐 {self.agent_id}: 个性化冷却={final_cooldown}周期({final_cooldown*20}秒) "
+            f"[盈亏${last_trade_pnl:+.1f} {mood}] "
+            f"[激进{self.personality.aggression:.1f}×{aggression_factor:.1f}, "
+            f"耐心{self.personality.patience:.1f}×{patience_factor:.1f}] "
+            f"[市场{trend_forecast}×{market_factor:.1f}]"
+        )
+        
+        return final_cooldown
+    
+    def calculate_position_size(self, current_price: float, balance: float, 
+                                 initial_capital: float, confidence: float,
+                                 risk_level: str = 'medium', 
+                                 total_pnl_ratio: float = 0.0) -> float:
+        """
+        Agent自主计算交易量（基于性格和市场信息）
+        
+        Args:
+            current_price: 当前BTC价格
+            balance: 可用资金
+            initial_capital: 初始资金
+            confidence: 交易信心度 (0-1)
+            risk_level: 风险等级 ('low', 'medium', 'high')
+            total_pnl_ratio: 总盈亏占初始资金比例
+            
+        Returns:
+            float: 建议交易量（BTC）
+        """
+        if current_price <= 0 or balance <= 0:
+            return 0.01  # 默认最小量
+        
+        # ========== 简化计算：直接算BTC数量 ==========
+        # 基础交易量：0.01 BTC
+        base_amount = 0.01
+        
+        # 1. 激进度加成：激进派可以翻倍 (0→1x, 0.5→1.5x, 1→2x)
+        aggression_multiplier = 1.0 + self.personality.aggression
+        
+        # 2. 风险承受度加成 (0→1x, 0.5→1.25x, 1→1.5x)
+        risk_tolerance_multiplier = 1.0 + self.personality.risk_tolerance * 0.5
+        
+        # 3. 信心度加成 (0.5→1x, 0.8→1.3x, 1.0→1.5x)
+        confidence_multiplier = 1.0 + (confidence - 0.5) * 1.0
+        
+        # 4. 风险等级调整
+        risk_multiplier = {
+            'low': 1.5,      # 低风险：+50%
+            'medium': 1.0,   # 中风险：不变
+            'high': 0.5      # 高风险：-50%
+        }.get(risk_level, 1.0)
+        
+        # 5. 盈亏状态调整
+        if total_pnl_ratio > 0.05:      # 盈利>5%，激进+30%
+            pnl_multiplier = 1.3
+        elif total_pnl_ratio > 0.02:    # 盈利>2%，+10%
+            pnl_multiplier = 1.1
+        elif total_pnl_ratio < -0.05:   # 亏损>5%，保守-40%
+            pnl_multiplier = 0.6
+        elif total_pnl_ratio < -0.02:   # 亏损>2%，-20%
+            pnl_multiplier = 0.8
+        else:
+            pnl_multiplier = 1.0
+        
+        # 综合计算BTC数量
+        btc_amount = (base_amount 
+                      * aggression_multiplier 
+                      * risk_tolerance_multiplier 
+                      * confidence_multiplier 
+                      * risk_multiplier 
+                      * pnl_multiplier)
+        
+        # BTC数量限制：0.01~0.1 BTC
+        btc_amount = max(0.01, min(0.1, btc_amount))
+        
+        # 四舍五入到0.01精度
+        btc_amount = round(btc_amount, 2)
+        
+        logger.debug(f"{self.agent_id}: 计算仓位 amount={btc_amount} BTC "
+                    f"(激进{self.personality.aggression:.1f}, 信心{confidence:.1%}, 风险{risk_level})")
+        
+        return btc_amount
+    
+    def decide(self, current_price: float = 0, has_position: bool = False, 
+               unrealized_pnl_pct: float = 0.0, position_amount: float = 0.0,
+               balance: float = 10000.0, initial_capital: float = 10000.0,
+               trade_count: int = 0, position_side: str = None) -> Dict:
         """
         决策方法（Supervisor调用的统一接口）
         
+        Args:
+            current_price: 当前价格
+            has_position: 是否已有持仓
+            unrealized_pnl_pct: 未实现盈亏百分比
+            position_amount: 当前持仓量（BTC）
+            balance: 当前余额
+            initial_capital: 初始资金
+            trade_count: 已交易笔数
+            position_side: 持仓方向 'long'/'short'/None
+        
         Returns:
-            Dict: 决策结果 {'signal': 'buy'/'sell'/None, 'confidence': float, 'reason': str}
+            Dict: 决策结果 {'signal', 'confidence', 'reason', 'suggested_amount'}
         """
-        return self.process_bulletins_and_decide()
+        # 保存当前价格供仓位计算使用
+        self._current_price = current_price
+        self._balance = balance
+        self._initial_capital = initial_capital
+        
+        return self.process_bulletins_and_decide(
+            has_position, unrealized_pnl_pct, position_amount, 
+            balance, initial_capital, trade_count, position_side
+        )
     
-    def process_bulletins_and_decide(self) -> Dict:
+    def process_bulletins_and_decide(self, has_position: bool = False, 
+                                     unrealized_pnl_pct: float = 0.0,
+                                     position_amount: float = 0.0,
+                                     balance: float = 10000.0,
+                                     initial_capital: float = 10000.0,
+                                     trade_count: int = 0,
+                                     position_side: str = None) -> Dict:
         """
         读取并处理所有公告，做出综合决策
         
+        Args:
+            has_position: 是否已有持仓
+            unrealized_pnl_pct: 未实现盈亏百分比
+            position_amount: 当前持仓量（BTC）
+            balance: 当前余额
+            initial_capital: 初始资金
+            trade_count: 已交易笔数
+            position_side: 持仓方向 'long'/'short'/None
+        
         Returns:
-            Dict: 决策结果 {'signal': 'buy'/'sell'/None, 'confidence': float, 'reason': str}
+            Dict: 决策结果 {'signal': 'buy'/'sell'/'add'/'short'/'cover'/None, 'confidence': float, 'reason': str}
         """
+        # 0. 冷却期处理（防止频繁开平仓）
+        # 注：个性化冷却期由calculate_personal_cooldown()动态计算
+        
+        # 冷却期递减
+        if self._cooldown_periods > 0:
+            self._cooldown_periods -= 1
+        
+        # 持仓周期递增（每个决策周期只增加一次，而不是每条公告都增加）
+        if has_position:
+            if not hasattr(self, '_holding_periods'):
+                self._holding_periods = 0
+            self._holding_periods += 1
+        
         # 1. 读取公告
         bulletins = self.read_bulletins(limit=10)
         
@@ -1131,10 +1691,14 @@ class AgentV4:
                 'reason': '无公告信息'
             }
         
-        # 2. 解读每条公告
+        # 2. 解读每条公告（传入持仓和资金状态）
         interpretations = []
         for bulletin in bulletins:
-            interp = self.interpret_bulletin(bulletin)
+            interp = self.interpret_bulletin(
+                bulletin, has_position, unrealized_pnl_pct,
+                position_amount, balance, initial_capital, trade_count,
+                position_side
+            )
             interpretations.append({
                 'bulletin_id': bulletin.get('bulletin_id'),
                 'tier': bulletin.get('tier'),
@@ -1153,7 +1717,7 @@ class AgentV4:
             }
         
         # 4. 根据接受的公告做出决策
-        # 优先级：战略 > 系统 > 市场
+        # 优先级：战略(先知占卜) > 系统 > 市场
         strategic = [b for b in accepted_bulletins if b['tier'] == 'strategic' and b.get('signal')]
         system = [b for b in accepted_bulletins if b['tier'] == 'system' and b.get('signal')]
         market = [b for b in accepted_bulletins if b['tier'] == 'market' and b.get('signal')]
@@ -1167,15 +1731,112 @@ class AgentV4:
             primary = market[0]
         else:
             # 没有任何交易信号
+            position_status = "持仓中" if has_position else "空仓"
             return {
                 'signal': None,
                 'confidence': 0,
-                'reason': f"接受了{len(accepted_bulletins)}条公告，但无交易信号"
+                'reason': f"{position_status}，观望"
             }
         
+        final_signal = primary['signal']
+        final_reason = primary['reason']
+        final_confidence = primary['confidence']
+        
+        # 冷却期检查：平仓后不能立即开仓
+        is_close_signal = final_signal in ['sell', 'cover']
+        is_open_signal = final_signal in ['buy', 'short']
+        is_add_signal = final_signal in ['add', 'add_short']
+        
+        # ========== 如果是平仓信号，计算个性化冷却期 ==========
+        if is_close_signal:
+            # 提取市场信息（用于计算冷却期）
+            trend_forecast = '正常'
+            risk_level = 'medium'
+            
+            # 从战略公告（先知预言）中提取
+            for b in strategic:
+                content = b.get('content', {}) if isinstance(b.get('content'), dict) else {}
+                trend_forecast = content.get('trend_forecast', '正常')
+                risk_level = content.get('risk_level', 'medium')
+                break
+            
+            # 分析平仓原因
+            if '止盈' in final_reason or '盈利' in final_reason:
+                close_reason = 'take_profit'
+            elif '止损' in final_reason or '亏损' in final_reason:
+                close_reason = 'stop_loss'
+            elif '时间' in final_reason:
+                close_reason = 'time_stop'
+            elif '趋势' in final_reason or '反转' in final_reason or '反向' in final_reason:
+                close_reason = 'trend_reverse'
+            elif '风险' in final_reason:
+                close_reason = 'risk_alert'
+            else:
+                close_reason = 'unknown'
+            
+            # 估算本次交易盈亏（基于未实现盈亏）
+            # 注：实际盈亏会在Supervisor执行后更新，这里只是估算
+            estimated_pnl = unrealized_pnl_pct * balance if 'has_position' in locals() and has_position else 0
+            
+            # 更新连续亏损计数器
+            if estimated_pnl < 0:
+                self._consecutive_losses += 1
+            else:
+                self._consecutive_losses = 0  # 盈利则重置
+            
+            # 调用个性化冷却期计算
+            personal_cooldown = self.calculate_personal_cooldown(
+                close_reason=close_reason,
+                last_trade_pnl=estimated_pnl,
+                trend_forecast=trend_forecast,
+                risk_level=risk_level
+            )
+            
+            self._cooldown_periods = personal_cooldown
+            self._close_reason = close_reason
+        
+        # 如果是开仓信号且在冷却期内，阻止开仓
+        if is_open_signal and self._cooldown_periods > 0:
+            return {
+                'signal': None,
+                'confidence': 0,
+                'reason': f"冷却期中({self._cooldown_periods}周期)，暂不开仓",
+                'suggested_amount': 0
+            }
+        
+        # ========== 计算建议交易量（Agent自主决定）==========
+        suggested_amount = 0.01  # 默认最小量
+        
+        if is_open_signal or is_add_signal:
+            # 从战略公告中获取风险等级
+            risk_level = 'medium'
+            for b in strategic:
+                content = b.get('content', {}) if isinstance(b.get('content'), dict) else {}
+                risk_level = content.get('risk_level', 'medium')
+                break
+            
+            # 计算盈亏比例
+            total_pnl_ratio = 0.0
+            if hasattr(self, '_initial_capital') and self._initial_capital > 0:
+                # 从账簿状态估算（简化版）
+                if hasattr(self, '_balance'):
+                    total_pnl_ratio = (self._balance - self._initial_capital) / self._initial_capital
+            
+            # 调用仓位计算方法
+            if hasattr(self, '_current_price') and self._current_price > 0:
+                suggested_amount = self.calculate_position_size(
+                    current_price=self._current_price,
+                    balance=getattr(self, '_balance', 10000),
+                    initial_capital=getattr(self, '_initial_capital', 10000),
+                    confidence=final_confidence,
+                    risk_level=risk_level,
+                    total_pnl_ratio=total_pnl_ratio
+                )
+        
         return {
-            'signal': primary['signal'],
-            'confidence': primary['confidence'],
-            'reason': f"{primary['tier']}公告: {primary['title'][:20]}... ({primary['reason']})"
+            'signal': final_signal,
+            'confidence': final_confidence,
+            'reason': final_reason,
+            'suggested_amount': suggested_amount
         }
 
