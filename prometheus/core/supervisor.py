@@ -1649,16 +1649,10 @@ class Supervisor:
     # ========== 完整运营系统(新增：主循环)==========
     
     def _log_print(self, message):
-        """同时输出到控制台和日志文件（处理Windows编码问题）"""
-        try:
-            print(message)
-        except UnicodeEncodeError:
-            # Windows控制台编码问题：将无法编码的字符替换为?
-            print(message.encode('gbk', errors='replace').decode('gbk'))
-        
-        if hasattr(self, 'log_handler') and self.log_handler:
-            self.log_handler.write(message + '\n')
-            self.log_handler.flush()
+        """输出到日志系统（logger会自动处理控制台和文件输出）"""
+        # 只使用logger.info，避免重复输出
+        # logging系统已配置输出到控制台和文件，不需要额外print
+        logger.info(message)
     
     def set_components(self, okx_trading, mastermind, agents, config):
         """
@@ -2226,6 +2220,83 @@ class Supervisor:
         
         return prophecy
     
+    def _calculate_system_total_pnl(self, current_price: float) -> Dict:
+        """
+        计算系统总体盈亏（所有Agent的实盈+浮盈）
+        
+        Args:
+            current_price: 当前市场价格
+            
+        Returns:
+            Dict: {
+                'realized_pnl': float,      # 已实现盈亏
+                'unrealized_pnl': float,    # 未实现盈亏
+                'total_pnl': float,         # 总盈亏
+                'realized_pnl_str': str,    # 格式化字符串（带颜色标记）
+                'unrealized_pnl_str': str,  # 格式化字符串（带颜色标记）
+                'total_pnl_str': str        # 格式化字符串（带颜色标记）
+            }
+        """
+        total_realized_pnl = 0.0
+        total_unrealized_pnl = 0.0
+        
+        for agent in self.agents:
+            agent_id = agent.agent_id
+            account = self.agent_accounts.get(agent_id)
+            
+            if account:
+                try:
+                    # 获取已实现盈亏
+                    realized_pnl = account.private_ledger.total_pnl
+                    total_realized_pnl += realized_pnl
+                    
+                    # 获取未实现盈亏（持仓浮盈）
+                    status = account.get_status_for_decision(
+                        current_price,
+                        caller_role=Role.SUPERVISOR,
+                        caller_id='system'
+                    )
+                    
+                    if status.get('has_position', False):
+                        position_info = status.get('position_info', {})
+                        if position_info:
+                            entry_price = position_info.get('entry_price', 0)
+                            position_amount = position_info.get('amount', 0)
+                            position_side = status.get('position_side')
+                            
+                            if entry_price > 0 and position_amount > 0:
+                                # 根据持仓方向计算浮盈
+                                if position_side == 'short':
+                                    unrealized_pnl = (entry_price - current_price) * position_amount
+                                else:  # 'long'
+                                    unrealized_pnl = (current_price - entry_price) * position_amount
+                                
+                                total_unrealized_pnl += unrealized_pnl
+                
+                except Exception as e:
+                    logger.debug(f"计算Agent {agent_id} 盈亏失败: {e}")
+                    continue
+        
+        total_pnl = total_realized_pnl + total_unrealized_pnl
+        
+        # 格式化字符串（根据正负显示颜色标记）
+        def format_pnl(pnl: float) -> str:
+            if pnl > 0:
+                return f"$+{pnl:.2f}"
+            elif pnl < 0:
+                return f"${pnl:.2f}"
+            else:
+                return "$0.00"
+        
+        return {
+            'realized_pnl': total_realized_pnl,
+            'unrealized_pnl': total_unrealized_pnl,
+            'total_pnl': total_pnl,
+            'realized_pnl_str': format_pnl(total_realized_pnl),
+            'unrealized_pnl_str': format_pnl(total_unrealized_pnl),
+            'total_pnl_str': format_pnl(total_pnl)
+        }
+    
     def _genesis_create_gene_pool(self, count: int, market_analysis: dict) -> list:
         """
         生成Agent基因库（v4.1：使用简化的可进化基因）
@@ -2243,6 +2314,7 @@ class Supervisor:
         for i in range(count):
             gene = EvolvableGene.create_genesis()
             gene_pool.append(gene)
+            logger.debug(f"[创世基因{i+1:02d}] gene_id={id(gene)}, params={gene.active_params}")
         
         # 根据市场趋势调整初始参数倾向（微调）
         if '上涨' in trend:
@@ -2266,19 +2338,32 @@ class Supervisor:
         
         # 只对激进型和保守型做非常轻微的标记，保持基因多样性
         # 激进型：轻微提升（只调整10%）
+        adjusted_count = 0
         for i in range(min(aggressive_count, len(gene_pool))):
             if random.random() < 0.1:  # 只有10%概率调整
+                old_val = gene_pool[i].active_params['risk_appetite']
                 gene_pool[i].active_params['risk_appetite'] = min(1.0, gene_pool[i].active_params.get('risk_appetite', 0.5) * 1.1)
+                adjusted_count += 1
+                logger.debug(f"[激进型调整] 基因{i+1} risk_appetite: {old_val:.4f} -> {gene_pool[i].active_params['risk_appetite']:.4f}")
+        
+        logger.debug(f"[类型标记] 激进型调整了 {adjusted_count}/{aggressive_count} 个")
         
         # 平衡型：完全保持原样
         # （不做任何调整，保持基因原始多样性）
         
         # 保守型：轻微降低（只调整10%）
+        adjusted_count = 0
         for i in range(aggressive_count + balanced_count, count):
             if i < len(gene_pool) and random.random() < 0.1:  # 只有10%概率调整
+                old_val = gene_pool[i].active_params['risk_appetite']
                 gene_pool[i].active_params['risk_appetite'] = max(0.0, gene_pool[i].active_params.get('risk_appetite', 0.5) * 0.9)
+                adjusted_count += 1
+                logger.debug(f"[保守型调整] 基因{i+1} risk_appetite: {old_val:.4f} -> {gene_pool[i].active_params['risk_appetite']:.4f}")
+        
+        logger.debug(f"[类型标记] 保守型调整了 {adjusted_count}/{conservative_count} 个")
         
         logger.info(f"      激进型: {aggressive_count}, 平衡型: {balanced_count}, 保守型: {conservative_count}")
+        logger.info(f"      ✅ 生成{len(gene_pool)}个独特基因")
         
         return gene_pool
     
@@ -2293,6 +2378,8 @@ class Supervisor:
         for i in range(count):
             agent_id = f"Agent_{i+1:02d}"
             gene = gene_pool[i] if i < len(gene_pool) else gene_pool[-1]
+            
+            logger.debug(f"[创建Agent] {agent_id}: gene_id={id(gene)}, params={gene.active_params}")
             
             if agent_factory:
                 # 使用工厂函数
@@ -2312,6 +2399,9 @@ class Supervisor:
                     agent.epiphany_count = 0
             
             agents.append(agent)
+            
+            # DEBUG: 验证Agent的gene对象是否正确
+            logger.debug(f"[Agent创建后] {agent.agent_id}: agent.gene_id={id(agent.gene)}, params={agent.gene.active_params}")
             
             # 更新next_agent_id
             self.next_agent_id = max(self.next_agent_id, i + 2)
@@ -2396,6 +2486,7 @@ class Supervisor:
             self._log_print(f"\n✅ 已通过创世初始化 @ {self.genesis_time.strftime('%H:%M:%S')}")
         
         try:
+            logger.info(f"开始主循环，check_interval={check_interval}秒")
             while True:
                 # 检查是否超时
                 if end_time and datetime.now() >= end_time:
@@ -2405,6 +2496,7 @@ class Supervisor:
                 cycle_count += 1
                 current_time = datetime.now()
                 
+                logger.debug(f"进入周期{cycle_count}")
                 self._log_print(f"\n{'='*70}")
                 self._log_print(f"  🔄 周期 {cycle_count} | {current_time.strftime('%H:%M:%S')}")
                 self._log_print(f"{'='*70}")
@@ -2420,6 +2512,18 @@ class Supervisor:
                     current_price = market_data['close'].iloc[-1]
                     self._log_print(f"\n📊 当前价格: ${current_price:.2f}")
                     
+                    # 1.5 显示系统总体盈利（实盈+浮盈）
+                    try:
+                        total_pnl_info = self._calculate_system_total_pnl(current_price)
+                        self._log_print(
+                            f"💰 系统总盈亏: {total_pnl_info['total_pnl_str']} "
+                            f"(实盈: {total_pnl_info['realized_pnl_str']}, "
+                            f"浮盈: {total_pnl_info['unrealized_pnl_str']})"
+                        )
+                    except Exception as e:
+                        logger.warning(f"计算系统总盈亏失败: {e}")
+                        self._log_print(f"💰 系统总盈亏: 计算中...")
+                    
                     # 2. Supervisor分析市场并发布
                     self.comprehensive_monitoring(market_data)
                     
@@ -2434,7 +2538,6 @@ class Supervisor:
                             self._execute_mastermind_strategy(market_data, prophecy_type='minor')
                     
                     # 4. 收集Agent决策（传入持仓状态）
-                    self._log_print(f"\n🤖 【Agents】自主决策模式")
                     agent_decisions = []
                     for agent in self.agents:
                         try:
@@ -2509,13 +2612,9 @@ class Supervisor:
                     cover_count = sum(1 for d in agent_decisions if d['signal'] == 'cover')
                     wait_count = len(agent_decisions) - buy_count - add_count - sell_count - short_count - add_short_count - cover_count
                     
-                    self._log_print(f"\n   📊 Agent决策分布:")
-                    self._log_print(f"      🟢 开多: {buy_count}个 | 加多: {add_count}个 | 平多: {sell_count}个")
-                    self._log_print(f"      🔴 开空: {short_count}个 | 加空: {add_short_count}个 | 平空: {cover_count}个")
-                    self._log_print(f"      ⚪ 观望: {wait_count}个Agent")
-                    
-                    # 5. Supervisor接收并执行交易请求
-                    self._log_print(f"\n💼 【交易执行】Supervisor接收Agent请求")
+                    # 精简显示：只显示有行动的Agent数量
+                    action_count = len(agent_decisions) - wait_count
+                    self._log_print(f"🤖 决策: 🟢{buy_count+add_count+sell_count}多 🔴{short_count+add_short_count+cover_count}空 ⚪{wait_count}观望 | 执行{action_count}笔")
                     executed_count = 0
                     for decision in agent_decisions:
                         if decision['signal']:
@@ -2529,10 +2628,7 @@ class Supervisor:
                             if success:
                                 executed_count += 1
                     
-                    if executed_count == 0:
-                        self._log_print(f"   ⏸️  本周期无交易执行")
-                    else:
-                        self._log_print(f"   ✅ 执行了{executed_count}笔交易")
+                    # 执行统计已在决策行显示，无需重复
                     
                     # 6. 更新虚拟盈亏
                     self._update_unrealized_pnl(current_price)
@@ -3071,23 +3167,22 @@ class Supervisor:
             if not rankings:
                 return
             
-            # ========== 1. 控制台输出 ==========
+            # ========== 1. 控制台输出（精简版：只显示前5和后3）==========
             self._log_print(f"\n{'='*70}")
-            self._log_print(f"📊 Agent表现排名 (含浮动盈亏)")
+            self._log_print(f"📊 Agent表现排名 (前5+后3)")
             self._log_print(f"{'='*70}")
             
-            # 显示所有Agent（最多显示前20）
-            for i, (agent_id, data) in enumerate(rankings[:20], 1):
+            def format_agent_line(rank, agent_id, data):
+                """格式化单个Agent排名行"""
                 total_pnl = data.get('total_pnl', 0)
-                realized_pnl = data.get('realized_pnl', 0)      # 实盈
-                unrealized_pnl = data.get('unrealized_pnl', 0)  # 浮盈
+                realized_pnl = data.get('realized_pnl', 0)
+                unrealized_pnl = data.get('unrealized_pnl', 0)
                 trade_count = data.get('trade_count', 0)
                 
-                # 双向持仓：分别显示多空持仓
+                # 双向持仓
                 long_amount = data.get('long_position_amount', 0)
                 short_amount = data.get('short_position_amount', 0)
                 
-                # 构建持仓显示字符串
                 position_parts = []
                 if long_amount > 0:
                     position_parts.append(f"多{long_amount:.2f}")
@@ -3097,16 +3192,26 @@ class Supervisor:
                 if position_parts:
                     position_str = " | ".join(position_parts) + "BTC"
                 elif trade_count > 0:
-                    position_str = "已平仓"  # 有交易记录但无持仓 = 已平仓
+                    position_str = "已平仓"
                 else:
-                    position_str = "未交易"  # 无交易记录 = 从未交易
+                    position_str = "未交易"
                 
-                # 构建PnL显示字符串（包含实盈和浮盈分解）
-                pnl_str = f"PnL=${total_pnl:+.2f} (实${realized_pnl:+.2f}|浮${unrealized_pnl:+.2f})"
-                
-                self._log_print(
-                    f"  {i:2d}. {agent_id}: {pnl_str} | {position_str} | {trade_count}笔"
-                )
+                pnl_str = f"${total_pnl:+.2f} (实${realized_pnl:+.2f}|浮${unrealized_pnl:+.2f})"
+                return f"  {rank:2d}. {agent_id}: {pnl_str} | {position_str} | {trade_count}笔"
+            
+            # 显示前5名
+            for i, (agent_id, data) in enumerate(rankings[:5], 1):
+                self._log_print(format_agent_line(i, agent_id, data))
+            
+            # 如果Agent数量>8，显示省略号和后3名
+            if len(rankings) > 8:
+                self._log_print("   ...")
+                for i, (agent_id, data) in enumerate(rankings[-3:], len(rankings) - 2):
+                    self._log_print(format_agent_line(i, agent_id, data))
+            # 如果Agent数量<=8，显示剩余的
+            elif len(rankings) > 5:
+                for i, (agent_id, data) in enumerate(rankings[5:], 6):
+                    self._log_print(format_agent_line(i, agent_id, data))
             
             self._log_print(f"{'='*70}")
             

@@ -343,9 +343,14 @@ class EvolutionManager:
     
     def _record_generation_stats(self, rankings, elite_count, eliminate_count, new_agents):
         """记录每代统计数据"""
-        all_agents = [agent for agent_id, _ in rankings 
-                     if agent_id in self.supervisor.agents
-                     for agent in [self.supervisor.agents[agent_id]]]
+        # 🐛 修复：supervisor.agents是List，不是Dict，需要通过agent_id查找
+        all_agents = []
+        for agent_id, _ in rankings:
+            # 从agents列表中找到对应的agent
+            for agent in self.supervisor.agents:
+                if hasattr(agent, 'agent_id') and agent.agent_id == agent_id:
+                    all_agents.append(agent)
+                    break
         
         # 计算参数复杂度
         param_counts = []
@@ -404,30 +409,47 @@ class EvolutionManager:
             多样性得分 (0-1, 越高越多样)
         """
         if len(agents) < 2:
+            logger.debug(f"[多样性计算] Agent数量<2: {len(agents)}")
             return 0.0
         
         # 收集所有Agent的所有参数
         all_param_values = {}
+        agents_with_genes = 0
         
         for agent in agents:
             if not self._has_evolvable_gene(agent):
+                logger.debug(f"[多样性计算] Agent {agent.agent_id} 无可进化基因")
                 continue
+            
+            agents_with_genes += 1
             
             for param, value in agent.gene.active_params.items():
                 if param not in all_param_values:
                     all_param_values[param] = []
                 all_param_values[param].append(value)
         
+        logger.debug(f"[多样性计算] 总Agent={len(agents)}, 有基因的Agent={agents_with_genes}, 参数种类={len(all_param_values)}")
+        
         if not all_param_values:
+            logger.warning(f"[多样性计算] 无有效参数值")
             return 0.0
+        
+        # DEBUG: 输出前5个Agent的基因ID和参数值
+        if logger.isEnabledFor(logging.DEBUG):
+            for i, agent in enumerate(agents[:5]):
+                if self._has_evolvable_gene(agent):
+                    logger.debug(f"  Agent {agent.agent_id}: gene_id={id(agent.gene)}, params={agent.gene.active_params}")
         
         # 计算每个参数的方差
         variances = []
         for param, values in all_param_values.items():
             if len(values) > 1:
-                variances.append(np.var(values))
+                var = np.var(values)
+                variances.append(var)
+                logger.debug(f"[多样性计算] {param}: 方差={var:.6f}, 范围=[{min(values):.4f}, {max(values):.4f}], 样本数={len(values)}")
         
         if not variances:
+            logger.warning(f"[多样性计算] 无方差数据")
             return 0.0
         
         # 平均方差作为多样性指标
@@ -435,6 +457,8 @@ class EvolutionManager:
         
         # 归一化到0-1（方差最大为0.25，当值在0和1之间均匀分布时）
         diversity = min(1.0, avg_variance / 0.25 * 2)
+        
+        logger.debug(f"[多样性计算] 平均方差={avg_variance:.6f}, 多样性={diversity:.4f}")
         
         return diversity
     
