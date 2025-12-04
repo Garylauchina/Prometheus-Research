@@ -204,14 +204,25 @@ class EvolutionManager:
             # 选择两个优秀父母（禁止自交配）
             parent1_id, parent1_data = self._select_parent(survivors)
             
-            # 选择第二个父母时，确保与第一个不同
+            # 选择第二个父母，确保与第一个不同
             max_attempts = 10
+            parent2_id = None
+            parent2_data = None
+            
             for attempt in range(max_attempts):
-                parent2_id, parent2_data = self._select_parent(survivors)
-                if parent2_id != parent1_id:
+                candidate_id, candidate_data = self._select_parent(survivors)
+                
+                # 检查是否为同一个Agent
+                if candidate_id != parent1_id:
+                    parent2_id = candidate_id
+                    parent2_data = candidate_data
                     break
-                if attempt == max_attempts - 1:
-                    logger.warning(f"无法找到不同的父母，使用相同父母（种群太小）")
+            
+            # 如果还是没找到，使用最后一个候选（极罕见）
+            if parent2_id is None:
+                parent2_id, parent2_data = self._select_parent(survivors)
+                if parent2_id == parent1_id:
+                    logger.warning(f"⚠️ 种群过小，允许自交配: {parent1_id}")
             
             parent1 = agent_map.get(parent1_id)
             parent2 = agent_map.get(parent2_id)
