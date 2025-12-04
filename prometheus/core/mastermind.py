@@ -343,12 +343,14 @@ class Mastermind:
             return self.minor_prophecy(market_data, current_market_state, top_performers)
     
     def evaluate_environmental_pressure(self, market_data=None, current_market_state=None,
-                                       agent_performance_stats=None) -> float:
+                                      agent_performance_stats=None) -> float:
         """
-        评估环境压力指数（v4.1 OGAE系统）
+        评估环境压力指数（v5.1增强版：集成市场微结构）
         
         环境压力指数用于触发进化系统的自适应调整。
         压力越高，进化系统变异率越高，淘汰率越低，以快速适应环境变化。
+        
+        v5.1新增：市场微结构因素（滑点、流动性、价差）⭐
         
         Args:
             market_data: 市场历史数据
@@ -373,20 +375,26 @@ class Mastermind:
                 returns = market_data['close'].pct_change().dropna()
                 if len(returns) > 0:
                     volatility = returns.std()
-                    # 归一化：5%以上视为高波动
-                    volatility_score = min(1.0, volatility / 0.05)
+                    # 归一化：3%以上视为高波动（v5.1调整：更敏感）
+                    volatility_score = min(1.0, volatility / 0.03)
                     pressure_factors['volatility'] = volatility_score
                 else:
                     pressure_factors['volatility'] = 0.2
             elif current_market_state and hasattr(current_market_state, 'volatility'):
                 # 使用MarketState中的volatility
-                vol_str = str(current_market_state.volatility).lower()
-                if 'high' in vol_str or '高' in vol_str:
-                    pressure_factors['volatility'] = 0.8
-                elif 'low' in vol_str or '低' in vol_str:
-                    pressure_factors['volatility'] = 0.2
+                if isinstance(current_market_state.volatility, (int, float)):
+                    # 数值型波动率：归一化到3%
+                    volatility_score = min(1.0, current_market_state.volatility / 0.03)
+                    pressure_factors['volatility'] = volatility_score
                 else:
-                    pressure_factors['volatility'] = 0.4
+                    # 字符串型波动率
+                    vol_str = str(current_market_state.volatility).lower()
+                    if 'high' in vol_str or '高' in vol_str:
+                        pressure_factors['volatility'] = 0.8
+                    elif 'low' in vol_str or '低' in vol_str:
+                        pressure_factors['volatility'] = 0.2
+                    else:
+                        pressure_factors['volatility'] = 0.4
             else:
                 pressure_factors['volatility'] = 0.3
             
@@ -398,7 +406,12 @@ class Mastermind:
                 price_shock_score = min(1.0, recent_change / 0.10)
                 pressure_factors['price_shock'] = price_shock_score
             else:
-                pressure_factors['price_shock'] = 0.2
+                # v5.1：根据波动率和微结构推断价格冲击
+                current_volatility = pressure_factors.get('volatility', 0.3)
+                current_slippage = pressure_factors.get('slippage_pressure', 0.2)
+                # 高波动率 + 高滑点 = 可能有价格冲击
+                estimated_shock = (current_volatility * 0.6 + current_slippage * 0.4)
+                pressure_factors['price_shock'] = estimated_shock
             
             # ========== 因素3：趋势反转（20%权重）==========
             trend_reversal_detected = False
@@ -412,8 +425,15 @@ class Mastermind:
                     prev_above = short_ma.iloc[-2] > long_ma.iloc[-2]
                     curr_above = short_ma.iloc[-1] > long_ma.iloc[-1]
                     trend_reversal_detected = (prev_above != curr_above)
-            
-            pressure_factors['trend_reversal'] = 0.8 if trend_reversal_detected else 0.2
+                
+                pressure_factors['trend_reversal'] = 0.8 if trend_reversal_detected else 0.2
+            else:
+                # v5.1：根据波动率突发推断趋势不稳定性
+                volatility_burst = pressure_factors.get('volatility_burst', 0.2)
+                current_volatility = pressure_factors.get('volatility', 0.3)
+                # 波动率突发 + 高波动 = 可能趋势不稳定
+                trend_instability = min(1.0, volatility_burst * 0.7 + current_volatility * 0.3)
+                pressure_factors['trend_reversal'] = trend_instability
             
             # ========== 因素4：Agent集体表现（25%权重）==========
             if agent_performance_stats:
@@ -446,13 +466,32 @@ class Mastermind:
             else:
                 pressure_factors['collective_failure'] = 0.3
             
-            # ========== 综合压力指数 ==========
-            pressure = (
+            # ========== 【v5.1新增】市场微结构因素 ==========
+            # 从current_market_state中提取微结构数据
+            microstructure_pressure = self._calculate_microstructure_pressure(
+                current_market_state
+            )
+            pressure_factors.update(microstructure_pressure)
+            
+            # ========== 综合压力指数（v5.1：宏观40% + 微结构60%）==========
+            # 宏观因素（40%权重）
+            macro_pressure = (
                 0.30 * pressure_factors.get('volatility', 0.3) +
                 0.25 * pressure_factors.get('price_shock', 0.2) +
                 0.20 * pressure_factors.get('trend_reversal', 0.2) +
                 0.25 * pressure_factors.get('collective_failure', 0.3)
             )
+            
+            # 微结构因素（60%权重）- v5.1：微观更重要
+            micro_pressure = (
+                0.35 * pressure_factors.get('slippage_pressure', 0.2) +
+                0.30 * pressure_factors.get('liquidity_pressure', 0.3) +
+                0.20 * pressure_factors.get('spread_pressure', 0.2) +
+                0.15 * pressure_factors.get('volatility_burst', 0.2)
+            )
+            
+            # 综合压力（微结构权重更高，因为更可靠）
+            pressure = 0.4 * macro_pressure + 0.6 * micro_pressure
             
             # 平滑处理（避免突变）
             if hasattr(self, 'last_pressure'):
@@ -471,16 +510,118 @@ class Mastermind:
             
             # 环境压力已经在小预言中输出，这里只保留debug级别详细信息
             logger.debug(f"🌍 环境压力评估: {pressure:.2f} ({pressure_desc})")
-            logger.debug(f"   压力因素: 波动{pressure_factors.get('volatility', 0):.2f} | "
+            logger.debug(f"   宏观压力({macro_pressure:.2f}): "
+                        f"波动{pressure_factors.get('volatility', 0):.2f} | "
                         f"价格{pressure_factors.get('price_shock', 0):.2f} | "
                         f"反转{pressure_factors.get('trend_reversal', 0):.2f} | "
                         f"集体{pressure_factors.get('collective_failure', 0):.2f}")
+            logger.debug(f"   微结构压力({micro_pressure:.2f}): "
+                        f"滑点{pressure_factors.get('slippage_pressure', 0):.2f} | "
+                        f"流动性{pressure_factors.get('liquidity_pressure', 0):.2f} | "
+                        f"价差{pressure_factors.get('spread_pressure', 0):.2f} | "
+                        f"突发{pressure_factors.get('volatility_burst', 0):.2f}")
             
             return pressure
             
         except Exception as e:
             logger.error(f"环境压力评估失败: {e}")
             return 0.3  # 默认中低压力
+    
+    def _calculate_microstructure_pressure(self, current_market_state=None) -> Dict[str, float]:
+        """
+        计算市场微结构压力因素（v5.1新增）
+        
+        微结构因素反映市场的"交易成本"和"流动性状况"
+        
+        Args:
+            current_market_state: 当前市场状态（包含微结构数据）
+        
+        Returns:
+            Dict: 微结构压力因素
+                - slippage_pressure: 滑点压力（0-1）
+                - liquidity_pressure: 流动性压力（0-1）
+                - spread_pressure: 价差压力（0-1）
+                - volatility_burst: 波动率突发（0-1）
+        """
+        import numpy as np
+        
+        micro_factors = {}
+        
+        try:
+            # ========== 因素1：滑点压力（交易成本）==========
+            # 从市场状态中获取平均滑点率
+            if current_market_state and hasattr(current_market_state, 'avg_slippage'):
+                avg_slippage = current_market_state.avg_slippage
+                # 归一化：0.3%以上视为高滑点（v5.1调整：更敏感）
+                slippage_score = min(1.0, avg_slippage / 0.003)
+                micro_factors['slippage_pressure'] = slippage_score
+            else:
+                # 默认：根据波动率估算滑点
+                volatility = getattr(current_market_state, 'volatility', 0.02) if current_market_state else 0.02
+                estimated_slippage = 0.001 + volatility * 0.5  # 基础滑点 + 波动率影响
+                slippage_score = min(1.0, estimated_slippage / 0.003)
+                micro_factors['slippage_pressure'] = slippage_score
+            
+            # ========== 因素2：流动性压力（市场深度）==========
+            # 流动性越低，压力越大
+            if current_market_state and hasattr(current_market_state, 'liquidity_depth'):
+                liquidity = current_market_state.liquidity_depth
+                # 归一化：500K以下视为低流动性（v5.1调整：更敏感）
+                # 流动性越低，压力越大（反比）
+                liquidity_score = max(0.0, 1.0 - liquidity / 500000.0)
+                micro_factors['liquidity_pressure'] = liquidity_score
+            else:
+                # 默认：中等流动性
+                micro_factors['liquidity_pressure'] = 0.3
+            
+            # ========== 因素3：价差压力（买卖价差）==========
+            # 价差越大，压力越大
+            if current_market_state and hasattr(current_market_state, 'bid_ask_spread'):
+                spread = current_market_state.bid_ask_spread
+                # 归一化：0.05%以上视为宽价差（v5.1调整：更敏感）
+                spread_score = min(1.0, spread / 0.0005)
+                micro_factors['spread_pressure'] = spread_score
+            else:
+                # 默认：根据波动率估算价差
+                volatility = getattr(current_market_state, 'volatility', 0.02) if current_market_state else 0.02
+                estimated_spread = 0.0001 + volatility * 0.2
+                spread_score = min(1.0, estimated_spread / 0.0005)
+                micro_factors['spread_pressure'] = spread_score
+            
+            # ========== 因素4：波动率突发（短期波动爆发）==========
+            # 检测短期波动率是否突然增加
+            if current_market_state and hasattr(current_market_state, 'short_term_volatility'):
+                short_vol = current_market_state.short_term_volatility
+                long_vol = getattr(current_market_state, 'volatility', short_vol)
+                
+                # 短期波动率 / 长期波动率
+                if long_vol > 0:
+                    vol_ratio = short_vol / long_vol
+                    # 比率>2表示波动率突发
+                    burst_score = min(1.0, max(0.0, (vol_ratio - 1.0) / 2.0))
+                    micro_factors['volatility_burst'] = burst_score
+                else:
+                    micro_factors['volatility_burst'] = 0.2
+            else:
+                # 默认：无突发
+                micro_factors['volatility_burst'] = 0.2
+            
+            logger.debug(f"   微结构压力: 滑点{micro_factors.get('slippage_pressure', 0):.2f} | "
+                        f"流动性{micro_factors.get('liquidity_pressure', 0):.2f} | "
+                        f"价差{micro_factors.get('spread_pressure', 0):.2f} | "
+                        f"突发{micro_factors.get('volatility_burst', 0):.2f}")
+            
+            return micro_factors
+            
+        except Exception as e:
+            logger.error(f"微结构压力计算失败: {e}")
+            # 返回默认值
+            return {
+                'slippage_pressure': 0.2,
+                'liquidity_pressure': 0.3,
+                'spread_pressure': 0.2,
+                'volatility_burst': 0.2,
+            }
     
     def minor_prophecy(self, market_data=None, current_market_state=None,
                        top_performers=None, agent_performance_stats=None) -> Optional[Dict]:
