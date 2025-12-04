@@ -92,6 +92,7 @@ class AgentV5:
         genome: GenomeVector,
         instinct: Instinct,
         generation: int = 0,
+        meta_genome: Optional['MetaGenome'] = None,
     ):
         """
         初始化Agent
@@ -103,6 +104,7 @@ class AgentV5:
             genome: 基因组向量
             instinct: 本能
             generation: 代数
+            meta_genome: 元基因组（控制决策风格）
         """
         # ==================== 身份与血统 ====================
         self.agent_id = agent_id
@@ -110,6 +112,12 @@ class AgentV5:
         self.lineage = lineage  # 固定，不变
         self.genome = genome    # 缓慢进化
         self.instinct = instinct  # 可遗传，可变
+        
+        # ==================== 元基因组（v5.1新增）====================
+        if meta_genome is None:
+            from prometheus.core.meta_genome import MetaGenome
+            meta_genome = MetaGenome.create_genesis()
+        self.meta_genome = meta_genome  # 可遗传，控制决策风格
         
         # ==================== 财务状态 ====================
         self.initial_capital = initial_capital

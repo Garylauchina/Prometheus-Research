@@ -76,10 +76,10 @@ class Daimon:
     """
     守护神 - Agent的决策中枢
     
-    v5.0版本特点：
+    v5.1版本特点：
     - 无记忆（纯函数式）
-    - 固定权重配置
-    - 五个"声音"投票机制
+    - 权重从元基因组读取（可遗传）✨
+    - 六个"声音"投票机制
     """
     
     def __init__(self, agent: 'AgentV5'):
@@ -91,15 +91,19 @@ class Daimon:
         """
         self.agent = agent
         
-        # 基础权重配置（v5.0完整版：6个声音）
-        self.base_weights = {
-            'instinct': 1.0,    # 本能权重最高（死亡恐惧）
-            'experience': 0.7,  # 经验次之（历史教训）
-            'prophecy': 0.6,    # 先知预言（战略指导）
-            'strategy': 0.5,    # 策略分析（战术分析）
-            'genome': 0.5,      # 基因偏好（个性倾向）
-            'emotion': 0.3,     # 情绪权重最低（易受干扰）
-        }
+        # v5.1: 权重从元基因组读取（可遗传！）
+        if hasattr(agent, 'meta_genome') and agent.meta_genome is not None:
+            self.base_weights = agent.meta_genome.get_daimon_weights()
+        else:
+            # 向后兼容：默认权重
+            self.base_weights = {
+                'instinct': 1.0,    # 本能权重最高（死亡恐惧）
+                'experience': 0.7,  # 经验次之（历史教训）
+                'prophecy': 0.6,    # 先知预言（战略指导）
+                'strategy': 0.5,    # 策略分析（战术分析）
+                'genome': 0.5,      # 基因偏好（个性倾向）
+                'emotion': 0.3,     # 情绪权重最低（易受干扰）
+            }
     
     # ==================== 主决策流程 ====================
     

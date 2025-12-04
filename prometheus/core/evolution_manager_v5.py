@@ -64,8 +64,8 @@ class EvolutionManagerV5:
         self.total_births = 0
         self.total_deaths = 0
         
-        # 生殖隔离阈值
-        self.kinship_threshold = 0.3  # 亲缘度 > 0.3 禁止交配
+        # 生殖隔离阈值（降低以减少限制）
+        self.kinship_threshold = 0.8  # 提高阈值，减少限制
         
         logger.info(f"🧬 EvolutionManagerV5已初始化")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
@@ -112,7 +112,7 @@ class EvolutionManagerV5:
         eliminate_count = max(1, int(total_agents * self.elimination_ratio))
         
         elite_agents = rankings[:elite_count]
-        survivors = rankings[:-eliminate_count]
+        survivors = rankings[:-eliminate_count] if eliminate_count < total_agents else []
         to_eliminate = rankings[-eliminate_count:]
         
         logger.info(f"📊 种群评估:")
@@ -137,14 +137,17 @@ class EvolutionManagerV5:
         logger.info(f"\n🧵 Clotho开始纺织新生命...")
         
         new_agents = []
+        attempts = 0
+        max_total_attempts = eliminate_count * 10  # 增加到10倍
         
-        for i in range(eliminate_count):
+        while len(new_agents) < eliminate_count and attempts < max_total_attempts:
+            attempts += 1
             try:
-                # 选择父母（禁止近亲）
-                parent1, parent2 = self._select_parents_with_isolation(survivors)
+                # 选择父母（使用放宽版本）
+                parent1, parent2 = self._select_parents_relaxed(survivors)
                 
                 if not parent1 or not parent2:
-                    logger.warning(f"   ⚠️ 无法找到合适父母，跳过")
+                    logger.debug(f"   尝试{attempts}: 无法找到父母")
                     continue
                 
                 # 🧵 纺织新Agent
@@ -163,10 +166,16 @@ class EvolutionManagerV5:
                 )
                 
             except Exception as e:
-                logger.error(f"   ❌ 繁殖失败: {e}")
+                logger.error(f"   ❌ 繁殖失败（尝试{attempts}）: {e}")
                 import traceback
                 logger.error(traceback.format_exc())
                 continue
+        
+        if len(new_agents) < eliminate_count:
+            logger.warning(
+                f"   ⚠️ 警告：只成功繁殖{len(new_agents)}个，"
+                f"少于淘汰数{eliminate_count}"
+            )
         
         # 6. 添加新Agent到Moirai
         self.moirai.agents.extend(new_agents)
@@ -214,55 +223,65 @@ class EvolutionManagerV5:
         
         return rankings
     
-    def _select_parents_with_isolation(
+    def _select_parents_relaxed(
         self, 
         survivors: List[Tuple[AgentV5, float]]
     ) -> Tuple[Optional[AgentV5], Optional[AgentV5]]:
         """
-        选择父母，并检查生殖隔离
+        选择父母（放宽的版本 - 优先保证繁殖成功）
         
         规则：
-        1. 优先选择表现好的
-        2. 禁止近亲交配（亲缘度 > 阈值）
-        3. 最多尝试10次
+        1. 如果存活者 < 5个，完全不检查生殖隔离
+        2. 否则，尝试10次后放宽
+        3. 确保不选同一个Agent
         
         Args:
             survivors: 存活的Agent列表
         
         Returns:
-            (parent1, parent2): 父母Agent，如果无法找到则返回None
+            (parent1, parent2): 父母Agent
         """
-        max_attempts = 10
+        if not survivors:
+            return None, None
         
-        for attempt in range(max_attempts):
-            # 选择父母（轮盘赌选择）
+        # 如果存活者太少，直接选择
+        if len(survivors) < 5:
+            parent1 = self._select_parent_roulette(survivors)
+            parent2 = self._select_parent_roulette(survivors)
+            # 确保不是同一个
+            attempts = 0
+            while parent1 and parent2 and parent1.agent_id == parent2.agent_id and attempts < 20:
+                parent2 = self._select_parent_roulette(survivors)
+                attempts += 1
+            return parent1, parent2
+        
+        # 尝试找到低亲缘度的父母
+        for attempt in range(10):
             parent1 = self._select_parent_roulette(survivors)
             parent2 = self._select_parent_roulette(survivors)
             
             if not parent1 or not parent2:
                 continue
             
-            # 检查是否为同一个Agent
+            # 不能是同一个
             if parent1.agent_id == parent2.agent_id:
                 continue
             
-            # 检查生殖隔离（亲缘度）
+            # 检查亲缘度
             kinship = parent1.lineage.compute_kinship(parent2.lineage)
             
-            if kinship > self.kinship_threshold:
-                logger.debug(
-                    f"   ⚠️ 近亲禁配: {parent1.agent_id} × {parent2.agent_id} "
-                    f"(亲缘度{kinship:.2f})"
-                )
-                continue
-            
-            # 找到合适的父母
-            return parent1, parent2
+            if kinship < self.kinship_threshold:
+                return parent1, parent2
         
-        # 失败：放宽条件，允许近亲
-        logger.warning(f"   ⚠️ 未找到合适父母，放宽生殖隔离")
+        # 10次失败后，放宽限制，直接选择
         parent1 = self._select_parent_roulette(survivors)
         parent2 = self._select_parent_roulette(survivors)
+        
+        # 确保不是同一个
+        attempts = 0
+        while parent1 and parent2 and parent1.agent_id == parent2.agent_id and attempts < 20:
+            parent2 = self._select_parent_roulette(survivors)
+            attempts += 1
         
         return parent1, parent2
     
@@ -317,6 +336,7 @@ class EvolutionManagerV5:
         1. Lineage（血统）- 混合父母血统
         2. Genome（基因组）- 交叉+变异
         3. Instinct（本能）- 遗传+随机强化/削弱
+        4. MetaGenome（元基因组）- 决策风格遗传 ✨[v5.1新增]
         
         Args:
             parent1: 父母1
@@ -341,87 +361,71 @@ class EvolutionManagerV5:
             parent2.genome
         )
         
-        # 变异（可能解锁新参数）
+        # 计算子代代数
         child_generation = max(parent1.generation, parent2.generation) + 1
-        child_genome.mutate(
-            generation=child_generation,
-            mutation_rate=0.3,
-            mutation_strength=0.15
-        )
         
         # 3. 🧬 继承本能（Instinct）
-        child_instinct = Instinct()
-        child_instinct.inherit_from_parents(
+        child_instinct = Instinct.inherit_from_parents(
             parent1.instinct,
             parent2.instinct,
-            mutation_strength=0.15
+            child_generation
         )
         
-        # 4. 🧵 创建新Agent
+        # 4. 🧬 继承元基因组（MetaGenome）- v5.1新增
+        from prometheus.core.meta_genome import MetaGenomeEvolution
+        
+        if hasattr(parent1, 'meta_genome') and hasattr(parent2, 'meta_genome'):
+            child_meta_genome = MetaGenomeEvolution.crossover_and_mutate(
+                parent1.meta_genome,
+                parent2.meta_genome,
+                crossover_rate=0.5,
+                mutation_rate=0.1
+            )
+        else:
+            # 向后兼容：创建新的元基因组
+            from prometheus.core.meta_genome import MetaGenome
+            child_meta_genome = MetaGenome.create_genesis()
+        
+        # 5. 创建子代Agent
         child = AgentV5(
             agent_id=child_id,
             initial_capital=parent1.initial_capital,  # 继承父母的初始资金
             lineage=child_lineage,
             genome=child_genome,
             instinct=child_instinct,
-            generation=child_generation
+            generation=child_generation,
+            meta_genome=child_meta_genome  # v5.1新增
         )
         
         return child
     
-    def should_run_evolution(self, cycle_count: int) -> bool:
+    def get_population_stats(self) -> Dict:
         """
-        判断是否应该触发进化
-        
-        触发条件：
-        1. Mock模式: 每30个周期
-        2. OKX模式: 每100个周期
-        3. 或者种群危机（盈利率 < 30%）
-        
-        Args:
-            cycle_count: 当前周期数
+        获取种群统计信息
         
         Returns:
-            bool: 是否触发进化
+            Dict: 种群统计
         """
-        # 获取交易模式
-        trading_mode = getattr(self.moirai.config, 'TRADING_MODE', 'okx')
+        if not self.moirai.agents:
+            return {}
         
-        # 基于模式的周期阈值
-        if trading_mode == 'mock':
-            cycle_threshold = 30
-        else:
-            cycle_threshold = 100
+        # 血统多样性
+        lineages = [agent.lineage for agent in self.moirai.agents]
+        lineage_entropy = self.blood_lab.calculate_lineage_entropy(lineages)
         
-        # 条件1: 周期数
-        if cycle_count > 0 and cycle_count % cycle_threshold == 0:
-            return True
+        # 基因多样性
+        genomes = [agent.genome for agent in self.moirai.agents]
+        gene_entropy = self.blood_lab.calculate_gene_entropy(genomes)
         
-        # 条件2: 种群危机
-        if len(self.moirai.agents) > 5:
-            profitable_count = sum(
-                1 for agent in self.moirai.agents 
-                if agent.total_pnl > 0
-            )
-            profitable_ratio = profitable_count / len(self.moirai.agents)
-            
-            if profitable_ratio < 0.3:
-                logger.warning(f"⚠️ 种群危机: 盈利率仅{profitable_ratio:.1%}")
-                return True
+        # 代数分布
+        generations = [agent.generation for agent in self.moirai.agents]
         
-        return False
-    
-    def get_evolution_stats(self) -> Dict:
-        """
-        获取进化统计
-        
-        Returns:
-            Dict: 统计数据
-        """
         return {
-            'generation': self.generation,
+            'population_size': len(self.moirai.agents),
+            'lineage_entropy': lineage_entropy,
+            'gene_entropy': gene_entropy,
+            'avg_generation': np.mean(generations),
+            'max_generation': max(generations),
             'total_births': self.total_births,
             'total_deaths': self.total_deaths,
-            'current_population': len(self.moirai.agents),
         }
-
