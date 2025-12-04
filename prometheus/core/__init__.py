@@ -9,6 +9,11 @@ from .mastermind import Mastermind, MarketRegime, GlobalStrategy
 from .supervisor import Supervisor, AgentHealthReport
 from .agent_v4 import AgentV4, AgentState, DeathReason, AgentPersonality, EmotionalState
 
+# v4.1 进化系统
+from .evolvable_gene import EvolvableGene
+from .epiphany_system import EpiphanySystem, EpiphanyTrigger
+from .evolution_manager import EvolutionManager
+
 # 市场分析（整合到Supervisor）
 from .indicator_calculator import IndicatorCalculator, TechnicalIndicators
 from .market_state_analyzer import (
@@ -40,7 +45,7 @@ except ImportError:
     Bulletin = BulletinV4
     Priority = None
 
-from .valhalla import Valhalla, Inscription, HallLevel
+from .elysium import Elysium, Inscription, HallLevel
 from .medal_system import MedalSystem, Medal, MedalType
 from .nirvana_system import NirvanaSystem, NirvanaEvent, NirvanaReason
 from .llm_oracle import LLMOracle, HumanOracle
@@ -70,6 +75,12 @@ __all__ = [
     'AgentPersonality',
     'EmotionalState',
     
+    # ========== 进化系统 v4.1 ==========
+    'EvolvableGene',
+    'EpiphanySystem',
+    'EpiphanyTrigger',
+    'EvolutionManager',
+    
     # ========== 市场分析（整合到Supervisor）==========
     'IndicatorCalculator',
     'TechnicalIndicators',
@@ -86,8 +97,8 @@ __all__ = [
     'BulletinBoardPermissions',
     
     # ========== 系统 ==========
-    # 英灵殿
-    'Valhalla',
+    # 极乐净土
+    'Elysium',
     'Inscription',
     'HallLevel',
     

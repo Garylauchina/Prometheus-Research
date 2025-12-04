@@ -16,7 +16,11 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\n程序被用户中断")
     except Exception as e:
-        print(f"\n\n❌ 错误: {e}")
+        # 避免Windows控制台编码问题
+        try:
+            print(f"\n\n❌ 错误: {e}")
+        except UnicodeEncodeError:
+            print(f"\n\n[X] 错误: {e}")
         import traceback
         traceback.print_exc()
 

@@ -1,7 +1,7 @@
 """
-英灵殿系统（Valhalla） - Prometheus v4.0
+极乐净土系统（Elysium） - Prometheus v4.0
 
-北欧神话中的战士殿堂，在此保存传奇Agent的基因和荣耀
+希腊神话中的英雄归宿，在此保存传奇Agent的基因和荣耀
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -77,9 +77,9 @@ class Inscription:
     parent_genes: List[str] = field(default_factory=list)
 
 
-class Valhalla:
+class Elysium:
     """
-    英灵殿系统
+    极乐净土系统
     
     职责：
     1. 审核并接纳优秀Agent
@@ -91,7 +91,7 @@ class Valhalla:
     
     def __init__(self, llm_oracle=None):
         """
-        初始化英灵殿
+        初始化极乐净土
         
         Args:
             llm_oracle: LLM Oracle实例（用于生成传奇名和铭文）
@@ -112,7 +112,7 @@ class Valhalla:
         self.total_inducted = 0
         self.induction_history = []
         
-        logger.info("英灵殿已开启 - Valhalla awaits the worthy")
+        logger.info("极乐净土已开启 - Elysium awaits the worthy")
     
     def evaluate_eligibility(self, agent) -> Optional[HallLevel]:
         """
@@ -446,7 +446,7 @@ Agent数据：
             return "风险控制"
         elif personality.aggression > 0.7:
             return "激进进攻"
-        elif agent.win_rate > 0.65:
+        elif agent.trade_count > 0 and agent.win_count / agent.trade_count > 0.65:
             return "精准狙击"
         else:
             return "全能战士"
@@ -617,7 +617,7 @@ Agent数据：
         """
         lines = []
         lines.append("╔" + "═" * 58 + "╗")
-        lines.append("║" + " " * 20 + "英灵殿 · 荣誉墙" + " " * 22 + "║")
+        lines.append("║" + " " * 19 + "极乐净土 · 荣誉墙" + " " * 20 + "║")
         lines.append("╠" + "═" * 58 + "╣")
         lines.append("║" + " " * 58 + "║")
         

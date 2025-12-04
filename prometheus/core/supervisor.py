@@ -2240,10 +2240,8 @@ class Supervisor:
         total_realized_pnl = 0.0
         total_unrealized_pnl = 0.0
         
-        for agent in self.agents:
-            agent_id = agent.agent_id
-            account = self.agent_accounts.get(agent_id)
-            
+        # 遍历所有账户（包括死亡Agent的账户），而不是只遍历活着的Agent
+        for agent_id, account in self.agent_accounts.items():
             if account:
                 try:
                     # 获取已实现盈亏
