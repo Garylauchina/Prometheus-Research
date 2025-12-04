@@ -484,10 +484,11 @@ class Mastermind:
             
             # 微结构因素（60%权重）- v5.1：微观更重要
             micro_pressure = (
-                0.35 * pressure_factors.get('slippage_pressure', 0.2) +
-                0.30 * pressure_factors.get('liquidity_pressure', 0.3) +
-                0.20 * pressure_factors.get('spread_pressure', 0.2) +
-                0.15 * pressure_factors.get('volatility_burst', 0.2)
+                0.30 * pressure_factors.get('slippage_pressure', 0.2) +
+                0.25 * pressure_factors.get('liquidity_pressure', 0.3) +
+                0.15 * pressure_factors.get('spread_pressure', 0.2) +
+                0.15 * pressure_factors.get('volatility_burst', 0.2) +
+                0.15 * pressure_factors.get('funding_rate_pressure', 0.2)  # 新增
             )
             
             # 综合压力（微结构权重更高，因为更可靠）
@@ -519,7 +520,8 @@ class Mastermind:
                         f"滑点{pressure_factors.get('slippage_pressure', 0):.2f} | "
                         f"流动性{pressure_factors.get('liquidity_pressure', 0):.2f} | "
                         f"价差{pressure_factors.get('spread_pressure', 0):.2f} | "
-                        f"突发{pressure_factors.get('volatility_burst', 0):.2f}")
+                        f"突发{pressure_factors.get('volatility_burst', 0):.2f} | "
+                        f"资金费率{pressure_factors.get('funding_rate_pressure', 0):.2f}")
             
             return pressure
             
@@ -542,6 +544,7 @@ class Mastermind:
                 - liquidity_pressure: 流动性压力（0-1）
                 - spread_pressure: 价差压力（0-1）
                 - volatility_burst: 波动率突发（0-1）
+                - funding_rate_pressure: 资金费率压力（0-1）⭐新增
         """
         import numpy as np
         
@@ -606,11 +609,22 @@ class Mastermind:
                 # 默认：无突发
                 micro_factors['volatility_burst'] = 0.2
             
-            logger.debug(f"   微结构压力: 滑点{micro_factors.get('slippage_pressure', 0):.2f} | "
-                        f"流动性{micro_factors.get('liquidity_pressure', 0):.2f} | "
-                        f"价差{micro_factors.get('spread_pressure', 0):.2f} | "
-                        f"突发{micro_factors.get('volatility_burst', 0):.2f}")
+            # ========== 因素5：资金费率压力（v5.1新增）==========
+            # 极端资金费率 = 市场失衡 = 高压力
+            if current_market_state and hasattr(current_market_state, 'funding_rate'):
+                from prometheus.core.funding_rate_model import FundingRateModel
+                funding_model = FundingRateModel()
+                
+                # 资金费率的绝对值越大，压力越大
+                funding_pressure = funding_model.get_funding_pressure(
+                    current_market_state.funding_rate
+                )
+                micro_factors['funding_rate_pressure'] = funding_pressure
+            else:
+                # 默认：中等资金费率压力
+                micro_factors['funding_rate_pressure'] = 0.2
             
+            # 微结构因素已收集完成（日志在主方法中统一输出）
             return micro_factors
             
         except Exception as e:
