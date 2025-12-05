@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from collections import defaultdict
 import logging
+import random  # v5.2: 用于探索性决策
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +146,25 @@ class Daimon:
                 context_snapshot=context.copy(),
             )
         
+        # v5.2：增强可见性 - 显示各个声音的投票
+        votes_by_category = {}
+        for vote in all_votes:
+            cat = vote.voter_category
+            if cat not in votes_by_category:
+                votes_by_category[cat] = []
+            votes_by_category[cat].append(vote)
+        
+        # 特别记录本能的投票（最重要）
+        if 'instinct' in votes_by_category:
+            instinct_votes = votes_by_category['instinct']
+            logger.debug(
+                f"   🧬 本能投票: {len(instinct_votes)}票 | "
+                f"数值:[{self.agent.instinct.describe_instinct_values()}] | "
+                f"性格:{self.agent.instinct.describe_personality()}"
+            )
+            for vote in instinct_votes:
+                logger.debug(f"      → {vote.action}({vote.confidence:.0%}): {vote.reason}")
+        
         # 加权汇总投票
         decision = self._tally_votes(all_votes, context)
         
@@ -176,18 +196,23 @@ class Daimon:
         position = context.get('position', {})
         has_position = position.get('amount', 0) != 0
         
-        # 1. 死亡恐惧
+        # 1. 死亡恐惧（v5.2改进：动态阈值，更激进）
         fear_level = instinct.calculate_death_fear_level(capital_ratio, consecutive_losses)
-        if fear_level > 1.5 and has_position:
+        # v5.2: 根据fear_of_death动态调整阈值（改进版：差异更大）
+        fear_threshold = 3.0 - instinct.fear_of_death * 1.5
+        # 高恐惧(1.8): threshold=0.3 → 极易触发（资金<85%就平仓）
+        # 低恐惧(0.3): threshold=2.55 → 极难触发（资金<15%才平仓）
+        
+        if fear_level > fear_threshold and has_position:
             # 高度恐惧 + 持仓 → 强烈要求平仓
             votes.append(Vote(
                 action='close',
                 confidence=min(fear_level / 3.0, 0.95),
                 voter_category='instinct',
-                reason=f"死亡恐惧({fear_level:.1f}): 资金仅剩{capital_ratio:.1%}"
+                reason=f"死亡恐惧({fear_level:.1f}>阈值{fear_threshold:.1f}): 资金仅剩{capital_ratio:.1%}"
             ))
-        elif fear_level > 1.0 and not has_position:
-            # 高度恐惧 + 无仓 → 观望
+        elif fear_level > fear_threshold * 0.7 and not has_position:
+            # 中度恐惧 + 无仓 → 观望
             votes.append(Vote(
                 action='hold',
                 confidence=0.7,
@@ -206,16 +231,18 @@ class Daimon:
                 reason=f"损失厌恶({loss_aversion_strength:.1%}): 及时止损(亏{recent_pnl:.1%})"
             ))
         
-        # 3. 风险偏好
-        if not has_position:
+        # 3. 风险偏好（v5.2改进：增强探索性开仓）
+        if not has_position and capital_ratio > 0.5:  # v5.2: 降低资金门槛到50%
             # 无仓时，风险偏好影响开仓倾向
-            if instinct.risk_appetite > 0.7:
-                # 高风险偏好 → 倾向开仓（但不指定方向，等待其他声音）
+            if instinct.risk_appetite > 0.6:  # v5.2: 降低门槛到60%
+                # 高风险偏好 → 主动探索开仓
+                # v5.2: 随机选择方向，增加多样性
+                action = random.choice(['buy', 'sell'])
                 votes.append(Vote(
-                    action='buy',  # 默认做多（可被market_voice覆盖）
-                    confidence=instinct.risk_appetite * 0.5,
+                    action=action,
+                    confidence=instinct.risk_appetite * 0.7,  # v5.2: 提高confidence到0.7
                     voter_category='instinct',
-                    reason=f"风险偏好({instinct.risk_appetite:.1%}): 寻求机会"
+                    reason=f"风险偏好({instinct.risk_appetite:.1%}): 探索性{action}"
                 ))
             elif instinct.risk_appetite < 0.3:
                 # 低风险偏好 → 倾向观望
@@ -535,6 +562,10 @@ class Daimon:
         2. 按action汇总得分
         3. 选择得分最高的action
         4. 最终信心 = 该action的平均信心
+        
+        v5.2改进：紧急模式
+        - 资金<60%时，本能权重×3
+        - 资金<40%时，本能权重×5
         """
         if not all_votes:
             return CouncilDecision(
@@ -543,6 +574,14 @@ class Daimon:
                 reasoning="无投票"
             )
         
+        # v5.2: 紧急模式 - 危险时提升本能权重
+        capital_ratio = context.get('capital_ratio', 1.0)
+        instinct_multiplier = 1.0
+        if capital_ratio < 0.4:
+            instinct_multiplier = 5.0  # 极度危险：本能权重×5
+        elif capital_ratio < 0.6:
+            instinct_multiplier = 3.0  # 危险：本能权重×3
+        
         # 计算每个action的加权得分
         action_scores = defaultdict(float)
         action_vote_counts = defaultdict(int)
@@ -550,6 +589,9 @@ class Daimon:
         
         for vote in all_votes:
             weight = self.base_weights.get(vote.voter_category, 0.5)
+            # v5.2: 紧急模式下，本能权重动态提升
+            if vote.voter_category == 'instinct':
+                weight *= instinct_multiplier
             weighted_score = vote.confidence * weight
             
             action_scores[vote.action] += weighted_score

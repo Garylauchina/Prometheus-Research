@@ -26,11 +26,13 @@ from prometheus.core.mastermind import Mastermind
 from prometheus.core.slippage_model import SlippageModel, MarketCondition, OrderSide, OrderType
 from prometheus.core.funding_rate_model import FundingRateModel
 from prometheus.core.niche_protection import NicheProtectionSystem
+from prometheus.core.market_noise import create_noise_layer  # v5.2新增
 
 print("="*80)
-print("🔥 Prometheus v5.1 极端压力测试")
+print("🔥 Prometheus v5.2 极端压力测试（含市场噪声）")
 print("="*80)
 print("⚠️  警告：将使用极端市场条件测试系统极限")
+print("🆕 v5.2新增：市场噪声层（流动性冲击/滑点尖峰/资金费率跳跃/订单簿断层）")
 print()
 
 # ============================================================================
@@ -107,9 +109,13 @@ extreme_funding_model = FundingRateModel(
 
 niche_protection = NicheProtectionSystem()
 
+# v5.2新增：市场噪声层
+market_noise = create_noise_layer("high")  # 高噪声模式（适合极端压力测试）
+
 print("✅ 极端环境配置完成")
 print(f"   基础滑点: {TEST_CONFIG['extreme_slippage']*100:.2f}% (正常10倍)")
 print(f"   基础资金费率: {TEST_CONFIG['extreme_funding']*100:.2f}% (正常10倍)")
+print(f"   🆕 市场噪声: high模式（流动性冲击10%/滑点尖峰20%/资金跳跃5%/订单簿断层15%）")
 
 # ============================================================================
 # 第三步：创建大规模初始种群
@@ -156,6 +162,30 @@ for cycle in range(TEST_CONFIG['evolution_cycles']):
     print(f"   价格变化: {extreme_sample['returns']*100:.2f}%")
     print(f"   当前价格: ${extreme_sample['close']:.2f}")
     
+    # v5.2新增：应用市场噪声
+    base_liquidity = 0.1  # 基础流动性（已经很低，极端环境）
+    base_slippage = TEST_CONFIG['extreme_slippage']
+    base_funding = TEST_CONFIG['extreme_funding']
+    
+    noisy_market = market_noise.apply_noise(
+        base_liquidity=base_liquidity,
+        base_slippage=base_slippage,
+        base_funding=base_funding,
+        current_cycle=cycle + 1
+    )
+    
+    if noisy_market['events']:
+        print(f"   🌪️ 市场噪声事件: {', '.join(noisy_market['events'])}")
+    
+    # 使用噪声后的市场参数
+    actual_liquidity = noisy_market['liquidity']
+    actual_slippage = noisy_market['slippage']
+    actual_funding = noisy_market['funding']
+    
+    print(f"   💨 实际流动性: {actual_liquidity:.3f} (基础{base_liquidity:.3f})")
+    print(f"   💨 实际滑点: {actual_slippage*100:.3f}% (基础{base_slippage*100:.3f}%)")
+    print(f"   💨 实际资金费率: {actual_funding*100:.3f}% (基础{base_funding*100:.3f}%)")
+    
     # 模拟极端交易
     current_agents = moirai.agents.copy()
     for agent in current_agents:
@@ -169,13 +199,13 @@ for cycle in range(TEST_CONFIG['evolution_cycles']):
             # 极端波动下的收益（放大波动）
             pnl_pct = np.random.normal(0, extreme_volatility * 2)
             
-            # 计算极端滑点
+            # 计算极端滑点（使用噪声后的参数）
             market_condition = MarketCondition(
                 price=extreme_sample['close'],
                 volume=extreme_sample['volume'],
                 volatility=extreme_volatility,
-                spread=TEST_CONFIG['extreme_slippage'],
-                liquidity_depth=extreme_sample['volume_quote'] * 0.1  # 流动性下降90%
+                spread=actual_slippage,  # v5.2: 使用噪声后的滑点
+                liquidity_depth=extreme_sample['volume_quote'] * actual_liquidity  # v5.2: 使用噪声后的流动性
             )
             
             slippage_result = extreme_slippage_model.calculate_slippage(
@@ -185,14 +215,18 @@ for cycle in range(TEST_CONFIG['evolution_cycles']):
                 market_condition=market_condition
             )
             
-            # 极端资金费率影响
-            funding_result = extreme_funding_model.calculate_funding_rate(
+            # 极端资金费率影响（v5.2: 使用噪声后的费率）
+            # 基础费率
+            base_funding_result = extreme_funding_model.calculate_funding_rate(
                 mark_price=extreme_sample['close'] * (1 + extreme_volatility),
                 index_price=extreme_sample['close'],
                 long_short_ratio=np.random.uniform(0.5, 2.0),
                 open_interest=1000000000
             )
-            funding_cost = position_size * abs(funding_result.funding_rate)
+            # 应用噪声调整
+            funding_noise_multiplier = actual_funding / base_funding if base_funding != 0 else 1.0
+            adjusted_funding_rate = base_funding_result.funding_rate * funding_noise_multiplier
+            funding_cost = position_size * abs(adjusted_funding_rate)
             
             # 综合PnL（极端条件）
             pnl = position_size * pnl_pct - slippage_result.slippage_amount - funding_cost
@@ -272,6 +306,15 @@ print("\n4️⃣  平均环境压力:")
 print(f"   平均: {stats_df['pressure'].mean():.3f}")
 print(f"   最高: {stats_df['pressure'].max():.3f}")
 print(f"   最低: {stats_df['pressure'].min():.3f}")
+
+print("\n5️⃣  市场噪声统计 (v5.2新增):")
+noise_stats = market_noise.get_statistics()
+print(f"   总噪声事件: {noise_stats['total_events']}次")
+print(f"   流动性冲击: {noise_stats['liquidity_shocks']}次")
+print(f"   滑点尖峰: {noise_stats['slippage_spikes']}次")
+print(f"   资金费率跳跃: {noise_stats['funding_jumps']}次")
+print(f"   订单簿断层: {noise_stats['orderbook_gaps']}次")
+print(f"   平均每轮: {noise_stats['total_events']/TEST_CONFIG['evolution_cycles']:.1f}次")
 
 print("\n5️⃣  最终策略分布:")
 niche_statuses = niche_protection.analyze_strategy_distribution(moirai.agents)

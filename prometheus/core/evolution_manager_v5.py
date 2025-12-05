@@ -15,6 +15,7 @@ Evolution Manager V5.0 - v5.0专用进化系统
 from typing import List, Tuple, Dict, Optional
 import logging
 import numpy as np
+import random  # v5.2: 用于变异率随机化
 
 from .agent_v5 import AgentV5
 from .lineage import LineageVector
@@ -133,8 +134,15 @@ class EvolutionManagerV5:
         logger.info(f"   总体健康: {health.overall_health}")
         
         # 1.1 计算动态变异率（v5.1.1）
-        dynamic_mutation_rate = self._calculate_dynamic_mutation_rate(health.gene_entropy)
-        logger.info(f"🧬 动态变异率: {dynamic_mutation_rate:.1%}")
+        base_mutation_rate = self._calculate_dynamic_mutation_rate(health.gene_entropy)
+        
+        # v5.2：引入随机噪声（±20%）
+        noise_factor = random.uniform(0.8, 1.2)
+        dynamic_mutation_rate = base_mutation_rate * noise_factor
+        
+        logger.info(f"🧬 基础变异率: {base_mutation_rate:.1%}")
+        logger.info(f"🎲 噪声系数: ×{noise_factor:.2f}")
+        logger.info(f"🧬 实际变异率: {dynamic_mutation_rate:.1%} (v5.2: 随机化)")
         
         # 1.2 检查多样性危机（v5.1.1）
         diversity_crisis = health.gene_entropy <= 0.1  # 修改为<=，包含边界值
@@ -183,7 +191,16 @@ class EvolutionManagerV5:
         new_agents = []
         attempts = 0
         max_total_attempts = eliminate_count * 20  # 增加到20倍（更多尝试机会）
-        failed_attempts_threshold = eliminate_count * 5  # 失败阈值：淘汰数的5倍
+        
+        # v5.2：允许种群随机波动（±10%）
+        # 随机决定本轮的繁殖目标：90%-110%之间
+        breeding_ratio = random.uniform(0.90, 1.10)  # 随机比例
+        target_breeding_count = max(1, round(eliminate_count * breeding_ratio))  # 使用round而非int
+        emergency_threshold = int(eliminate_count * 0.90)    # 90%紧急阈值
+        failed_attempts_threshold = eliminate_count * 5       # 失败阈值：淘汰数的5倍
+        
+        logger.info(f"📊 目标繁殖数: {target_breeding_count} (比例{breeding_ratio:.1%}，允许±5%波动)")
+        logger.info(f"   紧急阈值: {emergency_threshold} (低于此值触发强制繁殖)")
         
         # v5.1.1：动态相似度阈值（多样性危机时更激进）
         if diversity_crisis:
@@ -195,7 +212,8 @@ class EvolutionManagerV5:
             similarity_threshold = 0.90  # 正常情况90%
             logger.info(f"   相似度阈值: {similarity_threshold:.0%}")
         
-        while len(new_agents) < eliminate_count and attempts < max_total_attempts:
+        # v5.2：修改终止条件，允许达到95%即可
+        while len(new_agents) < target_breeding_count and attempts < max_total_attempts:
             attempts += 1
             try:
                 # 动态放宽相似度阈值（多样性危机时每20次降低5%，正常每50次）
@@ -248,6 +266,11 @@ class EvolutionManagerV5:
                     f"第{child.generation}代 | "
                     f"{lineage_type}"
                 )
+                # v5.2：显示继承的本能
+                logger.debug(
+                    f"      本能: [{child.instinct.describe_instinct_values()}] | "
+                    f"性格: {child.instinct.describe_personality()}"
+                )
                 
             except Exception as e:
                 logger.error(f"   ❌ 繁殖失败（尝试{attempts}）: {e}")
@@ -255,11 +278,30 @@ class EvolutionManagerV5:
                 logger.error(traceback.format_exc())
                 continue
         
-        if len(new_agents) < eliminate_count:
-            logger.warning(
-                f"   ⚠️ 警告：只成功繁殖{len(new_agents)}个，"
-                f"少于淘汰数{eliminate_count}"
-            )
+        # v5.2：种群波动分析
+        actual_breeding_ratio = len(new_agents) / eliminate_count
+        population_change = len(new_agents) - eliminate_count  # 正数=增长，负数=萎缩
+        
+        if len(new_agents) >= target_breeding_count:
+            # 达到目标
+            if population_change > 0:
+                logger.info(f"   ✅ 繁殖成功：{len(new_agents)}/{eliminate_count} ({actual_breeding_ratio:.1%})")
+                logger.info(f"   📈 种群增长+{population_change}个（v5.2特性：自然波动）")
+            elif population_change < 0:
+                logger.info(f"   ✅ 繁殖成功：{len(new_agents)}/{eliminate_count} ({actual_breeding_ratio:.1%})")
+                logger.info(f"   📉 种群萎缩{population_change}个（v5.2特性：可控波动）")
+            else:
+                logger.info(f"   ✅ 繁殖成功：{len(new_agents)}/{eliminate_count} ({actual_breeding_ratio:.1%})")
+                logger.info(f"   ⚖️ 种群平衡")
+        elif len(new_agents) >= emergency_threshold:
+            # 达到90%阈值，可接受
+            logger.warning(f"   ⚠️ 繁殖偏低：{len(new_agents)}/{eliminate_count} ({actual_breeding_ratio:.1%})")
+            logger.warning(f"   📉 种群萎缩{-population_change}个，接近紧急阈值")
+        else:
+            # 低于90%，触发紧急措施
+            logger.error(f"   🚨 繁殖严重不足：{len(new_agents)}/{eliminate_count} ({actual_breeding_ratio:.1%})")
+            logger.error(f"   💀 种群萎缩{-population_change}个，已触发紧急阈值！")
+            # 未来可以在这里添加紧急恢复机制
         
         # 6. 添加新Agent到Moirai
         self.moirai.agents.extend(new_agents)
@@ -274,35 +316,142 @@ class EvolutionManagerV5:
         logger.info(f"   累计死亡: {self.total_deaths}")
         logger.info(f"{'='*70}")
     
-    def _rank_agents(self) -> List[Tuple[AgentV5, float]]:
+    def _calculate_fitness_v2(self, agent: AgentV5, total_cycles: int) -> float:
         """
-        评估并排序Agent（v5.0专用）
+        计算Agent的综合适应度（v5.2: 完整版）
         
-        评估标准：
-        1. 总盈亏（total_pnl）
-        2. 胜率（win_rate）
-        3. 资金比率（capital_ratio）
+        核心理念：
+        1. 活着的Agent才是好Agent（必要条件）
+        2. 盈利的Agent才是好Agent（充分条件）
+        3. 活跃的Agent才是好Agent（不过度消极）
+        
+        Args:
+            agent: 要评估的Agent
+            total_cycles: 总周期数（用于归一化）
         
         Returns:
-            List[(agent, pnl)]: 按表现排序的Agent列表（从优到劣）
+            float: 适应度分数
+        """
+        import numpy as np
+        
+        # ============================================================
+        # Part 1: 基础分数（当前资金比率）
+        # ============================================================
+        capital_ratio = agent.current_capital / agent.initial_capital
+        base_score = capital_ratio
+        
+        # ============================================================
+        # Part 2: 生存加成（活得久 = 好）
+        # ============================================================
+        cycles_survived = agent.cycles_survived if hasattr(agent, 'cycles_survived') else 1
+        if total_cycles > 0:
+            survival_bonus = np.sqrt(cycles_survived / total_cycles)
+        else:
+            survival_bonus = 1.0
+        
+        # ============================================================
+        # Part 3: 稳定性加成（波动小 = 好）
+        # ============================================================
+        stability_bonus = 1.0
+        if agent.trade_count > 5:
+            sharpe = agent.get_sharpe_ratio() if hasattr(agent, 'get_sharpe_ratio') else 0
+            stability_bonus = 1 + min(sharpe * 0.2, 0.5)  # 最多+50%
+        
+        # ============================================================
+        # Part 4: 濒死惩罚（险些破产 = 差）
+        # ============================================================
+        if capital_ratio < 0.3:
+            near_death_penalty = 0.3  # 严重惩罚
+        elif capital_ratio < 0.5:
+            near_death_penalty = 0.7
+        else:
+            near_death_penalty = 1.0
+        
+        # ============================================================
+        # Part 5: 风险调整（回撤大 = 差）
+        # ============================================================
+        max_drawdown = agent.max_drawdown if hasattr(agent, 'max_drawdown') else 0
+        risk_adjustment = 1 / (1 + max_drawdown)
+        
+        # ============================================================
+        # Part 6: 消极惩罚（太保守 = 差）
+        # ============================================================
+        negativity_penalty = 1.0
+        
+        # 6.1 交易频率过低
+        expected_min_trades = cycles_survived * 0.3
+        if agent.trade_count < expected_min_trades:
+            negativity_penalty *= 0.7
+        
+        # 6.2 长期低收益（活很久但不赚钱）
+        if cycles_survived > 20:
+            total_return = capital_ratio - 1
+            if total_return < 0.05:  # 只赚5%
+                negativity_penalty *= 0.5
+            elif total_return < 0.10:
+                negativity_penalty *= 0.8
+        
+        # 6.3 远低于市场平均（机会成本）
+        alive_agents = [a for a in self.moirai.agents if a.current_capital > a.initial_capital * 0.2]
+        if len(alive_agents) > 1:
+            market_avg_return = np.mean([
+                (a.current_capital / a.initial_capital - 1) 
+                for a in alive_agents
+            ])
+            
+            if market_avg_return > 0.1:  # 市场有明显机会
+                relative_performance = (capital_ratio - 1) / market_avg_return
+                
+                if relative_performance < 0.3:  # 不到市场平均的30%
+                    negativity_penalty *= 0.5
+                elif relative_performance < 0.5:
+                    negativity_penalty *= 0.7
+        
+        # 6.4 持仓时间过少（总是空仓观望）
+        if hasattr(agent, 'cycles_with_position') and cycles_survived > 0:
+            position_time_ratio = agent.cycles_with_position / cycles_survived
+            if position_time_ratio < 0.2:  # 80%时间空仓
+                negativity_penalty *= 0.7
+            elif position_time_ratio < 0.4:
+                negativity_penalty *= 0.9
+        
+        # ============================================================
+        # Final: 综合Fitness（v5.2：6个维度）
+        # ============================================================
+        fitness = (
+            base_score 
+            * survival_bonus 
+            * stability_bonus 
+            * near_death_penalty 
+            * risk_adjustment
+            * negativity_penalty
+        )
+        
+        return fitness
+    
+    def _rank_agents(self) -> List[Tuple[AgentV5, float]]:
+        """
+        评估并排序Agent（v5.2: 使用fitness v2）
+        
+        评估标准：综合fitness（包含生存、盈利、活跃度等）
+        
+        Returns:
+            List[(agent, fitness)]: 按表现排序的Agent列表（从优到劣）
         """
         rankings = []
         
-        for agent in self.moirai.agents:
-            # 计算综合评分
-            capital_ratio = agent.current_capital / agent.initial_capital
-            win_rate = agent.win_count / agent.trade_count if agent.trade_count > 0 else 0
-            
-            # 综合评分
-            score = (
-                agent.total_pnl * 0.5 +          # 总盈亏（权重50%）
-                capital_ratio * 5000 * 0.3 +     # 资金比率（权重30%）
-                win_rate * 1000 * 0.2            # 胜率（权重20%）
-            )
-            
-            rankings.append((agent, agent.total_pnl))
+        # 计算total_cycles（用于归一化）
+        total_cycles = max(
+            getattr(agent, 'cycles_survived', 1) 
+            for agent in self.moirai.agents
+        ) if self.moirai.agents else 1
         
-        # 按总盈亏排序（从高到低）
+        for agent in self.moirai.agents:
+            # 使用fitness v2计算
+            fitness = self._calculate_fitness_v2(agent, total_cycles)
+            rankings.append((agent, fitness))
+        
+        # 按fitness排序（从高到低）
         rankings.sort(key=lambda x: x[1], reverse=True)
         
         return rankings

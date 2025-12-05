@@ -133,6 +133,13 @@ class AgentV5:
         self.consecutive_losses = 0
         self.total_pnl = 0.0
         
+        # ==================== 统计追踪（v5.2新增）====================
+        self.cycles_survived = 0  # 存活周期数
+        self.cycles_with_position = 0  # 有持仓的周期数
+        self.max_drawdown = 0.0  # 最大回撤
+        self.pnl_history: List[float] = []  # 盈亏历史
+        self.peak_capital = initial_capital  # 历史最高资金
+        
         # ==================== 策略系统 ====================
         self.strategy_pool: List[Strategy] = []
         self.active_strategies: List[Strategy] = []
@@ -530,6 +537,50 @@ class AgentV5:
         )
         self.state = AgentState.DEAD
         self.death_reason = DeathReason.SUICIDE
+    
+    # ==================== 统计更新（v5.2新增）====================
+    
+    def update_cycle_statistics(self, has_position: bool):
+        """
+        更新每周期的统计数据（v5.2新增）
+        
+        Args:
+            has_position: 本周期是否有持仓
+        """
+        self.cycles_survived += 1
+        
+        if has_position:
+            self.cycles_with_position += 1
+        
+        # 更新最高资金
+        if self.current_capital > self.peak_capital:
+            self.peak_capital = self.current_capital
+        
+        # 计算回撤
+        drawdown = (self.peak_capital - self.current_capital) / self.peak_capital
+        if drawdown > self.max_drawdown:
+            self.max_drawdown = drawdown
+    
+    def get_avg_pnl(self) -> float:
+        """计算平均盈亏"""
+        if len(self.pnl_history) == 0:
+            return 0.0
+        return sum(self.pnl_history) / len(self.pnl_history)
+    
+    def get_pnl_std(self) -> float:
+        """计算盈亏标准差"""
+        if len(self.pnl_history) < 2:
+            return 0.0
+        import numpy as np
+        return float(np.std(self.pnl_history))
+    
+    def get_sharpe_ratio(self) -> float:
+        """计算夏普比率"""
+        avg_pnl = self.get_avg_pnl()
+        pnl_std = self.get_pnl_std()
+        if pnl_std == 0:
+            return 0.0
+        return avg_pnl / pnl_std
     
     # ==================== 工具方法 ====================
     
