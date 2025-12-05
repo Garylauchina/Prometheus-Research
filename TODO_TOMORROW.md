@@ -1,212 +1,251 @@
 # 明天工作清单（2025-12-06）
 
-## 🎯 今日目标：优化生态位保护和参数调优
+## 🎊 今日成果（2025-12-05）
+
+### ✅ v5.1.3 参数优化完成！
+
+**已完成任务**：
+- ✅ 增强生态位保护系统
+- ✅ 动态变异率实现
+- ✅ 相似度限制机制
+- ✅ 强制繁殖保护
+- ✅ 批量测试验证
+- ✅ 文档更新完整
+
+**成果**：
+- 基因熵提升 73.7% (0.057 → 0.099)
+- 种群稳定性 100% (3/3测试)
+- 系统鲁棒性验证通过
 
 ---
 
-## ⏰ 时间规划（预计4-5小时）
+## 🎯 明天目标：历史数据回测与性能评估
 
-### 上午（2-3小时）
-**任务1：增强生态位保护系统** ⭐ P0
+---
 
-### 下午（1-2小时）
-**任务2：动态压力响应优化** ⭐ P1
+## ⏰ 时间规划（预计6-8小时）
 
-### 晚上（30分钟）
-**任务3：验证测试** ⭐ P1
+### 上午（3-4小时）
+**任务1：4年历史数据回测** ⭐ P1
+
+### 下午（2-3小时）  
+**任务2：多周期联合测试** ⭐ P1
+
+### 晚上（1小时）
+**任务3：性能分析报告** ⭐ P2
 
 ---
 
 ## 📝 详细任务
 
-### ✅ 任务1：增强生态位保护系统（2-3小时）
+### ✅ 任务1：4年历史数据回测（3-4小时）
 
-**问题**：极端压力测试中基因熵从0.27降到0.057（-79%）
+**目标**：使用完整的日线数据验证系统长期表现
 
-#### 子任务 1.1：修改 `niche_protection.py`
+#### 子任务 1.1：准备回测环境
 
-```python
-# 需要调整的参数
-class NicheProtectionSystem:
-    def __init__(self):
-        # 当前参数
-        self.endangered_threshold = 0.1  # 10%
-        self.dominant_threshold = 0.4    # 40%
-        self.max_bonus = 0.3             # 30%奖励
-        self.max_penalty = 0.5           # 50%惩罚
-        
-        # 建议优化为：
-        self.endangered_threshold = 0.15  # 15% ⬆️
-        self.dominant_threshold = 0.35    # 35% ⬇️
-        self.max_bonus = 0.5              # 50%奖励 ⬆️
-        self.max_penalty = 0.7            # 70%惩罚 ⬆️
-```
+**数据源**：
+- `data/okx/BTC_USDT_1d_10y.csv` (1,440条，4年)
+- `data/okx/ETH_USDT_1d_5y.csv` (1,440条，4年)
 
-**修改文件**：`prometheus/core/niche_protection.py`
-
-#### 子任务 1.2：添加强制多样性机制
+**创建回测脚本**：`test_historical_backtest.py`
 
 ```python
-# 在 evolution_manager_v5.py 中添加
-def _check_diversity_crisis(self) -> bool:
-    """检查多样性危机"""
-    health = self.blood_lab.population_checkup(self.moirai.agents)
-    return health.gene_entropy < 0.1  # 基因熵 < 0.1 触发危机
-
-def _emergency_diversity_injection(self):
-    """紧急多样性注入"""
-    # 1. 强制创建3-5个随机新Agent
-    # 2. 禁止相似度>90%的Agent交配
-    # 3. 临时提高变异率到50%
+# 核心逻辑
+1. 加载完整日线数据
+2. 初始化50个Agent
+3. 滚动窗口回测（每100天一个周期）
+4. 记录每个周期的:
+   - Agent表现
+   - 基因熵变化
+   - 策略分布
+   - 盈利统计
+5. 生成回测报告
 ```
 
-**修改文件**：`prometheus/core/evolution_manager_v5.py`
+#### 子任务 1.2：运行回测
 
-#### 子任务 1.3：创建测试脚本
+```powershell
+# BTC 4年回测
+python test_historical_backtest.py --symbol BTC-USDT --period 4y
 
-**创建文件**：`test_niche_enhanced.py`
-- 测试新参数下的生态位保护
-- 验证多样性是否改善
+# ETH 4年回测
+python test_historical_backtest.py --symbol ETH-USDT --period 4y
+```
+
+**预计耗时**：单个币种2小时
+
+#### 子任务 1.3：结果分析
+
+**关键指标**：
+- 累计收益率
+- 最大回撤
+- 夏普比率
+- 胜率
+- 基因熵稳定性
+- 策略多样性
 
 ---
 
-### ✅ 任务2：动态压力响应优化（1-2小时）
+### ✅ 任务2：多周期联合测试（2-3小时）
 
-**问题**：压力测试中压力值恒定0.494537
+**目标**：验证系统在不同时间周期的表现
 
-#### 子任务 2.1：实现动态变异率
+#### 子任务 2.1：小时线回测
 
-```python
-# 在 evolution_manager_v5.py 中修改
-def _calculate_mutation_rate(self, gene_entropy: float) -> float:
-    """动态变异率：基因熵越低，变异率越高"""
-    base_rate = 0.1
-    entropy_boost = 0.5 * (1 - gene_entropy)  # 熵0时boost=0.5
-    return min(base_rate + entropy_boost, 0.6)  # 最高60%
+```powershell
+# 使用2个月小时线数据
+python test_historical_backtest.py --symbol BTC-USDT --period 1h --days 60
 ```
 
-**修改文件**：`prometheus/core/evolution_manager_v5.py`
+#### 子任务 2.2：多周期对比
 
-#### 子任务 2.2：压力响应Agent表现
+**对比维度**：
+| 周期 | 数据量 | 进化速度 | 基因熵 | 收益 |
+|------|--------|---------|--------|------|
+| 1小时 | 1,440 | 快 | ? | ? |
+| 1天 | 1,440 | 慢 | ? | ? |
 
-```python
-# 在 mastermind.py 中修改
-def evaluate_environmental_pressure(self, ...):
-    # 添加：如果Agent表现差，增加压力
-    if agent_performance_stats:
-        if agent_performance_stats['profitable_ratio'] < 0.1:
-            pressure *= 1.2  # 增加20%压力
-        elif agent_performance_stats['profitable_ratio'] > 0.7:
-            pressure *= 0.8  # 降低20%压力
-```
+#### 子任务 2.3：最优周期选择
 
-**修改文件**：`prometheus/core/mastermind.py`
+**评估标准**：
+1. 基因熵稳定性
+2. 收益风险比
+3. 计算效率
 
 ---
 
-### ✅ 任务3：验证测试（30分钟）
+### ✅ 任务3：性能分析报告（1小时）
 
-#### 子任务 3.1：重新运行压力测试
+**目标**：生成完整的系统评估报告
+
+#### 子任务 3.1：创建分析脚本
+
+**创建文件**：`tools/analyze_backtest_results.py`
+
+功能：
+1. 读取所有回测结果
+2. 计算统计指标
+3. 生成可视化图表（可选）
+4. 输出Markdown报告
+
+#### 子任务 3.2：生成报告
 
 ```powershell
-python test_extreme_stress.py
+python tools/analyze_backtest_results.py --output BACKTEST_REPORT_V5.1.3.md
 ```
 
-**期望结果**：
-- 基因熵下降 < 50%（当前79%）
-- 最终基因熵 > 0.15（当前0.057）
-- 健康状态不降到critical
-
-#### 子任务 3.2：对比分析
-
-```powershell
-# 对比优化前后
-python -c "
-import pandas as pd
-old = pd.read_csv('extreme_stress_test_results.csv')
-new = pd.read_csv('extreme_stress_test_results_optimized.csv')
-print('优化前基因熵:', old['gene_entropy'].iloc[-1])
-print('优化后基因熵:', new['gene_entropy'].iloc[-1])
-print('改善:', (new['gene_entropy'].iloc[-1] - old['gene_entropy'].iloc[-1]) / old['gene_entropy'].iloc[-1] * 100, '%')
-"
-```
+**报告内容**：
+- 回测配置
+- 收益曲线
+- 基因熵变化
+- 策略分布演化
+- 风险指标
+- 结论与建议
 
 ---
 
 ## 🎯 成功标准
 
 ### 最低标准（必须达到）
-- ✅ 基因熵最终值 > 0.15
-- ✅ 健康状态不恶化到critical
-- ✅ 代码无新增bug
+- ✅ 完成至少1个币种的4年回测
+- ✅ 系统稳定运行（无崩溃）
+- ✅ 生成基本回测报告
 
 ### 理想标准（争取达到）
-- ⭐ 基因熵最终值 > 0.20
-- ⭐ 健康状态保持warning
-- ⭐ 盈利率有所改善（>5%）
+- ⭐ 完成BTC+ETH双币种回测
+- ⭐ 多周期对比分析
+- ⭐ 完整的性能分析报告
+- ⭐ 可视化图表（可选）
 
 ---
 
-## 📁 需要修改的文件
+## 📁 需要创建的文件
 
-1. `prometheus/core/niche_protection.py` - 参数调整
-2. `prometheus/core/evolution_manager_v5.py` - 多样性机制+动态变异
-3. `prometheus/core/mastermind.py` - 动态压力响应
-4. `test_niche_enhanced.py` - 新测试脚本（创建）
+1. `test_historical_backtest.py` - 历史回测脚本
+2. `tools/analyze_backtest_results.py` - 结果分析脚本
+3. `BACKTEST_REPORT_V5.1.3.md` - 回测报告（输出）
 
 ---
 
 ## 🛠️ 开发命令速查
 
 ```powershell
-# 运行测试
-python test_niche_enhanced.py
-python test_extreme_stress.py
+# 运行回测
+python test_historical_backtest.py --symbol BTC-USDT --period 4y
 
-# 查看结果
-type extreme_stress_test_results_optimized.csv
+# 分析结果
+python tools/analyze_backtest_results.py
 
-# 对比分析
-python load_and_analyze.py
+# 查看报告
+type BACKTEST_REPORT_V5.1.3.md
 ```
 
 ---
 
 ## 💡 Tips
 
-1. **小步快跑**：先改一个参数，测试，再改下一个
-2. **保存旧版本**：修改前备份关键文件
-3. **记录对比**：每次测试都保存结果CSV
-4. **提交Git**：每完成一个任务就commit
+1. **数据验证**：先检查历史数据质量（缺失值、异常值）
+2. **增量测试**：先用100条数据测试，确认无误后再全量
+3. **保存检查点**：每个币种回测完保存结果
+4. **资源监控**：关注内存使用（50个Agent×1,440天）
 
 ---
 
-## 📊 当前状态回顾
+## 📊 当前状态
 
-### 问题
-- 基因熵：0.269 → 0.057 (-79%) 🚨
-- 健康状态：warning → critical 🚨
+### v5.1.3 已完成
+- ✅ 参数优化系统
+- ✅ 多样性保护机制
+- ✅ 极端压力测试
+- ✅ 批量测试验证
+- ✅ 文档完整更新
 
-### 目标
-- 基因熵：保持 > 0.15 ✅
-- 健康状态：保持 warning ✅
+### 下一步
+- 🔄 历史数据回测
+- 🔄 长期性能评估
+- ⏸️ 实盘准备（后续）
 
 ---
 
-## ⏭️ 后续计划（如果明天完成快）
+## ⏭️ 后续计划（本周）
 
-可选任务：
-- [ ] 4年历史数据回测
-- [ ] 多币种测试（ETH）
-- [ ] 可视化图表生成
+**12月6日（周五）**：
+- 历史数据回测
+- 多周期测试
+
+**12月7-8日（周末）**：
+- 性能优化
+- 参数微调
+- 可视化工具
+
+**12月9日（下周）**：
+- 实盘准备
+- 风险控制
+- 监控系统
+
+---
+
+## 🎓 技术要点
+
+### 回测注意事项
+1. **避免未来函数**：只使用历史数据
+2. **滑点模拟**：考虑真实交易成本
+3. **资金管理**：初始资金×Agent数量
+4. **进化周期**：建议每100天一轮
+
+### 性能优化
+1. **批处理**：避免逐条处理数据
+2. **缓存机制**：复用计算结果
+3. **并行计算**：多进程处理（可选）
 
 ---
 
 **预计完成时间**：明天晚上20:00前  
-**难度评估**：中等（参数调优）  
-**成功概率**：90%+
+**难度评估**：中等（回测框架开发）  
+**成功概率**：85%+
 
 ---
 
-💪 加油！明天继续让Prometheus更强大！
+💪 继续前进！从参数优化到实战回测！
 
