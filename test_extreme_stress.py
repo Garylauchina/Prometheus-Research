@@ -15,6 +15,7 @@ Prometheus v5.1 极端压力测试
 import sys
 import pandas as pd
 import numpy as np
+import os
 from pathlib import Path
 from datetime import datetime
 
@@ -50,6 +51,14 @@ print(f"   进化轮数: {TEST_CONFIG['evolution_cycles']}轮")
 print(f"   极端波动: {TEST_CONFIG['extreme_volatility']*100:.1f}%")
 print(f"   极端滑点: {TEST_CONFIG['extreme_slippage']*100:.2f}%")
 print(f"   极端资金费率: {TEST_CONFIG['extreme_funding']*100:.2f}%")
+
+# ============================================================================
+# 清除旧测试记录
+# ============================================================================
+result_file = 'extreme_stress_test_results.csv'
+if os.path.exists(result_file):
+    os.remove(result_file)
+    print(f"\n🗑️  已清除旧测试记录: {result_file}")
 
 # ============================================================================
 # 第一步：加载极端波动时期数据

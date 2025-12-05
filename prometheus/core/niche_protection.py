@@ -43,11 +43,11 @@ class NicheProtectionSystem:
     4. 保护少数派策略
     """
     
-    # 配置参数
-    MIN_DIVERSITY_RATIO = 0.05      # 最小多样性比例（每种策略至少5%）
-    MAX_STRATEGY_RATIO = 0.60       # 最大策略占比（单一策略不超过60%）
-    COMPETITION_FACTOR = 2.0        # 竞争因子（同策略内竞争强度）
-    PROTECTION_FACTOR = 1.5         # 保护因子（少数派策略保护强度）
+    # 配置参数（v5.1.1优化：增强多样性保护）
+    MIN_DIVERSITY_RATIO = 0.10      # 最小多样性比例（每种策略至少10%）⬆️
+    MAX_STRATEGY_RATIO = 0.40       # 最大策略占比（单一策略不超过40%）⬇️
+    COMPETITION_FACTOR = 3.0        # 竞争因子（同策略内竞争强度）⬆️
+    PROTECTION_FACTOR = 3.0         # 保护因子（少数派策略保护强度）⬆️
     
     def __init__(
         self,
@@ -172,16 +172,16 @@ class NicheProtectionSystem:
         if not self.enable_protection:
             return 0.0
         
-        # 占比越低，奖励越高
+        # 占比越低，奖励越高（v5.1.1优化：动态阈值）
         if population_ratio < self.min_diversity_ratio:
-            # 极少数派：最高奖励
-            bonus = self.PROTECTION_FACTOR * (1 - population_ratio)
-        elif population_ratio < 0.2:
+            # 濒危策略：最高奖励
+            bonus = self.PROTECTION_FACTOR * (self.min_diversity_ratio - population_ratio)
+        elif population_ratio < self.min_diversity_ratio * 2:
             # 少数派：高奖励
-            bonus = self.PROTECTION_FACTOR * (0.5 - population_ratio)
-        elif population_ratio < 0.4:
+            bonus = self.PROTECTION_FACTOR * 0.5 * (self.min_diversity_ratio * 2 - population_ratio)
+        elif population_ratio < self.max_strategy_ratio * 0.5:
             # 中等规模：低奖励
-            bonus = 0.1 * (0.4 - population_ratio)
+            bonus = 0.2 * (self.max_strategy_ratio * 0.5 - population_ratio)
         else:
             # 多数派：无奖励
             bonus = 0.0
@@ -203,16 +203,16 @@ class NicheProtectionSystem:
         if not self.enable_protection:
             return 0.0
         
-        # 占比越高，惩罚越大
+        # 占比越高，惩罚越大（v5.1.1优化：动态阈值）
         if population_ratio > self.max_strategy_ratio:
-            # 严重过剩：高惩罚
+            # 严重过剩：高惩罚（超过最大占比）
             penalty = self.COMPETITION_FACTOR * (population_ratio - self.max_strategy_ratio)
-        elif population_ratio > 0.4:
-            # 过剩：中等惩罚
-            penalty = 0.5 * (population_ratio - 0.4)
-        elif population_ratio > 0.2:
-            # 正常竞争：低惩罚
-            penalty = 0.2 * (population_ratio - 0.2)
+        elif population_ratio > self.max_strategy_ratio * 0.75:
+            # 过剩：中等惩罚（超过最大占比的75%）
+            penalty = 1.0 * (population_ratio - self.max_strategy_ratio * 0.75)
+        elif population_ratio > self.min_diversity_ratio * 2:
+            # 正常竞争：低惩罚（超过最小占比的2倍）
+            penalty = 0.3 * (population_ratio - self.min_diversity_ratio * 2)
         else:
             # 少数派：无惩罚
             penalty = 0.0

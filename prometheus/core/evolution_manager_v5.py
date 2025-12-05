@@ -67,10 +67,44 @@ class EvolutionManagerV5:
         # 生殖隔离阈值（降低以减少限制）
         self.kinship_threshold = 0.8  # 提高阈值，减少限制
         
+        # v5.1.1：动态变异率配置
+        self.base_mutation_rate = 0.1   # 基础变异率10%
+        self.max_mutation_rate = 0.6    # 最大变异率60%
+        self.gene_entropy_threshold = 0.15  # 基因熵低于此值时增强变异
+        
         logger.info(f"🧬 EvolutionManagerV5已初始化")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
         logger.info(f"   淘汰比例: {elimination_ratio:.0%}")
         logger.info(f"   生殖隔离阈值: {self.kinship_threshold}")
+    
+    def _calculate_dynamic_mutation_rate(self, gene_entropy: float) -> float:
+        """
+        计算动态变异率（v5.1.1新增）
+        
+        基因熵越低，变异率越高，防止种群趋同
+        
+        Args:
+            gene_entropy: 当前基因熵（0-1）
+        
+        Returns:
+            float: 动态变异率（0.1-0.6）
+        """
+        if gene_entropy >= self.gene_entropy_threshold:
+            # 基因熵健康，使用基础变异率
+            return self.base_mutation_rate
+        else:
+            # 基因熵过低，提高变异率
+            # 熵越低，变异率越高（线性映射）
+            entropy_deficit = self.gene_entropy_threshold - gene_entropy
+            boost = (self.max_mutation_rate - self.base_mutation_rate) * (entropy_deficit / self.gene_entropy_threshold)
+            mutation_rate = self.base_mutation_rate + boost
+            
+            logger.warning(
+                f"⚠️  基因熵过低({gene_entropy:.3f} < {self.gene_entropy_threshold:.3f})，"
+                f"提高变异率: {self.base_mutation_rate:.1%} → {mutation_rate:.1%}"
+            )
+            
+            return min(mutation_rate, self.max_mutation_rate)
     
     def run_evolution_cycle(self, current_price: float = 0):
         """
@@ -97,6 +131,16 @@ class EvolutionManagerV5:
         logger.info(f"   血统熵: {health.lineage_entropy_normalized:.3f}")
         logger.info(f"   基因熵: {health.gene_entropy:.3f}")
         logger.info(f"   总体健康: {health.overall_health}")
+        
+        # 1.1 计算动态变异率（v5.1.1）
+        dynamic_mutation_rate = self._calculate_dynamic_mutation_rate(health.gene_entropy)
+        logger.info(f"🧬 动态变异率: {dynamic_mutation_rate:.1%}")
+        
+        # 1.2 检查多样性危机（v5.1.1）
+        diversity_crisis = health.gene_entropy <= 0.1  # 修改为<=，包含边界值
+        if diversity_crisis:
+            logger.error(f"🚨 多样性危机！基因熵={health.gene_entropy:.3f} ≤ 0.1")
+            logger.error(f"   启动紧急多样性恢复机制...")
         
         # 2. 评估Agent表现
         rankings = self._rank_agents()
@@ -138,11 +182,30 @@ class EvolutionManagerV5:
         
         new_agents = []
         attempts = 0
-        max_total_attempts = eliminate_count * 10  # 增加到10倍
+        max_total_attempts = eliminate_count * 20  # 增加到20倍（更多尝试机会）
+        failed_attempts_threshold = eliminate_count * 5  # 失败阈值：淘汰数的5倍
+        
+        # v5.1.1：动态相似度阈值（多样性危机时更激进）
+        if diversity_crisis:
+            # 多样性危机：初始阈值降低，更快放宽
+            similarity_threshold = 0.85  # 起始85%（而非90%）
+            logger.warning(f"   🚨 多样性危机模式：相似度阈值{similarity_threshold:.0%}，每20次尝试-5%，最低50%")
+            logger.warning(f"   🆘 如果{failed_attempts_threshold}次尝试后仍不足，将跳过相似度检查强制繁殖")
+        else:
+            similarity_threshold = 0.90  # 正常情况90%
+            logger.info(f"   相似度阈值: {similarity_threshold:.0%}")
         
         while len(new_agents) < eliminate_count and attempts < max_total_attempts:
             attempts += 1
             try:
+                # 动态放宽相似度阈值（多样性危机时每20次降低5%，正常每50次）
+                if diversity_crisis and attempts > 0:
+                    # 多样性危机：快速放宽（每20次尝试-5%）
+                    similarity_threshold = max(0.50, 0.85 - (attempts // 20) * 0.05)
+                elif attempts > 0:
+                    # 正常情况：缓慢放宽（每50次尝试-5%）
+                    similarity_threshold = max(0.70, 0.90 - (attempts // 50) * 0.05)
+                
                 # 选择父母（使用放宽版本）
                 parent1, parent2 = self._select_parents_relaxed(survivors)
                 
@@ -150,8 +213,29 @@ class EvolutionManagerV5:
                     logger.debug(f"   尝试{attempts}: 无法找到父母")
                     continue
                 
-                # 🧵 纺织新Agent
-                child = self._clotho_weave_child(parent1, parent2)
+                # v5.1.1：多样性危机时，禁止高相似度交配
+                # 但如果尝试次数过多，跳过检查强制繁殖
+                skip_similarity_check = (diversity_crisis and 
+                                        attempts > failed_attempts_threshold and 
+                                        len(new_agents) < eliminate_count)
+                
+                if diversity_crisis and not skip_similarity_check:
+                    # 计算基因相似度（使用.vector属性，不是.genes）
+                    gene_similarity = 1 - np.mean(np.abs(
+                        parent1.genome.vector - parent2.genome.vector
+                    ))
+                    
+                    if gene_similarity > similarity_threshold:
+                        if attempts % 20 == 0:  # 每20次尝试记录一次
+                            logger.warning(f"   尝试{attempts}: 父母相似度({gene_similarity:.1%})超过阈值({similarity_threshold:.1%})，继续尝试...")
+                        continue
+                
+                # 如果跳过了相似度检查，记录日志
+                if skip_similarity_check and attempts == failed_attempts_threshold + 1:
+                    logger.error(f"   🆘 已尝试{failed_attempts_threshold}次，强制跳过相似度检查以保证种群稳定！")
+                
+                # 🧵 纺织新Agent（使用动态变异率）
+                child = self._clotho_weave_child(parent1, parent2, mutation_rate=dynamic_mutation_rate)
                 
                 new_agents.append(child)
                 self.total_births += 1
@@ -327,7 +411,8 @@ class EvolutionManagerV5:
     def _clotho_weave_child(
         self, 
         parent1: AgentV5, 
-        parent2: AgentV5
+        parent2: AgentV5,
+        mutation_rate: float = 0.1
     ) -> AgentV5:
         """
         🧵 Clotho纺织新的生命之线
@@ -379,7 +464,7 @@ class EvolutionManagerV5:
                 parent1.meta_genome,
                 parent2.meta_genome,
                 crossover_rate=0.5,
-                mutation_rate=0.1
+                mutation_rate=mutation_rate  # 使用动态变异率
             )
         else:
             # 向后兼容：创建新的元基因组
