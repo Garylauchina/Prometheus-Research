@@ -24,6 +24,94 @@ import json
 logger = logging.getLogger(__name__)
 
 
+# ========== 数据类定义 ==========
+
+@dataclass
+class TradeRecord:
+    """交易记录（公私账簿共用）"""
+    agent_id: str
+    trade_id: str
+    trade_type: str  # 'buy', 'sell', 'short', 'cover', 'add', 'add_short'
+    amount: float
+    price: float
+    timestamp: datetime
+    confidence: float
+    pnl: Optional[float] = None  # 平仓时才有
+    is_real: bool = True  # True=实际交易, False=虚拟交易
+    position_side: Optional[str] = None  # 'long' or 'short' (双向持仓模式)
+    okx_order_id: Optional[str] = None  # OKX订单ID（用于精确对账）
+    
+    def to_dict(self):
+        """转为字典（用于序列化）"""
+        d = asdict(self)
+        d['timestamp'] = self.timestamp.isoformat()
+        return d
+
+
+@dataclass
+class PositionRecord:
+    """持仓记录"""
+    agent_id: str
+    side: str  # 'long' or 'short'
+    amount: float
+    entry_price: float
+    entry_time: datetime
+    confidence: float
+    
+    # OKX 交易费率（Taker市价单）
+    TAKER_FEE_RATE: float = 0.0005  # 0.05%
+    
+    def get_unrealized_pnl(self, current_price: float, include_fees: bool = True) -> float:
+        """
+        计算未实现盈亏（含交易费）
+        
+        Args:
+            current_price: 当前价格
+            include_fees: 是否扣除交易费（默认True）
+            
+        Returns:
+            float: 未实现盈亏（已扣除开仓费和预估平仓费）
+        """
+        # 计算基础盈亏（方向性）
+        if self.side == "long":
+            base_pnl = (current_price - self.entry_price) * self.amount
+        else:  # short
+            base_pnl = (self.entry_price - current_price) * self.amount
+        
+        # 扣除交易费（开仓时已扣 + 平仓时将扣）
+        if include_fees:
+            entry_fee = self.entry_price * self.amount * self.TAKER_FEE_RATE  # 开仓费
+            exit_fee = current_price * self.amount * self.TAKER_FEE_RATE      # 平仓费
+            return base_pnl - entry_fee - exit_fee
+        
+        return base_pnl
+    
+    def get_pnl_ratio(self, current_price: float, include_fees: bool = True) -> float:
+        """
+        计算盈亏比例（相对于入场金额）
+        
+        Returns:
+            float: 盈亏比例 (e.g., 0.05 = 5% profit)
+        """
+        position_value = self.entry_price * self.amount
+        if position_value == 0:
+            return 0.0
+        
+        pnl = self.get_unrealized_pnl(current_price, include_fees)
+        return pnl / position_value
+    
+    def to_dict(self):
+        """转为字典（用于序列化）"""
+        return {
+            'agent_id': self.agent_id,
+            'side': self.side,
+            'amount': self.amount,
+            'entry_price': self.entry_price,
+            'entry_time': self.entry_time.isoformat() if self.entry_time else None,
+            'confidence': self.confidence
+        }
+
+
 # ========== 访问权限控制 ==========
 
 class Role(Enum):
@@ -755,84 +843,6 @@ class LedgerReconciler:
             'by_type': by_type,
             'by_action': by_action
         }
-
-
-@dataclass
-class TradeRecord:
-    """交易记录（公私账簿共用）"""
-    agent_id: str
-    trade_id: str
-    trade_type: str  # 'buy', 'sell', 'short', 'cover', 'add', 'add_short'
-    amount: float
-    price: float
-    timestamp: datetime
-    confidence: float
-    pnl: Optional[float] = None  # 平仓时才有
-    is_real: bool = True  # True=实际交易, False=虚拟交易
-    position_side: Optional[str] = None  # 'long' or 'short' (双向持仓模式)
-    okx_order_id: Optional[str] = None  # OKX订单ID（用于精确对账）
-    
-    def to_dict(self):
-        """转为字典（用于序列化）"""
-        d = asdict(self)
-        d['timestamp'] = self.timestamp.isoformat()
-        return d
-
-
-@dataclass
-class PositionRecord:
-    """持仓记录"""
-    agent_id: str
-    side: str  # 'long' or 'short'
-    amount: float
-    entry_price: float
-    entry_time: datetime
-    confidence: float
-    
-    # OKX 交易费率（Taker市价单）
-    TAKER_FEE_RATE: float = 0.0005  # 0.05%
-    
-    def get_unrealized_pnl(self, current_price: float, include_fees: bool = True) -> float:
-        """
-        计算未实现盈亏（含交易费）
-        
-        Args:
-            current_price: 当前价格
-            include_fees: 是否扣除交易费（默认True）
-            
-        Returns:
-            float: 未实现盈亏（已扣除开仓费和预估平仓费）
-        """
-        # 计算原始盈亏
-        if self.side == 'long':
-            raw_pnl = (current_price - self.entry_price) * self.amount
-        else:
-            raw_pnl = (self.entry_price - current_price) * self.amount
-        
-        if not include_fees:
-            return raw_pnl
-        
-        # 计算交易费（开仓 + 平仓）
-        entry_fee = self.entry_price * self.amount * self.TAKER_FEE_RATE  # 开仓费
-        exit_fee = current_price * self.amount * self.TAKER_FEE_RATE  # 平仓费（预估）
-        total_fees = entry_fee + exit_fee
-        
-        # 净盈亏 = 原始盈亏 - 交易费
-        return raw_pnl - total_fees
-    
-    def get_trading_fees(self, exit_price: float) -> float:
-        """
-        计算总交易费
-        
-        Args:
-            exit_price: 平仓价格
-            
-        Returns:
-            float: 总交易费（开仓+平仓）
-        """
-        entry_fee = self.entry_price * self.amount * self.TAKER_FEE_RATE
-        exit_fee = exit_price * self.amount * self.TAKER_FEE_RATE
-        return entry_fee + exit_fee
 
 
 # ========== 私有账簿（Agent自己管理）==========

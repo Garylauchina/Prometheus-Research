@@ -22,6 +22,8 @@ from .lineage import LineageVector
 from .genome import GenomeVector
 from .instinct import Instinct
 from .dual_entropy import PrometheusBloodLab
+from .diversity_monitor import DiversityMonitor  # v5.2 Day 3
+from .diversity_protection import DiversityProtector  # v5.2 Day 3
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +62,14 @@ class EvolutionManagerV5:
         # 双熵监控系统
         self.blood_lab = PrometheusBloodLab(num_families=num_families)
         
+        # v5.2 Day 3: 多样性监控和保护系统
+        self.diversity_monitor = DiversityMonitor()
+        self.diversity_protector = DiversityProtector(
+            protection_ratio=0.1,
+            min_niche_size=3,
+            max_protection_count=5
+        )
+        
         # 进化统计
         self.generation = 0
         self.total_births = 0
@@ -68,12 +78,17 @@ class EvolutionManagerV5:
         # 生殖隔离阈值（降低以减少限制）
         self.kinship_threshold = 0.8  # 提高阈值，减少限制
         
-        # v5.1.1：动态变异率配置
-        self.base_mutation_rate = 0.1   # 基础变异率10%
-        self.max_mutation_rate = 0.6    # 最大变异率60%
-        self.gene_entropy_threshold = 0.15  # 基因熵低于此值时增强变异
+        # v5.3：提高变异率，强化多样性
+        self.base_mutation_rate = 0.2   # v5.3: 基础变异率提升到20%
+        self.max_mutation_rate = 0.7    # v5.3: 最大变异率提升到70%
+        self.gene_entropy_threshold = 0.3  # v5.3: 提高阈值，更积极触发高变异
         
-        logger.info(f"🧬 EvolutionManagerV5已初始化")
+        # v5.3：移民机制配置
+        self.immigration_enabled = True  # v5.3: 启用移民机制
+        self.immigration_interval = 10   # v5.3: 每10轮注入移民
+        self.immigrants_per_wave = 2     # v5.3: 每次2个移民
+        
+        logger.info(f"🧬 EvolutionManagerV5已初始化 (v5.3)")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
         logger.info(f"   淘汰比例: {elimination_ratio:.0%}")
         logger.info(f"   生殖隔离阈值: {self.kinship_threshold}")
@@ -159,6 +174,20 @@ class EvolutionManagerV5:
         
         total_agents = len(rankings)
         
+        # 2.1 【v5.2 Day 3】多样性监控
+        logger.info(f"\n🧬 多样性监控 (v5.2 Day 3):")
+        diversity_metrics = self.diversity_monitor.monitor(
+            agents=self.moirai.agents,
+            cycle=self.generation
+        )
+        
+        logger.info(f"   基因熵: {diversity_metrics.gene_entropy:.3f}")
+        logger.info(f"   策略熵: {diversity_metrics.strategy_entropy:.3f}")
+        logger.info(f"   血统熵: {diversity_metrics.lineage_entropy:.3f}")
+        logger.info(f"   活跃家族: {diversity_metrics.active_families}")
+        logger.info(f"   多样性得分: {diversity_metrics.diversity_score:.3f}")
+        logger.info(f"   健康状态: {'✅ 健康' if diversity_metrics.is_healthy else '⚠️ 需关注'}")
+        
         # 3. 识别精英、存活者和淘汰者
         elite_count = max(1, int(total_agents * self.elite_ratio))
         eliminate_count = max(1, int(total_agents * self.elimination_ratio))
@@ -166,6 +195,40 @@ class EvolutionManagerV5:
         elite_agents = rankings[:elite_count]
         survivors = rankings[:-eliminate_count] if eliminate_count < total_agents else []
         to_eliminate = rankings[-eliminate_count:]
+        
+        # 3.1 【v5.2 Day 3】多样性保护
+        protected_ids = set()
+        if not diversity_metrics.is_healthy:
+            logger.warning(f"\n🛡️ 多样性保护触发 (得分: {diversity_metrics.diversity_score:.3f}):")
+            
+            # 提取排序后的agent列表
+            ranked_agents_only = [agent for agent, _ in rankings]
+            
+            # 识别需要保护的Agent
+            protected_ids, protection_details = self.diversity_protector.protect_diversity(
+                agents=self.moirai.agents,
+                ranked_agents=ranked_agents_only,
+                diversity_metrics=diversity_metrics
+            )
+            
+            logger.info(f"   保护Agent数: {len(protected_ids)}")
+            logger.info(f"   - 生态位保护: {len(protection_details['niche_protection'])}")
+            logger.info(f"   - 稀有策略保护: {len(protection_details['rare_strategy_protection'])}")
+            logger.info(f"   - 稀有血统保护: {len(protection_details['rare_lineage_protection'])}")
+            
+            # 调整淘汰列表，排除受保护的Agent
+            if protected_ids:
+                original_eliminate = to_eliminate
+                to_eliminate = self.diversity_protector.adjust_elimination(
+                    ranked_agents=ranked_agents_only,
+                    protected_ids=protected_ids,
+                    elimination_count=eliminate_count
+                )
+                
+                logger.info(f"   调整淘汰列表: {len(original_eliminate)} → {len(to_eliminate)}")
+                
+                # 更新为元组列表格式
+                to_eliminate = [(agent, 0.0) for agent in to_eliminate]
         
         logger.info(f"📊 种群评估:")
         logger.info(f"   总数: {total_agents}")
@@ -187,6 +250,20 @@ class EvolutionManagerV5:
         
         # 5. 🧵 Clotho纺织新生命
         logger.info(f"\n🧵 Clotho开始纺织新生命...")
+        
+        # 5.1 【v5.2 Day 3】如果多样性极低，触发强制多样化繁殖
+        forced_diverse_breeding = []
+        if diversity_metrics.diversity_score < 0.4:
+            logger.warning(f"\n🧬 多样性极低({diversity_metrics.diversity_score:.3f})，启动强制多样化繁殖:")
+            
+            # 从存活者中强制多样化配对
+            survivor_agents = [agent for agent, _ in survivors]
+            forced_pairs = self.diversity_protector.force_diverse_breeding(
+                agents=survivor_agents,
+                num_offspring=min(3, eliminate_count // 2)  # 最多3对或淘汰数的一半
+            )
+            forced_diverse_breeding = forced_pairs
+            logger.info(f"   强制配对数: {len(forced_pairs)}")
         
         new_agents = []
         attempts = 0
@@ -216,16 +293,21 @@ class EvolutionManagerV5:
         while len(new_agents) < target_breeding_count and attempts < max_total_attempts:
             attempts += 1
             try:
-                # 动态放宽相似度阈值（多样性危机时每20次降低5%，正常每50次）
-                if diversity_crisis and attempts > 0:
-                    # 多样性危机：快速放宽（每20次尝试-5%）
-                    similarity_threshold = max(0.50, 0.85 - (attempts // 20) * 0.05)
-                elif attempts > 0:
-                    # 正常情况：缓慢放宽（每50次尝试-5%）
-                    similarity_threshold = max(0.70, 0.90 - (attempts // 50) * 0.05)
-                
-                # 选择父母（使用放宽版本）
-                parent1, parent2 = self._select_parents_relaxed(survivors)
+                # 【v5.2 Day 3】优先使用强制多样化配对
+                if forced_diverse_breeding and len(new_agents) < len(forced_diverse_breeding):
+                    parent1, parent2 = forced_diverse_breeding[len(new_agents)]
+                    logger.info(f"   🧬 使用强制多样化配对: {parent1.agent_id[:8]} + {parent2.agent_id[:8]}")
+                else:
+                    # 动态放宽相似度阈值（多样性危机时每20次降低5%，正常每50次）
+                    if diversity_crisis and attempts > 0:
+                        # 多样性危机：快速放宽（每20次尝试-5%）
+                        similarity_threshold = max(0.50, 0.85 - (attempts // 20) * 0.05)
+                    elif attempts > 0:
+                        # 正常情况：缓慢放宽（每50次尝试-5%）
+                        similarity_threshold = max(0.70, 0.90 - (attempts // 50) * 0.05)
+                    
+                    # 选择父母（使用放宽版本）
+                    parent1, parent2 = self._select_parents_relaxed(survivors)
                 
                 if not parent1 or not parent2:
                     logger.debug(f"   尝试{attempts}: 无法找到父母")
@@ -305,6 +387,14 @@ class EvolutionManagerV5:
         
         # 6. 添加新Agent到Moirai
         self.moirai.agents.extend(new_agents)
+        
+        # 6.5 v5.3：移民机制（每N轮注入新基因）
+        if (self.immigration_enabled and 
+            self.generation > 0 and 
+            self.generation % self.immigration_interval == 0):
+            logger.info(f"\n🛬 移民机制触发（第{self.generation}代，间隔{self.immigration_interval}）")
+            immigrants = self._inject_immigrants()
+            logger.info(f"   移民到达: {len(immigrants)}个全新基因的Agent")
         
         # 7. 记录统计
         self.generation += 1
@@ -631,7 +721,45 @@ class EvolutionManagerV5:
             meta_genome=child_meta_genome  # v5.1新增
         )
         
+        # 🔧 修复：为新Agent设置初始fitness（多样性保护器需要）
+        # 新生儿还没有交易记录，使用基准fitness = 1.0
+        child.fitness = 1.0
+        
         return child
+    
+    def _inject_immigrants(self) -> List[AgentV5]:
+        """
+        v5.3：注入移民Agent
+        
+        移民机制：定期注入全新基因的Agent，防止基因池枯竭
+        
+        Returns:
+            List[AgentV5]: 新创建的移民Agent列表
+        """
+        immigrants = []
+        
+        try:
+            for i in range(self.immigrants_per_wave):
+                # 使用Moirai创建全新的Agent（允许新家族）
+                immigrant = self.moirai._clotho_create_single_agent(
+                    allow_new_family=True  # 关键：允许创建新家族
+                )
+                
+                # 初始化fitness
+                immigrant.fitness = 1.0  # 给予基础适应度
+                
+                immigrants.append(immigrant)
+                self.moirai.agents.append(immigrant)
+                
+                logger.info(f"   🛬 移民{i+1}: {immigrant.agent_id[:12]} "
+                          f"(家族: {immigrant.lineage.family_id}, 新基因)")
+            
+            self.total_births += len(immigrants)
+            
+        except Exception as e:
+            logger.error(f"❌ 移民注入失败: {e}")
+        
+        return immigrants
     
     def get_population_stats(self) -> Dict:
         """
