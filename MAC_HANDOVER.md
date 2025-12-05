@@ -224,8 +224,14 @@ position_rate = agent.cycles_with_position / agent.cycles_survived if agent.cycl
 ### **1. 克隆项目**
 ```bash
 cd ~/Projects  # 或你喜欢的目录
-git clone <your-repo-url> prometheus-v30
+git clone https://github.com/Garylauchina/Prometheus-Quant.git prometheus-v30
 cd prometheus-v30
+
+# ⚠️ 重要：切换到 develop/v5.0 分支
+git checkout develop/v5.0
+
+# 验证分支
+git branch  # 应该显示 * develop/v5.0
 ```
 
 ### **2. 环境准备**

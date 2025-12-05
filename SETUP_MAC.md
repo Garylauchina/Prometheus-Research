@@ -26,11 +26,14 @@ brew install python@3.10
 # 进入工作目录
 cd ~/Projects  # 或你喜欢的目录
 
-# 克隆仓库（替换为你的仓库URL）
-git clone <your-repo-url> prometheus-v30
+# 克隆仓库
+git clone https://github.com/Garylauchina/Prometheus-Quant.git prometheus-v30
 
 # 进入项目目录
 cd prometheus-v30
+
+# ⚠️ 重要：切换到 develop/v5.0 分支
+git checkout develop/v5.0
 ```
 
 ---

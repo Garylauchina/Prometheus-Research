@@ -35,9 +35,10 @@
 - [ ] Homebrew 已安装（可选但推荐）
 
 ### **项目克隆**
-- [ ] 克隆仓库到MAC：`git clone <repo-url>`
+- [ ] 克隆仓库到MAC：`git clone https://github.com/Garylauchina/Prometheus-Quant.git`
 - [ ] 进入项目目录：`cd prometheus-v30`
-- [ ] 确认分支正确：`git branch`（应该在main）
+- [ ] 切换到开发分支：`git checkout develop/v5.0`
+- [ ] 确认分支正确：`git branch`（应该显示 * develop/v5.0）
 
 ### **Python环境**
 - [ ] 创建虚拟环境：`python3 -m venv venv`
