@@ -1,0 +1,18 @@
+# VPS配置文件示例
+# 
+# 使用方法：
+# 1. 复制此文件为 .env
+#    cp vps_config_example.txt .env
+# 
+# 2. 编辑 .env 文件，填入真实密码
+#    vim .env
+# 
+# 3. .env 文件内容格式：
+
+VPS_HOST=45.76.97.37
+VPS_USER=root
+VPS_PASSWORD=your_real_password_here
+VPS_PORT=22
+
+# 注意：.env 文件已在 .gitignore 中，不会被提交到Git
+
