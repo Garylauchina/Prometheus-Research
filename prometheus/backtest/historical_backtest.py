@@ -124,9 +124,9 @@ class HistoricalBacktest:
                 leveraged_return = base_return * leverage  # 杠杆放大收益
                 
                 # 交易成本（每次交易都要扣除）
-                # OKX Taker费用：0.05%（现货）到0.02%（VIP用户）
-                # 简化：使用0.05%作为交易费
-                trading_fee = 0.0005  # 0.05%
+                # OKX Taker费用：0.10%（真实费率，查证于OKX官网）
+                # 这是非VIP用户的真实成本
+                trading_fee = 0.001  # 0.10%
                 
                 # 滑点成本（市价单）
                 # 小额交易：~0.01-0.02%
