@@ -174,39 +174,45 @@ class HistoricalBacktest:
     
     def _agent_choose_leverage(self, agent) -> float:
         """
-        Agent选择杠杆倍数
+        Agent选择杠杆倍数（OKX真实限制：100x）
         
         基于风险偏好：
-        - 高风险 → 高杠杆（10x-20x）
-        - 中风险 → 中杠杆（3x-5x）
-        - 低风险 → 低杠杆（1x-2x）
+        - 极高风险（>0.9）→ 超高杠杆（50x-100x）⚠️
+        - 高风险（0.8-0.9）→ 高杠杆（20x-50x）
+        - 中高风险（0.6-0.8）→ 中高杠杆（10x-20x）
+        - 中等风险（0.4-0.6）→ 中等杠杆（5x-10x）
+        - 低风险（0.2-0.4）→ 低杠杆（3x-5x）
+        - 极低风险（<0.2）→ 保守杠杆（1x-3x）
         
         Args:
             agent: Agent对象
             
         Returns:
-            杠杆倍数（1-20）
+            杠杆倍数（1-100，OKX真实限制）
         """
         risk_tolerance = getattr(agent.instinct, 'risk_tolerance', 0.5)
         
-        # 根据风险偏好选择杠杆
-        if risk_tolerance > 0.8:
-            # 极度冒险：10x-20x杠杆
-            leverage = 10 + (risk_tolerance - 0.8) * 50  # 10-20x
+        # 根据风险偏好选择杠杆（真实OKX范围：1-100x）
+        if risk_tolerance > 0.9:
+            # 极度冒险：50x-100x杠杆 ⚠️⚠️⚠️
+            leverage = 50 + (risk_tolerance - 0.9) * 500  # 50-100x
+        elif risk_tolerance > 0.8:
+            # 高度冒险：20x-50x杠杆
+            leverage = 20 + (risk_tolerance - 0.8) * 300  # 20-50x
         elif risk_tolerance > 0.6:
-            # 冒险：5x-10x杠杆
-            leverage = 5 + (risk_tolerance - 0.6) * 25  # 5-10x
+            # 冒险：10x-20x杠杆
+            leverage = 10 + (risk_tolerance - 0.6) * 50   # 10-20x
         elif risk_tolerance > 0.4:
-            # 中等：3x-5x杠杆
-            leverage = 3 + (risk_tolerance - 0.4) * 10  # 3-5x
+            # 中等：5x-10x杠杆
+            leverage = 5 + (risk_tolerance - 0.4) * 25    # 5-10x
         elif risk_tolerance > 0.2:
-            # 保守：2x-3x杠杆
-            leverage = 2 + (risk_tolerance - 0.2) * 5   # 2-3x
+            # 保守：3x-5x杠杆
+            leverage = 3 + (risk_tolerance - 0.2) * 10    # 3-5x
         else:
-            # 极度保守：1x-2x杠杆
-            leverage = 1 + risk_tolerance * 5           # 1-2x
+            # 极度保守：1x-3x杠杆
+            leverage = 1 + risk_tolerance * 10            # 1-3x
         
-        return min(20.0, max(1.0, leverage))  # 限制在1-20x
+        return min(100.0, max(1.0, leverage))  # 限制在1-100x（OKX真实限制）
     
     def _agent_make_position_decision(self, agent, recent_price_change: float) -> float:
         """
