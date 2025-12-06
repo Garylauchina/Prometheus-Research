@@ -38,6 +38,9 @@ from .advanced_opponents import (
     PanicTrader       # 恐慌交易者
 )
 
+# v5.3: 历史数据加载（回测用）
+from .okx_data_loader import OKXDataLoader
+
 __all__ = [
     # === 简单版本（v5.2）===
     'SimpleOpponentMarket',
@@ -60,5 +63,8 @@ __all__ = [
     'Whale',
     'HighFrequencyTrader',
     'PassiveInvestor',
-    'PanicTrader'
+    'PanicTrader',
+    
+    # === 历史数据 ===
+    'OKXDataLoader'
 ]
