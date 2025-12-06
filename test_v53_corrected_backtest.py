@@ -145,6 +145,62 @@ class CorrectedHistoricalBacktest:
         
         return total_cost
     
+    def _agent_make_position_decision(self, agent, price_change: float) -> float:
+        """
+        Agent决策：基于本能和基因（使用原始回测的逻辑）
+        
+        Args:
+            agent: Agent实例
+            price_change: 价格变化
+            
+        Returns:
+            仓位 (-1到1，负数为做空)
+        """
+        # 使用与原始回测相同的逻辑
+        risk_tolerance = getattr(agent.instinct, 'risk_tolerance', 0.5)
+        time_preference = getattr(agent.instinct, 'time_preference', 0.5)
+        
+        # 基于价格变化判断
+        if abs(price_change) < 0.001:  # 价格基本不变
+            return 0.0  # 空仓
+        
+        # 简化策略：顺势交易 + 风险调整
+        if price_change > 0:  # 上涨
+            # 做多，力度由风险承受度决定
+            position = risk_tolerance * 0.8
+        else:  # 下跌
+            # 做空，力度由风险承受度决定
+            position = -risk_tolerance * 0.8
+        
+        # 限制在-1到1之间
+        return np.clip(position, -1, 1)
+    
+    def _agent_choose_leverage(self, agent) -> float:
+        """
+        Agent选择杠杆倍数（使用原始回测的逻辑）
+        
+        Args:
+            agent: Agent实例
+            
+        Returns:
+            杠杆倍数 (1-100)
+        """
+        risk_tolerance = getattr(agent.instinct, 'risk_tolerance', 0.5)
+        
+        # 使用与原始回测相同的杠杆选择逻辑
+        if risk_tolerance < 0.2:
+            return 1.0 + risk_tolerance * 10  # 1-3x
+        elif risk_tolerance < 0.4:
+            return 3.0 + (risk_tolerance - 0.2) * 10  # 3-5x
+        elif risk_tolerance < 0.6:
+            return 5.0 + (risk_tolerance - 0.4) * 25  # 5-10x
+        elif risk_tolerance < 0.8:
+            return 10.0 + (risk_tolerance - 0.6) * 50  # 10-20x
+        elif risk_tolerance < 0.9:
+            return 20.0 + (risk_tolerance - 0.8) * 300  # 20-50x
+        else:
+            return 50.0 + (risk_tolerance - 0.9) * 500  # 50-100x
+    
     def initialize_agents(self):
         """初始化Agent种群"""
         logger.info(f"🌱 初始化{self.initial_agents}个Agent...")
@@ -197,9 +253,9 @@ class CorrectedHistoricalBacktest:
             
             # 每个Agent做决策并更新资金
             for agent in agents:
-                # Agent决策
-                position = np.clip(np.random.randn() * 0.3, -1, 1)  # 简化决策
-                leverage = 7.5  # Agent发现的最优杠杆
+                # 使用Agent的真实决策逻辑
+                position = self._agent_make_position_decision(agent, price_change)
+                leverage = self._agent_choose_leverage(agent)
                 
                 # 计算基础收益
                 base_return = price_change * position
