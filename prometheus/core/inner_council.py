@@ -98,12 +98,13 @@ class Daimon:
         else:
             # 向后兼容：默认权重
             self.base_weights = {
-                'instinct': 1.0,    # 本能权重最高（死亡恐惧）
-                'experience': 0.7,  # 经验次之（历史教训）
-                'prophecy': 0.6,    # 先知预言（战略指导）
-                'strategy': 0.5,    # 策略分析（战术分析）
-                'genome': 0.5,      # 基因偏好（个性倾向）
-                'emotion': 0.3,     # 情绪权重最低（易受干扰）
+                'instinct': 1.0,          # 本能权重最高（死亡恐惧）
+                'world_signature': 0.8,   # ✨ v5.5+：世界感知（环境认知）
+                'experience': 0.7,        # 经验次之（历史教训）
+                'prophecy': 0.6,          # 先知预言（战略指导）
+                'strategy': 0.5,          # 策略分析（战术分析）
+                'genome': 0.5,            # 基因偏好（个性倾向）
+                'emotion': 0.3,           # 情绪权重最低（易受干扰）
             }
     
     # ==================== 主决策流程 ====================
@@ -122,11 +123,12 @@ class Daimon:
                 - recent_pnl: 最近盈亏
                 - consecutive_losses: 连续亏损次数
                 - personal_stats: 个人统计（如果有PersonalInsights）
+                - world_signature: WorldSignature（v5.5+新增）✨
         
         Returns:
             CouncilDecision: 决策结果
         """
-        # 收集所有"声音"的投票（v5.0完整版：6个声音）
+        # 收集所有"声音"的投票（v5.5+：7个声音）
         all_votes = []
         all_votes.extend(self._instinct_voice(context))
         all_votes.extend(self._genome_voice(context))
@@ -134,6 +136,7 @@ class Daimon:
         all_votes.extend(self._emotion_voice(context))
         all_votes.extend(self._strategy_voice(context))   # 策略分析（战术）
         all_votes.extend(self._prophecy_voice(context))   # 先知预言（战略）
+        all_votes.extend(self._world_signature_voice(context))  # ✨ v5.5+：世界感知！
         
         # 如果没有任何投票，默认hold
         if not all_votes:
@@ -547,6 +550,196 @@ class Daimon:
                     confidence=0.6,
                     voter_category='prophecy',
                     reason=f"环境压力高({environmental_pressure:.1%}): 观望"
+                ))
+        
+        return votes
+    
+    def _world_signature_voice(self, context: Dict) -> List[Vote]:
+        """
+        世界签名声音：基于WorldSignature感知市场环境（v5.5+新增）✨
+        
+        这是朋友指出的关键：让Agent"知道"它在什么世界中！
+        
+        WorldSignature特征：
+        - drift: 漂移率（趋势方向和强度）
+        - volatility: 波动率（市场波动程度）
+        - trend_strength: 趋势强度（趋势的可靠性）
+        - entropy: 熵（市场混乱程度）
+        - regime_label: Regime标签（bull/bear/volatile/sideways）
+        
+        特点：
+        - 这是"环境感知"层的指导
+        - 权重适中（0.6-0.8），让Agent"看见"世界
+        - 与先知预言配合，形成完整的环境认知
+        """
+        votes = []
+        
+        # 获取WorldSignature
+        signature = context.get('world_signature', None)
+        if not signature:
+            # 如果没有WorldSignature，不投票
+            return votes
+        
+        # 提取特征（支持两种格式）
+        if hasattr(signature, 'drift'):
+            # SignatureEnrichedData格式
+            drift = signature.drift
+            volatility = signature.volatility
+            trend_strength = signature.trend_strength
+            entropy = signature.entropy
+            regime_label = signature.regime_label
+        else:
+            # 字典格式
+            drift = signature.get('drift', 0)
+            volatility = signature.get('volatility', 0)
+            trend_strength = signature.get('trend_strength', 0)
+            entropy = signature.get('entropy', 0)
+            regime_label = signature.get('regime_label', 'unknown')
+        
+        position = context.get('position', {})
+        has_position = position.get('amount', 0) != 0
+        
+        # ==================== Regime感知决策 ====================
+        
+        # 1. 牛市regime
+        if regime_label in ['steady_bull', 'volatile_bull']:
+            if drift > 0.01 and trend_strength > 0.5:
+                # 强势牛市：建议做多
+                if not has_position:
+                    votes.append(Vote(
+                        action='buy',
+                        confidence=min(trend_strength * 0.9, 0.85),
+                        voter_category='world_signature',
+                        reason=f"牛市环境(drift={drift:+.2%}, 趋势强度={trend_strength:.0%})"
+                    ))
+                elif has_position:
+                    # 持有多单
+                    votes.append(Vote(
+                        action='hold',
+                        confidence=0.7,
+                        voter_category='world_signature',
+                        reason=f"牛市持续，持有头寸"
+                    ))
+            elif drift < 0:
+                # 牛市转熊？建议警惕
+                if has_position:
+                    votes.append(Vote(
+                        action='close',
+                        confidence=0.6,
+                        voter_category='world_signature',
+                        reason=f"牛市可能反转(drift={drift:+.2%})"
+                    ))
+        
+        # 2. 熊市regime
+        elif regime_label in ['crash_bear', 'steady_bear']:
+            if drift < -0.01 and trend_strength > 0.5:
+                # 强势熊市：建议做空或平多
+                if has_position:
+                    votes.append(Vote(
+                        action='close',
+                        confidence=0.8,
+                        voter_category='world_signature',
+                        reason=f"熊市环境(drift={drift:+.2%})，及时离场"
+                    ))
+                else:
+                    votes.append(Vote(
+                        action='sell',
+                        confidence=min(trend_strength * 0.8, 0.75),
+                        voter_category='world_signature',
+                        reason=f"熊市环境，顺势做空"
+                    ))
+            elif drift > 0:
+                # 熊市转牛？谨慎乐观
+                votes.append(Vote(
+                    action='hold',
+                    confidence=0.5,
+                    voter_category='world_signature',
+                    reason=f"熊市可能反转，观望"
+                ))
+        
+        # 3. 高波震荡
+        elif regime_label == 'high_volatility':
+            if entropy > 0.7:
+                # 高熵高波：市场混乱，建议观望或快速进出
+                if has_position:
+                    votes.append(Vote(
+                        action='close',
+                        confidence=0.7,
+                        voter_category='world_signature',
+                        reason=f"高波震荡(vol={volatility:.0%}, 熵={entropy:.0%})，快速离场"
+                    ))
+                else:
+                    votes.append(Vote(
+                        action='hold',
+                        confidence=0.6,
+                        voter_category='world_signature',
+                        reason=f"市场混乱，观望为主"
+                    ))
+            else:
+                # 有序震荡：可以短线交易
+                if not has_position and abs(drift) > 0.005:
+                    action = 'buy' if drift > 0 else 'sell'
+                    votes.append(Vote(
+                        action=action,
+                        confidence=0.6,
+                        voter_category='world_signature',
+                        reason=f"有序震荡，短线{action}"
+                    ))
+        
+        # 4. 低波盘整
+        elif regime_label == 'low_volatility':
+            # 低波动：交易成本高，建议观望
+            if has_position and abs(drift) < 0.003:
+                # 无明显趋势，平仓
+                votes.append(Vote(
+                    action='close',
+                    confidence=0.5,
+                    voter_category='world_signature',
+                    reason=f"低波盘整(vol={volatility:.0%})，节省成本"
+                ))
+            else:
+                votes.append(Vote(
+                    action='hold',
+                    confidence=0.6,
+                    voter_category='world_signature',
+                    reason=f"低波盘整，等待机会"
+                ))
+        
+        # 5. 未知regime
+        else:
+            # 侧向观望
+            votes.append(Vote(
+                action='hold',
+                confidence=0.5,
+                voter_category='world_signature',
+                reason=f"Regime不明({regime_label})，观望"
+            ))
+        
+        # ==================== 危险指数检查（通用）====================
+        
+        # 如果WorldSignature有danger_index（v2.0格式）
+        if hasattr(signature, 'danger_index'):
+            danger = signature.danger_index
+            if danger > 0.7 and has_position:
+                # 高危环境，强烈建议平仓
+                votes.append(Vote(
+                    action='close',
+                    confidence=0.9,
+                    voter_category='world_signature',
+                    reason=f"高危环境(danger={danger:.0%})，紧急离场！"
+                ))
+        
+        # 如果WorldSignature有opportunity_index（v2.0格式）
+        if hasattr(signature, 'opportunity_index'):
+            opportunity = signature.opportunity_index
+            if opportunity > 0.8 and not has_position:
+                # 高机会环境，建议开仓
+                action = 'buy' if drift > 0 else 'sell'
+                votes.append(Vote(
+                    action=action,
+                    confidence=0.75,
+                    voter_category='world_signature',
+                    reason=f"高机会环境(opportunity={opportunity:.0%})！"
                 ))
         
         return votes
