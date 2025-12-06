@@ -45,13 +45,25 @@ def initialize_system(config: dict):
     
     # 1. 初始化交易所
     okx_config = config['okx']
-    exchange = OKXExchange(
-        api_key=okx_config['api_key'],
-        api_secret=okx_config['api_secret'],
-        passphrase=okx_config['passphrase'],
-        paper_trading=okx_config['paper_trading'],
-        testnet=okx_config.get('testnet', False)
-    )
+    
+    # 虚拟盘模式不需要API密钥（只获取公开市场数据）
+    if okx_config['paper_trading']:
+        exchange = OKXExchange(
+            api_key="",
+            api_secret="",
+            passphrase="",
+            paper_trading=True,
+            testnet=False
+        )
+    else:
+        # 实盘模式需要真实API密钥
+        exchange = OKXExchange(
+            api_key=okx_config['api_key'],
+            api_secret=okx_config['api_secret'],
+            passphrase=okx_config['passphrase'],
+            paper_trading=False,
+            testnet=okx_config.get('testnet', False)
+        )
     
     # 测试连接
     if not exchange.test_connection():
