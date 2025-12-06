@@ -119,14 +119,64 @@ class HistoricalBacktest:
                 #   +1 = 100%做多，0 = 空仓，-1 = 100%做空
                 position = self._agent_make_position_decision(agent, price_change)
                 
-                # 计算杠杆收益（支持做空 + 杠杆）
+                # 计算杠杆收益（支持做空 + 杠杆 + 交易成本）
                 base_return = price_change * position
                 leveraged_return = base_return * leverage  # 杠杆放大收益
+                
+                # 交易成本（每次交易都要扣除）
+                # OKX Taker费用：0.05%（现货）到0.02%（VIP用户）
+                # 简化：使用0.05%作为交易费
+                trading_fee = 0.0005  # 0.05%
+                
+                # 滑点成本（市价单）
+                # 小额交易：~0.01-0.02%
+                slippage = 0.0001  # 0.01%
+                
+                # 资金费率（期货合约，每8小时收取一次）
+                # 简化：每日3次，每次~0.01%，日均~0.03%
+                # 由于我们是日线数据，计算为0.03%/天
+                funding_rate = 0.0003  # 0.03%
+                
+                # 总交易成本
+                # 注意：只有实际交易时才扣除（position != 0）
+                if abs(position) > 0.01:  # 有持仓
+                    total_cost = trading_fee + slippage + funding_rate
+                    leveraged_return -= total_cost * leverage  # 成本也受杠杆影响
                 
                 # 检查是否爆仓（亏损超过100%）
                 if leveraged_return <= -1.0:  # 亏损100%或更多
                     # 爆仓！💀
-                    logger.warning(f"💥 Agent {agent.agent_id} 爆仓！| 杠杆:{leverage:.1f}x | 持仓:{position:+.2f} | 价格变化:{price_change:+.2%} | 亏损:{leveraged_return:.2%}")
+                    # 记录详细的死亡信息
+                    death_report = {
+                        'agent_id': agent.agent_id,
+                        'timestamp': timestamp,
+                        'price': current_price,
+                        'step': self.current_step,
+                        'leverage': leverage,
+                        'position': position,
+                        'price_change': price_change,
+                        'base_return': base_return,
+                        'leveraged_return': leveraged_return,
+                        'capital_before': agent.current_capital,
+                        'risk_tolerance': getattr(agent.instinct, 'risk_tolerance', 'unknown'),
+                        'time_preference': getattr(agent.instinct, 'time_preference', 'unknown'),
+                        'trade_count': len(agent.trade_history) if hasattr(agent, 'trade_history') else 0,
+                        'lineage': agent.lineage.get_dominant_family() if hasattr(agent, 'lineage') else 'unknown'
+                    }
+                    
+                    if not hasattr(self, 'liquidation_records'):
+                        self.liquidation_records = []
+                    self.liquidation_records.append(death_report)
+                    
+                    logger.warning(f"💥 Agent {agent.agent_id} 爆仓！")
+                    logger.warning(f"   ├─ 时刻: 第{self.current_step}根K线，价格${current_price:,.2f}")
+                    logger.warning(f"   ├─ 杠杆: {leverage:.1f}x")
+                    logger.warning(f"   ├─ 持仓: {position:+.2f} ({'做空' if position < 0 else '做多'})")
+                    logger.warning(f"   ├─ 价格变化: {price_change:+.2%}")
+                    logger.warning(f"   ├─ 亏损: {leveraged_return:.2%}")
+                    logger.warning(f"   ├─ 风险偏好: {death_report['risk_tolerance']:.2f}" if isinstance(death_report['risk_tolerance'], float) else f"   ├─ 风险偏好: {death_report['risk_tolerance']}")
+                    logger.warning(f"   └─ 交易次数: {death_report['trade_count']}次")
+                    
                     agents_to_remove.append(agent)
                     agent.current_capital = 0  # 归零
                     continue
@@ -451,6 +501,10 @@ class HistoricalBacktest:
                 'liquidation_rate': float(liquidated_count / self.initial_agents * 100)
             }
         }
+        
+        # 添加爆仓记录（如果有）
+        if hasattr(self, 'liquidation_records') and self.liquidation_records:
+            results['liquidation_records'] = self.liquidation_records
         
         return results
     
