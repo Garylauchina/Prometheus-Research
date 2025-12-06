@@ -34,27 +34,32 @@ class OKXDataDownloaderCCXT:
         logger.info(f"   输出目录: {self.output_dir}")
         logger.info(f"   交易所: {self.exchange.name}")
     
-    def download_klines(self, symbol: str = "BTC/USDT", timeframe: str = "1d", days: int = 1000):
+    def download_klines(self, symbol: str = "BTC/USDT", timeframe: str = "1d", days: int = 1000, max_requests: int = 50):
         """
-        下载K线数据
+        下载K线数据（循环下载，尽可能多）
         
         Args:
             symbol: 交易对（BTC/USDT）
             timeframe: 时间周期（1m, 5m, 15m, 1h, 4h, 1d）
-            days: 天数
+            days: 目标天数
+            max_requests: 最大请求次数（防止无限循环）
         """
         logger.info(f"\n📊 开始下载 {symbol} {timeframe} K线数据")
         logger.info(f"   目标天数: {days}天")
+        logger.info(f"   最大请求次数: {max_requests}次")
         
         all_data = []
         
-        # 计算起始时间
+        # 从当前时间开始往前下载
         since = int((datetime.now() - timedelta(days=days)).timestamp() * 1000)
         
-        limit = 500  # CCXT推荐的每次请求数量
+        limit = 100  # 每次请求100条（OKX稳定支持）
+        request_count = 0
         
-        while True:
+        while request_count < max_requests:
             try:
+                request_count += 1
+                
                 # 获取数据
                 ohlcv = self.exchange.fetch_ohlcv(
                     symbol=symbol,
@@ -64,26 +69,38 @@ class OKXDataDownloaderCCXT:
                 )
                 
                 if not ohlcv:
+                    logger.info(f"   第{request_count}次请求: 无数据，停止")
                     break
                 
-                all_data.extend(ohlcv)
-                
-                # 更新since为最后一条数据的时间戳
-                since = ohlcv[-1][0] + 1
+                # 检查是否有重复数据
+                new_count = 0
+                for candle in ohlcv:
+                    if candle not in all_data:
+                        all_data.append(candle)
+                        new_count += 1
                 
                 # 显示进度
-                if len(all_data) % 1000 < limit:
-                    logger.info(f"   已下载: {len(all_data)}条")
+                if request_count % 5 == 0 or new_count == 0:
+                    logger.info(f"   请求{request_count}: +{new_count}条，总计{len(all_data)}条")
                 
-                # 如果返回的数据少于limit，说明没有更多数据了
-                if len(ohlcv) < limit:
+                # 如果没有新数据，说明到头了
+                if new_count == 0:
+                    logger.info(f"   ✅ 已到达最早数据（请求{request_count}次）")
                     break
                 
-                # 避免请求过快
-                time.sleep(self.exchange.rateLimit / 1000)
+                # 更新since为最后一条数据的时间戳+1
+                since = ohlcv[-1][0] + 1
+                
+                # 如果返回的数据少于limit，可能接近最早数据
+                if len(ohlcv) < limit:
+                    logger.info(f"   ⚠️ 返回数据<{limit}条，可能接近最早数据")
+                    # 但继续尝试
+                
+                # 避免请求过快（OKX限制：20次/2秒）
+                time.sleep(0.15)
                 
             except Exception as e:
-                logger.error(f"❌ 下载出错: {e}")
+                logger.error(f"❌ 第{request_count}次请求出错: {e}")
                 break
         
         if not all_data:
@@ -135,11 +152,11 @@ def main():
         # 初始化
         downloader = OKXDataDownloaderCCXT(output_dir="data/okx")
         
-        # 下载计划
+        # 下载计划（尽可能多的历史数据）
         plans = [
-            {"timeframe": "1d", "days": 1000, "desc": "日线数据（约3年）"},
-            {"timeframe": "4h", "days": 365, "desc": "4小时线（1年）"},
-            {"timeframe": "1h", "days": 180, "desc": "1小时线（半年）"},
+            {"timeframe": "1d", "days": 2000, "max_requests": 100, "desc": "日线数据（尽可能多，最多10000条）"},
+            {"timeframe": "4h", "days": 730, "max_requests": 100, "desc": "4小时线（尽可能多，最多10000条）"},
+            {"timeframe": "1h", "days": 365, "max_requests": 100, "desc": "1小时线（尽可能多，最多10000条）"},
         ]
         
         logger.info("\n📋 下载计划:")
@@ -157,7 +174,8 @@ def main():
                 df = downloader.download_klines(
                     symbol="BTC/USDT",
                     timeframe=plan['timeframe'],
-                    days=plan['days']
+                    days=plan['days'],
+                    max_requests=plan.get('max_requests', 50)
                 )
                 
                 if df is not None:
