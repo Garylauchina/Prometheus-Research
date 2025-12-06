@@ -199,6 +199,45 @@ class Daimon:
         position = context.get('position', {})
         has_position = position.get('amount', 0) != 0
         
+        # 获取未实现盈亏和账户健康度
+        unrealized_pnl = context.get('unrealized_pnl', 0)
+        account_health = context.get('account_health', 1.0)
+        
+        # ==================== 🚨 硬性止损规则（最高优先级！）====================
+        # 这些是"生存第一"的铁律，无论其他因素如何都必须执行！
+        
+        # 规则1：亏损超过30% → 强制止损！
+        if unrealized_pnl < -0.30 and has_position:
+            votes.append(Vote(
+                action='close',
+                confidence=1.0,  # 100%信心！这是铁律！
+                voter_category='instinct',
+                reason=f"🚨触发硬性止损线(亏损{unrealized_pnl:.1%}>30%)！"
+            ))
+            # 强制止损时，直接返回，不考虑其他因素
+            return votes
+        
+        # 规则2：账户健康度<20% → 强制平仓！
+        if account_health < 0.2 and has_position:
+            votes.append(Vote(
+                action='close',
+                confidence=0.99,
+                voter_category='instinct',
+                reason=f"🚨账户危险(健康度{account_health:.1%}<20%)！强制平仓！"
+            ))
+            return votes
+        
+        # 规则3：账户健康度<50% 且 有亏损 → 高度建议平仓
+        if account_health < 0.5 and unrealized_pnl < 0 and has_position:
+            votes.append(Vote(
+                action='close',
+                confidence=0.90,
+                voter_category='instinct',
+                reason=f"⚠️账户亚健康(健康度{account_health:.1%})且亏损{unrealized_pnl:.1%}，建议离场"
+            ))
+        
+        # ==================== 动态恐惧机制 ====================
+        
         # 1. 死亡恐惧（v5.2改进：动态阈值，更激进）
         fear_level = instinct.calculate_death_fear_level(capital_ratio, consecutive_losses)
         # v5.2: 根据fear_of_death动态调整阈值（改进版：差异更大）
@@ -599,6 +638,49 @@ class Daimon:
         position = context.get('position', {})
         has_position = position.get('amount', 0) != 0
         
+        # ==================== 🚨 紧急危险检查（最高优先级！）====================
+        # 这必须放在最前面！极端危险时，regime无关紧要！
+        
+        # 支持多种danger属性名（兼容性）
+        danger = None
+        if hasattr(signature, 'danger'):
+            danger = signature.danger
+        elif hasattr(signature, 'danger_index'):
+            danger = signature.danger_index
+        elif isinstance(signature, dict) and 'danger' in signature:
+            danger = signature['danger']
+        
+        # 极端危险：danger > 0.8 且持仓 → 立即平仓！
+        if danger is not None and danger > 0.8:
+            if has_position:
+                # 🚨 这是生死攸关的决策！
+                votes.append(Vote(
+                    action='close',
+                    confidence=0.99,  # 极高信心！
+                    voter_category='world_signature',
+                    reason=f"🚨极度危险(danger={danger:.1%})！立即止损！"
+                ))
+                # 极端危险时，直接返回，不考虑其他因素
+                return votes
+            else:
+                # 空仓时，坚决不开仓
+                votes.append(Vote(
+                    action='hold',
+                    confidence=0.95,
+                    voter_category='world_signature',
+                    reason=f"⚠️极度危险(danger={danger:.1%})，严禁开仓！"
+                ))
+                return votes
+        
+        # 高危险：danger > 0.6 且持仓 → 强烈建议平仓
+        if danger is not None and danger > 0.6 and has_position:
+            votes.append(Vote(
+                action='close',
+                confidence=0.85,
+                voter_category='world_signature',
+                reason=f"⚠️高危环境(danger={danger:.1%})，建议离场"
+            ))
+        
         # ==================== Regime感知决策 ====================
         
         # 1. 牛市regime
@@ -715,19 +797,7 @@ class Daimon:
                 reason=f"Regime不明({regime_label})，观望"
             ))
         
-        # ==================== 危险指数检查（通用）====================
-        
-        # 如果WorldSignature有danger_index（v2.0格式）
-        if hasattr(signature, 'danger_index'):
-            danger = signature.danger_index
-            if danger > 0.7 and has_position:
-                # 高危环境，强烈建议平仓
-                votes.append(Vote(
-                    action='close',
-                    confidence=0.9,
-                    voter_category='world_signature',
-                    reason=f"高危环境(danger={danger:.0%})，紧急离场！"
-                ))
+        # ==================== 机会指数检查（通用）====================
         
         # 如果WorldSignature有opportunity_index（v2.0格式）
         if hasattr(signature, 'opportunity_index'):
