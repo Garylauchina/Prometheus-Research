@@ -645,8 +645,10 @@ class V6Facade:
         
         return bulletins
     
-    def maybe_inject_immigrants(self, metrics: Optional[Dict] = None, force: bool = False):  # AlphaZero式：移除DiversityMetrics
-        return self.evolution.maybe_inject_immigrants(metrics=metrics, force=force)
+    def maybe_inject_immigrants(self, metrics: Optional[Dict] = None, force: bool = False):
+        """AlphaZero式：不使用Immigration机制"""
+        logger.debug("AlphaZero式：Immigration已禁用")
+        return []
 
     def run(self, total_cycles: int, market_feed=None, evo_interval: int = 1):
         """

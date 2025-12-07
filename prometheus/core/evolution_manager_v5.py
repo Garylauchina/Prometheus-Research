@@ -876,62 +876,9 @@ class EvolutionManagerV5:
                           count: Optional[int] = None,
                           allow_new_family: bool = True,
                           reason: Optional[str] = None) -> List[AgentV5]:
-        """
-        v5.3：注入移民Agent（改为上层/先知策略触发）
-        
-        触发方：先知/战略层，根据多样性或市场状态决定是否引入新基因
-        防抖：代级冷却，避免短时间多次注入
-        
-        Returns:
-            List[AgentV5]: 新创建的移民Agent列表
-        """
-        immigrants = []
-        
-        try:
-            # 冷却检查
-            if (self.generation - self.last_immigration_generation) < self.immigration_cooldown:
-                logger.info(f"   🛬 移民跳过：冷却中 (cooldown={self.immigration_cooldown})")
-                return immigrants
-            
-            batch = count if count is not None else self.immigrants_per_wave
-            batch = max(1, batch)
-            
-            for i in range(batch):
-                # 使用Moirai创建全新的Agent（允许新家族）
-                immigrant = self.moirai._clotho_create_single_agent(
-                    allow_new_family=allow_new_family  # 默认允许新家族，由上层策略决定
-                )
-                # 确保血统携带family_id
-                if hasattr(immigrant.lineage, "family_id"):
-                    immigrant.lineage.family_id = immigrant.lineage.family_id
-                else:
-                    immigrant.lineage.family_id = immigrant.lineage.get_dominant_family()
-                
-                # 初始化fitness
-                immigrant.fitness = 1.0  # 给予基础适应度
-                
-                immigrants.append(immigrant)
-                self.moirai.agents.append(immigrant)
-                
-                logger.info(f"   🛬 移民{i+1}: {immigrant.agent_id[:12]} "
-                          f"(家族: {immigrant.lineage.family_id}, 新基因"
-                          f"{' | reason: ' + reason if reason else ''})")
-            
-            # 挂账簿：为移民补账户，防对账缺失
-            try:
-                from prometheus.ledger.attach_accounts import attach_accounts
-                public_ledger = getattr(self.moirai, "public_ledger", None)
-                attach_accounts(immigrants, public_ledger)
-            except Exception as e:
-                logger.warning(f"移民挂账簿失败: {e}")
-            
-            self.total_births += len(immigrants)
-            self.last_immigration_generation = self.generation
-            
-        except Exception as e:
-            logger.error(f"❌ 移民注入失败: {e}")
-        
-        return immigrants
+        """AlphaZero式：不使用Immigration机制"""
+        logger.debug("AlphaZero式：Immigration已禁用")
+        return []
 
     def maybe_inject_immigrants(self,
                                 metrics: Optional['DiversityMetrics'] = None,
