@@ -496,28 +496,24 @@ class EvolutionManagerV5:
     
     def _calculate_fitness_alphazero(self, agent: AgentV5, current_price: float = 0.0) -> float:
         """
-        ⚔️ AlphaZero式极简Fitness - 只有绝对收益
+        ⚔️ AlphaZero式极简Fitness v2 - 绝对收益 + 参与惩罚
         
-        移除所有人为干预：
-        ❌ 持有奖励（不鼓励特定行为）
-        ❌ 频率惩罚（不惩罚探索）
-        ❌ 趋势对齐（不人为引导）
-        ❌ 生存奖励（不鼓励苟活）
-        
-        只有：
-        ✅ 绝对收益 = (最终资金 - 初始资金) / 初始资金
+        核心原则：
+        ✅ 绝对收益是主要指标
+        ✅ 惩罚不参与交易（资金闲置是浪费！）
         
         理由：
         - 盈利是唯一目标
-        - 让进化自己找到最优策略
-        - 不要人为干预演化方向
+        - 但"不交易"不等于"持有"
+        - 不交易 = 资金闲置 = 应该被淘汰
+        - 让进化鼓励"积极参与"而非"消极观望"
         
         Args:
             agent: 待评估的Agent
             current_price: 当前市场价格（用于计算未实现盈亏）
         
         Returns:
-            float: Fitness分数（绝对收益）
+            float: Fitness分数（绝对收益，不交易则惩罚）
         """
         # 1. 计算最终资金（现金 + 未实现盈亏）
         current_liquid_capital = agent.account.private_ledger.virtual_capital if hasattr(agent, 'account') and agent.account else agent.current_capital
@@ -527,7 +523,14 @@ class EvolutionManagerV5:
         # 2. 计算绝对收益
         absolute_return = (effective_capital - agent.initial_capital) / agent.initial_capital
         
-        # 就这么简单！
+        # 3. ✨ 惩罚不交易（关键修改！）
+        trade_count = agent.account.private_ledger.trade_count if hasattr(agent, 'account') and agent.account else 0
+        
+        if trade_count == 0:
+            # 从未交易 = 资金闲置 = 严厉惩罚
+            return -1.0  # 负分！必死无疑！
+        
+        # 如果有交易，直接返回绝对收益
         return absolute_return
     
     def _rank_agents(self, current_price: float = 0.0) -> List[Tuple[AgentV5, float]]:
