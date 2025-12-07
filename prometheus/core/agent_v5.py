@@ -588,59 +588,19 @@ class AgentV5:
         pnl_pct = (recent[-1] - recent[0]) / recent[0] if recent[0] > 0 else 0
         return pnl_pct
     
-    # ==================== 学习与冥思 ====================
-    
-    def meditate(self, recent_trades: List[Dict]):
-        """
-        冥思：反思最近的交易
-        
-        Args:
-            recent_trades: 最近的交易记录
-        """
-        record = self.personal_insights.meditate(recent_trades)
-        
-        if record.insights:
-            logger.info(
-                f"🧘 Agent {self.agent_id} 冥思 | "
-                f"发现{record.patterns_discovered}个模式 | "
-                f"洞察: {record.insights[:2]}"
-            )
-    
-    def try_epiphany(self) -> bool:
-        """
-        尝试顿悟
-        
-        顿悟条件：
-        - 连续盈利3次
-        - 或资金翻倍
-        - 或其他触发条件
-        
-        Returns:
-            bool: 是否触发顿悟
-        """
-        capital_ratio = self.current_capital / self.initial_capital
-        
-        # 条件1: 资金翻倍
-        if capital_ratio >= 2.0:
-            epiphany = self.personal_insights.trigger_epiphany(
-                trigger="资金翻倍",
-                effect="解锁新策略",
-                magnitude=0.8
-            )
-            logger.info(f"💡 Agent {self.agent_id} 顿悟! {epiphany.effect}")
-            return True
-        
-        # 条件2: 连续盈利5次
-        if self.consecutive_wins >= 5:
-            epiphany = self.personal_insights.trigger_epiphany(
-                trigger="连续盈利5次",
-                effect="提升信心本能",
-                magnitude=0.5
-            )
-            logger.info(f"💡 Agent {self.agent_id} 顿悟! {epiphany.effect}")
-            return True
-        
-        return False
+    # AlphaZero式：移除学习与冥思
+    # 理由：
+    # 1. 过度设计，增加复杂度
+    # 2. AlphaZero没有"冥思"、"顿悟"等心理活动
+    # 3. 学习应该通过进化实现，不需要个体学习
+    #
+    # def meditate(self, recent_trades: List[Dict]):
+    #     """已移除"""
+    #     pass
+    #
+    # def try_epiphany(self) -> bool:
+    #     """已移除"""
+    #     return False
     
     # ==================== 生命周期 ====================
     
@@ -654,43 +614,19 @@ class AgentV5:
         elif self.days_alive > 7:
             self.state = AgentState.ACTIVE
     
-    def should_commit_suicide(self) -> bool:
-        """
-        AlphaZero式：简化自杀判断，只基于客观指标
-        
-        不再有"情绪绝望"、"死亡恐惧"等主观因素
-        只基于客观的资金状况
-        
-        Returns:
-            bool: 是否自杀
-        """
-        if self.state == AgentState.DEAD or self.days_alive < 3:
-            return False
-        
-        capital_ratio = self.current_capital / self.initial_capital
-        
-        # AlphaZero式：纯理性判断
-        suicide_factors = {
-            '资金严重亏损': capital_ratio < 0.2,  # 亏损80%
-            '连续大量亏损': self.consecutive_losses > 15,  # 连续15次亏损
-        }
-        
-        # 触发任意一个条件即自杀（更激进）
-        if any(suicide_factors.values()):
-            return True
-        
-        return False
-    
-    def commit_suicide(self):
-        """AlphaZero式：理性自杀（基于客观指标）"""
-        capital_ratio = self.current_capital / self.initial_capital
-        logger.warning(
-            f"💀 Agent {self.agent_id} 自杀 | "
-            f"资金剩余{self.current_capital:.2f} ({capital_ratio:.1%}) | "
-            f"连续亏损{self.consecutive_losses}次"
-        )
-        self.state = AgentState.DEAD
-        self.death_reason = DeathReason.SUICIDE
+    # AlphaZero式：移除自杀机制
+    # 理由：
+    # 1. Agent不应该主动自杀，应该由EvolutionManager强制淘汰
+    # 2. 违背"死亡有价值"的理念
+    # 3. AlphaZero的棋子不会"自杀"，只会被判定输赢
+    #
+    # def should_commit_suicide(self) -> bool:
+    #     """已移除"""
+    #     return False
+    #
+    # def commit_suicide(self):
+    #     """已移除"""
+    #     pass
     
     # ==================== 统计更新（v5.2新增）====================
     

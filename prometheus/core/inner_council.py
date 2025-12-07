@@ -75,37 +75,27 @@ class CouncilDecision:
 
 class Daimon:
     """
-    守护神 - Agent的决策中枢
+    守护神 - Agent的决策中枢（AlphaZero式极简版）
     
-    v5.1版本特点：
-    - 无记忆（纯函数式）
-    - 权重从元基因组读取（可遗传）✨
-    - 六个"声音"投票机制
+    v6.0 AlphaZero式重构：
+    - 移除所有情绪化voice（instinct, emotion, experience, prophecy）
+    - 只保留2个纯理性voice：
+      1. genome_voice（感知市场）
+      2. strategy_voice（执行策略）
+    - 纯函数式，无状态，完全理性
     """
     
     def __init__(self, agent: 'AgentV5'):
         """
-        初始化守护神
+        初始化守护神 - AlphaZero式极简版
         
         Args:
             agent: 所属的Agent对象
         """
         self.agent = agent
         
-        # v5.1: 权重从元基因组读取（可遗传！）
-        if hasattr(agent, 'meta_genome') and agent.meta_genome is not None:
-            self.base_weights = agent.meta_genome.get_daimon_weights()
-        else:
-            # 向后兼容：默认权重
-            self.base_weights = {
-                'instinct': 1.0,          # 本能权重最高（死亡恐惧）
-                'world_signature': 0.8,   # ✨ v5.5+：世界感知（环境认知）
-                'experience': 0.7,        # 经验次之（历史教训）
-                'prophecy': 0.6,          # 先知预言（战略指导）
-                'strategy': 0.5,          # 策略分析（战术分析）
-                'genome': 0.5,            # 基因偏好（个性倾向）
-                'emotion': 0.3,           # 情绪权重最低（易受干扰）
-            }
+        # AlphaZero式：移除权重系统
+        # 只有2个voice，权重相等，简单投票即可
     
     # ==================== 主决策流程 ====================
     
@@ -128,46 +118,26 @@ class Daimon:
         Returns:
             CouncilDecision: 决策结果
         """
-        # 收集所有"声音"的投票（v5.5+：7个声音）
+        # AlphaZero式：只收集2个理性voice的投票
         all_votes = []
-        all_votes.extend(self._instinct_voice(context))
-        all_votes.extend(self._genome_voice(context))
-        all_votes.extend(self._experience_voice(context))
+        all_votes.extend(self._genome_voice(context))  # 感知市场
+        all_votes.extend(self._strategy_voice(context))  # 执行策略
         all_votes.extend(self._emotion_voice(context))
         all_votes.extend(self._strategy_voice(context))   # 策略分析（战术）
         all_votes.extend(self._prophecy_voice(context))   # 先知预言（战略）
         all_votes.extend(self._world_signature_voice(context))  # ✨ v5.5+：世界感知！
         
-        # 如果没有任何投票，默认hold
+        # AlphaZero式：如果没有投票，默认hold
         if not all_votes:
-            logger.debug(f"Agent {self.agent.agent_id} Daimon: 所有声音都未投票，默认hold")
+            logger.debug(f"Agent {self.agent.agent_id} Daimon: 无投票，默认hold")
             return CouncilDecision(
                 action='hold',
                 confidence=0.5,
                 reasoning="无明确信号，保持观望",
                 all_votes=[],
-                weights_used=self.base_weights.copy(),
+                weights_used={},  # AlphaZero式：无权重系统
                 context_snapshot=context.copy(),
             )
-        
-        # v5.2：增强可见性 - 显示各个声音的投票
-        votes_by_category = {}
-        for vote in all_votes:
-            cat = vote.voter_category
-            if cat not in votes_by_category:
-                votes_by_category[cat] = []
-            votes_by_category[cat].append(vote)
-        
-        # 特别记录本能的投票（最重要）
-        if 'instinct' in votes_by_category:
-            instinct_votes = votes_by_category['instinct']
-            logger.debug(
-                f"   🧬 本能投票: {len(instinct_votes)}票 | "
-                f"数值:[{self.agent.instinct.describe_instinct_values()}] | "
-                f"性格:{self.agent.instinct.describe_personality()}"
-            )
-            for vote in instinct_votes:
-                logger.debug(f"      → {vote.action}({vote.confidence:.0%}): {vote.reason}")
         
         # 加权汇总投票
         decision = self._tally_votes(all_votes, context)
@@ -183,16 +153,11 @@ class Daimon:
     # ==================== 五个"声音" ====================
     
     def _instinct_voice(self, context: Dict) -> List[Vote]:
-        """
-        本能声音：基于Agent的本能做出判断
+        """AlphaZero式：已移除本能voice（死亡恐惧等情绪化机制）"""
+        return []  # 不再投票
         
-        本能影响：
-        1. 死亡恐惧：资金低时强烈要求平仓
-        2. 损失厌恶：亏损时倾向止损
-        3. 风险偏好：影响开仓倾向
-        """
-        votes = []
-        instinct = self.agent.instinct
+        # 以下代码已废弃（AlphaZero式重构）
+        # instinct = self.agent.instinct
         
         capital_ratio = context.get('capital_ratio', 1.0)
         recent_pnl = context.get('recent_pnl', 0)
@@ -436,15 +401,10 @@ class Daimon:
         return votes
     
     def _experience_voice(self, context: Dict) -> List[Vote]:
-        """
-        经验声音：基于Agent的历史经验做出判断
+        """AlphaZero式：已移除经验voice（通过进化继承，不需要个体学习）"""
+        return []  # 不再投票
         
-        经验来源：
-        - PersonalInsights（如果实现了）
-        - Private Ledger的历史记录
-        
-        v5.0版本：简化实现，仅基于最近表现
-        """
+        # 以下代码已废弃
         votes = []
         
         # v5.0: 简化版，仅基于最近的盈亏模式
@@ -474,6 +434,10 @@ class Daimon:
         return votes
     
     def _emotion_voice(self, context: Dict) -> List[Vote]:
+        """AlphaZero式：已移除情绪voice（纯理性，无情绪）"""
+        return []  # 不再投票
+        
+        # 以下代码已废弃
         """
         情绪声音：基于Agent的情绪状态做出判断
         
@@ -535,60 +499,101 @@ class Daimon:
     
     def _strategy_voice(self, context: Dict) -> List[Vote]:
         """
-        策略声音：基于Agent的策略池进行市场分析
+        策略声音 - AlphaZero式极简版
         
-        策略分析流程：
-        1. 遍历Agent激活的策略
-        2. 每个策略分析市场，给出评分
-        3. 将评分转换为投票
+        基于StrategyParams的纯理性决策：
+        1. 止损/止盈（硬性规则）
+        2. 持仓时长管理
+        3. 开仓方向选择
         
-        v5.0设计：
-        - Strategy不直接决策，只提供"市场评估"
-        - 输出：bullish_score/bearish_score（0-1）
-        - Daimon综合所有因素后做最终决策
+        不再依赖：
+        - 策略池（Strategy Pool）
+        - 复杂的市场分析
         """
         votes = []
+        params = self.agent.strategy_params
         
-        # 获取策略信号
-        strategy_signals = context.get('strategy_signals', [])
+        # 获取当前状态
+        position = context.get('position', {})
+        has_position = position.get('amount', 0) != 0
+        current_side = position.get('side')
+        unrealized_pnl_pct = context.get('unrealized_pnl_pct', 0)
+        holding_periods = context.get('holding_periods', 0)
         
-        for signal in strategy_signals:
-            strategy_name = signal.get('strategy_name', 'Unknown')
-            bullish_score = signal.get('bullish_score', 0)
-            bearish_score = signal.get('bearish_score', 0)
-            confidence = signal.get('confidence', 0.5)
-            reasoning = signal.get('reasoning', '')
+        # ========== 1. 止损逻辑（最优先） ==========
+        if has_position and unrealized_pnl_pct < -params.stop_loss_threshold:
+            votes.append(Vote(
+                action='close',
+                confidence=0.95,
+                voter_category='strategy',
+                reason=f"止损: 亏损{unrealized_pnl_pct:.1%} > 阈值{params.stop_loss_threshold:.1%}"
+            ))
+            return votes  # 止损优先，立即返回
+        
+        # ========== 2. 止盈逻辑 ==========
+        if has_position and unrealized_pnl_pct > params.take_profit_threshold:
+            votes.append(Vote(
+                action='close',
+                confidence=0.90,
+                voter_category='strategy',
+                reason=f"止盈: 盈利{unrealized_pnl_pct:.1%} > 阈值{params.take_profit_threshold:.1%}"
+            ))
+        
+        # ========== 3. 持仓时长管理 ==========
+        expected_holding = params.holding_preference * 50  # 0-50个周期
+        if has_position and holding_periods > expected_holding:
+            votes.append(Vote(
+                action='close',
+                confidence=0.70,
+                voter_category='strategy',
+                reason=f"持仓到期: {holding_periods} > {expected_holding:.0f}周期"
+            ))
+        
+        # ========== 4. 开仓方向选择 ==========
+        if not has_position:
+            market_trend = context.get('market_data', {}).get('trend', 'neutral')
             
-            # 如果看涨评分高
-            if bullish_score > 0.6:
-                votes.append(Vote(
-                    action='buy',
-                    confidence=bullish_score * confidence,
-                    voter_category='strategy',
-                    reason=f"{strategy_name}: {reasoning} (看涨{bullish_score:.1%})"
-                ))
-            
-            # 如果看跌评分高
-            if bearish_score > 0.6:
-                votes.append(Vote(
-                    action='sell',
-                    confidence=bearish_score * confidence,
-                    voter_category='strategy',
-                    reason=f"{strategy_name}: {reasoning} (看跌{bearish_score:.1%})"
-                ))
-            
-            # 如果都不高，可能建议观望
-            if bullish_score < 0.5 and bearish_score < 0.5:
-                votes.append(Vote(
-                    action='hold',
-                    confidence=confidence * 0.6,
-                    voter_category='strategy',
-                    reason=f"{strategy_name}: {reasoning} (震荡)"
-                ))
+            # 基于trend_following_strength选择顺势或逆势
+            if params.trend_following_strength > 0.5:
+                # 顺势策略
+                if market_trend == 'bullish' and params.directional_bias < 0.7:
+                    votes.append(Vote(
+                        action='buy',
+                        confidence=params.trend_following_strength,
+                        voter_category='strategy',
+                        reason=f"顺势做多"
+                    ))
+                elif market_trend == 'bearish' and params.directional_bias > 0.3:
+                    votes.append(Vote(
+                        action='short',
+                        confidence=params.trend_following_strength,
+                        voter_category='strategy',
+                        reason=f"顺势做空"
+                    ))
+            else:
+                # 逆势策略（均值回归）
+                if market_trend == 'bullish' and params.directional_bias > 0.3:
+                    votes.append(Vote(
+                        action='short',
+                        confidence=1 - params.trend_following_strength,
+                        voter_category='strategy',
+                        reason=f"逆势做空"
+                    ))
+                elif market_trend == 'bearish' and params.directional_bias < 0.7:
+                    votes.append(Vote(
+                        action='buy',
+                        confidence=1 - params.trend_following_strength,
+                        voter_category='strategy',
+                        reason=f"逆势做多"
+                    ))
         
         return votes
     
     def _prophecy_voice(self, context: Dict) -> List[Vote]:
+        """AlphaZero式：已移除预言voice（WorldSignature已包含所有市场信息）"""
+        return []  # 不再投票
+        
+        # 以下代码已废弃
         """
         预言声音：基于Mastermind的预言（战略指导）
         

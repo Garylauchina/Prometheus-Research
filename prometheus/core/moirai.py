@@ -326,10 +326,9 @@ class Moirai(Supervisor):
         
         for agent in self.agents:
             try:
-                # Agent自主判断
-                if agent.should_commit_suicide():
-                    to_eliminate.append((agent, "自杀"))
-                elif agent.current_capital < agent.initial_capital * 0.1:
+                # AlphaZero式：只基于客观指标判断淘汰
+                # 移除"自杀"机制，由EvolutionManager强制淘汰
+                if agent.current_capital < agent.initial_capital * 0.1:
                     to_eliminate.append((agent, "资金耗尽"))
                     
             except Exception as e:
