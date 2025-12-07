@@ -283,7 +283,7 @@ class V6Facade:
         overall_score = (
             min(active_families / min(50, len(agents)), 1.0) * 0.3 +
             genome_diversity * 0.35 +
-            instinct_diversity * 0.35
+            strategy_diversity * 0.35
         )
         
         logger.info(f"   🎯 创世质量评分: {overall_score:.1%}")
