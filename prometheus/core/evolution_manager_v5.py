@@ -208,8 +208,9 @@ class EvolutionManagerV5:
                 continue
         
         # v5.2：种群波动分析
-        actual_breeding_ratio = len(new_agents) / eliminate_count
+        actual_breeding_ratio = len(new_agents) / eliminate_count if eliminate_count > 0 else 1.0
         population_change = len(new_agents) - eliminate_count  # 正数=增长，负数=萎缩
+        emergency_threshold = int(eliminate_count * 0.9)  # 90%阈值
         
         if len(new_agents) >= target_replication_count:
             # 达到目标
@@ -607,8 +608,8 @@ class EvolutionManagerV5:
         child_generation = elite.generation + 1
         
         # 1. 克隆Lineage
-        child_lineage = elite.lineage.clone()
-        child_lineage.family_id = elite.lineage.family_id
+        import copy
+        child_lineage = copy.deepcopy(elite.lineage)
         
         # 2. 克隆Genome并变异
         child_genome = elite.genome.clone()
