@@ -267,9 +267,9 @@ class V6Facade:
             if hasattr(agent, 'strategy_params'):
                 sp = agent.strategy_params
                 strategy_vectors.append((
-                    round(sp.position_sizing_aggressiveness, 1),
-                    round(sp.holding_period_preference, 1),
-                    round(sp.risk_tolerance, 1)
+                    round(sp.position_size_base, 1),
+                    round(sp.holding_preference, 1),
+                    round(sp.directional_bias, 1)
                 ))
         
         unique_strategies = len(set(strategy_vectors))

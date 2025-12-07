@@ -621,14 +621,16 @@ class EvolutionManagerV5:
         
         # 3. 克隆StrategyParams并变异
         from prometheus.core.strategy_params import StrategyParams
+        sp = elite.strategy_params
         child_strategy_params = StrategyParams(
-            position_sizing_aggressiveness=elite.strategy_params.position_sizing_aggressiveness,
-            holding_period_preference=elite.strategy_params.holding_period_preference,
-            risk_tolerance=elite.strategy_params.risk_tolerance,
-            profit_taking_threshold=elite.strategy_params.profit_taking_threshold,
-            loss_cutting_threshold=elite.strategy_params.loss_cutting_threshold,
-            exploration_vs_exploitation=elite.strategy_params.exploration_vs_exploitation,
-            generation=child_generation
+            position_size_base=sp.position_size_base,
+            holding_preference=sp.holding_preference,
+            directional_bias=sp.directional_bias,
+            stop_loss_threshold=sp.stop_loss_threshold,
+            take_profit_threshold=sp.take_profit_threshold,
+            trend_following_strength=sp.trend_following_strength,
+            generation=child_generation,
+            parent_params=(sp.to_dict(),)  # 记录父代参数
         )
         child_strategy_params.mutate(mutation_rate=mutation_rate)
         

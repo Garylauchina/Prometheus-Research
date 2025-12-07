@@ -200,7 +200,7 @@ class Moirai(Supervisor):
                     f"      ✅ {agent_id} | "
                     f"家族{family_id} | "
                     f"策略{[s.name for s in agent.strategy_pool]} | "
-                    f"参数:{agent.strategy_params.describe_strategy_profile() if hasattr(agent, 'strategy_params') else 'N/A'}"
+                    f"参数:{agent.strategy_params.get_display_string() if hasattr(agent, 'strategy_params') else 'N/A'}"
                 )
                 
             except Exception as e:
