@@ -291,25 +291,42 @@ class Daimon:
         has_position = position.get('amount', 0) != 0
         position_side = position.get('side')  # 'long' or 'short'
         
-        # 1. 趋势偏好（激进版：移除限制！）
+        # 1. 趋势偏好（修复版：支持加仓！）
         market_trend = context.get('market_data', {}).get('trend', 'neutral')
         
-        # ⚔️ 自由演化：移除trend_pref限制，让所有Agent都能开仓
         if not has_position:
-            # 无持仓：市场趋势明确时开仓
+            # 无持仓：开新仓
             if market_trend == 'bullish':
                 votes.append(Vote(
                     action='buy',
-                    confidence=0.75,  # 固定高置信度
+                    confidence=0.80,
                     voter_category='genome',
-                    reason=f"自由演化: 牛市做多"
+                    reason=f"开仓做多"
                 ))
             elif market_trend == 'bearish':
                 votes.append(Vote(
                     action='short',
-                    confidence=0.75,  # 固定高置信度
+                    confidence=0.80,
                     voter_category='genome',
-                    reason=f"自由演化: 熊市做空"
+                    reason=f"开仓做空"
+                ))
+        else:
+            # ✨ 关键修复：有持仓也可以加仓！
+            if position_side == 'long' and market_trend == 'bullish':
+                # 多头 + 牛市 → 加仓做多！
+                votes.append(Vote(
+                    action='buy',
+                    confidence=0.65,
+                    voter_category='genome',
+                    reason=f"加仓做多"
+                ))
+            elif position_side == 'short' and market_trend == 'bearish':
+                # 空头 + 熊市 → 加仓做空！
+                votes.append(Vote(
+                    action='short',
+                    confidence=0.65,
+                    voter_category='genome',
+                    reason=f"加仓做空"
                 ))
             else:
                 # ✅ 有持仓：检查趋势是否与持仓方向一致
@@ -545,27 +562,43 @@ class Daimon:
                 reason=f"持仓到期: {holding_periods} > {expected_holding:.0f}周期"
             ))
         
-        # ========== 4. 开仓方向选择（激进版：移除限制！）==========
+        # ========== 4. 开仓/加仓方向选择（修复版：支持加仓！）==========
+        market_trend = context.get('market_data', {}).get('trend', 'neutral')
+        
         if not has_position:
-            market_trend = context.get('market_data', {}).get('trend', 'neutral')
-            
-            # ⚔️ 自由演化：只要趋势明确，就开仓！
-            # 移除所有参数限制，让所有Agent都有机会参与！
+            # 无持仓：开新仓
             if market_trend == 'bullish':
                 votes.append(Vote(
                     action='buy',
-                    confidence=0.80,  # 高置信度
+                    confidence=0.85,  # 高置信度
                     voter_category='strategy',
-                    reason=f"自由演化: 牛市做多"
+                    reason=f"开仓做多"
                 ))
             elif market_trend == 'bearish':
                 votes.append(Vote(
                     action='short',
-                    confidence=0.80,  # 高置信度
+                    confidence=0.85,  # 高置信度
                     voter_category='strategy',
-                    reason=f"自由演化: 熊市做空"
+                    reason=f"开仓做空"
                 ))
-            # neutral时不开仓（观望）
+        else:
+            # ✨ 关键修复：有持仓也可以加仓！
+            if current_side == 'long' and market_trend == 'bullish':
+                # 多头 + 牛市 → 加仓做多！
+                votes.append(Vote(
+                    action='buy',
+                    confidence=0.70,  # 加仓confidence稍低
+                    voter_category='strategy',
+                    reason=f"加仓做多"
+                ))
+            elif current_side == 'short' and market_trend == 'bearish':
+                # 空头 + 熊市 → 加仓做空！
+                votes.append(Vote(
+                    action='short',
+                    confidence=0.70,
+                    voter_category='strategy',
+                    reason=f"加仓做空"
+                ))
         
         return votes
     
