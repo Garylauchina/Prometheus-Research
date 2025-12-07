@@ -612,7 +612,7 @@ class EvolutionManagerV5:
         child_lineage = copy.deepcopy(elite.lineage)
         
         # 2. 克隆Genome并变异
-        child_genome = elite.genome.clone()
+        child_genome = copy.deepcopy(elite.genome)
         child_genome.mutate(mutation_rate=mutation_rate)
         
         # 3. 克隆StrategyParams并变异
@@ -633,7 +633,7 @@ class EvolutionManagerV5:
         # 4. 克隆MetaGenome（如果有）
         child_meta_genome = None
         if hasattr(elite, 'meta_genome') and elite.meta_genome:
-            child_meta_genome = elite.meta_genome.clone()
+            child_meta_genome = copy.deepcopy(elite.meta_genome)
             child_meta_genome.mutate(mutation_rate=mutation_rate)
         
         # 5. 创建子代

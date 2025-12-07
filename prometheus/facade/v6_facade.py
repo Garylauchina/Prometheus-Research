@@ -996,16 +996,16 @@ def run_scenario(mode: str,
         "seed_config": facade.seed_config  # ✅ 保存种子配置
     })
     facade.run(total_cycles=total_cycles, market_feed=market_feed, evo_interval=evo_interval)
-    # 结束时落盘最后一条多样性指标
-    if facade.metrics_history:
-        m = facade.metrics_history[-1]
-        facade.save_metrics({
-            "cycle": m.cycle,
-            "diversity_score": m.diversity_score,
-            "gene_entropy": m.gene_entropy,
-            "lineage_entropy": m.lineage_entropy,
-            "active_families": m.active_families
-        })
+    # AlphaZero式：移除多样性指标记录
+    # if facade.metrics_history:
+    #     m = facade.metrics_history[-1]
+    #     facade.save_metrics({
+    #         "cycle": m.cycle,
+    #         "diversity_score": m.diversity_score,
+    #         "gene_entropy": m.gene_entropy,
+    #         "lineage_entropy": m.lineage_entropy,
+    #         "active_families": m.active_families
+    #     })
     return facade
 
 
@@ -1119,7 +1119,8 @@ def run_seed_experiment(
                 "final_agents": summary.get("agent_count", 0),
                 "avg_capital": summary.get("avg_capital", 0),
                 "total_trades": summary.get("total_trades", 0),
-                "diversity_score": facade.metrics_history[-1].diversity_score if facade.metrics_history else 0,
+                # AlphaZero式：移除diversity_score
+                # "diversity_score": facade.metrics_history[-1].diversity_score if facade.metrics_history else 0,
                 "run_dir": str(facade.run_dir) if facade.run_dir else None
             }
             
