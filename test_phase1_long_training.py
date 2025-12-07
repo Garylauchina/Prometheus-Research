@@ -112,24 +112,31 @@ def run_phase1():
         # 获取最终状态
         facade = result
         moirai = facade.moirai
-        alive_agents = [a for a in moirai.agents if a.state.name != 'DEAD']
+        
+        # 统计（使用state判断存活）
+        from prometheus.core.agent_v5 import AgentState
+        alive_agents = len([a for a in moirai.agents if a.state != AgentState.DEAD])
+        total_trades = sum(len(a.account.private_ledger.trade_history) 
+                         for a in moirai.agents if hasattr(a, 'account') and a.account)
         
         # 计算系统收益
-        total_capital = sum(a.current_capital for a in alive_agents)
-        initial_capital = agent_count * 10000
-        system_return = (total_capital - initial_capital) / initial_capital * 100
-        
-        # 统计交易（从公共账簿获取）
-        total_trades = len(facade.public_ledger.trade_history)
+        agent_count_final = len(moirai.agents)
+        system_initial = agent_count_final * 10000.0
+        current_price = prices[min(total_cycles - 1, len(prices) - 1)]
+        system_current = sum(
+            a.account.private_ledger.virtual_capital + a.calculate_unrealized_pnl(current_price)
+            for a in moirai.agents if hasattr(a, 'account') and a.account
+        )
+        system_return = (system_current - system_initial) / system_initial * 100
         
         logger.info("")
         logger.info("=" * 80)
         logger.info(f"✅ 训练完成 (Seed: {seed})")
         logger.info("=" * 80)
-        logger.info(f"   存活Agent: {len(alive_agents)}/{agent_count}")
+        logger.info(f"   存活Agent: {alive_agents}/{agent_count_final}")
         logger.info(f"   总交易数: {total_trades}")
         logger.info(f"   系统收益: {system_return:+.2f}%")
-        logger.info(f"   人均交易: {total_trades/len(alive_agents):.1f}笔")
+        logger.info(f"   人均交易: {total_trades/agent_count_final:.1f}笔" if agent_count_final > 0 else "   人均交易: 0.0笔")
         logger.info("")
         
         # 保存结果
@@ -141,10 +148,11 @@ def run_phase1():
                 "full_genome_unlock": True
             },
             "result": {
-                "alive_agents": len(alive_agents),
+                "alive_agents": alive_agents,
+                "total_agents": agent_count_final,
                 "total_trades": total_trades,
                 "system_return": system_return,
-                "avg_trades_per_agent": total_trades / len(alive_agents) if alive_agents else 0,
+                "avg_trades_per_agent": total_trades / agent_count_final if agent_count_final > 0 else 0,
                 "status": "success"
             }
         }
