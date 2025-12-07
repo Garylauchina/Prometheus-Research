@@ -195,19 +195,14 @@ class EvolutionManagerV5:
                 # 日志
                 lineage_type = child.lineage.classify_purity()
                 logger.info(
-                    f"   👶 {child.agent_id} | "
-                    f"父母: {parent1.agent_id} × {parent2.agent_id} | "
+                    f"   🦠 {child.agent_id} | "
+                    f"精英父本: {elite.agent_id} | "
                     f"第{child.generation}代 | "
                     f"{lineage_type}"
                 )
-                # v5.2：显示继承的本能
-                logger.debug(
-                    f"      本能: [{child.instinct.describe_instinct_values()}] | "
-                    f"性格: {child.instinct.describe_personality()}"
-                )
                 
             except Exception as e:
-                logger.error(f"   ❌ 繁殖失败（尝试{attempts}）: {e}")
+                logger.error(f"   ❌ 繁殖失败（尝试{i+1}/{target_replication_count}）: {e}")
                 import traceback
                 logger.error(traceback.format_exc())
                 continue
