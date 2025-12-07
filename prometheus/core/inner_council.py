@@ -328,41 +328,31 @@ class Daimon:
                     voter_category='genome',
                     reason=f"加仓做空"
                 ))
-            else:
-                # ✅ 有持仓：检查趋势是否与持仓方向一致
-                if position_side == 'long' and market_trend == 'bearish':
-                    # 多头 + 熊市 → 建议平仓（但不强制）
-                    votes.append(Vote(
-                        action='sell',
-                        confidence=trend_pref * 0.5,  # 降低confidence，不强制
-                        voter_category='genome',
-                        reason=f"趋势反转({market_trend}): 考虑平多"
-                    ))
-                elif position_side == 'short' and market_trend == 'bullish':
-                    # 空头 + 牛市 → 建议平仓（但不强制）
-                    votes.append(Vote(
-                        action='cover',
-                        confidence=trend_pref * 0.5,
-                        voter_category='genome',
-                        reason=f"趋势反转({market_trend}): 考虑平空"
-                    ))
-                elif (position_side == 'long' and market_trend == 'bullish') or \
-                     (position_side == 'short' and market_trend == 'bearish'):
-                    # ✅ 趋势与持仓一致 → 强烈建议hold！
-                    votes.append(Vote(
-                        action='hold',
-                        confidence=0.9,  # 高置信度！
-                        voter_category='genome',
-                        reason=f"趋势与持仓一致({market_trend}+{position_side}): 坚定持有"
-                    ))
-        elif market_trend != 'neutral' and not has_position:
-            # ✅ 只在无持仓时响应趋势
-            votes.append(Vote(
-                action='buy' if market_trend == 'bullish' else 'short',
-                confidence=0.3,
-                voter_category='genome',
-                reason=f"市场趋势明确({market_trend}): 跟随"
-            ))
+            elif position_side == 'long' and market_trend == 'bearish':
+                # 多头 + 熊市 → 建议平仓
+                votes.append(Vote(
+                    action='close',
+                    confidence=0.70,
+                    voter_category='genome',
+                    reason=f"趋势反转: 多头遇熊市"
+                ))
+            elif position_side == 'short' and market_trend == 'bullish':
+                # 空头 + 牛市 → 建议平仓
+                votes.append(Vote(
+                    action='close',
+                    confidence=0.70,
+                    voter_category='genome',
+                    reason=f"趋势反转: 空头遇牛市"
+                ))
+            elif (position_side == 'long' and market_trend == 'bullish') or \
+                 (position_side == 'short' and market_trend == 'bearish'):
+                # 持仓方向与趋势一致 → 建议持有
+                votes.append(Vote(
+                    action='hold',
+                    confidence=0.85,
+                    voter_category='genome',
+                    reason=f"趋势一致: 继续持有"
+                ))
         
         # 2. 均值回归偏好
         mean_reversion = active_params.get('mean_reversion', 0.5)
