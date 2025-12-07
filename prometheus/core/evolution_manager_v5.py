@@ -187,26 +187,27 @@ class EvolutionManagerV5:
             self.moirai._atropos_eliminate_agent(agent, "进化淘汰")
             self.total_deaths += 1
         
-        # 3. 🧵 Clotho纺织新生命（AlphaZero式：精英配对）
-        logger.info(f"\n🧵 Clotho开始纺织新生命...")
+        # 3. 🦠 病毒式复制（Viral Replication）
+        logger.info(f"\n🦠 病毒式复制：精英自我克隆 + 随机变异...")
         
         new_agents = []
-        target_breeding_count = eliminate_count  # 简单：淘汰多少，繁殖多少
+        target_replication_count = eliminate_count  # 淘汰多少，复制多少
         
-        logger.info(f"📊 目标繁殖数: {target_breeding_count}")
+        logger.info(f"📊 目标复制数: {target_replication_count}")
+        logger.info(f"🧬 变异率: {mutation_rate:.1%}")
         
-        # AlphaZero式：简单繁殖（随机选择精英配对）
-        for i in range(target_breeding_count):
+        # 🦠 病毒式复制：从精英中选择，克隆并变异
+        for i in range(target_replication_count):
             try:
-                # 从精英中随机选择两个父母
-                parent1, parent2 = self._select_parents_simple(elite_agents)
+                # 1. 选择一个精英（按fitness加权随机）
+                elite = self._select_elite_weighted(elite_agents)
                 
-                if not parent1 or not parent2:
-                    logger.warning(f"   无法找到父母，跳过本次繁殖")
+                if not elite:
+                    logger.warning(f"   无法选择精英，跳过本次复制")
                     continue
                 
-                # 纺织新Agent（固定变异率0.1）
-                child = self._clotho_weave_child(parent1, parent2, mutation_rate=mutation_rate)
+                # 2. 病毒式复制：克隆 + 变异
+                child = self._viral_replicate(elite, mutation_rate=mutation_rate)
                 
                 new_agents.append(child)
                 self.total_births += 1
@@ -576,6 +577,133 @@ class EvolutionManagerV5:
         rankings.sort(key=lambda x: x[1], reverse=True)
         
         return rankings
+    
+    def _select_elite_weighted(self, elite_agents: List[Tuple[AgentV5, float]]) -> Optional[AgentV5]:
+        """
+        🦠 病毒式复制：按fitness加权选择精英
+        
+        规则：fitness越高，被选中概率越大（轮盘赌选择）
+        
+        Args:
+            elite_agents: 精英Agent列表 [(agent, fitness), ...]
+        
+        Returns:
+            被选中的精英Agent
+        """
+        if not elite_agents:
+            return None
+        
+        agents = [agent for agent, _ in elite_agents]
+        fitnesses = [fitness for _, fitness in elite_agents]
+        
+        # 如果所有fitness都<=0，均等概率选择
+        if all(f <= 0 for f in fitnesses):
+            return random.choice(agents)
+        
+        # 调整负数fitness为0
+        fitnesses = [max(0, f) for f in fitnesses]
+        total = sum(fitnesses)
+        
+        if total == 0:
+            return random.choice(agents)
+        
+        # 轮盘赌选择
+        probabilities = [f / total for f in fitnesses]
+        return random.choices(agents, weights=probabilities, k=1)[0]
+    
+    def _viral_replicate(self, elite: AgentV5, mutation_rate: float) -> AgentV5:
+        """
+        🦠 病毒式复制：克隆精英 + 随机变异
+        
+        流程：
+        1. 克隆所有基因（Genome, StrategyParams, Lineage）
+        2. 应用随机变异
+        3. 创建新Agent
+        
+        Args:
+            elite: 被复制的精英
+            mutation_rate: 变异率
+        
+        Returns:
+            复制的子代Agent
+        """
+        child_id = f"agent_{self.moirai.agent_birth_counter:04d}"
+        self.moirai.agent_birth_counter += 1
+        child_generation = elite.generation + 1
+        
+        # 1. 克隆Lineage
+        child_lineage = elite.lineage.clone()
+        child_lineage.family_id = elite.lineage.family_id
+        
+        # 2. 克隆Genome并变异
+        child_genome = elite.genome.clone()
+        child_genome.mutate(mutation_rate=mutation_rate)
+        
+        # 3. 克隆StrategyParams并变异
+        from prometheus.core.strategy_params import StrategyParams
+        child_strategy_params = StrategyParams(
+            position_sizing_aggressiveness=elite.strategy_params.position_sizing_aggressiveness,
+            holding_period_preference=elite.strategy_params.holding_period_preference,
+            risk_tolerance=elite.strategy_params.risk_tolerance,
+            profit_taking_threshold=elite.strategy_params.profit_taking_threshold,
+            loss_cutting_threshold=elite.strategy_params.loss_cutting_threshold,
+            exploration_vs_exploitation=elite.strategy_params.exploration_vs_exploitation,
+            generation=child_generation
+        )
+        child_strategy_params.mutate(mutation_rate=mutation_rate)
+        
+        # 4. 克隆MetaGenome（如果有）
+        child_meta_genome = None
+        if hasattr(elite, 'meta_genome') and elite.meta_genome:
+            child_meta_genome = elite.meta_genome.clone()
+            child_meta_genome.mutate(mutation_rate=mutation_rate)
+        
+        # 5. 创建子代
+        child = AgentV5(
+            agent_id=child_id,
+            initial_capital=elite.initial_capital,
+            lineage=child_lineage,
+            genome=child_genome,
+            strategy_params=child_strategy_params,
+            generation=child_generation,
+            meta_genome=child_meta_genome
+        )
+        
+        logger.debug(f"   🦠 {elite.agent_id[:8]} → {child_id[:8]} (G{child_generation})")
+        self.total_births += 1
+        return child
+    
+    def _select_parents_simple(
+        self, 
+        elite_agents: List[Tuple[AgentV5, float]]
+    ) -> Tuple[Optional[AgentV5], Optional[AgentV5]]:
+        """
+        AlphaZero式极简父母选择
+        
+        规则：
+        1. 从精英中随机选择两个
+        2. 确保不是同一个Agent
+        
+        Args:
+            elite_agents: 精英Agent列表
+        
+        Returns:
+            (parent1, parent2): 父母Agent
+        """
+        if not elite_agents or len(elite_agents) < 2:
+            return None, None
+        
+        # 随机选择两个不同的精英
+        elite_only = [agent for agent, _ in elite_agents]
+        parent1 = random.choice(elite_only)
+        
+        # 确保parent2不是parent1
+        available_parents = [a for a in elite_only if a.agent_id != parent1.agent_id]
+        if not available_parents:
+            return parent1, parent1  # 如果只有1个精英，只能自交
+        
+        parent2 = random.choice(available_parents)
+        return parent1, parent2
     
     def _select_parents_relaxed(
         self, 
