@@ -613,7 +613,7 @@ class EvolutionManagerV5:
         
         # 2. 克隆Genome并变异
         child_genome = copy.deepcopy(elite.genome)
-        child_genome.mutate(mutation_rate=mutation_rate)
+        child_genome.mutate(mutation_rate=mutation_rate, generation=child_generation)
         
         # 3. 克隆StrategyParams并变异
         from prometheus.core.strategy_params import StrategyParams
@@ -634,7 +634,11 @@ class EvolutionManagerV5:
         child_meta_genome = None
         if hasattr(elite, 'meta_genome') and elite.meta_genome:
             child_meta_genome = copy.deepcopy(elite.meta_genome)
-            child_meta_genome.mutate(mutation_rate=mutation_rate)
+            # MetaGenome的mutate可能不需要generation参数，捕获异常
+            try:
+                child_meta_genome.mutate(mutation_rate=mutation_rate, generation=child_generation)
+            except TypeError:
+                child_meta_genome.mutate(mutation_rate=mutation_rate)
         
         # 5. 创建子代
         child = AgentV5(
