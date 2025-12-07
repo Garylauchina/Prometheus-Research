@@ -30,7 +30,8 @@ from .supervisor import Supervisor, AgentHealthReport
 from .agent_v5 import AgentV5, AgentState, DeathReason
 from .lineage import LineageVector
 from .genome import GenomeVector
-from .instinct import Instinct
+# AlphaZero式：移除Instinct
+# from .instinct import Instinct
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +200,7 @@ class Moirai(Supervisor):
                     f"      ✅ {agent_id} | "
                     f"家族{family_id} | "
                     f"策略{[s.name for s in agent.strategy_pool]} | "
-                    f"本能:{agent.instinct.describe_personality()}"
+                    f"参数:{agent.strategy_params.describe_strategy_profile() if hasattr(agent, 'strategy_params') else 'N/A'}"
                 )
                 
             except Exception as e:

@@ -261,23 +261,23 @@ class V6Facade:
         if genome_diversity < 0.3:
             logger.warning(f"   ⚠️ 基因多样性偏低: {genome_diversity:.1%}（建议>30%）")
         
-        # 4. 本能多样性检查
-        instinct_vectors = []
+        # 4. 策略参数多样性检查（AlphaZero式）
+        strategy_vectors = []
         for agent in agents:
-            if hasattr(agent, 'instinct'):
-                inst = agent.instinct
-                instinct_vectors.append((
-                    round(inst.fear_of_death, 1),
-                    round(inst.risk_appetite, 1),
-                    round(inst.loss_aversion, 1)
+            if hasattr(agent, 'strategy_params'):
+                sp = agent.strategy_params
+                strategy_vectors.append((
+                    round(sp.position_sizing_aggressiveness, 1),
+                    round(sp.holding_period_preference, 1),
+                    round(sp.risk_tolerance, 1)
                 ))
         
-        unique_instincts = len(set(instinct_vectors))
-        instinct_diversity = unique_instincts / len(agents) if len(agents) > 0 else 0
-        logger.info(f"   🧠 本能多样性: {instinct_diversity:.1%} ({unique_instincts}/{len(agents)}个独特本能)")
+        unique_strategies = len(set(strategy_vectors))
+        strategy_diversity = unique_strategies / len(agents) if len(agents) > 0 else 0
+        logger.info(f"   🧠 策略多样性: {strategy_diversity:.1%} ({unique_strategies}/{len(agents)}个独特策略)")
         
-        if instinct_diversity < 0.3:
-            logger.warning(f"   ⚠️ 本能多样性偏低: {instinct_diversity:.1%}（建议>30%）")
+        if strategy_diversity < 0.3:
+            logger.warning(f"   ⚠️ 策略多样性偏低: {strategy_diversity:.1%}（建议>30%）")
         
         # 5. 整体评估
         overall_score = (
@@ -419,7 +419,8 @@ class V6Facade:
                 elif hasattr(self.evolution, "evolve_population"):
                     self.evolution.evolve_population()
         
-        return metrics
+        # AlphaZero式：不再返回metrics
+        return None
 
     # ========== 数据增强（统一封装）==========
     def _enrich_market_data(self, market_data: Dict, cycle_count: int) -> Dict:
@@ -658,14 +659,15 @@ class V6Facade:
         self.evo_interval = max(1, evo_interval)
         for c in range(1, total_cycles + 1):
             md, bb = ({}, {}) if market_feed is None else market_feed(c)
-            metrics = self.run_cycle(
+            result = self.run_cycle(
                 market_data=md, 
                 bulletins=bb, 
                 cycle_count=c,
                 scenario=self.scenario  # ✅ 传递场景类型
             )
-            if metrics:
-                logger.debug(f"cycle {c}: diversity_score={metrics.diversity_score:.3f}")
+            # AlphaZero式：不再记录diversity metrics
+            # if result:
+            #     logger.debug(f"cycle {c}: diversity_score={result.diversity_score:.3f}")
 
     def reconcile(self):
         """
