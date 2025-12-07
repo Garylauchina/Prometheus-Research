@@ -561,6 +561,9 @@ class AgentV5:
         position_size = self.current_capital * max_position_pct * guidance.confidence
         amount = position_size / current_price if current_price > 0 else 0
         
+        # 🚀 杠杆设置（实验性）
+        leverage = 3.0  # 3x杠杆
+        
         return {
             'agent_id': self.agent_id,
             'action': action,
@@ -568,6 +571,7 @@ class AgentV5:
             'confidence': guidance.confidence,
             'reasoning': guidance.reasoning,
             'strategy': self.current_strategy_name,
+            'leverage': leverage,  # ✨ 新增：杠杆
         }
     
     # ==================== 状态更新 ====================
