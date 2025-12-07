@@ -24,6 +24,40 @@ import json
 logger = logging.getLogger(__name__)
 
 
+# ============================================================================
+# 自定义异常 - 账簿不一致错误（三大铁律第3关）
+# ============================================================================
+class LedgerInconsistencyError(Exception):
+    """
+    账簿不一致错误
+    
+    每笔交易后自动对账，发现不一致立即抛出此异常
+    这是三大铁律第3关的守护机制！
+    """
+    def __init__(self, agent_id: str, issues: list, details: dict = None):
+        self.agent_id = agent_id
+        self.issues = issues
+        self.details = details or {}
+        
+        message = f"\n{'='*80}\n"
+        message += f"❌ 账簿不一致错误 - Agent: {agent_id}\n"
+        message += f"{'='*80}\n"
+        message += "检测到以下问题：\n"
+        for i, issue in enumerate(issues, 1):
+            message += f"  {i}. {issue}\n"
+        
+        if details:
+            message += f"\n详细信息：\n"
+            for key, value in details.items():
+                message += f"  {key}: {value}\n"
+        
+        message += f"{'='*80}\n"
+        message += "⚠️ 这是三大铁律第3关的守护！账簿一致性是系统生命线！\n"
+        message += f"{'='*80}\n"
+        
+        super().__init__(message)
+
+
 # ========== 数据类定义 ==========
 
 @dataclass
@@ -40,11 +74,17 @@ class TradeRecord:
     is_real: bool = True  # True=实际交易, False=虚拟交易
     position_side: Optional[str] = None  # 'long' or 'short' (双向持仓模式)
     okx_order_id: Optional[str] = None  # OKX订单ID（用于精确对账）
+    inst_id: Optional[str] = "BTC-USDT-SWAP"  # 标的
+    reduce_only: bool = False
+    closed: bool = False  # 是否为平仓交易
+    closed_at: Optional[datetime] = None
     
     def to_dict(self):
         """转为字典（用于序列化）"""
         d = asdict(self)
         d['timestamp'] = self.timestamp.isoformat()
+        if d.get('closed_at'):
+            d['closed_at'] = d['closed_at'].isoformat()
         return d
 
 
@@ -57,6 +97,9 @@ class PositionRecord:
     entry_price: float
     entry_time: datetime
     confidence: float
+    closed: bool = False
+    closed_at: Optional[datetime] = None
+    closed_pnl: Optional[float] = None
     
     # OKX 交易费率（Taker市价单）
     TAKER_FEE_RATE: float = 0.0005  # 0.05%
@@ -118,6 +161,7 @@ class Role(Enum):
     """角色定义"""
     MASTERMIND = "mastermind"
     SUPERVISOR = "supervisor"
+    MOIRAI = "moirai"  # ✅ V6新增：命运三女神
     AGENT = "agent"
 
 
@@ -589,7 +633,8 @@ class LedgerReconciler:
                 side='long',
                 amount=okx_amount,
                 entry_price=okx_entry_price,
-                opened_at=datetime.now()
+                opened_at=datetime.now(),
+                confidence=1.0
             )
         else:
             private_ledger.position = None
@@ -636,7 +681,8 @@ class LedgerReconciler:
                 side='long',
                 amount=long_amount,
                 entry_price=avg_long_price,
-                entry_time=datetime.now()
+                entry_time=datetime.now(),
+                confidence=1.0
             )
             results.append(f"多头{long_amount:.4f}@${avg_long_price:.2f}")
         else:
@@ -654,7 +700,8 @@ class LedgerReconciler:
                 side='short',
                 amount=short_amount,
                 entry_price=avg_short_price,
-                entry_time=datetime.now()
+                entry_time=datetime.now(),
+                confidence=1.0
             )
             results.append(f"空头{short_amount:.4f}@${avg_short_price:.2f}")
         else:
@@ -775,7 +822,8 @@ class LedgerReconciler:
                 side='long',
                 amount=long_amount,
                 entry_price=avg_price,
-                entry_time=datetime.now()
+                entry_time=datetime.now(),
+                confidence=1.0
             )
             results.append(f"重建多头{long_amount:.4f}")
         
@@ -788,7 +836,8 @@ class LedgerReconciler:
                 side='short',
                 amount=short_amount,
                 entry_price=avg_price,
-                entry_time=datetime.now()
+                entry_time=datetime.now(),
+                confidence=1.0
             )
             results.append(f"重建空头{short_amount:.4f}")
         
@@ -938,12 +987,12 @@ class PrivateLedger:
                 raise AccessDeniedException(
                     f"Agent {caller_id} 无权修改 {self._owner_id} 的私有账簿"
                 )
-        elif caller_role == Role.SUPERVISOR:
-            # Supervisor通过AgentAccountSystem间接修改（系统操作）
+        elif caller_role in [Role.SUPERVISOR, Role.MOIRAI]:
+            # ✅ V6：Supervisor或Moirai通过AgentAccountSystem间接修改（系统操作）
             # caller_id=='system' 表示这是系统操作，允许
             if caller_id != 'system':
                 raise AccessDeniedException(
-                    "Supervisor 只能通过AgentAccountSystem修改私有账簿"
+                    f"{caller_role.value} 只能通过AgentAccountSystem修改私有账簿"
                 )
         elif caller_role == Role.MASTERMIND:
             # Mastermind无权访问私有账簿
@@ -1099,7 +1148,7 @@ class PrivateLedger:
     
     # ========== 交易记录（Agent和Supervisor都可以调用）==========
     
-    def record_buy(self, amount: float, price: float, confidence: float, is_real=True, 
+    def record_buy(self, amount: float, price: float, confidence: float,
                    caller_role: Role = Role.AGENT, caller_id: str = None,
                    okx_order_id: str = None):
         """
@@ -1117,9 +1166,13 @@ class PrivateLedger:
         """
         # 权限检查
         self._check_write_access(caller_role, caller_id)
+        # 参数校验
+        if amount is None or price is None or amount <= 0 or price <= 0:
+            raise ValueError(f"record_buy 参数非法 amount={amount}, price={price}")
         
         # 双向持仓：买入只影响多头持仓
-        existing_long = self.long_position if is_real else self.virtual_position
+        # ✅ 统一使用long_position，不再区分is_real
+        existing_long = self.long_position
         
         if existing_long and existing_long.amount > 0:
             # 加多仓：计算新的加权平均入场价
@@ -1150,11 +1203,10 @@ class PrivateLedger:
             )
             logger.debug(f"{self.agent_id}: 开多 {amount} @ ${price}")
         
-        if is_real:
-            self.long_position = position  # 更新多头持仓
-            self.real_position = position  # 兼容性
-        else:
-            self.virtual_position = position
+        # ✅ 统一使用long_position，彻底废除双轨制！
+        self.long_position = position
+        # ❌ 删除所有对real_position和virtual_position的写入
+        # 不再维护这些字段，避免不一致
         
         # 记录交易
         trade = TradeRecord(
@@ -1165,9 +1217,12 @@ class PrivateLedger:
             price=price,
             timestamp=datetime.now(),
             confidence=confidence,
-            is_real=is_real,
+            is_real=True,  # ✅ V6：统一使用long_position/short_position，不再区分is_real
             position_side='long',  # 买入总是影响多头
-            okx_order_id=okx_order_id
+            okx_order_id=okx_order_id,
+            closed=False,
+            inst_id="BTC-USDT-SWAP",
+            reduce_only=False
         )
         self.trade_history.append(trade)
         self.trade_count += 1
@@ -1175,7 +1230,7 @@ class PrivateLedger:
         
         logger.debug(f"{self.agent_id}: 私有账簿记录买入 {amount} @ ${price}")
     
-    def record_sell(self, price: float, confidence: float, is_real=True,
+    def record_sell(self, price: float, confidence: float,
                     caller_role: Role = Role.AGENT, caller_id: str = None,
                     okx_order_id: str = None) -> float:
         """
@@ -1187,19 +1242,20 @@ class PrivateLedger:
         """
         # 权限检查
         self._check_write_access(caller_role, caller_id)
+        # 参数校验
+        if price is None or price <= 0:
+            raise ValueError(f"record_sell 参数非法 price={price}")
         
         # 双向持仓：卖出只处理多头持仓
-        long_pos = self.long_position if is_real else self.virtual_position
+        # ✅ 统一使用long_position,废除双轨制
+        long_pos = self.long_position
         
         # 初始化盈亏和数量
         pnl = 0.0
         sell_amount = 0.0
         
         if not long_pos or long_pos.amount == 0:
-            logger.warning(f"{self.agent_id}: 无多头持仓，但仍记录卖出操作（盈亏=0）")
-            # 不要提前返回！继续记录交易历史以保持账簿一致性
-            sell_amount = 0.0
-            pnl = 0.0
+            raise RuntimeError(f"{self.agent_id}: 无多头持仓，无法卖出")
         else:
             # 计算盈亏
             pnl = long_pos.get_unrealized_pnl(price)
@@ -1214,13 +1270,13 @@ class PrivateLedger:
             else:
                 self.loss_count += 1
             
-            # 清除多头持仓
-            if is_real:
-                self.long_position = None
-                # 更新 real_position 为空头持仓（如果有）
-                self.real_position = self.short_position
-            else:
-                self.virtual_position = None
+            # ✅ 统一清除多头持仓，彻底废除双轨制！
+            # 标记持仓已平
+            long_pos.closed = True
+            long_pos.closed_at = datetime.now()
+            long_pos.closed_pnl = pnl
+            self.long_position = None  # 清除持仓
+            # ❌ 删除所有对real_position和virtual_position的操作
             
             logger.debug(f"{self.agent_id}: 平多 {sell_amount} @ ${price}, PnL=${pnl:.2f}")
         
@@ -1234,18 +1290,23 @@ class PrivateLedger:
             timestamp=datetime.now(),
             confidence=confidence,
             pnl=pnl,
-            is_real=is_real,
+            is_real=True,  # ✅ V6：统一使用long_position/short_position
             position_side='long',  # 卖出总是平多头
-            okx_order_id=okx_order_id
+            okx_order_id=okx_order_id,
+            closed=True,
+            closed_at=datetime.now(),
+            inst_id="BTC-USDT-SWAP",
+            reduce_only=True
         )
         self.trade_history.append(trade)
         self.trade_count += 1  # 每笔交易都要计数
         self.last_trade_time = datetime.now()
+        # ❌ 删除重复的持仓清除逻辑（已在上面处理）
         
         logger.debug(f"{self.agent_id}: 私有账簿记录卖出 PnL=${pnl:.2f}")
         return pnl
     
-    def record_short(self, amount: float, price: float, confidence: float, is_real=True,
+    def record_short(self, amount: float, price: float, confidence: float,
                      caller_role: Role = Role.AGENT, caller_id: str = None,
                      okx_order_id: str = None):
         """
@@ -1265,7 +1326,8 @@ class PrivateLedger:
         self._check_write_access(caller_role, caller_id)
         
         # 双向持仓：开空只影响空头持仓
-        existing_short = self.short_position if is_real else self.virtual_position
+        # ✅ 统一使用short_position，不再区分is_real
+        existing_short = self.short_position
         
         if existing_short and existing_short.amount > 0:
             # 加空：计算新的加权平均入场价
@@ -1296,11 +1358,9 @@ class PrivateLedger:
             )
             logger.debug(f"{self.agent_id}: 开空 {amount} @ ${price}")
         
-        if is_real:
-            self.short_position = position  # 更新空头持仓
-            self.real_position = position   # 兼容性（如果无多头）
-        else:
-            self.virtual_position = position
+        # ✅ 统一使用short_position，彻底废除双轨制！
+        self.short_position = position
+        # ❌ 删除所有对real_position和virtual_position的写入
         
         # 记录交易（无论成功失败都要记录，保持账簿一致性）
         trade = TradeRecord(
@@ -1312,9 +1372,12 @@ class PrivateLedger:
             timestamp=datetime.now(),
             confidence=confidence,
             pnl=0.0,
-            is_real=is_real,
+            is_real=True,  # ✅ V6：统一使用long_position/short_position
             position_side='short',  # 开空总是影响空头
-            okx_order_id=okx_order_id
+            okx_order_id=okx_order_id,
+            closed=False,
+            inst_id="BTC-USDT-SWAP",
+            reduce_only=False
         )
         self.trade_history.append(trade)
         self.trade_count += 1  # 每笔交易都要计数
@@ -1322,7 +1385,7 @@ class PrivateLedger:
         
         logger.debug(f"{self.agent_id}: 私有账簿记录开空 {amount} @ ${price}")
     
-    def record_cover(self, price: float, confidence: float, is_real=True,
+    def record_cover(self, price: float, confidence: float,
                      caller_role: Role = Role.AGENT, caller_id: str = None,
                      okx_order_id: str = None) -> float:
         """
@@ -1342,17 +1405,15 @@ class PrivateLedger:
         self._check_write_access(caller_role, caller_id)
         
         # 双向持仓：平空只处理空头持仓
-        short_pos = self.short_position if is_real else self.virtual_position
+        # ✅ 统一使用short_position,废除双轨制
+        short_pos = self.short_position
         
         # 初始化盈亏和数量
         pnl = 0.0
         cover_amount = 0.0
         
         if not short_pos or short_pos.amount == 0:
-            logger.warning(f"{self.agent_id}: 无空头持仓，但仍记录平空操作（盈亏=0）")
-            # 不要提前返回！继续记录交易历史以保持账簿一致性
-            cover_amount = 0.0
-            pnl = 0.0
+            raise RuntimeError(f"{self.agent_id}: 无空头持仓，无法平空")
         else:
             # 正常平空
             # 计算盈亏（做空盈亏 = (入场价 - 平仓价) * 数量）
@@ -1368,13 +1429,13 @@ class PrivateLedger:
             else:
                 self.loss_count += 1
             
-            # 清除空头持仓
-            if is_real:
-                self.short_position = None
-                # 更新 real_position 为多头持仓（如果有）
-                self.real_position = self.long_position
-            else:
-                self.virtual_position = None
+            # ✅ 统一清除空头持仓，彻底废除双轨制！
+            # 标记持仓已平
+            short_pos.closed = True
+            short_pos.closed_at = datetime.now()
+            short_pos.closed_pnl = pnl
+            self.short_position = None  # 清除持仓
+            # ❌ 删除所有对real_position和virtual_position的操作
             
             logger.debug(f"{self.agent_id}: 平空 {cover_amount} @ ${price}, PnL=${pnl:.2f}")
         
@@ -1388,13 +1449,18 @@ class PrivateLedger:
             timestamp=datetime.now(),
             confidence=confidence,
             pnl=pnl,
-            is_real=is_real,
+            is_real=True,  # ✅ V6：统一使用long_position/short_position
             position_side='short',  # 平空总是影响空头
-            okx_order_id=okx_order_id
+            okx_order_id=okx_order_id,
+            closed=True,
+            closed_at=datetime.now(),
+            inst_id="BTC-USDT-SWAP",
+            reduce_only=True
         )
         self.trade_history.append(trade)
         self.trade_count += 1  # 每笔交易都要计数
         self.last_trade_time = datetime.now()
+        # ❌ 删除重复的持仓清除逻辑（已在上面处理）
         
         logger.debug(f"{self.agent_id}: 私有账簿记录平空 PnL=${pnl:.2f}")
         return pnl
@@ -1435,6 +1501,23 @@ class PublicLedger:
         self.created_at = datetime.now()
         
         logger.info("公共账簿已创建")
+
+    def _calculate_position_from_trades(self, trades: List[TradeRecord]) -> Dict[str, float]:
+        """
+        从交易列表计算多/空持仓数量（与 LedgerReconciler 逻辑保持一致）
+        """
+        long_position = 0.0
+        short_position = 0.0
+        for trade in trades:
+            if trade.trade_type == 'buy':
+                long_position += trade.amount
+            elif trade.trade_type == 'sell':
+                long_position -= trade.amount
+            elif trade.trade_type == 'short':
+                short_position += trade.amount
+            elif trade.trade_type == 'cover':
+                short_position -= trade.amount
+        return {'long': max(0, long_position), 'short': max(0, short_position)}
     
     # ========== 访问权限控制 ==========
     
@@ -1449,10 +1532,10 @@ class PublicLedger:
     
     def _check_write_access(self, caller_role: Role):
         """检查写入权限"""
-        if caller_role != Role.SUPERVISOR:
-            # 只有Supervisor可以写入公共账簿
+        if caller_role not in [Role.SUPERVISOR, Role.MOIRAI]:
+            # ✅ V6：只有Supervisor或Moirai可以写入公共账簿
             raise AccessDeniedException(
-                f"{caller_role.value} 无权修改公共账簿，只有Supervisor可以修改"
+                f"{caller_role.value} 无权修改公共账簿，只有Supervisor/Moirai可以修改"
             )
     
     # ========== 记录交易（Supervisor调用）==========
@@ -1650,71 +1733,81 @@ class AgentAccountSystem:
         
         logger.info(f"账户系统创建: {agent_id}")
     
-    def record_trade(self, trade_type: str, amount: float, price: float, confidence: float, is_real=True,
-                    caller_role: Role = Role.SUPERVISOR, okx_order_id: str = None):
+    def record_trade(self, trade_type: str, amount: float, price: float, confidence: float,
+                    caller_role: Role = Role.MOIRAI, okx_order_id: str = None):
         """
         记录交易（同时更新私有和公共账簿）
         
-        只有Supervisor才能调用此方法
+        只有Moirai才能调用此方法
         
         Args:
             trade_type: 'buy', 'sell', 'short', 'cover'
             amount: 交易数量
             price: 交易价格（应使用OKX实际成交价格）
             confidence: 信心度
-            is_real: 是否实际交易
             caller_role: 调用者角色
             okx_order_id: OKX订单ID（用于精确对账）
         """
-        # Supervisor调用，有权限更新私有账簿（但以系统身份）
-        # 1. 更新私有账簿（Supervisor以系统身份更新，不需要检查）
+        # ✅ 仅允许 Moirai 写账簿，且必须是有效数值
+        if caller_role not in [Role.MOIRAI, Role.SUPERVISOR]:  # 兼容旧代码
+            raise PermissionError("record_trade 必须由 Moirai 调用")
+        if amount is None or price is None or amount <= 0 or price <= 0:
+            raise ValueError(f"record_trade 参数非法 amount={amount}, price={price}")
+
+        # Moirai调用，有权限更新私有账簿（但以系统身份）
+        # 1. 更新私有账簿（Moirai以系统身份更新，不需要检查）
         pnl = None
+        before_private_count = len(self.private_ledger.trade_history)
         
         if trade_type == 'buy':
             self.private_ledger.record_buy(
-                amount, price, confidence, is_real,
-                caller_role=Role.SUPERVISOR, caller_id='system',
+                amount, price, confidence,
+                caller_role=Role.MOIRAI, caller_id='system',
                 okx_order_id=okx_order_id
             )
         elif trade_type == 'sell':
             pnl = self.private_ledger.record_sell(
-                price, confidence, is_real,
-                caller_role=Role.SUPERVISOR, caller_id='system',
+                price, confidence,
+                caller_role=Role.MOIRAI, caller_id='system',
                 okx_order_id=okx_order_id
             )
         elif trade_type == 'short':
             self.private_ledger.record_short(
-                amount, price, confidence, is_real,
-                caller_role=Role.SUPERVISOR, caller_id='system',
+                amount, price, confidence,
+                caller_role=Role.MOIRAI, caller_id='system',
                 okx_order_id=okx_order_id
             )
         elif trade_type == 'cover':
             pnl = self.private_ledger.record_cover(
-                price, confidence, is_real,
-                caller_role=Role.SUPERVISOR, caller_id='system',
+                price, confidence,
+                caller_role=Role.MOIRAI, caller_id='system',
                 okx_order_id=okx_order_id
             )
         
         # 2. 提交到公共账簿（使用私有账簿的最后一笔交易记录，确保trade_id一致）
-        if self.private_ledger.trade_history:
-            # 使用私有账簿刚刚创建的TradeRecord（确保trade_id一致）
-            last_trade = self.private_ledger.trade_history[-1]
-            self.public_ledger.record_trade(last_trade, caller_role=caller_role)
-        else:
-            # 备用方案：如果私有账簿没有记录（异常情况），手动创建
-            logger.warning(f"{self.agent_id}: 私有账簿无交易记录，手动创建")
-            trade = TradeRecord(
-                agent_id=self.agent_id,
-                trade_id=f"{self.agent_id}_{uuid.uuid4().hex[:12]}",
-                trade_type=trade_type,
-                amount=amount,
-                price=price,
-                timestamp=datetime.now(),
-                confidence=confidence,
-                pnl=pnl,
-                is_real=is_real
+        after_private_count = len(self.private_ledger.trade_history)
+        if after_private_count != before_private_count + 1:
+            raise RuntimeError(f"{self.agent_id}: 私账写入计数异常 before={before_private_count}, after={after_private_count}")
+        last_trade = self.private_ledger.trade_history[-1]
+        self.public_ledger.record_trade(last_trade, caller_role=caller_role)
+
+        # 3. 交易数一致性校验
+        private_count = len(self.private_ledger.trade_history)
+        public_count = len(self.public_ledger.get_agent_trades(self.agent_id))
+        if private_count != public_count:
+            raise RuntimeError(f"{self.agent_id}: 公私交易数不一致 private={private_count}, public={public_count}")
+
+        # 4. 持仓一致性校验（基于公账交易序列重算）
+        calc_pos = self.public_ledger._calculate_position_from_trades(self.public_ledger.get_agent_trades(self.agent_id))
+        # ✅ 简化逻辑：统一使用long_position和short_position，不再检查virtual_position
+        private_long = self.private_ledger.long_position.amount if self.private_ledger.long_position else 0.0
+        private_short = self.private_ledger.short_position.amount if self.private_ledger.short_position else 0.0
+        if abs(calc_pos.get('long', 0) - private_long) > 1e-8 or abs(calc_pos.get('short', 0) - private_short) > 1e-8:
+            raise RuntimeError(
+                f"{self.agent_id}: 公私持仓不一致 pub_long={calc_pos.get('long',0)}, pri_long={private_long}, "
+                f"pub_short={calc_pos.get('short',0)}, pri_short={private_short}, "
+                f"last_trade={last_trade.trade_type} {last_trade.amount} @ {last_trade.price}"
             )
-            self.public_ledger.record_trade(trade, caller_role=caller_role)
         
         # 3. 更新公共账簿中的余额和统计
         self.public_ledger.update_agent_balance(self.agent_id, self.private_ledger.virtual_capital)
@@ -1723,6 +1816,72 @@ class AgentAccountSystem:
             'trade_count': self.private_ledger.trade_count,
             'win_rate': self.private_ledger.get_win_rate()
         })
+        
+        # ✅ 4. 三大铁律第3关：每笔交易后自动对账验证
+        self._verify_consistency_after_trade()
+    
+    def _verify_consistency_after_trade(self):
+        """
+        每笔交易后的自动对账验证（三大铁律第3关）
+        
+        检查项：
+        1. 交易数量一致（已在record_trade中检查）
+        2. 持仓一致（已在record_trade中检查）
+        3. 空记录检查
+        4. 金额合法性检查
+        
+        如果发现问题，立即抛出 LedgerInconsistencyError
+        """
+        issues = []
+        details = {}
+        
+        # 检查1：私账中是否有空记录
+        empty_private_trades = [
+            t for t in self.private_ledger.trade_history 
+            if t.amount == 0 or t.price == 0
+        ]
+        if empty_private_trades:
+            issues.append(f"私账有{len(empty_private_trades)}条空记录（amount=0或price=0）")
+            details['empty_private_count'] = len(empty_private_trades)
+        
+        # 检查2：公账中是否有空记录
+        public_trades = self.public_ledger.get_agent_trades(self.agent_id)
+        empty_public_trades = [
+            t for t in public_trades 
+            if t.amount == 0 or t.price == 0
+        ]
+        if empty_public_trades:
+            issues.append(f"公账有{len(empty_public_trades)}条空记录（amount=0或price=0）")
+            details['empty_public_count'] = len(empty_public_trades)
+        
+        # 检查3：最新一笔交易的合法性
+        if self.private_ledger.trade_history:
+            last_trade = self.private_ledger.trade_history[-1]
+            if last_trade.amount <= 0:
+                issues.append(f"最新交易amount非法: {last_trade.amount}")
+            if last_trade.price <= 0:
+                issues.append(f"最新交易price非法: {last_trade.price}")
+            
+            details['last_trade'] = {
+                'trade_type': last_trade.trade_type,
+                'amount': last_trade.amount,
+                'price': last_trade.price,
+                'timestamp': str(last_trade.timestamp)
+            }
+        
+        # 检查4：交易数和持仓信息
+        details['private_trade_count'] = len(self.private_ledger.trade_history)
+        details['public_trade_count'] = len(public_trades)
+        details['private_long_position'] = self.private_ledger.long_position.amount if self.private_ledger.long_position else 0
+        details['private_short_position'] = self.private_ledger.short_position.amount if self.private_ledger.short_position else 0
+        
+        # 如果发现任何问题，立即抛出异常
+        if issues:
+            raise LedgerInconsistencyError(
+                agent_id=self.agent_id,
+                issues=issues,
+                details=details
+            )
     
     def get_status_for_decision(self, current_price: float, 
                                 caller_role: Role = Role.AGENT, 

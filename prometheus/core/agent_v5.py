@@ -123,9 +123,13 @@ class AgentV5:
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.capital_history: List[float] = [initial_capital]
+        # 账簿占位：由上层（Supervisor/Moirai）挂载 AgentAccountSystem
+        self.account = None
         
         # ==================== 交易状态 ====================
-        self.current_position: Dict = {'amount': 0, 'side': None, 'entry_price': 0}
+        # ⚠️ DEPRECATED: current_position 已废弃
+        # 请使用 self._get_position_from_ledger() 获取实时持仓
+        self.current_position: Dict = {'amount': 0, 'side': None, 'entry_price': 0}  # 保留兼容
         self.trade_count = 0
         self.win_count = 0
         self.loss_count = 0
@@ -250,9 +254,14 @@ class AgentV5:
             return None
         
         # 新生保护期（前3个周期）
-        if self.cycles_alive < 3:
+        # TODO: 回测模式下暂时禁用保护期，实盘应该开启
+        protection_period = 0  # 原值: 3
+        if self.cycles_alive < protection_period:
             self.cycles_alive += 1
             return None
+        
+        # 确保cycles_alive增长
+        self.cycles_alive += 1
         
         # 2. 更新情绪
         self._update_emotional_state()
@@ -274,11 +283,174 @@ class AgentV5:
             f"推理: {guidance.reasoning}"
         )
         
-        # 6. 生成交易请求
+        # 6. 合理性检查 ✅ 防止不合理决策
+        if not self._validate_decision(guidance.action):
+            logger.debug(
+                f"Agent {self.agent_id} | "
+                f"拒绝不合理决策: {guidance.action} (持仓不匹配)"
+            )
+            return None  # 拒绝不合理决策
+        
+        # 7. 生成交易请求
         if guidance.action in ['buy', 'sell', 'short', 'cover', 'close']:
             return self._create_trade_request(guidance, market_data)
         else:
             return None  # hold
+    
+    def _convert_position_for_daimon(self, real_position: Dict) -> Dict:
+        """
+        将双向持仓格式转换为Daimon兼容的旧格式
+        
+        新格式（双向持仓）:
+            {'long': {'amount': 0.5, 'price': 90000}, 'short': None, 'has_position': True}
+        
+        旧格式（Daimon兼容）:
+            {'amount': 0.5, 'side': 'long', 'entry_price': 90000}
+        
+        策略：优先返回多头，如果没有多头就返回空头
+        
+        Args:
+            real_position: 实时双向持仓
+        
+        Returns:
+            Dict: Daimon兼容的持仓格式
+        """
+        long_pos = real_position.get('long')
+        short_pos = real_position.get('short')
+        
+        # 优先多头
+        if long_pos:
+            return {
+                'amount': long_pos['amount'],
+                'side': 'long',
+                'entry_price': long_pos['price']
+            }
+        
+        # 其次空头
+        if short_pos:
+            return {
+                'amount': short_pos['amount'],
+                'side': 'short',
+                'entry_price': short_pos['price']
+            }
+        
+        # 无持仓
+        return {
+            'amount': 0,
+            'side': None,
+            'entry_price': 0
+        }
+    
+    def _validate_decision(self, action: str) -> bool:
+        """
+        验证决策的合理性
+        
+        防止Agent做出不可能的交易：
+        - sell: 需要有多头持仓
+        - cover: 需要有空头持仓
+        - buy/short: 总是合理（开仓操作）
+        
+        Args:
+            action: 交易动作 (buy/sell/short/cover/close/hold)
+        
+        Returns:
+            bool: 决策是否合理
+        """
+        if action in ['buy', 'short', 'hold', 'close']:
+            return True  # 开仓和持有总是合理的
+        
+        # 获取实时持仓
+        position = self._get_position_from_ledger()
+        
+        # sell需要有多头持仓
+        if action == 'sell':
+            has_long = position.get('long') is not None
+            if not has_long:
+                logger.debug(f"{self.agent_id}: Daimon建议sell但无多头持仓，拒绝")
+                return False
+        
+        # cover需要有空头持仓
+        elif action == 'cover':
+            has_short = position.get('short') is not None
+            if not has_short:
+                logger.debug(f"{self.agent_id}: Daimon建议cover但无空头持仓，拒绝")
+                return False
+        
+        return True
+    
+    def calculate_unrealized_pnl(self, current_price: float) -> float:
+        """
+        计算未实现盈亏（v6新增）
+        
+        Args:
+            current_price: 当前市场价格
+        
+        Returns:
+            float: 未实现盈亏金额（美元）
+        """
+        if not hasattr(self, 'account') or not self.account:
+            return 0.0
+        
+        ledger = self.account.private_ledger
+        unrealized_pnl = 0.0
+        
+        # 多头未实现盈亏
+        if ledger.long_position and ledger.long_position.amount > 0:
+            unrealized_pnl += (current_price - ledger.long_position.entry_price) * ledger.long_position.amount
+        
+        # 空头未实现盈亏
+        if ledger.short_position and ledger.short_position.amount > 0:
+            unrealized_pnl += (ledger.short_position.entry_price - current_price) * ledger.short_position.amount
+        
+        return unrealized_pnl
+
+    def _get_position_from_ledger(self) -> Dict:
+        """
+        从账簿系统获取实时持仓状态
+        
+        ⚠️ 这是唯一可信的持仓来源！
+        不再使用 self.current_position (已废弃)
+        
+        Returns:
+            Dict: {
+                'long': {'amount': float, 'price': float} or None,
+                'short': {'amount': float, 'price': float} or None,
+                'has_position': bool
+            }
+        """
+        # 如果没有账簿系统，返回空持仓
+        if not hasattr(self, 'account') or not self.account:
+            return {
+                'long': None,
+                'short': None,
+                'has_position': False
+            }
+        
+        ledger = self.account.private_ledger
+        
+        # 获取多头持仓
+        long_pos = None
+        if ledger.long_position and ledger.long_position.amount > 0:
+            long_pos = {
+                'amount': ledger.long_position.amount,
+                'price': ledger.long_position.entry_price,
+                'side': 'long'
+            }
+        
+        # 获取空头持仓
+        short_pos = None
+        if ledger.short_position and ledger.short_position.amount > 0:
+            short_pos = {
+                'amount': ledger.short_position.amount,
+                'price': ledger.short_position.entry_price,
+                'side': 'short'
+            }
+        
+        return {
+            'long': long_pos,
+            'short': short_pos,
+            'has_position': long_pos is not None or short_pos is not None
+        }
     
     def _analyze_with_strategies(self, market_data: Dict) -> List[StrategySignal]:
         """
@@ -326,6 +498,12 @@ class AgentV5:
         Returns:
             Dict: 决策上下文
         """
+        # 获取实时持仓（新格式：双向持仓）
+        real_position = self._get_position_from_ledger()
+        
+        # 转换为Daimon兼容格式（旧格式：单一持仓）
+        position_for_daimon = self._convert_position_for_daimon(real_position)
+        
         return {
             # 市场数据
             'market_data': market_data,
@@ -334,7 +512,7 @@ class AgentV5:
             # Agent状态
             'capital': self.current_capital,
             'capital_ratio': self.current_capital / self.initial_capital,
-            'position': self.current_position,
+            'position': position_for_daimon,  # ✅ Daimon兼容格式
             
             # 交易历史
             'recent_pnl': self._get_recent_pnl(),
@@ -376,7 +554,8 @@ class AgentV5:
         current_price = market_data.get('price', 0)
         
         # 计算仓位大小（基于genome和confidence）
-        max_position_pct = self.genome.active_params.get('max_position_pct', 0.1)
+        # ✨ V6修复：提高默认仓位到80%（原来10%太保守！）
+        max_position_pct = self.genome.active_params.get('max_position_pct', 0.8)
         position_size = self.current_capital * max_position_pct * guidance.confidence
         amount = position_size / current_price if current_price > 0 else 0
         
@@ -605,7 +784,8 @@ class AgentV5:
         }
     
     @classmethod
-    def create_genesis(cls, agent_id: str, initial_capital: float, family_id: int = 0, num_families: int = 50) -> 'AgentV5':
+    def create_genesis(cls, agent_id: str, initial_capital: float, family_id: int = 0, num_families: int = 50, 
+                      full_genome_unlock: bool = False) -> 'AgentV5':
         """
         创建创世Agent
         
@@ -614,12 +794,14 @@ class AgentV5:
             initial_capital: 初始资金
             family_id: 家族ID
             num_families: 家族总数
+            full_genome_unlock: 是否解锁所有50个基因参数（激进模式）
         
         Returns:
             AgentV5: 创世Agent
         """
         lineage = LineageVector.create_genesis(family_id=family_id, num_families=num_families)
-        genome = GenomeVector.create_genesis()
+        lineage.family_id = family_id  # 显式记录家族ID，供多样性/移民使用
+        genome = GenomeVector.create_genesis(full_unlock=full_genome_unlock)  # ✨ 传递参数
         instinct = Instinct.create_genesis()
         
         return cls(

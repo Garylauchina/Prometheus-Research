@@ -44,24 +44,28 @@ class OKXExchange:
         self.testnet = testnet
         
         # 初始化ccxt
-        self.exchange = ccxt.okx({
+        exchange_config = {
             'apiKey': api_key,
             'secret': api_secret,
             'password': passphrase,
             'enableRateLimit': True,
-        })
+        }
         
-        # 设置测试网或虚拟盘
+        # 关键修复：OKX模拟盘的正确配置方式
         if testnet:
-            self.exchange.set_sandbox_mode(True)
-            logger.info("🧪 OKX测试网模式")
-        elif paper_trading:
-            # 虚拟盘模式（本地模拟）
+            exchange_config['sandbox'] = True  # 修复：直接在顶层配置sandbox
+            exchange_config['options'] = {'defaultType': 'swap'}  # 永续合约
+            logger.info("🧪 OKX Sandbox模式（模拟盘）")
+        
+        self.exchange = ccxt.okx(exchange_config)
+        
+        # paper_trading模式（本地模拟）
+        if paper_trading and not testnet:
             self.paper_positions = {}
             self.paper_balance = {'USDT': 100000.0}  # 虚拟资金10万
             self.paper_orders = []
-            logger.info("📝 OKX虚拟盘模式（初始资金: $100,000）")
-        else:
+            logger.info("📝 OKX本地模拟模式（初始资金: $100,000）")
+        elif not testnet and not paper_trading:
             logger.warning("⚠️  OKX实盘模式 - 请谨慎操作！")
         
         logger.info(f"✅ OKX交易所初始化完成")
@@ -291,27 +295,48 @@ class OKXExchange:
             return self._place_paper_order(symbol, side, size, order_type, price, leverage)
         
         try:
+            # 转换symbol格式：BTC/USDT → BTC-USDT-SWAP
+            inst_id = symbol.replace('/', '-').replace(':USDT', '') + '-SWAP'
+            if inst_id.endswith('-SWAP-SWAP'):
+                inst_id = inst_id.replace('-SWAP-SWAP', '-SWAP')
+            
+            # 使用OKX私有API直接下单（避免ccxt的参数转换问题）
+            request = {
+                'instId': inst_id,
+                'tdMode': 'cross',  # 全仓模式
+                'side': side,
+                'posSide': 'long' if side == 'buy' else 'short',  # 持仓方向
+                'ordType': 'market' if order_type == 'market' else 'limit',
+                'sz': str(int(size * 100))  # 转换为张数（1 BTC = 100张）
+            }
+            
+            # 限价单需要价格
+            if order_type == 'limit':
+                request['px'] = str(price)
+            
             # 设置杠杆
             if leverage > 1:
-                self.exchange.set_leverage(leverage, symbol)
+                request['lever'] = str(int(leverage))
             
-            # 下单
-            if order_type == 'market':
-                order = self.exchange.create_market_order(symbol, side, size)
+            # 调用OKX私有API
+            response = self.exchange.privatePostTradeOrder(request)
+            
+            if response['code'] == '0' and response['data']:
+                order_data = response['data'][0]
+                # logger.info(f"✅ 订单已提交: {symbol} {side} {size} @ {order_type}")  # 关闭详细日志
+                
+                return {
+                    'order_id': order_data['ordId'],
+                    'symbol': symbol,
+                    'side': side,
+                    'size': size,
+                    'price': price,
+                    'status': 'submitted',
+                    'timestamp': int(order_data['ts'])
+                }
             else:
-                order = self.exchange.create_limit_order(symbol, side, size, price)
-            
-            logger.info(f"✅ 订单已提交: {symbol} {side} {size} @ {order_type}")
-            
-            return {
-                'order_id': order['id'],
-                'symbol': symbol,
-                'side': side,
-                'size': size,
-                'price': order.get('price', price),
-                'status': order['status'],
-                'timestamp': order['timestamp']
-            }
+                logger.error(f"下单失败: {response}")
+                return None
         except Exception as e:
             logger.error(f"下单失败: {e}")
             return None

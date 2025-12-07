@@ -83,10 +83,11 @@ class EvolutionManagerV5:
         self.max_mutation_rate = 0.7    # v5.3: 最大变异率提升到70%
         self.gene_entropy_threshold = 0.3  # v5.3: 提高阈值，更积极触发高变异
         
-        # v5.3：移民机制配置
-        self.immigration_enabled = True  # v5.3: 启用移民机制
-        self.immigration_interval = 10   # v5.3: 每10轮注入移民
-        self.immigrants_per_wave = 2     # v5.3: 每次2个移民
+        # v5.3：移民机制（改为由先知/战略层触发，而非固定间隔）
+        self.immigration_enabled = True          # 可由上层关停
+        self.immigrants_per_wave = 2             # 默认批量
+        self.immigration_cooldown = 3            # 代级防抖，避免频繁注入
+        self.last_immigration_generation = -999  # 初始化为极小
         
         logger.info(f"🧬 EvolutionManagerV5已初始化 (v5.3)")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
@@ -165,8 +166,8 @@ class EvolutionManagerV5:
             logger.error(f"🚨 多样性危机！基因熵={health.gene_entropy:.3f} ≤ 0.1")
             logger.error(f"   启动紧急多样性恢复机制...")
         
-        # 2. 评估Agent表现
-        rankings = self._rank_agents()
+        # 2. 评估Agent表现（✨ 传入当前价格）
+        rankings = self._rank_agents(current_price=current_price)
         
         if not rankings:
             logger.warning("无Agent可进化")
@@ -387,14 +388,13 @@ class EvolutionManagerV5:
         
         # 6. 添加新Agent到Moirai
         self.moirai.agents.extend(new_agents)
-        
-        # 6.5 v5.3：移民机制（每N轮注入新基因）
-        if (self.immigration_enabled and 
-            self.generation > 0 and 
-            self.generation % self.immigration_interval == 0):
-            logger.info(f"\n🛬 移民机制触发（第{self.generation}代，间隔{self.immigration_interval}）")
-            immigrants = self._inject_immigrants()
-            logger.info(f"   移民到达: {len(immigrants)}个全新基因的Agent")
+        # 为新生Agent挂载账簿，防止后续对账缺失
+        try:
+            from prometheus.ledger.attach_accounts import attach_accounts
+            public_ledger = getattr(self.moirai, "public_ledger", None)
+            attach_accounts(new_agents, public_ledger)
+        except Exception as e:
+            logger.warning(f"新Agent挂账簿失败: {e}")
         
         # 7. 记录统计
         self.generation += 1
@@ -497,13 +497,17 @@ class EvolutionManagerV5:
                 elif relative_performance < 0.5:
                     negativity_penalty *= 0.7
         
-        # 6.4 持仓时间过少（总是空仓观望）
+        # 6.4 持仓时间过少（总是空仓观望）- ⭐ 加强惩罚！
         if hasattr(agent, 'cycles_with_position') and cycles_survived > 0:
             position_time_ratio = agent.cycles_with_position / cycles_survived
-            if position_time_ratio < 0.2:  # 80%时间空仓
-                negativity_penalty *= 0.7
-            elif position_time_ratio < 0.4:
-                negativity_penalty *= 0.9
+            if position_time_ratio < 0.1:  # 90%时间空仓 - 极严重！
+                negativity_penalty *= 0.3  # ⭐ 从0.7→0.3，严厉惩罚！
+            elif position_time_ratio < 0.2:  # 80%时间空仓
+                negativity_penalty *= 0.5  # ⭐ 从0.7→0.5
+            elif position_time_ratio < 0.4:  # 60%时间空仓
+                negativity_penalty *= 0.7  # ⭐ 从0.9→0.7
+            elif position_time_ratio < 0.6:  # 40%时间空仓
+                negativity_penalty *= 0.9  # ⭐ 新增：适度惩罚
         
         # ============================================================
         # Final: 综合Fitness（v5.2：6个维度）
@@ -519,11 +523,138 @@ class EvolutionManagerV5:
         
         return fitness
     
-    def _rank_agents(self) -> List[Tuple[AgentV5, float]]:
+    def _calculate_fitness_v3(self, agent: AgentV5, total_cycles: int, current_price: float = 0.0, btc_return: float = 0.0) -> float:
         """
-        评估并排序Agent（v5.2: 使用fitness v2）
+        ⚔️ 计算Agent的适应度（v3: 绝对收益导向，鼓励"买入持有"）
         
-        评估标准：综合fitness（包含生存、盈利、活跃度等）
+        **核心理念转变**：
+        - ❌ 旧版v2：survival_bonus（活得久就好）→ 导致保守观望
+        - ✅ 新版v3：绝对收益（赚钱就好）→ 激励积极交易并长期持有
+        
+        **关键修改**：
+        1. 不再乘以survival_bonus（去除"活得久"奖励）
+        2. 强力奖励长期持有（holding_duration_bonus）
+        3. 严厉惩罚频繁交易（trade_frequency_penalty）
+        4. 奖励趋势对齐（做对方向）
+        
+        Args:
+            agent: 要评估的Agent
+            total_cycles: 总周期数
+            current_price: 当前市场价格（用于计算未实现盈亏）✨ 关键修复！
+            btc_return: BTC的收益率（用于对比）
+        
+        Returns:
+            float: 适应度分数
+        """
+        import numpy as np
+        
+        # ============================================================
+        # Part 1: 绝对收益（核心！）+ 未实现盈亏（v6修复）
+        # ============================================================
+        # ✅ v6修复：包含未实现盈亏！使用真实的当前市场价格！
+        current_capital = agent.current_capital
+        
+        # 计算未实现盈亏（使用传入的当前市场价格）
+        unrealized_pnl = 0.0
+        if current_price > 0:  # ✨ 使用真实的当前价格
+            unrealized_pnl = agent.calculate_unrealized_pnl(current_price)
+        
+        # 有效资金 = 已实现资金 + 未实现盈亏
+        effective_capital = current_capital + unrealized_pnl
+        capital_ratio = effective_capital / agent.initial_capital
+        absolute_return = capital_ratio - 1  # -1 = -100%, 0 = 0%, 1 = +100%
+        
+        # 如果亏损，fitness极低
+        if absolute_return <= -0.5:  # 亏损50%以上
+            return 0.001  # 接近淘汰
+        elif absolute_return <= 0:  # 任何亏损
+            return 0.1 + absolute_return * 0.2  # 0~0.1之间
+        
+        # 如果盈利，base_score = 1 + 收益率
+        base_score = 1.0 + absolute_return  # 0%收益=1.0, 100%收益=2.0
+        
+        # ============================================================
+        # Part 2: 持仓时间奖励（关键！鼓励长期持有）
+        # ============================================================
+        holding_duration_bonus = 1.0
+        
+        if hasattr(agent, 'cycles_with_position') and hasattr(agent, 'cycles_survived'):
+            if agent.cycles_survived > 0:
+                holding_ratio = agent.cycles_with_position / agent.cycles_survived
+                
+                # 强力奖励持仓！
+                if holding_ratio >= 0.9:  # 90%时间持仓
+                    holding_duration_bonus = 3.0  # 3倍！
+                elif holding_ratio >= 0.7:  # 70%时间持仓
+                    holding_duration_bonus = 2.0  # 2倍
+                elif holding_ratio >= 0.5:  # 50%时间持仓
+                    holding_duration_bonus = 1.5
+                elif holding_ratio >= 0.3:  # 30%时间持仓
+                    holding_duration_bonus = 1.2
+                else:  # <30%时间持仓
+                    holding_duration_bonus = 0.5  # 严厉惩罚空仓观望！
+        
+        # ============================================================
+        # Part 3: 交易频率惩罚（关键！惩罚频繁交易）
+        # ============================================================
+        trade_frequency_penalty = 1.0
+        
+        if hasattr(agent, 'cycles_survived') and agent.cycles_survived > 0:
+            # 理想：每20个周期交易1次（0.05）
+            ideal_frequency = 0.05
+            # 使用private_ledger的trade_count
+            actual_trade_count = agent.account.private_ledger.trade_count if hasattr(agent, 'account') else 0
+            actual_frequency = actual_trade_count / agent.cycles_survived
+            
+            if actual_frequency > ideal_frequency * 5:  # 超过理想的5倍（太频繁！）
+                trade_frequency_penalty = 0.3  # 严厉惩罚！
+            elif actual_frequency > ideal_frequency * 3:  # 超过3倍
+                trade_frequency_penalty = 0.5
+            elif actual_frequency > ideal_frequency * 2:  # 超过2倍
+                trade_frequency_penalty = 0.7
+            elif actual_frequency > ideal_frequency * 1.5:  # 超过1.5倍
+                trade_frequency_penalty = 0.9
+            # else: 频率合理或偏低，不惩罚
+        
+        # ============================================================
+        # Part 4: 趋势对齐奖励（做对方向）
+        # ============================================================
+        trend_alignment_bonus = 1.0
+        
+        # 如果有BTC基准收益，且Agent跑赢BTC
+        if btc_return > 0 and absolute_return > btc_return:
+            outperformance = (absolute_return - btc_return) / btc_return
+            trend_alignment_bonus = 1.0 + min(outperformance, 1.0)  # 最多2倍
+        
+        # ============================================================
+        # Part 5: 稳定性调整（可选，适度影响）
+        # ============================================================
+        stability_bonus = 1.0
+        max_drawdown = getattr(agent, 'max_drawdown', 0)
+        if max_drawdown > 0:
+            stability_bonus = 1 / (1 + max_drawdown * 0.5)  # 适度惩罚回撤
+        
+        # ============================================================
+        # Final: 综合Fitness（v3：4个关键维度）
+        # ============================================================
+        fitness = (
+            base_score                    # 绝对收益
+            * holding_duration_bonus      # 持仓时间（3倍奖励！）
+            * trade_frequency_penalty     # 交易频率（严厉惩罚！）
+            * trend_alignment_bonus       # 趋势对齐
+            * stability_bonus             # 稳定性
+        )
+        
+        return max(fitness, 0.001)  # 确保非负
+    
+    def _rank_agents(self, current_price: float = 0.0) -> List[Tuple[AgentV5, float]]:
+        """
+        ⚔️ 评估并排序Agent（v6: 使用fitness v3 - 绝对收益导向）
+        
+        评估标准：绝对收益 + 长期持有 + 交易频率控制
+        
+        Args:
+            current_price: 当前市场价格（用于计算未实现盈亏）✨
         
         Returns:
             List[(agent, fitness)]: 按表现排序的Agent列表（从优到劣）
@@ -536,9 +667,12 @@ class EvolutionManagerV5:
             for agent in self.moirai.agents
         ) if self.moirai.agents else 1
         
+        # 计算BTC基准收益（如果可用）
+        btc_return = 0.0  # TODO: 从市场数据计算
+        
         for agent in self.moirai.agents:
-            # 使用fitness v2计算
-            fitness = self._calculate_fitness_v2(agent, total_cycles)
+            # ⚔️ 使用fitness v3计算（绝对收益导向）✨ 传入当前价格！
+            fitness = self._calculate_fitness_v3(agent, total_cycles, current_price, btc_return)
             rankings.append((agent, fitness))
         
         # 按fitness排序（从高到低）
@@ -720,6 +854,12 @@ class EvolutionManagerV5:
             generation=child_generation,
             meta_genome=child_meta_genome  # v5.1新增
         )
+        # 确保血统携带family_id（优先父母的dominant family）
+        if hasattr(child_lineage, "family_id"):
+            child.lineage.family_id = child_lineage.family_id
+        else:
+            dom_family = child_lineage.get_dominant_family()
+            child.lineage.family_id = dom_family
         
         # 🔧 修复：为新Agent设置初始fitness（多样性保护器需要）
         # 新生儿还没有交易记录，使用基准fitness = 1.0
@@ -727,11 +867,15 @@ class EvolutionManagerV5:
         
         return child
     
-    def _inject_immigrants(self) -> List[AgentV5]:
+    def inject_immigrants(self, 
+                          count: Optional[int] = None,
+                          allow_new_family: bool = True,
+                          reason: Optional[str] = None) -> List[AgentV5]:
         """
-        v5.3：注入移民Agent
+        v5.3：注入移民Agent（改为上层/先知策略触发）
         
-        移民机制：定期注入全新基因的Agent，防止基因池枯竭
+        触发方：先知/战略层，根据多样性或市场状态决定是否引入新基因
+        防抖：代级冷却，避免短时间多次注入
         
         Returns:
             List[AgentV5]: 新创建的移民Agent列表
@@ -739,11 +883,24 @@ class EvolutionManagerV5:
         immigrants = []
         
         try:
-            for i in range(self.immigrants_per_wave):
+            # 冷却检查
+            if (self.generation - self.last_immigration_generation) < self.immigration_cooldown:
+                logger.info(f"   🛬 移民跳过：冷却中 (cooldown={self.immigration_cooldown})")
+                return immigrants
+            
+            batch = count if count is not None else self.immigrants_per_wave
+            batch = max(1, batch)
+            
+            for i in range(batch):
                 # 使用Moirai创建全新的Agent（允许新家族）
                 immigrant = self.moirai._clotho_create_single_agent(
-                    allow_new_family=True  # 关键：允许创建新家族
+                    allow_new_family=allow_new_family  # 默认允许新家族，由上层策略决定
                 )
+                # 确保血统携带family_id
+                if hasattr(immigrant.lineage, "family_id"):
+                    immigrant.lineage.family_id = immigrant.lineage.family_id
+                else:
+                    immigrant.lineage.family_id = immigrant.lineage.get_dominant_family()
                 
                 # 初始化fitness
                 immigrant.fitness = 1.0  # 给予基础适应度
@@ -752,14 +909,85 @@ class EvolutionManagerV5:
                 self.moirai.agents.append(immigrant)
                 
                 logger.info(f"   🛬 移民{i+1}: {immigrant.agent_id[:12]} "
-                          f"(家族: {immigrant.lineage.family_id}, 新基因)")
+                          f"(家族: {immigrant.lineage.family_id}, 新基因"
+                          f"{' | reason: ' + reason if reason else ''})")
+            
+            # 挂账簿：为移民补账户，防对账缺失
+            try:
+                from prometheus.ledger.attach_accounts import attach_accounts
+                public_ledger = getattr(self.moirai, "public_ledger", None)
+                attach_accounts(immigrants, public_ledger)
+            except Exception as e:
+                logger.warning(f"移民挂账簿失败: {e}")
             
             self.total_births += len(immigrants)
+            self.last_immigration_generation = self.generation
             
         except Exception as e:
             logger.error(f"❌ 移民注入失败: {e}")
         
         return immigrants
+
+    def maybe_inject_immigrants(self,
+                                metrics: Optional['DiversityMetrics'] = None,
+                                allow_new_family: bool = True,
+                                force: bool = False) -> List[AgentV5]:
+        """
+        先知/战略层调用：基于多样性健康状况决定是否注入移民
+        
+        触发条件（任一满足）：
+        - force=True 强制
+        - 活跃家族远低于阈值（< 70% * active_families_min）
+        - 多样性综合得分远低于阈值（< 70% * diversity_score_min）
+        - 基因/血统熵低于阈值（< 70%）
+        
+        Args:
+            metrics: DiversityMonitor 计算出的 DiversityMetrics
+            allow_new_family: 是否允许创建新家族
+            force: 是否强制注入
+        
+        Returns:
+            List[AgentV5]: 实际注入的移民列表
+        """
+        if not self.immigration_enabled:
+            return []
+        
+        if metrics is None and not force:
+            return []
+        
+        reasons = []
+        try:
+            thresholds = self.diversity_monitor.thresholds
+            
+            if force:
+                reasons.append("force")
+            
+            if metrics:
+                if metrics.active_families < thresholds['active_families_min'] * 0.7:
+                    reasons.append(f"active_families {metrics.active_families} < 0.7*{thresholds['active_families_min']}")
+                
+                if metrics.diversity_score < thresholds['diversity_score_min'] * 0.7:
+                    reasons.append(f"diversity_score {metrics.diversity_score:.3f} < 0.7*{thresholds['diversity_score_min']}")
+                
+                if metrics.gene_entropy < thresholds['gene_entropy_min'] * 0.7:
+                    reasons.append(f"gene_entropy {metrics.gene_entropy:.3f} < 0.7*{thresholds['gene_entropy_min']}")
+                
+                if metrics.lineage_entropy < thresholds['lineage_entropy_min'] * 0.7:
+                    reasons.append(f"lineage_entropy {metrics.lineage_entropy:.3f} < 0.7*{thresholds['lineage_entropy_min']}")
+            
+            if not reasons:
+                return []
+            
+            reason_text = "; ".join(reasons)
+            logger.info(f"🛬 先知触发移民 | {reason_text}")
+            return self.inject_immigrants(
+                allow_new_family=allow_new_family,
+                reason=reason_text
+            )
+        
+        except Exception as e:
+            logger.error(f"❌ maybe_inject_immigrants 失败: {e}")
+            return []
     
     def get_population_stats(self) -> Dict:
         """

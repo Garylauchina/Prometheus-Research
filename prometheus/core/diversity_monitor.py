@@ -369,8 +369,10 @@ class DiversityMonitor:
             # 统计每个家族在种群中的总占比
             family_totals = lineage_vectors.sum(axis=0)
             
-            # 活跃家族：总占比 > 0.05 * len(agents)
-            threshold = 0.05 * len(agents)
+            # 活跃家族：总占比 > 动态阈值
+            # 原始阈值0.05*len(agents)在“家族数接近种群数”的场景过高
+            # 这里放宽为：max(1, 0.01 * len(agents))，避免创世阶段刷屏
+            threshold = max(1.0, 0.01 * len(agents))
             active = (family_totals > threshold).sum()
             
             return int(active)

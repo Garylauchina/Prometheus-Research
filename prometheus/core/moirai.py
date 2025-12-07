@@ -70,6 +70,8 @@ class Moirai(Supervisor):
     def __init__(self, 
                  bulletin_board=None,
                  num_families: int = 50,
+                 exchange=None,
+                 match_config: Optional[Dict] = None,
                  **kwargs):
         """
         初始化命运三女神（v5.0专用，不向后兼容）
@@ -77,6 +79,8 @@ class Moirai(Supervisor):
         Args:
             bulletin_board: 公告板系统
             num_families: 家族数量
+            exchange: 交易所接口（OKXExchange或模拟交易所）
+            match_config: 撮合配置
             **kwargs: 其他参数传递给Supervisor
         """
         # 继承Supervisor的初始化
@@ -87,6 +91,28 @@ class Moirai(Supervisor):
         
         # 家族分配计数器（用于创世Agent）
         self._family_counter = 0
+        
+        # 交易撮合配置
+        self.exchange = exchange
+        self.match_config = match_config or {
+            # 回测配置
+            "backtest_slippage": 0.0001,
+            "backtest_fee": 0.0002,
+            # Mock配置
+            "mock_latency_min": 10,
+            "mock_latency_max": 100,
+            "mock_reject_rate": 0.05,
+            "mock_fee": 0.0003,
+            "mock_slippage_max": 0.005,
+            # 虚拟盘配置
+            "live_max_retries": 3,
+            "live_timeout": 5.0,
+            "live_cycle_interval": 3600,
+            # 风控配置
+            "max_position_ratio": 0.95,
+            "max_trades_per_hour": 10,
+            "min_trade_interval": 60,
+        }
         
         logger.info(f"⚖️ Moirai（命运三女神）已初始化 [v5.0专用]")
         logger.info(f"   🧵 Clotho准备纺织新生命...")
@@ -99,7 +125,7 @@ class Moirai(Supervisor):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
     def _genesis_create_agents(self, agent_count, gene_pool, capital_per_agent, 
-                               agent_factory=None):
+                               agent_factory=None, full_genome_unlock=False):
         """
         🧵 Clotho的职责：纺织新的生命之线（v5.0专用）
         
@@ -110,16 +136,18 @@ class Moirai(Supervisor):
             gene_pool: 基因池（v4.0格式，但我们不使用）
             capital_per_agent: 每个Agent的资金
             agent_factory: Agent工厂（忽略）
+            full_genome_unlock: 是否解锁所有50个基因参数（激进模式）
         
         Returns:
             List[AgentV5]: 创建的AgentV5列表
         """
         return self._clotho_create_v5_agents(
-            agent_count, gene_pool, capital_per_agent
+            agent_count, gene_pool, capital_per_agent, full_genome_unlock
         )
     
     def _clotho_create_v5_agents(self, agent_count: int, gene_pool: List, 
-                                   capital_per_agent: float) -> List[AgentV5]:
+                                  capital_per_agent: float,
+                                  full_genome_unlock: bool = False) -> List[AgentV5]:
         """
         🧵 Clotho纺织v5.0 Agent
         
@@ -135,13 +163,15 @@ class Moirai(Supervisor):
             agent_count: 要创建的Agent数量
             gene_pool: 基因池（v4.0格式，需要转换）
             capital_per_agent: 每个Agent的初始资金
+            full_genome_unlock: 是否解锁所有50个基因参数（激进模式）
         
         Returns:
             List[AgentV5]: 创建的AgentV5列表
         """
         agents = []
         
-        logger.info(f"   🧵 Clotho开始纺织{agent_count}条生命之线...")
+        mode_msg = "🔥 激进模式（50参数）" if full_genome_unlock else "渐进模式（3参数）"
+        logger.info(f"   🧵 Clotho开始纺织{agent_count}条生命之线...{mode_msg}")
         
         for i in range(agent_count):
             try:
@@ -157,8 +187,11 @@ class Moirai(Supervisor):
                     agent_id=agent_id,
                     initial_capital=capital_per_agent,
                     family_id=family_id,
-                    num_families=self.num_families
+                    num_families=self.num_families,
+                    full_genome_unlock=full_genome_unlock  # ✨ 传递参数
                 )
+                # 确保血统携带family_id供多样性/移民统计使用
+                agent.lineage.family_id = family_id
                 
                 agents.append(agent)
                 
@@ -186,6 +219,33 @@ class Moirai(Supervisor):
         logger.info(f"      📊 家族分布: {len(family_dist)}个家族参与")
         
         return agents
+
+    def _clotho_create_single_agent(self, allow_new_family: bool = False) -> AgentV5:
+        """
+        v5.3 移民机制需要的单Agent创建接口
+        
+        Args:
+            allow_new_family: 是否允许创建新家族（用于移民注入）
+        """
+        agent_id = f"Agent_{self.next_agent_id}"
+        self.next_agent_id += 1
+        
+        if allow_new_family:
+            family_id = self.num_families  # 新家族
+            self.num_families += 1
+        else:
+            family_id = self._family_counter % self.num_families
+            self._family_counter += 1
+        
+        agent = AgentV5.create_genesis(
+            agent_id=agent_id,
+            initial_capital=self.initial_capital_per_agent if hasattr(self, 'initial_capital_per_agent') else 10000.0,
+            family_id=family_id,
+            num_families=self.num_families
+        )
+        # 确保血统携带family_id
+        agent.lineage.family_id = family_id
+        return agent
     
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # Lachesis（拉刻西斯）- 分配命运
@@ -363,6 +423,288 @@ class Moirai(Supervisor):
         report['strategy_distribution'] = strategy_dist
         
         return report
+    
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # Lachesis（拉刻西斯）- 交易撮合系统
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    def match_trade(
+        self,
+        agent: AgentV5,
+        decision: Dict,
+        market_data: Dict,
+        scenario: str = "backtest"
+    ) -> Optional[Dict]:
+        """
+        ⚖️ Lachesis的职责：撮合交易
+        
+        场景差异：
+        - backtest: 立即确定性成交，无延迟，精确滑点
+        - mock: 模拟各种异常，可配置延迟/拒绝率
+        - live_demo: 真实网络调用，异步处理，真实延迟
+        
+        Args:
+            agent: 发起交易的Agent
+            decision: Agent的交易决策
+            market_data: 当前市场数据
+            scenario: 场景类型
+            
+        Returns:
+            成交回执 或 None(失败)
+        """
+        # 1. 风控检查
+        if not self._risk_check(agent, decision, scenario):
+            return None
+        
+        # 2. 场景化撮合
+        if scenario == "backtest":
+            trade_result = self._match_backtest(agent, decision, market_data)
+        elif scenario == "mock":
+            trade_result = self._match_mock(agent, decision, market_data)
+        elif scenario == "live_demo":
+            trade_result = self._match_live_demo(agent, decision, market_data)
+        else:
+            logger.error(f"未知场景: {scenario}")
+            return None
+        
+        # 3. 记录账簿
+        if trade_result and trade_result.get("success"):
+            self._record_to_ledgers(agent, trade_result)
+        
+        return trade_result
+    
+    def _risk_check(self, agent: AgentV5, decision: Dict, scenario: str) -> bool:
+        """风控检查"""
+        try:
+            # 1. 资金充足性
+            required_capital = self._calculate_required_capital(decision, scenario)
+            if not hasattr(agent, 'account') or not agent.account:
+                logger.warning(f"Agent {agent.agent_id} 无账户系统")
+                return False
+            
+            available_capital = agent.account.private_ledger.virtual_capital
+            if required_capital > available_capital:
+                logger.debug(f"资金不足: 需要{required_capital:.2f}, 可用{available_capital:.2f}")
+                return False
+            
+            # 2. 持仓限制
+            if not self._check_position_limit(agent, decision):
+                logger.debug(f"超过持仓限制")
+                return False
+            
+            # 3. 价格合理性
+            if not self._check_price_sanity(decision):
+                logger.debug(f"价格异常")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"风控检查失败: {e}")
+            return False
+    
+    def _calculate_required_capital(self, decision: Dict, scenario: str) -> float:
+        """计算所需资金"""
+        amount = abs(decision.get("amount", 0))
+        price = decision.get("price", 0)
+        leverage = decision.get("leverage", 1.0)
+        
+        if amount <= 0 or price <= 0:
+            return float('inf')  # 无效决策，返回无穷大
+        
+        # 保证金 = 名义价值 / 杠杆
+        notional = amount * price
+        margin = notional / leverage
+        
+        # 加上手续费和缓冲
+        fee_rate = self.match_config.get(f"{scenario}_fee", 0.0003)
+        buffer_rate = 0.01  # 1%缓冲
+        
+        total_required = margin * (1 + fee_rate + buffer_rate)
+        
+        return total_required
+    
+    def _check_position_limit(self, agent: AgentV5, decision: Dict) -> bool:
+        """检查持仓限制"""
+        # 简单实现：最大持仓不超过资金的95%
+        max_ratio = self.match_config.get("max_position_ratio", 0.95)
+        return True  # 暂时总是通过
+    
+    def _check_price_sanity(self, decision: Dict) -> bool:
+        """检查价格合理性"""
+        price = decision.get("price", 0)
+        if price <= 0:
+            return False
+        # BTC价格应该在合理范围内
+        if price < 1000 or price > 1000000:
+            return False
+        return True
+    
+    def _match_backtest(self, agent: AgentV5, decision: Dict, market_data: Dict) -> Dict:
+        """回测撮合：确定性、同步、快速"""
+        import time
+        import uuid
+        
+        price = market_data.get("price", decision.get("price", 0))
+        action = decision.get("action")
+        amount = abs(decision.get("amount", 0))
+        
+        if price <= 0 or amount <= 0:
+            return {"success": False, "error": "INVALID_PARAMS"}
+        
+        # 应用滑点
+        slippage_rate = self.match_config.get("backtest_slippage", 0.0001)
+        if action in ["buy", "long"]:
+            fill_price = price * (1 + slippage_rate)
+        else:
+            fill_price = price * (1 - slippage_rate)
+        
+        # 手续费
+        fee_rate = self.match_config.get("backtest_fee", 0.0002)
+        fee = abs(amount * fill_price) * fee_rate
+        
+        return {
+            "success": True,
+            "action": action,
+            "amount": amount,
+            "fill_price": fill_price,
+            "fee": fee,
+            "timestamp": time.time(),
+            "order_id": f"BT_{uuid.uuid4().hex[:8]}",
+            "latency_ms": 0,
+            "scenario": "backtest"
+        }
+    
+    def _match_mock(self, agent: AgentV5, decision: Dict, market_data: Dict) -> Dict:
+        """Mock撮合：可配置各种异常情况"""
+        import random
+        import time
+        import uuid
+        
+        # 模拟网络延迟
+        latency_ms = random.randint(
+            self.match_config.get("mock_latency_min", 10),
+            self.match_config.get("mock_latency_max", 100)
+        )
+        time.sleep(latency_ms / 1000.0)
+        
+        # 模拟订单拒绝
+        reject_rate = self.match_config.get("mock_reject_rate", 0.05)
+        if random.random() < reject_rate:
+            return {
+                "success": False,
+                "error": "ORDER_REJECTED",
+                "reason": "模拟订单拒绝",
+                "latency_ms": latency_ms,
+                "scenario": "mock"
+            }
+        
+        price = market_data.get("price", decision.get("price", 0))
+        action = decision.get("action")
+        amount = abs(decision.get("amount", 0))
+        
+        if price <= 0 or amount <= 0:
+            return {"success": False, "error": "INVALID_PARAMS"}
+        
+        # 动态滑点
+        volatility = market_data.get("volatility", 0.01)
+        slippage_rate = random.uniform(0, volatility * 2)
+        
+        if action in ["buy", "long"]:
+            fill_price = price * (1 + slippage_rate)
+        else:
+            fill_price = price * (1 - slippage_rate)
+        
+        # 手续费
+        fee_rate = self.match_config.get("mock_fee", 0.0003)
+        fee = abs(amount * fill_price) * fee_rate
+        
+        return {
+            "success": True,
+            "action": action,
+            "amount": amount,
+            "fill_price": fill_price,
+            "fee": fee,
+            "timestamp": time.time(),
+            "order_id": f"MOCK_{uuid.uuid4().hex[:8]}",
+            "latency_ms": latency_ms,
+            "slippage_bps": slippage_rate * 10000,
+            "scenario": "mock"
+        }
+    
+    def _match_live_demo(self, agent: AgentV5, decision: Dict, market_data: Dict) -> Dict:
+        """虚拟盘撮合：真实网络调用"""
+        import time
+        
+        start_time = time.time()
+        action = decision.get("action")
+        amount = abs(decision.get("amount", 0))
+        
+        if not hasattr(self, 'exchange') or not self.exchange:
+            return {"success": False, "error": "NO_EXCHANGE"}
+        
+        # 调用OKX API
+        max_retries = self.match_config.get("live_max_retries", 3)
+        for retry in range(max_retries):
+            try:
+                order_result = self.exchange.place_order(
+                    symbol="BTC-USDT-SWAP",
+                    side=action,
+                    order_type="market",
+                    amount=amount,
+                    agent_id=agent.agent_id
+                )
+                
+                latency_ms = (time.time() - start_time) * 1000
+                
+                return {
+                    "success": True,
+                    "action": action,
+                    "amount": amount,
+                    "fill_price": order_result.get("avgPrice", 0),
+                    "fee": order_result.get("fee", 0),
+                    "timestamp": time.time(),
+                    "order_id": order_result.get("orderId", ""),
+                    "latency_ms": latency_ms,
+                    "retries": retry,
+                    "scenario": "live_demo"
+                }
+                
+            except Exception as e:
+                if retry == max_retries - 1:
+                    return {
+                        "success": False,
+                        "error": "NETWORK_ERROR",
+                        "reason": str(e),
+                        "latency_ms": (time.time() - start_time) * 1000,
+                        "scenario": "live_demo"
+                    }
+                time.sleep(0.5 * (retry + 1))
+        
+        return {"success": False, "error": "MAX_RETRIES_EXCEEDED"}
+    
+    def _record_to_ledgers(self, agent: AgentV5, trade_result: Dict):
+        """记录到账簿系统"""
+        from .ledger_system import Role
+        
+        try:
+            if not hasattr(agent, 'account') or not agent.account:
+                logger.error(f"Agent {agent.agent_id} 无账户系统，无法记录交易")
+                return
+            
+            # 统一调用账簿系统记录交易
+            agent.account.record_trade(
+                trade_type=trade_result["action"],
+                amount=trade_result["amount"],
+                price=trade_result["fill_price"],
+                confidence=1.0,
+                caller_role=Role.MOIRAI  # ✅ 使用MOIRAI角色
+            )
+            
+            logger.debug(f"✅ 交易已记录: Agent {agent.agent_id} {trade_result['action']} {trade_result['amount']:.4f} @ {trade_result['fill_price']:.2f}")
+            
+        except Exception as e:
+            logger.error(f"记录交易到账簿失败: {e}")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

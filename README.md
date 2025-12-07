@@ -15,6 +15,31 @@
 
 ---
 
+## 🧭 开发者导航（快速入口）
+
+### 🔴 必读：三大铁律（2025-12-07新增）
+- **代码三大铁律**：统一封装 + 测试规范 + 不可简化
+- **数据封装规范**：`docs/DATA_ENCAPSULATION_STANDARD.md` ⭐ **解决数据接口问题！**
+- **账簿问题诊断与修复**：`docs/LEDGER_ISSUES_AND_FIXES.md` ⚠️
+- **代码审查清单**：`docs/CODE_REVIEW_CHECKLIST.md` ✅
+- **Daimon持有逻辑修复**：`docs/DAIMON_HOLD_FIX_20251207.md` 🆕 **解决交易频率过高！**
+- **正确测试示例**：`test_ultimate_v6_CORRECT.py` （使用v6 Facade）
+
+### 📚 架构与模块
+- 一页架构/模块索引：`docs/module_registry.md`
+- API/调用速查（OKX、双账簿、进化/创世、监督循环）：`docs/cookbook.md`
+- 场景化Playbook目录（回测、实盘/虚拟盘、创世与移民、进化调优）：`docs/playbook_index.md`
+- 全文档地图（按版本/主题索引）：`docs/DOCUMENT_MAP.md`
+- v6 封装/兼容策略草案：`docs/V6_FACADE_PLAN.md`
+- 🎲 **随机种子控制指南**：`docs/SEED_CONTROL_GUIDE.md` ⭐ NEW
+
+### 🧪 测试与审计
+- 标准测试模板：`templates/STANDARD_TEST_TEMPLATE.py` (v6.0已过时,使用下面的)
+- ✅ v6正确测试：`test_ultimate_v6_CORRECT.py` **推荐使用**
+- 审计与重写计划：`ARCHITECTURE_AUDIT_2025.md` · `CODE_AUDIT_REPORT.md` · `AUDIT_SUMMARY.md` · `templates/REWRITE_PLAN.md`
+
+---
+
 ## 🎯 v5.0核心成就
 
 v5.0是对整个Agent系统的**完全重构**，不向后兼容，追求最优架构设计。

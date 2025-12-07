@@ -170,27 +170,43 @@ class GenomeVector:
         return self.to_dict()
     
     @classmethod
-    def create_genesis(cls) -> 'GenomeVector':
+    def create_genesis(cls, full_unlock: bool = False) -> 'GenomeVector':
         """
-        创建创世基因组（只有3个基础参数）
+        创建创世基因组
+        
+        Args:
+            full_unlock: 是否解锁所有50个参数（激进模式）
+                        - False: 只解锁Tier 1的3个基础参数（渐进式）
+                        - True: 解锁所有50个参数（完全自由）
         
         Returns:
             GenomeVector: 初始基因组
         
         Examples:
+            >>> # 渐进式（默认）
             >>> genome = GenomeVector.create_genesis()
             >>> genome.get_unlocked_count()  # 3
-            >>> genome.get_unlocked_params()  # ['risk_appetite', 'trend_pref', 'patience']
+            
+            >>> # 激进模式
+            >>> genome = GenomeVector.create_genesis(full_unlock=True)
+            >>> genome.get_unlocked_count()  # 50
         """
         genome = cls()
         
-        # 解锁Tier 1参数（前3个）
-        for i in range(3):
-            genome.unlocked_mask[i] = True
-            # 使用Beta分布生成初始值（避免极端值）
-            genome.vector[i] = np.random.beta(2, 2)
-        
-        logger.debug(f"创建创世基因组: 解锁{genome.get_unlocked_count()}个参数")
+        if full_unlock:
+            # ⚡ 激进模式：解锁所有50个参数！
+            for i in range(50):
+                genome.unlocked_mask[i] = True
+                # 使用Beta分布生成初始值（避免极端值）
+                genome.vector[i] = np.random.beta(2, 2)
+            logger.info(f"🔥 激进模式创世：解锁所有{genome.get_unlocked_count()}个参数")
+        else:
+            # 渐进式：解锁Tier 1参数（前3个）
+            for i in range(3):
+                genome.unlocked_mask[i] = True
+                # 使用Beta分布生成初始值（避免极端值）
+                genome.vector[i] = np.random.beta(2, 2)
+            logger.debug(f"创建创世基因组: 解锁{genome.get_unlocked_count()}个参数")
         
         return genome
     

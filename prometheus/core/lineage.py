@@ -79,7 +79,10 @@ class LineageVector:
         
         logger.debug(f"创建创世血统: family_{family_id} (纯度: 100%)")
         
-        return cls(vector)
+        lineage = cls(vector)
+        # 存储家族ID，供多样性/移民等功能使用
+        lineage.family_id = family_id
+        return lineage
     
     @classmethod
     def create_child(cls, parent1: 'LineageVector', parent2: 'LineageVector') -> 'LineageVector':
@@ -111,7 +114,11 @@ class LineageVector:
         
         logger.debug(f"创建子代血统: 混合度 {cls._compute_mixing_degree(parent1, parent2):.2f}")
         
-        return cls(child_vector)
+        child = cls(child_vector)
+        # 为子代设置family_id（取血统占比最高的家族）
+        dominant_idx = int(np.argmax(child.vector))
+        child.family_id = dominant_idx
+        return child
     
     @staticmethod
     def _compute_mixing_degree(parent1: 'LineageVector', parent2: 'LineageVector') -> float:
@@ -211,6 +218,24 @@ class LineageVector:
         ]
         
         return result
+    
+    def get_dominant_family(self) -> int:
+        """
+        获取主导家族ID（用于多样性监控）
+        
+        Returns:
+            int: 主导家族ID（血统比例最高的家族）
+        
+        Examples:
+            >>> lineage = LineageVector.create_genesis(5, 50)
+            >>> lineage.get_dominant_family()  # 5
+        """
+        # 优先使用显式标记的family_id（创建时写入）
+        explicit_family = getattr(self, 'family_id', None)
+        if explicit_family is not None:
+            return int(explicit_family)
+        dominant_idx = np.argmax(self.vector)
+        return int(dominant_idx)
     
     def classify_purity(self, pure_threshold: float = 0.95) -> LineagePurityClass:
         """

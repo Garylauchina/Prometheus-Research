@@ -147,6 +147,8 @@ class AgentV4:
         self.agent_id = agent_id
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
+        # 账簿占位：由上层挂载 AgentAccountSystem / PrivateLedger
+        self.account: Optional[object] = None
         
         # 基因和性格（v4.1：支持EvolvableGene对象）
         from prometheus.core.evolvable_gene import EvolvableGene

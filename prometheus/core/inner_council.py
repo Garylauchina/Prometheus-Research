@@ -140,6 +140,7 @@ class Daimon:
         
         # 如果没有任何投票，默认hold
         if not all_votes:
+            logger.debug(f"Agent {self.agent.agent_id} Daimon: 所有声音都未投票，默认hold")
             return CouncilDecision(
                 action='hold',
                 confidence=0.5,
@@ -273,20 +274,30 @@ class Daimon:
                 reason=f"损失厌恶({loss_aversion_strength:.1%}): 及时止损(亏{recent_pnl:.1%})"
             ))
         
-        # 3. 风险偏好（v5.2改进：增强探索性开仓）
-        if not has_position and capital_ratio > 0.5:  # v5.2: 降低资金门槛到50%
-            # 无仓时，风险偏好影响开仓倾向
-            if instinct.risk_appetite > 0.6:  # v5.2: 降低门槛到60%
-                # 高风险偏好 → 主动探索开仓
-                # v5.2: 随机选择方向，增加多样性
-                action = random.choice(['buy', 'sell'])
+        # 3. 风险偏好（v6修复：开仓时考虑市场趋势！）
+        if not has_position and capital_ratio > 0.2:
+            if instinct.risk_appetite > 0.10:
+                # ✅ v6修复：根据市场趋势选择方向，而不是随机！
+                market_trend = context.get('market_data', {}).get('trend', 'neutral')
+                
+                if market_trend == 'bullish':
+                    action = 'buy'  # 牛市做多
+                    reason = f"风险偏好({instinct.risk_appetite:.1%})+牛市: 做多"
+                elif market_trend == 'bearish':
+                    action = 'short'  # 熊市做空
+                    reason = f"风险偏好({instinct.risk_appetite:.1%})+熊市: 做空"
+                else:
+                    # neutral才随机（增加多样性）
+                    action = random.choice(['buy', 'short'])
+                    reason = f"风险偏好({instinct.risk_appetite:.1%})+震荡: 探索性{action}"
+                
                 votes.append(Vote(
                     action=action,
-                    confidence=instinct.risk_appetite * 0.7,  # v5.2: 提高confidence到0.7
+                    confidence=min(instinct.risk_appetite * 1.2, 0.9),
                     voter_category='instinct',
-                    reason=f"风险偏好({instinct.risk_appetite:.1%}): 探索性{action}"
+                    reason=reason
                 ))
-            elif instinct.risk_appetite < 0.3:
+            elif instinct.risk_appetite < 0.35:
                 # 低风险偏好 → 倾向观望
                 votes.append(Vote(
                     action='hold',
@@ -312,62 +323,115 @@ class Daimon:
         # 获取genome中的关键参数
         active_params = genome.active_params
         
+        # ✅ 先检查持仓状态（关键！）
+        position = context.get('position', {})
+        has_position = position.get('amount', 0) != 0
+        position_side = position.get('side')  # 'long' or 'short'
+        
         # 1. 趋势偏好
         trend_pref = active_params.get('trend_pref', 0.5)
         market_trend = context.get('market_data', {}).get('trend', 'neutral')
         
-        if trend_pref > 0.6:
-            # 高趋势偏好 → 顺势交易
-            if market_trend == 'bullish':
-                votes.append(Vote(
-                    action='buy',
-                    confidence=trend_pref * 0.6,
-                    voter_category='genome',
-                    reason=f"趋势偏好({trend_pref:.1%}): 顺势做多"
-                ))
-            elif market_trend == 'bearish':
-                votes.append(Vote(
-                    action='sell',
-                    confidence=trend_pref * 0.6,
-                    voter_category='genome',
-                    reason=f"趋势偏好({trend_pref:.1%}): 顺势做空"
-                ))
+        if trend_pref > 0.35:
+            # ✅ V6修复：区分"开仓"和"持仓中的应对"
+            if not has_position:
+                # 无持仓：可以开新仓
+                if market_trend == 'bullish':
+                    votes.append(Vote(
+                        action='buy',
+                        confidence=trend_pref * 0.8,
+                        voter_category='genome',
+                        reason=f"趋势偏好({trend_pref:.1%}): 顺势做多"
+                    ))
+                elif market_trend == 'bearish':
+                    votes.append(Vote(
+                        action='short',  # ✅ 明确用short，不是sell
+                        confidence=trend_pref * 0.8,
+                        voter_category='genome',
+                        reason=f"趋势偏好({trend_pref:.1%}): 顺势做空"
+                    ))
+            else:
+                # ✅ 有持仓：检查趋势是否与持仓方向一致
+                if position_side == 'long' and market_trend == 'bearish':
+                    # 多头 + 熊市 → 建议平仓（但不强制）
+                    votes.append(Vote(
+                        action='sell',
+                        confidence=trend_pref * 0.5,  # 降低confidence，不强制
+                        voter_category='genome',
+                        reason=f"趋势反转({market_trend}): 考虑平多"
+                    ))
+                elif position_side == 'short' and market_trend == 'bullish':
+                    # 空头 + 牛市 → 建议平仓（但不强制）
+                    votes.append(Vote(
+                        action='cover',
+                        confidence=trend_pref * 0.5,
+                        voter_category='genome',
+                        reason=f"趋势反转({market_trend}): 考虑平空"
+                    ))
+                elif (position_side == 'long' and market_trend == 'bullish') or \
+                     (position_side == 'short' and market_trend == 'bearish'):
+                    # ✅ 趋势与持仓一致 → 强烈建议hold！
+                    votes.append(Vote(
+                        action='hold',
+                        confidence=0.9,  # 高置信度！
+                        voter_category='genome',
+                        reason=f"趋势与持仓一致({market_trend}+{position_side}): 坚定持有"
+                    ))
+        elif market_trend != 'neutral' and not has_position:
+            # ✅ 只在无持仓时响应趋势
+            votes.append(Vote(
+                action='buy' if market_trend == 'bullish' else 'short',
+                confidence=0.3,
+                voter_category='genome',
+                reason=f"市场趋势明确({market_trend}): 跟随"
+            ))
         
         # 2. 均值回归偏好
         mean_reversion = active_params.get('mean_reversion', 0.5)
         price_deviation = context.get('market_data', {}).get('price_deviation', 0)
         
         if mean_reversion > 0.6 and abs(price_deviation) > 0.05:
-            # 高均值回归偏好 + 价格偏离 → 反向交易
-            if price_deviation > 0:  # 价格过高
-                votes.append(Vote(
-                    action='sell',
-                    confidence=mean_reversion * 0.5,
-                    voter_category='genome',
-                    reason=f"均值回归({mean_reversion:.1%}): 价格过高"
-                ))
-            else:  # 价格过低
-                votes.append(Vote(
-                    action='buy',
-                    confidence=mean_reversion * 0.5,
-                    voter_category='genome',
-                    reason=f"均值回归({mean_reversion:.1%}): 价格过低"
-                ))
+            # ✅ V6修复：只在无持仓时考虑均值回归开仓
+            if not has_position:
+                # 高均值回归偏好 + 价格偏离 → 反向交易
+                if price_deviation > 0:  # 价格过高
+                    votes.append(Vote(
+                        action='short',  # ✅ 明确用short
+                        confidence=mean_reversion * 0.5,
+                        voter_category='genome',
+                        reason=f"均值回归({mean_reversion:.1%}): 价格过高，做空"
+                    ))
+                else:  # 价格过低
+                    votes.append(Vote(
+                        action='buy',
+                        confidence=mean_reversion * 0.5,
+                        voter_category='genome',
+                        reason=f"均值回归({mean_reversion:.1%}): 价格过低，做多"
+                    ))
+            # ✅ 有持仓时，均值回归不主动建议交易（由patience处理）
         
-        # 3. 耐心
+        # 3. 耐心（✅ V6加强：强力鼓励持有）
         patience = active_params.get('patience', 0.5)
-        position = context.get('position', {})
-        has_position = position.get('amount', 0) != 0
         holding_periods = context.get('holding_periods', 0)
         
-        if patience > 0.7 and has_position and holding_periods < 5:
-            # 高耐心 + 持仓时间短 → 建议持有
-            votes.append(Vote(
-                action='hold',
-                confidence=patience * 0.6,
-                voter_category='genome',
-                reason=f"耐心({patience:.1%}): 等待更好时机"
-            ))
+        if has_position:
+            # ✅ V6修复：只要有持仓，就倾向于持有（不管耐心高低）
+            # 耐心越高，持有意愿越强
+            if patience > 0.4:  # 降低门槛，让更多Agent倾向持有
+                hold_confidence = min(patience * 0.9, 0.95)  # 提高confidence
+                votes.append(Vote(
+                    action='hold',
+                    confidence=hold_confidence,
+                    voter_category='genome',
+                    reason=f"耐心({patience:.1%}): 持有待涨/跌"
+                ))
+            elif holding_periods < 10:  # 即使耐心不高，但如果刚开仓不久，也倾向持有
+                votes.append(Vote(
+                    action='hold',
+                    confidence=0.5,
+                    voter_category='genome',
+                    reason=f"持仓时间短({holding_periods}周期): 给策略更多时间"
+                ))
         
         return votes
     
