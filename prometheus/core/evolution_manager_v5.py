@@ -20,24 +20,29 @@ import random  # v5.2: 用于变异率随机化
 from .agent_v5 import AgentV5
 from .lineage import LineageVector
 from .genome import GenomeVector
-from .instinct import Instinct
-from .dual_entropy import PrometheusBloodLab
-from .diversity_monitor import DiversityMonitor  # v5.2 Day 3
-from .diversity_protection import DiversityProtector  # v5.2 Day 3
+# AlphaZero式：移除所有diversity相关import
+# from .instinct import Instinct
+# from .dual_entropy import PrometheusBloodLab
+# from .diversity_monitor import DiversityMonitor
+# from .diversity_protection import DiversityProtector
 
 logger = logging.getLogger(__name__)
 
 
 class EvolutionManagerV5:
     """
-    v5.0进化管理器（不向后兼容）
+    v6.0 AlphaZero式进化管理器
     
-    职责：
-    1. 评估种群表现
-    2. 选择优秀父母
-    3. 繁殖新Agent（Lineage/Genome/Instinct遗传）
-    4. 生殖隔离检查
-    5. 监控双熵健康度
+    核心职责：
+    1. 评估种群表现（纯Fitness）
+    2. 淘汰最差Agent
+    3. 病毒式复制（克隆精英+变异）
+    
+    移除：
+    ❌ 生殖隔离检查
+    ❌ 双熵监控
+    ❌ Immigration
+    ❌ 多样性保护
     """
     
     def __init__(self, 
@@ -59,40 +64,15 @@ class EvolutionManagerV5:
         self.elimination_ratio = elimination_ratio
         self.num_families = num_families
         
-        # 双熵监控系统
-        self.blood_lab = PrometheusBloodLab(num_families=num_families)
-        
-        # v5.2 Day 3: 多样性监控和保护系统
-        self.diversity_monitor = DiversityMonitor()
-        self.diversity_protector = DiversityProtector(
-            protection_ratio=0.1,
-            min_niche_size=3,
-            max_protection_count=5
-        )
-        
-        # 进化统计
+        # AlphaZero式：极简统计
         self.generation = 0
         self.total_births = 0
         self.total_deaths = 0
         
-        # 生殖隔离阈值（降低以减少限制）
-        self.kinship_threshold = 0.8  # 提高阈值，减少限制
-        
-        # v5.3：提高变异率，强化多样性
-        self.base_mutation_rate = 0.2   # v5.3: 基础变异率提升到20%
-        self.max_mutation_rate = 0.7    # v5.3: 最大变异率提升到70%
-        self.gene_entropy_threshold = 0.3  # v5.3: 提高阈值，更积极触发高变异
-        
-        # v5.3：移民机制（改为由先知/战略层触发，而非固定间隔）
-        self.immigration_enabled = True          # 可由上层关停
-        self.immigrants_per_wave = 2             # 默认批量
-        self.immigration_cooldown = 3            # 代级防抖，避免频繁注入
-        self.last_immigration_generation = -999  # 初始化为极小
-        
-        logger.info(f"🧬 EvolutionManagerV5已初始化 (v5.3)")
+        logger.info(f"🦠 EvolutionManagerV5已初始化 (v6.0 AlphaZero式)")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
         logger.info(f"   淘汰比例: {elimination_ratio:.0%}")
-        logger.info(f"   生殖隔离阈值: {self.kinship_threshold}")
+        logger.info(f"   繁殖方式: 病毒式复制（固定变异率0.1）")
     
     def _calculate_dynamic_mutation_rate(self, gene_entropy: float) -> float:
         """
