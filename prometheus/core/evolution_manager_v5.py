@@ -125,48 +125,32 @@ class EvolutionManagerV5:
     
     def run_evolution_cycle(self, current_price: float = 0):
         """
-        执行一轮进化周期（v5.0专用）
+        🧬 执行一轮进化周期 - AlphaZero式极简版
         
         流程：
-        1. 双熵健康检查
-        2. 评估Agent表现
-        3. 淘汰表现最差的
-        4. 选择优秀父母
-        5. 🧵 Clotho纺织新生命（Lineage/Genome/Instinct遗传）
-        6. 记录统计
+        1. 评估Agent表现（纯Fitness）
+        2. 淘汰最差的
+        3. 让最好的繁殖
+        4. 固定变异率（0.1）
+        
+        移除：
+        ❌ 双熵健康检查
+        ❌ 动态变异率
+        ❌ 多样性危机检测
+        ❌ Immigration
+        ❌ 多样性保护
         
         Args:
             current_price: 当前市场价格
         """
         logger.info(f"\n{'='*70}")
-        logger.info(f"🧬 开始进化周期 - 第{self.generation + 1}代")
+        logger.info(f"🧬 开始进化周期 - 第{self.generation + 1}代 (AlphaZero式)")
         logger.info(f"{'='*70}")
         
-        # 1. 双熵健康检查
-        health = self.blood_lab.population_checkup(self.moirai.agents)
-        logger.info(f"🩺 种群健康检查:")
-        logger.info(f"   血统熵: {health.lineage_entropy_normalized:.3f}")
-        logger.info(f"   基因熵: {health.gene_entropy:.3f}")
-        logger.info(f"   总体健康: {health.overall_health}")
+        # AlphaZero式：固定变异率
+        mutation_rate = 0.1
         
-        # 1.1 计算动态变异率（v5.1.1）
-        base_mutation_rate = self._calculate_dynamic_mutation_rate(health.gene_entropy)
-        
-        # v5.2：引入随机噪声（±20%）
-        noise_factor = random.uniform(0.8, 1.2)
-        dynamic_mutation_rate = base_mutation_rate * noise_factor
-        
-        logger.info(f"🧬 基础变异率: {base_mutation_rate:.1%}")
-        logger.info(f"🎲 噪声系数: ×{noise_factor:.2f}")
-        logger.info(f"🧬 实际变异率: {dynamic_mutation_rate:.1%} (v5.2: 随机化)")
-        
-        # 1.2 检查多样性危机（v5.1.1）
-        diversity_crisis = health.gene_entropy <= 0.1  # 修改为<=，包含边界值
-        if diversity_crisis:
-            logger.error(f"🚨 多样性危机！基因熵={health.gene_entropy:.3f} ≤ 0.1")
-            logger.error(f"   启动紧急多样性恢复机制...")
-        
-        # 2. 评估Agent表现（✨ 传入当前价格）
+        # 1. 评估Agent表现（纯Fitness排序）
         rankings = self._rank_agents(current_price=current_price)
         
         if not rankings:
@@ -175,21 +159,7 @@ class EvolutionManagerV5:
         
         total_agents = len(rankings)
         
-        # 2.1 【v5.2 Day 3】多样性监控
-        logger.info(f"\n🧬 多样性监控 (v5.2 Day 3):")
-        diversity_metrics = self.diversity_monitor.monitor(
-            agents=self.moirai.agents,
-            cycle=self.generation
-        )
-        
-        logger.info(f"   基因熵: {diversity_metrics.gene_entropy:.3f}")
-        logger.info(f"   策略熵: {diversity_metrics.strategy_entropy:.3f}")
-        logger.info(f"   血统熵: {diversity_metrics.lineage_entropy:.3f}")
-        logger.info(f"   活跃家族: {diversity_metrics.active_families}")
-        logger.info(f"   多样性得分: {diversity_metrics.diversity_score:.3f}")
-        logger.info(f"   健康状态: {'✅ 健康' if diversity_metrics.is_healthy else '⚠️ 需关注'}")
-        
-        # 3. 识别精英、存活者和淘汰者
+        # 2. 识别精英、存活者和淘汰者（AlphaZero式：纯实力）
         elite_count = max(1, int(total_agents * self.elite_ratio))
         eliminate_count = max(1, int(total_agents * self.elimination_ratio))
         
@@ -197,39 +167,7 @@ class EvolutionManagerV5:
         survivors = rankings[:-eliminate_count] if eliminate_count < total_agents else []
         to_eliminate = rankings[-eliminate_count:]
         
-        # 3.1 【v5.2 Day 3】多样性保护
-        protected_ids = set()
-        if not diversity_metrics.is_healthy:
-            logger.warning(f"\n🛡️ 多样性保护触发 (得分: {diversity_metrics.diversity_score:.3f}):")
-            
-            # 提取排序后的agent列表
-            ranked_agents_only = [agent for agent, _ in rankings]
-            
-            # 识别需要保护的Agent
-            protected_ids, protection_details = self.diversity_protector.protect_diversity(
-                agents=self.moirai.agents,
-                ranked_agents=ranked_agents_only,
-                diversity_metrics=diversity_metrics
-            )
-            
-            logger.info(f"   保护Agent数: {len(protected_ids)}")
-            logger.info(f"   - 生态位保护: {len(protection_details['niche_protection'])}")
-            logger.info(f"   - 稀有策略保护: {len(protection_details['rare_strategy_protection'])}")
-            logger.info(f"   - 稀有血统保护: {len(protection_details['rare_lineage_protection'])}")
-            
-            # 调整淘汰列表，排除受保护的Agent
-            if protected_ids:
-                original_eliminate = to_eliminate
-                to_eliminate = self.diversity_protector.adjust_elimination(
-                    ranked_agents=ranked_agents_only,
-                    protected_ids=protected_ids,
-                    elimination_count=eliminate_count
-                )
-                
-                logger.info(f"   调整淘汰列表: {len(original_eliminate)} → {len(to_eliminate)}")
-                
-                # 更新为元组列表格式
-                to_eliminate = [(agent, 0.0) for agent in to_eliminate]
+        # AlphaZero式：没有多样性保护，纯实力淘汰
         
         logger.info(f"📊 种群评估:")
         logger.info(f"   总数: {total_agents}")
@@ -249,94 +187,26 @@ class EvolutionManagerV5:
             self.moirai._atropos_eliminate_agent(agent, "进化淘汰")
             self.total_deaths += 1
         
-        # 5. 🧵 Clotho纺织新生命
+        # 3. 🧵 Clotho纺织新生命（AlphaZero式：精英配对）
         logger.info(f"\n🧵 Clotho开始纺织新生命...")
         
-        # 5.1 【v5.2 Day 3】如果多样性极低，触发强制多样化繁殖
-        forced_diverse_breeding = []
-        if diversity_metrics.diversity_score < 0.4:
-            logger.warning(f"\n🧬 多样性极低({diversity_metrics.diversity_score:.3f})，启动强制多样化繁殖:")
-            
-            # 从存活者中强制多样化配对
-            survivor_agents = [agent for agent, _ in survivors]
-            forced_pairs = self.diversity_protector.force_diverse_breeding(
-                agents=survivor_agents,
-                num_offspring=min(3, eliminate_count // 2)  # 最多3对或淘汰数的一半
-            )
-            forced_diverse_breeding = forced_pairs
-            logger.info(f"   强制配对数: {len(forced_pairs)}")
-        
         new_agents = []
-        attempts = 0
-        max_total_attempts = eliminate_count * 20  # 增加到20倍（更多尝试机会）
+        target_breeding_count = eliminate_count  # 简单：淘汰多少，繁殖多少
         
-        # v5.2：允许种群随机波动（±10%）
-        # 随机决定本轮的繁殖目标：90%-110%之间
-        breeding_ratio = random.uniform(0.90, 1.10)  # 随机比例
-        target_breeding_count = max(1, round(eliminate_count * breeding_ratio))  # 使用round而非int
-        emergency_threshold = int(eliminate_count * 0.90)    # 90%紧急阈值
-        failed_attempts_threshold = eliminate_count * 5       # 失败阈值：淘汰数的5倍
+        logger.info(f"📊 目标繁殖数: {target_breeding_count}")
         
-        logger.info(f"📊 目标繁殖数: {target_breeding_count} (比例{breeding_ratio:.1%}，允许±5%波动)")
-        logger.info(f"   紧急阈值: {emergency_threshold} (低于此值触发强制繁殖)")
-        
-        # v5.1.1：动态相似度阈值（多样性危机时更激进）
-        if diversity_crisis:
-            # 多样性危机：初始阈值降低，更快放宽
-            similarity_threshold = 0.85  # 起始85%（而非90%）
-            logger.warning(f"   🚨 多样性危机模式：相似度阈值{similarity_threshold:.0%}，每20次尝试-5%，最低50%")
-            logger.warning(f"   🆘 如果{failed_attempts_threshold}次尝试后仍不足，将跳过相似度检查强制繁殖")
-        else:
-            similarity_threshold = 0.90  # 正常情况90%
-            logger.info(f"   相似度阈值: {similarity_threshold:.0%}")
-        
-        # v5.2：修改终止条件，允许达到95%即可
-        while len(new_agents) < target_breeding_count and attempts < max_total_attempts:
-            attempts += 1
+        # AlphaZero式：简单繁殖（随机选择精英配对）
+        for i in range(target_breeding_count):
             try:
-                # 【v5.2 Day 3】优先使用强制多样化配对
-                if forced_diverse_breeding and len(new_agents) < len(forced_diverse_breeding):
-                    parent1, parent2 = forced_diverse_breeding[len(new_agents)]
-                    logger.info(f"   🧬 使用强制多样化配对: {parent1.agent_id[:8]} + {parent2.agent_id[:8]}")
-                else:
-                    # 动态放宽相似度阈值（多样性危机时每20次降低5%，正常每50次）
-                    if diversity_crisis and attempts > 0:
-                        # 多样性危机：快速放宽（每20次尝试-5%）
-                        similarity_threshold = max(0.50, 0.85 - (attempts // 20) * 0.05)
-                    elif attempts > 0:
-                        # 正常情况：缓慢放宽（每50次尝试-5%）
-                        similarity_threshold = max(0.70, 0.90 - (attempts // 50) * 0.05)
-                    
-                    # 选择父母（使用放宽版本）
-                    parent1, parent2 = self._select_parents_relaxed(survivors)
+                # 从精英中随机选择两个父母
+                parent1, parent2 = self._select_parents_simple(elite_agents)
                 
                 if not parent1 or not parent2:
-                    logger.debug(f"   尝试{attempts}: 无法找到父母")
+                    logger.warning(f"   无法找到父母，跳过本次繁殖")
                     continue
                 
-                # v5.1.1：多样性危机时，禁止高相似度交配
-                # 但如果尝试次数过多，跳过检查强制繁殖
-                skip_similarity_check = (diversity_crisis and 
-                                        attempts > failed_attempts_threshold and 
-                                        len(new_agents) < eliminate_count)
-                
-                if diversity_crisis and not skip_similarity_check:
-                    # 计算基因相似度（使用.vector属性，不是.genes）
-                    gene_similarity = 1 - np.mean(np.abs(
-                        parent1.genome.vector - parent2.genome.vector
-                    ))
-                    
-                    if gene_similarity > similarity_threshold:
-                        if attempts % 20 == 0:  # 每20次尝试记录一次
-                            logger.warning(f"   尝试{attempts}: 父母相似度({gene_similarity:.1%})超过阈值({similarity_threshold:.1%})，继续尝试...")
-                        continue
-                
-                # 如果跳过了相似度检查，记录日志
-                if skip_similarity_check and attempts == failed_attempts_threshold + 1:
-                    logger.error(f"   🆘 已尝试{failed_attempts_threshold}次，强制跳过相似度检查以保证种群稳定！")
-                
-                # 🧵 纺织新Agent（使用动态变异率）
-                child = self._clotho_weave_child(parent1, parent2, mutation_rate=dynamic_mutation_rate)
+                # 纺织新Agent（固定变异率0.1）
+                child = self._clotho_weave_child(parent1, parent2, mutation_rate=mutation_rate)
                 
                 new_agents.append(child)
                 self.total_births += 1
