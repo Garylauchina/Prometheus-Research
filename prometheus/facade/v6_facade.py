@@ -10,7 +10,8 @@ from datetime import datetime
 from prometheus.core.moirai import Moirai
 from prometheus.core.evolution_manager_v5 import EvolutionManagerV5
 from prometheus.core.bulletin_board import BulletinBoard, BulletinType, Priority
-from prometheus.core.diversity_monitor import DiversityMonitor, DiversityMetrics
+# AlphaZero式：移除diversity_monitor
+# from prometheus.core.diversity_monitor import DiversityMonitor, DiversityMetrics
 from prometheus.exchange.okx_api import OKXExchange
 from prometheus.exchange.okx_api import OKXExchange as OKXExchangeType  # alias for type hints
 from prometheus.core.ledger_system import PublicLedger, PrivateLedger, LedgerReconciler, TradeRecord, Role
@@ -144,7 +145,8 @@ class V6Facade:
             match_config=match_config
         )
         self.evolution = EvolutionManagerV5(moirai=self.moirai, num_families=num_families)
-        self.diversity_monitor = self.evolution.diversity_monitor  # 复用同一监控器
+        # AlphaZero式：移除diversity_monitor
+        # self.diversity_monitor = self.evolution.diversity_monitor
         self.public_ledger = PublicLedger()
         # 让 moirai 持有同一公共账簿，供 attach_accounts 使用
         self.moirai.public_ledger = self.public_ledger
@@ -404,9 +406,9 @@ class V6Facade:
             except Exception as e:
                 logger.error(f"更新Agent {agent.agent_id} 统计数据失败: {e}")
         
-        # 4. 多样性监控
-        metrics = self.diversity_monitor.monitor(self.moirai.agents, cycle_count)
-        self.metrics_history.append(metrics)
+        # AlphaZero式：移除多样性监控
+        # metrics = self.diversity_monitor.monitor(self.moirai.agents, cycle_count)
+        # self.metrics_history.append(metrics)
         
         # 5. 进化
         if self.evo_interval and self.evo_interval > 0:
