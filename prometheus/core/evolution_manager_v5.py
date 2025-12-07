@@ -647,32 +647,59 @@ class EvolutionManagerV5:
         
         return max(fitness, 0.001)  # 确保非负
     
-    def _rank_agents(self, current_price: float = 0.0) -> List[Tuple[AgentV5, float]]:
+    def _calculate_fitness_alphazero(self, agent: AgentV5, current_price: float = 0.0) -> float:
         """
-        ⚔️ 评估并排序Agent（v6: 使用fitness v3 - 绝对收益导向）
+        ⚔️ AlphaZero式极简Fitness - 只有绝对收益
         
-        评估标准：绝对收益 + 长期持有 + 交易频率控制
+        移除所有人为干预：
+        ❌ 持有奖励（不鼓励特定行为）
+        ❌ 频率惩罚（不惩罚探索）
+        ❌ 趋势对齐（不人为引导）
+        ❌ 生存奖励（不鼓励苟活）
+        
+        只有：
+        ✅ 绝对收益 = (最终资金 - 初始资金) / 初始资金
+        
+        理由：
+        - 盈利是唯一目标
+        - 让进化自己找到最优策略
+        - 不要人为干预演化方向
         
         Args:
-            current_price: 当前市场价格（用于计算未实现盈亏）✨
+            agent: 待评估的Agent
+            current_price: 当前市场价格（用于计算未实现盈亏）
+        
+        Returns:
+            float: Fitness分数（绝对收益）
+        """
+        # 1. 计算最终资金（现金 + 未实现盈亏）
+        current_liquid_capital = agent.account.private_ledger.virtual_capital if hasattr(agent, 'account') and agent.account else agent.current_capital
+        unrealized_pnl = agent.calculate_unrealized_pnl(current_price) if current_price > 0 else 0.0
+        effective_capital = current_liquid_capital + unrealized_pnl
+        
+        # 2. 计算绝对收益
+        absolute_return = (effective_capital - agent.initial_capital) / agent.initial_capital
+        
+        # 就这么简单！
+        return absolute_return
+    
+    def _rank_agents(self, current_price: float = 0.0) -> List[Tuple[AgentV5, float]]:
+        """
+        ⚔️ 评估并排序Agent（AlphaZero式极简版）
+        
+        评估标准：纯绝对收益
+        
+        Args:
+            current_price: 当前市场价格（用于计算未实现盈亏）
         
         Returns:
             List[(agent, fitness)]: 按表现排序的Agent列表（从优到劣）
         """
         rankings = []
         
-        # 计算total_cycles（用于归一化）
-        total_cycles = max(
-            getattr(agent, 'cycles_survived', 1) 
-            for agent in self.moirai.agents
-        ) if self.moirai.agents else 1
-        
-        # 计算BTC基准收益（如果可用）
-        btc_return = 0.0  # TODO: 从市场数据计算
-        
         for agent in self.moirai.agents:
-            # ⚔️ 使用fitness v3计算（绝对收益导向）✨ 传入当前价格！
-            fitness = self._calculate_fitness_v3(agent, total_cycles, current_price, btc_return)
+            # AlphaZero式：使用极简Fitness（只有绝对收益）
+            fitness = self._calculate_fitness_alphazero(agent, current_price)
             rankings.append((agent, fitness))
         
         # 按fitness排序（从高到低）
