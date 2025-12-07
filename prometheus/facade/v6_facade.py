@@ -730,7 +730,8 @@ class V6Facade:
                 total_trades += len(agent.account.private_ledger.trade_history)
         
         # 多样性评分
-        diversity_score = self.metrics_history[-1].diversity_score if self.metrics_history else 0
+        # AlphaZero式：不再记录diversity metrics
+        diversity_score = 0
         
         return {
             "agent_count": agent_count,
