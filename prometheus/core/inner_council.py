@@ -103,16 +103,12 @@ class Daimon:
     
     def _calculate_leverage(self, context: Dict, decision: CouncilDecision) -> float:
         """
-        计算杠杆倍数
+        计算杠杆倍数（可进化版本）
         
-        基于以下因素：
-        1. StrategyParams（position_size_base, directional_bias）
-        2. 决策信心（confidence）
-        3. 市场波动率（volatility）
-        4. Agent资金状况（capital_ratio）
+        直接从StrategyParams读取杠杆偏好，让进化机制决定最优杠杆！
         
         Returns:
-            float: 杠杆倍数 (1.0-10.0)
+            float: 杠杆倍数 (1.0-100.0)
         """
         # 如果是平仓或持有，不需要杠杆
         if decision.action in ['hold', 'close', 'sell', 'cover']:
@@ -120,29 +116,19 @@ class Daimon:
         
         params = self.agent.strategy_params
         
-        # 基础杠杆（基于position_size_base）
-        # position_size_base越高，愿意用更高的杠杆
-        base_leverage = 1.0 + params.position_size_base * 5.0  # 0.0-1.0 → 1.0-6.0
+        # ✨ 从策略参数读取杠杆偏好（可进化！）
+        # leverage_preference: 0.0-1.0 → leverage: 1-100x
+        leverage = 1.0 + params.leverage_preference * 99.0
         
-        # 信心调整（confidence越高，杠杆越高）
-        confidence_multiplier = 0.5 + decision.confidence * 0.5  # 0.5-1.0
-        
-        # 资金状况调整（资金越健康，杠杆越高）
+        # 资金状况安全阀（亏损时强制降低杠杆）
         capital_ratio = context.get('capital_ratio', 1.0)
-        if capital_ratio > 1.5:  # 盈利50%以上
-            capital_multiplier = 1.2
-        elif capital_ratio > 1.0:  # 盈利
-            capital_multiplier = 1.0
-        elif capital_ratio > 0.8:  # 轻微亏损
-            capital_multiplier = 0.8
-        else:  # 严重亏损
-            capital_multiplier = 0.5
+        if capital_ratio < 0.5:  # 亏损50%以上
+            leverage = min(leverage, 2.0)  # 强制降到2x
+        elif capital_ratio < 0.8:  # 亏损20%以上
+            leverage = min(leverage, 5.0)  # 强制降到5x
         
-        # 综合计算
-        leverage = base_leverage * confidence_multiplier * capital_multiplier
-        
-        # 限制范围：1.0-10.0
-        leverage = max(1.0, min(leverage, 10.0))
+        # 限制范围：1.0-100.0
+        leverage = max(1.0, min(leverage, 100.0))
         
         return leverage
     
