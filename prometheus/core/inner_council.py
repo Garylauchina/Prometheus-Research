@@ -122,9 +122,6 @@ class Daimon:
         all_votes = []
         all_votes.extend(self._genome_voice(context))  # 感知市场
         all_votes.extend(self._strategy_voice(context))  # 执行策略
-        all_votes.extend(self._emotion_voice(context))
-        all_votes.extend(self._strategy_voice(context))   # 策略分析（战术）
-        all_votes.extend(self._prophecy_voice(context))   # 先知预言（战略）
         all_votes.extend(self._world_signature_voice(context))  # ✨ v5.5+：世界感知！
         
         # AlphaZero式：如果没有投票，默认hold
@@ -145,7 +142,8 @@ class Daimon:
         # 生成推理
         decision.reasoning = self._generate_reasoning(all_votes, decision.action)
         decision.all_votes = all_votes
-        decision.weights_used = self.base_weights.copy()
+        # AlphaZero式：不再记录权重（没有权重系统）
+        decision.weights_used = {}
         decision.context_snapshot = context.copy()
         
         return decision
@@ -920,11 +918,8 @@ class Daimon:
         action_confidence_sum = defaultdict(float)
         
         for vote in all_votes:
-            weight = self.base_weights.get(vote.voter_category, 0.5)
-            # v5.2: 紧急模式下，本能权重动态提升
-            if vote.voter_category == 'instinct':
-                weight *= instinct_multiplier
-            weighted_score = vote.confidence * weight
+            # AlphaZero式：不使用权重，简单基于confidence投票
+            weighted_score = vote.confidence
             
             action_scores[vote.action] += weighted_score
             action_vote_counts[vote.action] += 1
