@@ -61,6 +61,7 @@ class CouncilDecision:
         action: 最终决策的行动
         confidence: 决策信心 (0-1)
         reasoning: 决策推理（自然语言）
+        leverage: 杠杆倍数 (1.0-10.0)
         all_votes: 所有投票记录
         weights_used: 使用的权重配置
         context_snapshot: 决策时的上下文快照（用于调试）
@@ -68,6 +69,7 @@ class CouncilDecision:
     action: str
     confidence: float
     reasoning: str
+    leverage: float = 1.0  # ✨ 新增：杠杆倍数
     all_votes: List[Vote] = field(default_factory=list)
     weights_used: Dict[str, float] = field(default_factory=dict)
     context_snapshot: Dict = field(default_factory=dict)
@@ -98,6 +100,51 @@ class Daimon:
         # 只有2个voice，权重相等，简单投票即可
     
     # ==================== 主决策流程 ====================
+    
+    def _calculate_leverage(self, context: Dict, decision: CouncilDecision) -> float:
+        """
+        计算杠杆倍数
+        
+        基于以下因素：
+        1. StrategyParams（position_size_base, directional_bias）
+        2. 决策信心（confidence）
+        3. 市场波动率（volatility）
+        4. Agent资金状况（capital_ratio）
+        
+        Returns:
+            float: 杠杆倍数 (1.0-10.0)
+        """
+        # 如果是平仓或持有，不需要杠杆
+        if decision.action in ['hold', 'close', 'sell', 'cover']:
+            return 1.0
+        
+        params = self.agent.strategy_params
+        
+        # 基础杠杆（基于position_size_base）
+        # position_size_base越高，愿意用更高的杠杆
+        base_leverage = 1.0 + params.position_size_base * 5.0  # 0.0-1.0 → 1.0-6.0
+        
+        # 信心调整（confidence越高，杠杆越高）
+        confidence_multiplier = 0.5 + decision.confidence * 0.5  # 0.5-1.0
+        
+        # 资金状况调整（资金越健康，杠杆越高）
+        capital_ratio = context.get('capital_ratio', 1.0)
+        if capital_ratio > 1.5:  # 盈利50%以上
+            capital_multiplier = 1.2
+        elif capital_ratio > 1.0:  # 盈利
+            capital_multiplier = 1.0
+        elif capital_ratio > 0.8:  # 轻微亏损
+            capital_multiplier = 0.8
+        else:  # 严重亏损
+            capital_multiplier = 0.5
+        
+        # 综合计算
+        leverage = base_leverage * confidence_multiplier * capital_multiplier
+        
+        # 限制范围：1.0-10.0
+        leverage = max(1.0, min(leverage, 10.0))
+        
+        return leverage
     
     def guide(self, context: Dict) -> CouncilDecision:
         """
@@ -131,6 +178,7 @@ class Daimon:
                 action='hold',
                 confidence=0.5,
                 reasoning="无明确信号，保持观望",
+                leverage=1.0,  # 默认无杠杆
                 all_votes=[],
                 weights_used={},  # AlphaZero式：无权重系统
                 context_snapshot=context.copy(),
@@ -145,6 +193,9 @@ class Daimon:
         # AlphaZero式：不再记录权重（没有权重系统）
         decision.weights_used = {}
         decision.context_snapshot = context.copy()
+        
+        # ✨ 计算杠杆（基于策略参数和市场条件）
+        decision.leverage = self._calculate_leverage(context, decision)
         
         return decision
     
