@@ -30,7 +30,8 @@ import logging
 # v5.0模块
 from prometheus.core.lineage import LineageVector
 from prometheus.core.genome import GenomeVector
-from prometheus.core.instinct import Instinct
+# from prometheus.core.instinct import Instinct  # 已移除，使用StrategyParams替代
+from prometheus.core.strategy_params import StrategyParams  # AlphaZero式极简
 from prometheus.core.inner_council import Daimon, CouncilDecision
 from prometheus.core.strategy import Strategy, StrategySignal, get_compatible_strategies
 from prometheus.core.personal_insights import PersonalInsights
@@ -90,19 +91,19 @@ class AgentV5:
         initial_capital: float,
         lineage: LineageVector,
         genome: GenomeVector,
-        instinct: Instinct,
+        strategy_params: StrategyParams,  # AlphaZero式：直接替换instinct
         generation: int = 0,
         meta_genome: Optional['MetaGenome'] = None,
     ):
         """
-        初始化Agent
+        初始化Agent - AlphaZero式极简版
         
         Args:
             agent_id: Agent唯一标识
             initial_capital: 初始资金
             lineage: 血统向量
             genome: 基因组向量
-            instinct: 本能
+            strategy_params: 策略参数（替代instinct）
             generation: 代数
             meta_genome: 元基因组（控制决策风格）
         """
@@ -111,7 +112,7 @@ class AgentV5:
         self.generation = generation
         self.lineage = lineage  # 固定，不变
         self.genome = genome    # 缓慢进化
-        self.instinct = instinct  # 可遗传，可变
+        self.strategy_params = strategy_params  # AlphaZero式：纯理性策略参数
         
         # ==================== 元基因组（v5.1新增）====================
         if meta_genome is None:
@@ -154,7 +155,8 @@ class AgentV5:
         self.personal_insights = PersonalInsights()
         
         # ==================== 情绪状态 ====================
-        self.emotion = EmotionalState()
+        # AlphaZero式：移除情绪系统，纯理性决策
+        # self.emotion = EmotionalState()  # 已移除
         
         # ==================== 决策系统 ====================
         self.daimon = Daimon(self)  # 守护神 - 决策中枢
@@ -170,7 +172,7 @@ class AgentV5:
             f"第{generation}代 | "
             f"资金${initial_capital:.2f} | "
             f"家族{self.lineage.get_dominant_families()[:3]} | "
-            f"性格:{self.instinct.describe_personality()}"
+            f"策略:{self.strategy_params.get_display_string()}"
         )
     
     # ==================== 策略管理 ====================
@@ -263,8 +265,8 @@ class AgentV5:
         # 确保cycles_alive增长
         self.cycles_alive += 1
         
-        # 2. 更新情绪
-        self._update_emotional_state()
+        # 2. 更新情绪（AlphaZero式：已移除）
+        # self._update_emotional_state()  # 不再需要
         
         # 3. 激活策略，获取市场分析
         strategy_signals = self._analyze_with_strategies(market_data)
@@ -571,29 +573,8 @@ class AgentV5:
     # ==================== 状态更新 ====================
     
     def _update_emotional_state(self):
-        """更新情绪状态"""
-        capital_ratio = self.current_capital / self.initial_capital
-        
-        # 绝望
-        if capital_ratio < 0.5:
-            self.emotion.despair = (0.5 - capital_ratio) * 2
-        else:
-            self.emotion.despair = 0
-        
-        self.emotion.despair += self.consecutive_losses * 0.05
-        self.emotion.despair = min(self.emotion.despair, 1.0)
-        
-        # 信心
-        if capital_ratio > 1.0:
-            self.emotion.confidence = min(capital_ratio - 1.0 + 0.5, 1.0)
-        else:
-            self.emotion.confidence = capital_ratio * 0.5
-        
-        # 恐惧
-        self.emotion.fear = self.emotion.despair * 0.8
-        
-        # 压力
-        self.emotion.stress = (self.emotion.despair + self.emotion.fear) / 2
+        """AlphaZero式：已移除情绪系统"""
+        pass  # 纯理性Agent不需要情绪更新
     
     def _get_recent_pnl(self, last_n: int = 5) -> float:
         """获取最近N笔交易的平均盈亏率"""
@@ -675,9 +656,10 @@ class AgentV5:
     
     def should_commit_suicide(self) -> bool:
         """
-        判断是否应该自杀
+        AlphaZero式：简化自杀判断，只基于客观指标
         
-        完全由Agent自主决定
+        不再有"情绪绝望"、"死亡恐惧"等主观因素
+        只基于客观的资金状况
         
         Returns:
             bool: 是否自杀
@@ -687,32 +669,25 @@ class AgentV5:
         
         capital_ratio = self.current_capital / self.initial_capital
         
-        # 综合评估
+        # AlphaZero式：纯理性判断
         suicide_factors = {
-            '资金严重亏损': capital_ratio < 0.3,
-            '连续大量亏损': self.consecutive_losses > 10,
-            '累计亏损巨大': capital_ratio < 0.2,
-            '情绪绝望': self.emotion.despair > 0.8,
+            '资金严重亏损': capital_ratio < 0.2,  # 亏损80%
+            '连续大量亏损': self.consecutive_losses > 15,  # 连续15次亏损
         }
         
-        triggered = sum(suicide_factors.values())
-        
-        if triggered >= 3:
-            # 性格影响最终决定
-            suicide_probability = triggered / len(suicide_factors)
-            will_to_live = self.instinct.fear_of_death * (1 - self.emotion.despair)
-            
-            if suicide_probability > will_to_live:
-                return True
+        # 触发任意一个条件即自杀（更激进）
+        if any(suicide_factors.values()):
+            return True
         
         return False
     
     def commit_suicide(self):
-        """自杀"""
+        """AlphaZero式：理性自杀（基于客观指标）"""
+        capital_ratio = self.current_capital / self.initial_capital
         logger.warning(
             f"💀 Agent {self.agent_id} 自杀 | "
-            f"资金剩余{self.current_capital:.2f} | "
-            f"绝望{self.emotion.despair:.1%}"
+            f"资金剩余{self.current_capital:.2f} ({capital_ratio:.1%}) | "
+            f"连续亏损{self.consecutive_losses}次"
         )
         self.state = AgentState.DEAD
         self.death_reason = DeathReason.SUICIDE
@@ -775,19 +750,15 @@ class AgentV5:
             'trade_count': self.trade_count,
             'win_rate': self.win_count / self.trade_count if self.trade_count > 0 else 0,
             'current_strategy': self.current_strategy_name,
-            'emotion': {
-                'despair': self.emotion.despair,
-                'fear': self.emotion.fear,
-                'confidence': self.emotion.confidence,
-                'stress': self.emotion.stress,
-            },
+            # AlphaZero式：移除emotion字段
+            'strategy_params': self.strategy_params.to_dict() if hasattr(self, 'strategy_params') else {},
         }
     
     @classmethod
     def create_genesis(cls, agent_id: str, initial_capital: float, family_id: int = 0, num_families: int = 50, 
                       full_genome_unlock: bool = False) -> 'AgentV5':
         """
-        创建创世Agent
+        创建创世Agent - AlphaZero式极简版
         
         Args:
             agent_id: Agent ID
@@ -801,15 +772,15 @@ class AgentV5:
         """
         lineage = LineageVector.create_genesis(family_id=family_id, num_families=num_families)
         lineage.family_id = family_id  # 显式记录家族ID，供多样性/移民使用
-        genome = GenomeVector.create_genesis(full_unlock=full_genome_unlock)  # ✨ 传递参数
-        instinct = Instinct.create_genesis()
+        genome = GenomeVector.create_genesis(full_unlock=full_genome_unlock)
+        strategy_params = StrategyParams.create_genesis()  # AlphaZero式
         
         return cls(
             agent_id=agent_id,
             initial_capital=initial_capital,
             lineage=lineage,
             genome=genome,
-            instinct=instinct,
+            strategy_params=strategy_params,  # 直接使用strategy_params
             generation=0,
         )
 
