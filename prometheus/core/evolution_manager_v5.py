@@ -960,39 +960,9 @@ class EvolutionManagerV5:
         if metrics is None and not force:
             return []
         
-        reasons = []
-        try:
-            thresholds = self.diversity_monitor.thresholds
-            
-            if force:
-                reasons.append("force")
-            
-            if metrics:
-                if metrics.active_families < thresholds['active_families_min'] * 0.7:
-                    reasons.append(f"active_families {metrics.active_families} < 0.7*{thresholds['active_families_min']}")
-                
-                if metrics.diversity_score < thresholds['diversity_score_min'] * 0.7:
-                    reasons.append(f"diversity_score {metrics.diversity_score:.3f} < 0.7*{thresholds['diversity_score_min']}")
-                
-                if metrics.gene_entropy < thresholds['gene_entropy_min'] * 0.7:
-                    reasons.append(f"gene_entropy {metrics.gene_entropy:.3f} < 0.7*{thresholds['gene_entropy_min']}")
-                
-                if metrics.lineage_entropy < thresholds['lineage_entropy_min'] * 0.7:
-                    reasons.append(f"lineage_entropy {metrics.lineage_entropy:.3f} < 0.7*{thresholds['lineage_entropy_min']}")
-            
-            if not reasons:
-                return []
-            
-            reason_text = "; ".join(reasons)
-            logger.info(f"🛬 先知触发移民 | {reason_text}")
-            return self.inject_immigrants(
-                allow_new_family=allow_new_family,
-                reason=reason_text
-            )
-        
-        except Exception as e:
-            logger.error(f"❌ maybe_inject_immigrants 失败: {e}")
-            return []
+        # AlphaZero式：移除Immigration机制
+        logger.debug("AlphaZero式：不使用Immigration")
+        return []
     
     def get_population_stats(self) -> Dict:
         """
@@ -1004,23 +974,13 @@ class EvolutionManagerV5:
         if not self.moirai.agents:
             return {}
         
-        # 血统多样性
-        lineages = [agent.lineage for agent in self.moirai.agents]
-        lineage_entropy = self.blood_lab.calculate_lineage_entropy(lineages)
-        
-        # 基因多样性
-        genomes = [agent.genome for agent in self.moirai.agents]
-        gene_entropy = self.blood_lab.calculate_gene_entropy(genomes)
-        
-        # 代数分布
+        # AlphaZero式：极简统计（移除熵计算）
         generations = [agent.generation for agent in self.moirai.agents]
         
         return {
             'population_size': len(self.moirai.agents),
-            'lineage_entropy': lineage_entropy,
-            'gene_entropy': gene_entropy,
-            'avg_generation': np.mean(generations),
-            'max_generation': max(generations),
+            'avg_generation': np.mean(generations) if generations else 0,
+            'max_generation': max(generations) if generations else 0,
             'total_births': self.total_births,
             'total_deaths': self.total_deaths,
         }
