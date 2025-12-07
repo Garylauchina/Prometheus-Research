@@ -1,0 +1,1597 @@
+================================================================================
+🚀 Prometheus 终极测试 - v6 Facade 正式版
+================================================================================
+
+✅ 账簿系统状态: 双轨制缺陷已修复，公私账完全一致!
+
+📋 测试配置:
+  - 测试次数: 10 次
+  - 测试周期: 2000 步
+  - Agent数量: 50 个
+  - 初始资金: $10,000/Agent
+  - 架构: v6 Facade + 完整双账簿
+  - 数据: data/okx/BTC_USDT_1d_20251206.csv
+  - Agent决策: 完全自主 (buy/sell/short/cover)
+  - 进化周期: 每30步
+
+🎯 测试目标:
+  1. 验证账簿系统长期稳定性
+  2. 验证进化机制有效性
+  3. 验证Agent决策能力
+  4. 验证多样性监控准确性
+================================================================================
+
+[1/1] 运行测试 #1... INFO:prometheus.core.indicator_calculator:技术指标计算器已初始化
+INFO:prometheus.core.market_state_analyzer:市场状态分析器已初始化
+INFO:prometheus.core.medal_system:奖章系统已初始化
+INFO:prometheus.core.ledger_system:公共账簿已创建
+INFO:prometheus.core.ledger_system:账簿调节器已初始化
+INFO:prometheus.core.evolution_manager:✅ 进化管理器初始化完成
+INFO:prometheus.core.supervisor:监督者已初始化(完整运营系统：市场分析 + Agent监控 + 双账簿系统 + 进化系统)
+INFO:prometheus.core.moirai:⚖️ Moirai（命运三女神）已初始化 [v5.0专用]
+INFO:prometheus.core.moirai:   🧵 Clotho准备纺织新生命...
+INFO:prometheus.core.moirai:   ⚖️ Lachesis准备分配命运...
+INFO:prometheus.core.moirai:   ✂️ Atropos准备剪断失败者的生命之线...
+INFO:prometheus.core.moirai:   📊 家族数量: 50
+INFO:prometheus.core.dual_entropy:🏥 普罗米修斯验血实验室已开业！
+INFO:prometheus.core.diversity_monitor:多样性监控器已初始化 | 阈值: {'gene_entropy_min': 2.0, 'strategy_entropy_min': 1.5, 'lineage_entropy_min': 2.5, 'active_families_min': 10, 'diversity_score_min': 0.5, 'decline_rate_max': 0.2}
+INFO:prometheus.core.diversity_protection:多样性保护器已初始化 | 保护比例: 10.0%
+INFO:prometheus.core.evolution_manager_v5:🧬 EvolutionManagerV5已初始化 (v5.3)
+INFO:prometheus.core.evolution_manager_v5:   精英比例: 20%
+INFO:prometheus.core.evolution_manager_v5:   淘汰比例: 30%
+INFO:prometheus.core.evolution_manager_v5:   生殖隔离阈值: 0.8
+INFO:prometheus.core.ledger_system:公共账簿已创建
+INFO:prometheus.core.moirai:   🧵 Clotho开始纺织20条生命之线...
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_1 诞生 | 第0代 | 资金$10000.00 | 家族[(0, 1.0)] | 性格:强烈的繁衍欲望
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_2 诞生 | 第0代 | 资金$10000.00 | 家族[(1, 1.0)] | 性格:无畏者、淡泊的繁衍欲望、对损失麻木、短期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_3 诞生 | 第0代 | 资金$10000.00 | 家族[(2, 1.0)] | 性格:极度恐惧死亡、极度好奇、长期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_4 诞生 | 第0代 | 资金$10000.00 | 家族[(3, 1.0)] | 性格:无畏者、保守派
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_5 诞生 | 第0代 | 资金$10000.00 | 家族[(4, 1.0)] | 性格:淡泊的繁衍欲望、冒险家、极度好奇
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_6 诞生 | 第0代 | 资金$10000.00 | 家族[(5, 1.0)] | 性格:淡泊的繁衍欲望、对损失麻木
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_7 诞生 | 第0代 | 资金$10000.00 | 家族[(6, 1.0)] | 性格:平衡型性格
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_8 诞生 | 第0代 | 资金$10000.00 | 家族[(7, 1.0)] | 性格:淡泊的繁衍欲望、冒险家、长期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_9 诞生 | 第0代 | 资金$10000.00 | 家族[(8, 1.0)] | 性格:极度恐惧死亡、强烈的繁衍欲望、极度厌恶损失、冒险家、极度好奇
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_10 诞生 | 第0代 | 资金$10000.00 | 家族[(9, 1.0)] | 性格:冒险家、长期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_11 诞生 | 第0代 | 资金$10000.00 | 家族[(10, 1.0)] | 性格:极度好奇
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_12 诞生 | 第0代 | 资金$10000.00 | 家族[(11, 1.0)] | 性格:无畏者、对损失麻木、冒险家、极度好奇、短期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_13 诞生 | 第0代 | 资金$10000.00 | 家族[(12, 1.0)] | 性格:对损失麻木、冒险家、极度好奇、长期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_14 诞生 | 第0代 | 资金$10000.00 | 家族[(13, 1.0)] | 性格:极度厌恶损失、短期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_15 诞生 | 第0代 | 资金$10000.00 | 家族[(14, 1.0)] | 性格:淡泊的繁衍欲望、极度厌恶损失、墨守成规
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_16 诞生 | 第0代 | 资金$10000.00 | 家族[(15, 1.0)] | 性格:极度恐惧死亡、淡泊的繁衍欲望、极度厌恶损失、冒险家、短期主义者
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_17 诞生 | 第0代 | 资金$10000.00 | 家族[(16, 1.0)] | 性格:无畏者、淡泊的繁衍欲望、保守派
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_18 诞生 | 第0代 | 资金$10000.00 | 家族[(17, 1.0)] | 性格:极度厌恶损失、保守派
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_19 诞生 | 第0代 | 资金$10000.00 | 家族[(18, 1.0)] | 性格:强烈的繁衍欲望
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_20 诞生 | 第0代 | 资金$10000.00 | 家族[(19, 1.0)] | 性格:淡泊的繁衍欲望、冒险家、短期主义者
+INFO:prometheus.core.moirai:   🧵 Clotho纺织完成: 20个Agent诞生
+INFO:prometheus.core.moirai:      📊 家族分布: 20个家族参与
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_1
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_2
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_3
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_4
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_5
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_6
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_7
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_8
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_9
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_10
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_11
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_12
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_13
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_14
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_15
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_16
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_17
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_18
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_19
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_20
+INFO:prometheus.facade.v6_facade:创世完成并挂账簿：20 agents
+INFO:prometheus.facade.v6_facade:结果归档目录: results/backtest/20251207/ultimate_test_1_20251207T081502Z
+INFO:prometheus.facade.v6_facade:已保存配置: results/backtest/20251207/ultimate_test_1_20251207T081502Z/config.json
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 1 | DiversityMetrics(cycle=1, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 2 | DiversityMetrics(cycle=2, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 3 | DiversityMetrics(cycle=3, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 4 | DiversityMetrics(cycle=4, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 5 | DiversityMetrics(cycle=5, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 6 | DiversityMetrics(cycle=6, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 7 | DiversityMetrics(cycle=7, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 8 | DiversityMetrics(cycle=8, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 9 | DiversityMetrics(cycle=9, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 10 | DiversityMetrics(cycle=10, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 11 | DiversityMetrics(cycle=11, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 12 | DiversityMetrics(cycle=12, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 13 | DiversityMetrics(cycle=13, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 14 | DiversityMetrics(cycle=14, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 15 | DiversityMetrics(cycle=15, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 16 | DiversityMetrics(cycle=16, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 17 | DiversityMetrics(cycle=17, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 18 | DiversityMetrics(cycle=18, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 19 | DiversityMetrics(cycle=19, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 20 | DiversityMetrics(cycle=20, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 21 | DiversityMetrics(cycle=21, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 22 | DiversityMetrics(cycle=22, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 23 | DiversityMetrics(cycle=23, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 24 | DiversityMetrics(cycle=24, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 25 | DiversityMetrics(cycle=25, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 26 | DiversityMetrics(cycle=26, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 27 | DiversityMetrics(cycle=27, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 28 | DiversityMetrics(cycle=28, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 29 | DiversityMetrics(cycle=29, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 30 | DiversityMetrics(cycle=30, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:
+======================================================================
+INFO:prometheus.core.evolution_manager_v5:🧬 开始进化周期 - 第1代
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+INFO:prometheus.core.evolution_manager_v5:🩺 种群健康检查:
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 1.000
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.442
+INFO:prometheus.core.evolution_manager_v5:   总体健康: good
+INFO:prometheus.core.evolution_manager_v5:🧬 基础变异率: 20.0%
+INFO:prometheus.core.evolution_manager_v5:🎲 噪声系数: ×1.17
+INFO:prometheus.core.evolution_manager_v5:🧬 实际变异率: 23.4% (v5.2: 随机化)
+INFO:prometheus.core.evolution_manager_v5:
+🧬 多样性监控 (v5.2 Day 3):
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.171 < 2.000 | 增加变异率或引入新基因
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 活跃家族过少: 0 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.355 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 0 | DiversityMetrics(cycle=0, gene_entropy=0.171, strategy_entropy=4.122, diversity_score=0.355, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.171
+INFO:prometheus.core.evolution_manager_v5:   策略熵: 4.122
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 4.322
+INFO:prometheus.core.evolution_manager_v5:   活跃家族: 0
+INFO:prometheus.core.evolution_manager_v5:   多样性得分: 0.355
+INFO:prometheus.core.evolution_manager_v5:   健康状态: ⚠️ 需关注
+WARNING:prometheus.core.evolution_manager_v5:
+🛡️ 多样性保护触发 (得分: 0.355):
+INFO:prometheus.core.diversity_protection:🛡️ 保护了 5 个Agent | 生态位: 12, 稀有策略: 1, 稀有血统: 20
+INFO:prometheus.core.evolution_manager_v5:   保护Agent数: 5
+INFO:prometheus.core.evolution_manager_v5:   - 生态位保护: 12
+INFO:prometheus.core.evolution_manager_v5:   - 稀有策略保护: 1
+INFO:prometheus.core.evolution_manager_v5:   - 稀有血统保护: 20
+INFO:prometheus.core.evolution_manager_v5:   调整淘汰列表: 6 → 6
+INFO:prometheus.core.evolution_manager_v5:📊 种群评估:
+INFO:prometheus.core.evolution_manager_v5:   总数: 20
+INFO:prometheus.core.evolution_manager_v5:   精英: 4 (永久保留)
+INFO:prometheus.core.evolution_manager_v5:   存活: 14
+INFO:prometheus.core.evolution_manager_v5:   淘汰: 6
+INFO:prometheus.core.evolution_manager_v5:
+✂️ Atropos开始淘汰失败者...
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_20 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_20的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_19 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_19的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_18 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_18的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_16 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_16的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_15 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_15的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_14 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_14的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:
+🧵 Clotho开始纺织新生命...
+WARNING:prometheus.core.evolution_manager_v5:
+🧬 多样性极低(0.355)，启动强制多样化繁殖:
+INFO:prometheus.core.diversity_protection:🧬 v5.3强制多样化繁殖 | 14个家族参与
+INFO:prometheus.core.diversity_protection:🧬 强制多样化繁殖 | 配对数: 3 | 跨家族: 3/3
+INFO:prometheus.core.evolution_manager_v5:   强制配对数: 3
+INFO:prometheus.core.evolution_manager_v5:📊 目标繁殖数: 6 (比例95.3%，允许±5%波动)
+INFO:prometheus.core.evolution_manager_v5:   紧急阈值: 5 (低于此值触发强制繁殖)
+INFO:prometheus.core.evolution_manager_v5:   相似度阈值: 90%
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_13 + Agent_14
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_21 诞生 | 第1代 | 资金$10000.00 | 家族[(12, 0.5), (13, 0.5)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_21 | 父母: Agent_13 × Agent_14 | 第1代 | LineagePurityClass(category='mixed', dominant_family=12, purity_score=0.5, family_distribution={12: 0.5, 13: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_8 + Agent_12
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_22 诞生 | 第1代 | 资金$10000.00 | 家族[(11, 0.5), (7, 0.5)] | 性格:对损失麻木、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_22 | 父母: Agent_8 × Agent_12 | 第1代 | LineagePurityClass(category='mixed', dominant_family=11, purity_score=0.5, family_distribution={11: 0.5, 7: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_1 + Agent_4
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_23 诞生 | 第1代 | 资金$10000.00 | 家族[(0, 0.5), (3, 0.5)] | 性格:保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_23 | 父母: Agent_1 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=0, purity_score=0.5, family_distribution={0: 0.5, 3: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_24 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (2, 0.5)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_24 | 父母: Agent_2 × Agent_3 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 2: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_25 诞生 | 第1代 | 资金$10000.00 | 家族[(6, 0.5), (7, 0.5)] | 性格:长期主义者
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_25 | 父母: Agent_8 × Agent_7 | 第1代 | LineagePurityClass(category='mixed', dominant_family=6, purity_score=0.5, family_distribution={6: 0.5, 7: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_26 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (4, 0.5)] | 性格:淡泊的繁衍欲望
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_26 | 父母: Agent_2 × Agent_5 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 4: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   ✅ 繁殖成功：6/6 (100.0%)
+INFO:prometheus.core.evolution_manager_v5:   ⚖️ 种群平衡
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_21
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_22
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_23
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_24
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_25
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_26
+INFO:prometheus.core.evolution_manager_v5:
+🧬 进化周期完成:
+INFO:prometheus.core.evolution_manager_v5:   新生: 6个
+INFO:prometheus.core.evolution_manager_v5:   当前种群: 20个
+INFO:prometheus.core.evolution_manager_v5:   累计出生: 6
+INFO:prometheus.core.evolution_manager_v5:   累计死亡: 6
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 31 | DiversityMetrics(cycle=31, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 32 | DiversityMetrics(cycle=32, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 33 | DiversityMetrics(cycle=33, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 34 | DiversityMetrics(cycle=34, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 35 | DiversityMetrics(cycle=35, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 36 | DiversityMetrics(cycle=36, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 37 | DiversityMetrics(cycle=37, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 38 | DiversityMetrics(cycle=38, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 39 | DiversityMetrics(cycle=39, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 40 | DiversityMetrics(cycle=40, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 41 | DiversityMetrics(cycle=41, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 42 | DiversityMetrics(cycle=42, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 43 | DiversityMetrics(cycle=43, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 44 | DiversityMetrics(cycle=44, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 45 | DiversityMetrics(cycle=45, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 46 | DiversityMetrics(cycle=46, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 47 | DiversityMetrics(cycle=47, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 48 | DiversityMetrics(cycle=48, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 49 | DiversityMetrics(cycle=49, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 50 | DiversityMetrics(cycle=50, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 51 | DiversityMetrics(cycle=51, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 52 | DiversityMetrics(cycle=52, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 53 | DiversityMetrics(cycle=53, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 54 | DiversityMetrics(cycle=54, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 55 | DiversityMetrics(cycle=55, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 56 | DiversityMetrics(cycle=56, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 57 | DiversityMetrics(cycle=57, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 58 | DiversityMetrics(cycle=58, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 59 | DiversityMetrics(cycle=59, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 60 | DiversityMetrics(cycle=60, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:
+======================================================================
+INFO:prometheus.core.evolution_manager_v5:🧬 开始进化周期 - 第2代
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+INFO:prometheus.core.evolution_manager_v5:🩺 种群健康检查:
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 0.983
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.377
+INFO:prometheus.core.evolution_manager_v5:   总体健康: warning
+INFO:prometheus.core.evolution_manager_v5:🧬 基础变异率: 20.0%
+INFO:prometheus.core.evolution_manager_v5:🎲 噪声系数: ×1.05
+INFO:prometheus.core.evolution_manager_v5:🧬 实际变异率: 20.9% (v5.2: 随机化)
+INFO:prometheus.core.evolution_manager_v5:
+🧬 多样性监控 (v5.2 Day 3):
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.164 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.369 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 1 | DiversityMetrics(cycle=1, gene_entropy=0.164, strategy_entropy=4.022, diversity_score=0.369, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.164
+INFO:prometheus.core.evolution_manager_v5:   策略熵: 4.022
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 3.840
+INFO:prometheus.core.evolution_manager_v5:   活跃家族: 9
+INFO:prometheus.core.evolution_manager_v5:   多样性得分: 0.369
+INFO:prometheus.core.evolution_manager_v5:   健康状态: ⚠️ 需关注
+WARNING:prometheus.core.evolution_manager_v5:
+🛡️ 多样性保护触发 (得分: 0.369):
+INFO:prometheus.core.diversity_protection:🛡️ 保护了 5 个Agent | 生态位: 10, 稀有策略: 1, 稀有血统: 9
+INFO:prometheus.core.evolution_manager_v5:   保护Agent数: 5
+INFO:prometheus.core.evolution_manager_v5:   - 生态位保护: 10
+INFO:prometheus.core.evolution_manager_v5:   - 稀有策略保护: 1
+INFO:prometheus.core.evolution_manager_v5:   - 稀有血统保护: 9
+INFO:prometheus.core.evolution_manager_v5:   调整淘汰列表: 6 → 6
+INFO:prometheus.core.evolution_manager_v5:📊 种群评估:
+INFO:prometheus.core.evolution_manager_v5:   总数: 20
+INFO:prometheus.core.evolution_manager_v5:   精英: 4 (永久保留)
+INFO:prometheus.core.evolution_manager_v5:   存活: 14
+INFO:prometheus.core.evolution_manager_v5:   淘汰: 6
+INFO:prometheus.core.evolution_manager_v5:
+✂️ Atropos开始淘汰失败者...
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_26 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_26的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_25 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_25的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_24 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_24的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_23 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_23的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_22 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_22的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_21 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_21的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:
+🧵 Clotho开始纺织新生命...
+WARNING:prometheus.core.evolution_manager_v5:
+🧬 多样性极低(0.369)，启动强制多样化繁殖:
+INFO:prometheus.core.diversity_protection:🧬 v5.3强制多样化繁殖 | 14个家族参与
+INFO:prometheus.core.diversity_protection:🧬 强制多样化繁殖 | 配对数: 3 | 跨家族: 3/3
+INFO:prometheus.core.evolution_manager_v5:   强制配对数: 3
+INFO:prometheus.core.evolution_manager_v5:📊 目标繁殖数: 6 (比例98.9%，允许±5%波动)
+INFO:prometheus.core.evolution_manager_v5:   紧急阈值: 5 (低于此值触发强制繁殖)
+INFO:prometheus.core.evolution_manager_v5:   相似度阈值: 90%
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_11 + Agent_13
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_27 诞生 | 第1代 | 资金$10000.00 | 家族[(12, 0.5), (10, 0.5)] | 性格:对损失麻木、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_27 | 父母: Agent_11 × Agent_13 | 第1代 | LineagePurityClass(category='mixed', dominant_family=12, purity_score=0.5, family_distribution={12: 0.5, 10: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_8 + Agent_12
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_28 诞生 | 第1代 | 资金$10000.00 | 家族[(11, 0.5), (7, 0.5)] | 性格:冒险家、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_28 | 父母: Agent_8 × Agent_12 | 第1代 | LineagePurityClass(category='mixed', dominant_family=11, purity_score=0.5, family_distribution={11: 0.5, 7: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_1 + Agent_4
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_29 诞生 | 第1代 | 资金$10000.00 | 家族[(0, 0.5), (3, 0.5)] | 性格:对损失麻木、保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_29 | 父母: Agent_1 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=0, purity_score=0.5, family_distribution={0: 0.5, 3: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_30 诞生 | 第1代 | 资金$10000.00 | 家族[(12, 0.5), (6, 0.5)] | 性格:冒险家
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_30 | 父母: Agent_13 × Agent_7 | 第1代 | LineagePurityClass(category='mixed', dominant_family=12, purity_score=0.5, family_distribution={12: 0.5, 6: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_31 诞生 | 第1代 | 资金$10000.00 | 家族[(3, 0.5), (10, 0.5)] | 性格:无畏者
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_31 | 父母: Agent_11 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=3, purity_score=0.5, family_distribution={3: 0.5, 10: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_32 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (2, 0.5)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_32 | 父母: Agent_2 × Agent_3 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 2: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   ✅ 繁殖成功：6/6 (100.0%)
+INFO:prometheus.core.evolution_manager_v5:   ⚖️ 种群平衡
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_27
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_28
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_29
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_30
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_31
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_32
+INFO:prometheus.core.evolution_manager_v5:
+🧬 进化周期完成:
+INFO:prometheus.core.evolution_manager_v5:   新生: 6个
+INFO:prometheus.core.evolution_manager_v5:   当前种群: 20个
+INFO:prometheus.core.evolution_manager_v5:   累计出生: 12
+INFO:prometheus.core.evolution_manager_v5:   累计死亡: 12
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 61 | DiversityMetrics(cycle=61, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 62 | DiversityMetrics(cycle=62, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 63 | DiversityMetrics(cycle=63, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 64 | DiversityMetrics(cycle=64, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 65 | DiversityMetrics(cycle=65, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 66 | DiversityMetrics(cycle=66, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 67 | DiversityMetrics(cycle=67, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 68 | DiversityMetrics(cycle=68, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 69 | DiversityMetrics(cycle=69, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 70 | DiversityMetrics(cycle=70, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 71 | DiversityMetrics(cycle=71, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 72 | DiversityMetrics(cycle=72, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 73 | DiversityMetrics(cycle=73, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 74 | DiversityMetrics(cycle=74, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 75 | DiversityMetrics(cycle=75, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 76 | DiversityMetrics(cycle=76, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 77 | DiversityMetrics(cycle=77, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 78 | DiversityMetrics(cycle=78, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 79 | DiversityMetrics(cycle=79, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 80 | DiversityMetrics(cycle=80, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 81 | DiversityMetrics(cycle=81, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 82 | DiversityMetrics(cycle=82, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 83 | DiversityMetrics(cycle=83, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 84 | DiversityMetrics(cycle=84, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 85 | DiversityMetrics(cycle=85, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 86 | DiversityMetrics(cycle=86, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 87 | DiversityMetrics(cycle=87, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 88 | DiversityMetrics(cycle=88, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 89 | DiversityMetrics(cycle=89, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 90 | DiversityMetrics(cycle=90, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:
+======================================================================
+INFO:prometheus.core.evolution_manager_v5:🧬 开始进化周期 - 第3代
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+INFO:prometheus.core.evolution_manager_v5:🩺 种群健康检查:
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 0.987
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.398
+INFO:prometheus.core.evolution_manager_v5:   总体健康: warning
+INFO:prometheus.core.evolution_manager_v5:🧬 基础变异率: 20.0%
+INFO:prometheus.core.evolution_manager_v5:🎲 噪声系数: ×1.19
+INFO:prometheus.core.evolution_manager_v5:🧬 实际变异率: 23.9% (v5.2: 随机化)
+INFO:prometheus.core.evolution_manager_v5:
+🧬 多样性监控 (v5.2 Day 3):
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.158 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 2 | DiversityMetrics(cycle=2, gene_entropy=0.158, strategy_entropy=4.122, diversity_score=0.370, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.158
+INFO:prometheus.core.evolution_manager_v5:   策略熵: 4.122
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 3.759
+INFO:prometheus.core.evolution_manager_v5:   活跃家族: 9
+INFO:prometheus.core.evolution_manager_v5:   多样性得分: 0.370
+INFO:prometheus.core.evolution_manager_v5:   健康状态: ⚠️ 需关注
+WARNING:prometheus.core.evolution_manager_v5:
+🛡️ 多样性保护触发 (得分: 0.370):
+INFO:prometheus.core.diversity_protection:🛡️ 保护了 5 个Agent | 生态位: 13, 稀有策略: 1, 稀有血统: 8
+INFO:prometheus.core.evolution_manager_v5:   保护Agent数: 5
+INFO:prometheus.core.evolution_manager_v5:   - 生态位保护: 13
+INFO:prometheus.core.evolution_manager_v5:   - 稀有策略保护: 1
+INFO:prometheus.core.evolution_manager_v5:   - 稀有血统保护: 8
+INFO:prometheus.core.evolution_manager_v5:   调整淘汰列表: 6 → 6
+INFO:prometheus.core.evolution_manager_v5:📊 种群评估:
+INFO:prometheus.core.evolution_manager_v5:   总数: 20
+INFO:prometheus.core.evolution_manager_v5:   精英: 4 (永久保留)
+INFO:prometheus.core.evolution_manager_v5:   存活: 14
+INFO:prometheus.core.evolution_manager_v5:   淘汰: 6
+INFO:prometheus.core.evolution_manager_v5:
+✂️ Atropos开始淘汰失败者...
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_32 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_32的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_31 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_31的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_30 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_30的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_28 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_28的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_13 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_13的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_11 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_11的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:
+🧵 Clotho开始纺织新生命...
+WARNING:prometheus.core.evolution_manager_v5:
+🧬 多样性极低(0.370)，启动强制多样化繁殖:
+INFO:prometheus.core.diversity_protection:🧬 v5.3强制多样化繁殖 | 14个家族参与
+INFO:prometheus.core.diversity_protection:🧬 强制多样化繁殖 | 配对数: 3 | 跨家族: 3/3
+INFO:prometheus.core.evolution_manager_v5:   强制配对数: 3
+INFO:prometheus.core.evolution_manager_v5:📊 目标繁殖数: 6 (比例94.7%，允许±5%波动)
+INFO:prometheus.core.evolution_manager_v5:   紧急阈值: 5 (低于此值触发强制繁殖)
+INFO:prometheus.core.evolution_manager_v5:   相似度阈值: 90%
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_11 + Agent_13
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_33 诞生 | 第1代 | 资金$10000.00 | 家族[(12, 0.5), (10, 0.5)] | 性格:对损失麻木、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_33 | 父母: Agent_11 × Agent_13 | 第1代 | LineagePurityClass(category='mixed', dominant_family=12, purity_score=0.5, family_distribution={12: 0.5, 10: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_8 + Agent_12
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_34 诞生 | 第1代 | 资金$10000.00 | 家族[(11, 0.5), (7, 0.5)] | 性格:极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_34 | 父母: Agent_8 × Agent_12 | 第1代 | LineagePurityClass(category='mixed', dominant_family=11, purity_score=0.5, family_distribution={11: 0.5, 7: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_1 + Agent_4
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_35 诞生 | 第1代 | 资金$10000.00 | 家族[(0, 0.5), (3, 0.5)] | 性格:保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_35 | 父母: Agent_1 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=0, purity_score=0.5, family_distribution={0: 0.5, 3: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_36 诞生 | 第1代 | 资金$10000.00 | 家族[(5, 0.5), (10, 0.5)] | 性格:对损失麻木、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_36 | 父母: Agent_11 × Agent_6 | 第1代 | LineagePurityClass(category='mixed', dominant_family=5, purity_score=0.5, family_distribution={5: 0.5, 10: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_37 诞生 | 第1代 | 资金$10000.00 | 家族[(3, 0.5), (7, 0.5)] | 性格:长期主义者
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_37 | 父母: Agent_4 × Agent_8 | 第1代 | LineagePurityClass(category='mixed', dominant_family=3, purity_score=0.5, family_distribution={3: 0.5, 7: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_38 诞生 | 第1代 | 资金$10000.00 | 家族[(12, 0.5), (8, 0.5)] | 性格:极度恐惧死亡、强烈的繁衍欲望、冒险家、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_38 | 父母: Agent_13 × Agent_9 | 第1代 | LineagePurityClass(category='mixed', dominant_family=12, purity_score=0.5, family_distribution={12: 0.5, 8: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   ✅ 繁殖成功：6/6 (100.0%)
+INFO:prometheus.core.evolution_manager_v5:   ⚖️ 种群平衡
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_33
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_34
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_35
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_36
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_37
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_38
+INFO:prometheus.core.evolution_manager_v5:
+🧬 进化周期完成:
+INFO:prometheus.core.evolution_manager_v5:   新生: 6个
+INFO:prometheus.core.evolution_manager_v5:   当前种群: 20个
+INFO:prometheus.core.evolution_manager_v5:   累计出生: 18
+INFO:prometheus.core.evolution_manager_v5:   累计死亡: 18
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 91 | DiversityMetrics(cycle=91, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 92 | DiversityMetrics(cycle=92, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 93 | DiversityMetrics(cycle=93, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 94 | DiversityMetrics(cycle=94, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 95 | DiversityMetrics(cycle=95, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 96 | DiversityMetrics(cycle=96, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 97 | DiversityMetrics(cycle=97, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 98 | DiversityMetrics(cycle=98, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 99 | DiversityMetrics(cycle=99, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 100 | DiversityMetrics(cycle=100, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 101 | DiversityMetrics(cycle=101, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 102 | DiversityMetrics(cycle=102, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 103 | DiversityMetrics(cycle=103, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 104 | DiversityMetrics(cycle=104, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 105 | DiversityMetrics(cycle=105, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 106 | DiversityMetrics(cycle=106, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 107 | DiversityMetrics(cycle=107, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 108 | DiversityMetrics(cycle=108, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 109 | DiversityMetrics(cycle=109, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 110 | DiversityMetrics(cycle=110, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 111 | DiversityMetrics(cycle=111, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 112 | DiversityMetrics(cycle=112, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 113 | DiversityMetrics(cycle=113, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 114 | DiversityMetrics(cycle=114, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 115 | DiversityMetrics(cycle=115, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 116 | DiversityMetrics(cycle=116, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 117 | DiversityMetrics(cycle=117, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 118 | DiversityMetrics(cycle=118, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 119 | DiversityMetrics(cycle=119, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 120 | DiversityMetrics(cycle=120, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:
+======================================================================
+INFO:prometheus.core.evolution_manager_v5:🧬 开始进化周期 - 第4代
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+INFO:prometheus.core.evolution_manager_v5:🩺 种群健康检查:
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 0.982
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.321
+INFO:prometheus.core.evolution_manager_v5:   总体健康: warning
+INFO:prometheus.core.evolution_manager_v5:🧬 基础变异率: 20.0%
+INFO:prometheus.core.evolution_manager_v5:🎲 噪声系数: ×0.87
+INFO:prometheus.core.evolution_manager_v5:🧬 实际变异率: 17.4% (v5.2: 随机化)
+INFO:prometheus.core.evolution_manager_v5:
+🧬 多样性监控 (v5.2 Day 3):
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.162 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.370 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 3 | DiversityMetrics(cycle=3, gene_entropy=0.162, strategy_entropy=4.222, diversity_score=0.370, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.162
+INFO:prometheus.core.evolution_manager_v5:   策略熵: 4.222
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 3.737
+INFO:prometheus.core.evolution_manager_v5:   活跃家族: 8
+INFO:prometheus.core.evolution_manager_v5:   多样性得分: 0.370
+INFO:prometheus.core.evolution_manager_v5:   健康状态: ⚠️ 需关注
+WARNING:prometheus.core.evolution_manager_v5:
+🛡️ 多样性保护触发 (得分: 0.370):
+INFO:prometheus.core.diversity_protection:🛡️ 保护了 5 个Agent | 生态位: 13, 稀有策略: 1, 稀有血统: 7
+INFO:prometheus.core.evolution_manager_v5:   保护Agent数: 5
+INFO:prometheus.core.evolution_manager_v5:   - 生态位保护: 13
+INFO:prometheus.core.evolution_manager_v5:   - 稀有策略保护: 1
+INFO:prometheus.core.evolution_manager_v5:   - 稀有血统保护: 7
+INFO:prometheus.core.evolution_manager_v5:   调整淘汰列表: 6 → 6
+INFO:prometheus.core.evolution_manager_v5:📊 种群评估:
+INFO:prometheus.core.evolution_manager_v5:   总数: 20
+INFO:prometheus.core.evolution_manager_v5:   精英: 4 (永久保留)
+INFO:prometheus.core.evolution_manager_v5:   存活: 14
+INFO:prometheus.core.evolution_manager_v5:   淘汰: 6
+INFO:prometheus.core.evolution_manager_v5:
+✂️ Atropos开始淘汰失败者...
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_38 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_38的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_37 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_37的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_36 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_36的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_34 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_34的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_33 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_33的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_12 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_12的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:
+🧵 Clotho开始纺织新生命...
+WARNING:prometheus.core.evolution_manager_v5:
+🧬 多样性极低(0.370)，启动强制多样化繁殖:
+INFO:prometheus.core.diversity_protection:🧬 v5.3强制多样化繁殖 | 13个家族参与
+INFO:prometheus.core.diversity_protection:🧬 强制多样化繁殖 | 配对数: 3 | 跨家族: 3/3
+INFO:prometheus.core.evolution_manager_v5:   强制配对数: 3
+INFO:prometheus.core.evolution_manager_v5:📊 目标繁殖数: 6 (比例94.9%，允许±5%波动)
+INFO:prometheus.core.evolution_manager_v5:   紧急阈值: 5 (低于此值触发强制繁殖)
+INFO:prometheus.core.evolution_manager_v5:   相似度阈值: 90%
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_8 + Agent_12
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_39 诞生 | 第1代 | 资金$10000.00 | 家族[(11, 0.5), (7, 0.5)] | 性格:对损失麻木、冒险家、极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_39 | 父母: Agent_8 × Agent_12 | 第1代 | LineagePurityClass(category='mixed', dominant_family=11, purity_score=0.5, family_distribution={11: 0.5, 7: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_1 + Agent_4
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_40 诞生 | 第1代 | 资金$10000.00 | 家族[(0, 0.5), (3, 0.5)] | 性格:保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_40 | 父母: Agent_1 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=0, purity_score=0.5, family_distribution={0: 0.5, 3: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_2 + Agent_5
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_41 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (4, 0.5)] | 性格:淡泊的繁衍欲望、对损失麻木、短期主义者
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_41 | 父母: Agent_2 × Agent_5 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 4: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_42 诞生 | 第2代 | 资金$10000.00 | 家族[(11, 0.5), (12, 0.25), (10, 0.25)] | 性格:极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_42 | 父母: Agent_27 × Agent_12 | 第2代 | LineagePurityClass(category='mixed', dominant_family=11, purity_score=0.5, family_distribution={11: 0.5, 12: 0.25, 10: 0.25})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_43 诞生 | 第1代 | 资金$10000.00 | 家族[(2, 0.5), (6, 0.5)] | 性格:极度厌恶损失
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_43 | 父母: Agent_3 × Agent_7 | 第1代 | LineagePurityClass(category='mixed', dominant_family=2, purity_score=0.5, family_distribution={2: 0.5, 6: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_44 诞生 | 第2代 | 资金$10000.00 | 家族[(9, 0.5), (10, 0.25), (12, 0.25)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_44 | 父母: Agent_10 × Agent_27 | 第2代 | LineagePurityClass(category='mixed', dominant_family=9, purity_score=0.5, family_distribution={9: 0.5, 10: 0.25, 12: 0.25})
+INFO:prometheus.core.evolution_manager_v5:   ✅ 繁殖成功：6/6 (100.0%)
+INFO:prometheus.core.evolution_manager_v5:   ⚖️ 种群平衡
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_39
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_40
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_41
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_42
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_43
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_44
+INFO:prometheus.core.evolution_manager_v5:
+🧬 进化周期完成:
+INFO:prometheus.core.evolution_manager_v5:   新生: 6个
+INFO:prometheus.core.evolution_manager_v5:   当前种群: 20个
+INFO:prometheus.core.evolution_manager_v5:   累计出生: 24
+INFO:prometheus.core.evolution_manager_v5:   累计死亡: 24
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 121 | DiversityMetrics(cycle=121, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 122 | DiversityMetrics(cycle=122, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 123 | DiversityMetrics(cycle=123, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 124 | DiversityMetrics(cycle=124, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 125 | DiversityMetrics(cycle=125, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 126 | DiversityMetrics(cycle=126, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 127 | DiversityMetrics(cycle=127, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 128 | DiversityMetrics(cycle=128, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 129 | DiversityMetrics(cycle=129, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 130 | DiversityMetrics(cycle=130, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 131 | DiversityMetrics(cycle=131, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 132 | DiversityMetrics(cycle=132, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 133 | DiversityMetrics(cycle=133, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 134 | DiversityMetrics(cycle=134, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 135 | DiversityMetrics(cycle=135, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 136 | DiversityMetrics(cycle=136, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 137 | DiversityMetrics(cycle=137, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 138 | DiversityMetrics(cycle=138, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 139 | DiversityMetrics(cycle=139, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 140 | DiversityMetrics(cycle=140, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 141 | DiversityMetrics(cycle=141, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 142 | DiversityMetrics(cycle=142, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 143 | DiversityMetrics(cycle=143, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 144 | DiversityMetrics(cycle=144, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 145 | DiversityMetrics(cycle=145, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 146 | DiversityMetrics(cycle=146, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 147 | DiversityMetrics(cycle=147, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 148 | DiversityMetrics(cycle=148, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 149 | DiversityMetrics(cycle=149, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 150 | DiversityMetrics(cycle=150, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:
+======================================================================
+INFO:prometheus.core.evolution_manager_v5:🧬 开始进化周期 - 第5代
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+INFO:prometheus.core.evolution_manager_v5:🩺 种群健康检查:
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 0.979
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.301
+INFO:prometheus.core.evolution_manager_v5:   总体健康: warning
+INFO:prometheus.core.evolution_manager_v5:🧬 基础变异率: 20.0%
+INFO:prometheus.core.evolution_manager_v5:🎲 噪声系数: ×0.91
+INFO:prometheus.core.evolution_manager_v5:🧬 实际变异率: 18.2% (v5.2: 随机化)
+INFO:prometheus.core.evolution_manager_v5:
+🧬 多样性监控 (v5.2 Day 3):
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.159 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 8 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.360 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 4 | DiversityMetrics(cycle=4, gene_entropy=0.159, strategy_entropy=4.022, diversity_score=0.360, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.159
+INFO:prometheus.core.evolution_manager_v5:   策略熵: 4.022
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 3.728
+INFO:prometheus.core.evolution_manager_v5:   活跃家族: 8
+INFO:prometheus.core.evolution_manager_v5:   多样性得分: 0.360
+INFO:prometheus.core.evolution_manager_v5:   健康状态: ⚠️ 需关注
+WARNING:prometheus.core.evolution_manager_v5:
+🛡️ 多样性保护触发 (得分: 0.360):
+INFO:prometheus.core.diversity_protection:🛡️ 保护了 5 个Agent | 生态位: 12, 稀有策略: 1, 稀有血统: 8
+INFO:prometheus.core.evolution_manager_v5:   保护Agent数: 5
+INFO:prometheus.core.evolution_manager_v5:   - 生态位保护: 12
+INFO:prometheus.core.evolution_manager_v5:   - 稀有策略保护: 1
+INFO:prometheus.core.evolution_manager_v5:   - 稀有血统保护: 8
+INFO:prometheus.core.evolution_manager_v5:   调整淘汰列表: 6 → 6
+INFO:prometheus.core.evolution_manager_v5:📊 种群评估:
+INFO:prometheus.core.evolution_manager_v5:   总数: 20
+INFO:prometheus.core.evolution_manager_v5:   精英: 4 (永久保留)
+INFO:prometheus.core.evolution_manager_v5:   存活: 14
+INFO:prometheus.core.evolution_manager_v5:   淘汰: 6
+INFO:prometheus.core.evolution_manager_v5:
+✂️ Atropos开始淘汰失败者...
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_44 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_44的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_43 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_43的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_41 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_41的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_40 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_40的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_39 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_39的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_10 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_10的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:
+🧵 Clotho开始纺织新生命...
+WARNING:prometheus.core.evolution_manager_v5:
+🧬 多样性极低(0.360)，启动强制多样化繁殖:
+INFO:prometheus.core.diversity_protection:🧬 v5.3强制多样化繁殖 | 12个家族参与
+INFO:prometheus.core.diversity_protection:🧬 强制多样化繁殖 | 配对数: 3 | 跨家族: 3/3
+INFO:prometheus.core.evolution_manager_v5:   强制配对数: 3
+INFO:prometheus.core.evolution_manager_v5:📊 目标繁殖数: 6 (比例99.7%，允许±5%波动)
+INFO:prometheus.core.evolution_manager_v5:   紧急阈值: 5 (低于此值触发强制繁殖)
+INFO:prometheus.core.evolution_manager_v5:   相似度阈值: 90%
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_1 + Agent_4
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_45 诞生 | 第1代 | 资金$10000.00 | 家族[(0, 0.5), (3, 0.5)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_45 | 父母: Agent_1 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=0, purity_score=0.5, family_distribution={0: 0.5, 3: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_2 + Agent_5
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_46 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (4, 0.5)] | 性格:淡泊的繁衍欲望、冒险家、短期主义者
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_46 | 父母: Agent_2 × Agent_5 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 4: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_8 + Agent_27
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_47 诞生 | 第2代 | 资金$10000.00 | 家族[(7, 0.5), (10, 0.25), (12, 0.25)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_47 | 父母: Agent_8 × Agent_27 | 第2代 | LineagePurityClass(category='mixed', dominant_family=7, purity_score=0.5, family_distribution={7: 0.5, 10: 0.25, 12: 0.25})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_48 诞生 | 第1代 | 资金$10000.00 | 家族[(2, 0.5), (16, 0.5)] | 性格:淡泊的繁衍欲望、极度厌恶损失、保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_48 | 父母: Agent_3 × Agent_17 | 第1代 | LineagePurityClass(category='mixed', dominant_family=2, purity_score=0.5, family_distribution={2: 0.5, 16: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_49 诞生 | 第2代 | 资金$10000.00 | 家族[(16, 0.5), (0, 0.25), (3, 0.25)] | 性格:无畏者、保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_49 | 父母: Agent_17 × Agent_35 | 第2代 | LineagePurityClass(category='mixed', dominant_family=16, purity_score=0.5, family_distribution={16: 0.5, 0: 0.25, 3: 0.25})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_50 诞生 | 第1代 | 资金$10000.00 | 家族[(5, 0.5), (8, 0.5)] | 性格:冒险家
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_50 | 父母: Agent_6 × Agent_9 | 第1代 | LineagePurityClass(category='mixed', dominant_family=5, purity_score=0.5, family_distribution={5: 0.5, 8: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   ✅ 繁殖成功：6/6 (100.0%)
+INFO:prometheus.core.evolution_manager_v5:   ⚖️ 种群平衡
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_45
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_46
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_47
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_48
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_49
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_50
+INFO:prometheus.core.evolution_manager_v5:
+🧬 进化周期完成:
+INFO:prometheus.core.evolution_manager_v5:   新生: 6个
+INFO:prometheus.core.evolution_manager_v5:   当前种群: 20个
+INFO:prometheus.core.evolution_manager_v5:   累计出生: 30
+INFO:prometheus.core.evolution_manager_v5:   累计死亡: 30
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 151 | DiversityMetrics(cycle=151, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 152 | DiversityMetrics(cycle=152, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 153 | DiversityMetrics(cycle=153, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 154 | DiversityMetrics(cycle=154, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 155 | DiversityMetrics(cycle=155, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 156 | DiversityMetrics(cycle=156, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 157 | DiversityMetrics(cycle=157, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 158 | DiversityMetrics(cycle=158, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 159 | DiversityMetrics(cycle=159, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 160 | DiversityMetrics(cycle=160, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 161 | DiversityMetrics(cycle=161, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 162 | DiversityMetrics(cycle=162, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 163 | DiversityMetrics(cycle=163, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 164 | DiversityMetrics(cycle=164, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 165 | DiversityMetrics(cycle=165, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 166 | DiversityMetrics(cycle=166, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 167 | DiversityMetrics(cycle=167, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 168 | DiversityMetrics(cycle=168, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 169 | DiversityMetrics(cycle=169, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 170 | DiversityMetrics(cycle=170, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 171 | DiversityMetrics(cycle=171, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 172 | DiversityMetrics(cycle=172, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 173 | DiversityMetrics(cycle=173, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 174 | DiversityMetrics(cycle=174, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 175 | DiversityMetrics(cycle=175, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 176 | DiversityMetrics(cycle=176, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 177 | DiversityMetrics(cycle=177, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 178 | DiversityMetrics(cycle=178, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 179 | DiversityMetrics(cycle=179, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 180 | DiversityMetrics(cycle=180, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:
+======================================================================
+INFO:prometheus.core.evolution_manager_v5:🧬 开始进化周期 - 第6代
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+INFO:prometheus.core.evolution_manager_v5:🩺 种群健康检查:
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 0.968
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.281
+INFO:prometheus.core.evolution_manager_v5:   总体健康: warning
+WARNING:prometheus.core.evolution_manager_v5:⚠️  基因熵过低(0.281 < 0.300)，提高变异率: 20.0% → 23.2%
+INFO:prometheus.core.evolution_manager_v5:🧬 基础变异率: 23.2%
+INFO:prometheus.core.evolution_manager_v5:🎲 噪声系数: ×1.11
+INFO:prometheus.core.evolution_manager_v5:🧬 实际变异率: 25.9% (v5.2: 随机化)
+INFO:prometheus.core.evolution_manager_v5:
+🧬 多样性监控 (v5.2 Day 3):
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.152 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.368 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 5 | DiversityMetrics(cycle=5, gene_entropy=0.152, strategy_entropy=4.222, diversity_score=0.368, healthy=⚠️)
+INFO:prometheus.core.evolution_manager_v5:   基因熵: 0.152
+INFO:prometheus.core.evolution_manager_v5:   策略熵: 4.222
+INFO:prometheus.core.evolution_manager_v5:   血统熵: 3.582
+INFO:prometheus.core.evolution_manager_v5:   活跃家族: 9
+INFO:prometheus.core.evolution_manager_v5:   多样性得分: 0.368
+INFO:prometheus.core.evolution_manager_v5:   健康状态: ⚠️ 需关注
+WARNING:prometheus.core.evolution_manager_v5:
+🛡️ 多样性保护触发 (得分: 0.368):
+INFO:prometheus.core.diversity_protection:🛡️ 保护了 5 个Agent | 生态位: 14, 稀有策略: 1, 稀有血统: 6
+INFO:prometheus.core.evolution_manager_v5:   保护Agent数: 5
+INFO:prometheus.core.evolution_manager_v5:   - 生态位保护: 14
+INFO:prometheus.core.evolution_manager_v5:   - 稀有策略保护: 1
+INFO:prometheus.core.evolution_manager_v5:   - 稀有血统保护: 6
+INFO:prometheus.core.evolution_manager_v5:   调整淘汰列表: 6 → 6
+INFO:prometheus.core.evolution_manager_v5:📊 种群评估:
+INFO:prometheus.core.evolution_manager_v5:   总数: 20
+INFO:prometheus.core.evolution_manager_v5:   精英: 4 (永久保留)
+INFO:prometheus.core.evolution_manager_v5:   存活: 14
+INFO:prometheus.core.evolution_manager_v5:   淘汰: 6
+INFO:prometheus.core.evolution_manager_v5:
+✂️ Atropos开始淘汰失败者...
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_50 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_50的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_49 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_49的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_48 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_48的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_46 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_46的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_45 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_45的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:   💀 Agent_17 (PnL=$+0.00)
+WARNING:prometheus.core.moirai:   ✂️ Atropos剪断了Agent_17的生命之线 | 原因: 进化淘汰 | 资金剩余: $10000.00
+INFO:prometheus.core.evolution_manager_v5:
+🧵 Clotho开始纺织新生命...
+WARNING:prometheus.core.evolution_manager_v5:
+🧬 多样性极低(0.368)，启动强制多样化繁殖:
+INFO:prometheus.core.diversity_protection:🧬 v5.3强制多样化繁殖 | 12个家族参与
+INFO:prometheus.core.diversity_protection:🧬 强制多样化繁殖 | 配对数: 3 | 跨家族: 3/3
+INFO:prometheus.core.evolution_manager_v5:   强制配对数: 3
+INFO:prometheus.core.evolution_manager_v5:📊 目标繁殖数: 6 (比例94.2%，允许±5%波动)
+INFO:prometheus.core.evolution_manager_v5:   紧急阈值: 5 (低于此值触发强制繁殖)
+INFO:prometheus.core.evolution_manager_v5:   相似度阈值: 90%
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_8 + Agent_42
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_51 诞生 | 第3代 | 资金$10000.00 | 家族[(7, 0.5), (11, 0.25), (10, 0.125)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_51 | 父母: Agent_8 × Agent_42 | 第3代 | LineagePurityClass(category='hybrid', dominant_family=7, purity_score=0.125, family_distribution={7: 0.5, 11: 0.25, 10: 0.125, 12: 0.125})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_1 + Agent_4
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_52 诞生 | 第1代 | 资金$10000.00 | 家族[(0, 0.5), (3, 0.5)] | 性格:保守派
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_52 | 父母: Agent_1 × Agent_4 | 第1代 | LineagePurityClass(category='mixed', dominant_family=0, purity_score=0.5, family_distribution={0: 0.5, 3: 0.5})
+INFO:prometheus.core.evolution_manager_v5:   🧬 使用强制多样化配对: Agent_2 + Agent_5
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_53 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (4, 0.5)] | 性格:淡泊的繁衍欲望、对损失麻木
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_53 | 父母: Agent_2 × Agent_5 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 4: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_54 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (2, 0.5)] | 性格:平衡型性格
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_54 | 父母: Agent_3 × Agent_2 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 2: 0.5})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_55 诞生 | 第3代 | 资金$10000.00 | 家族[(1, 0.5), (11, 0.25), (10, 0.125)] | 性格:短期主义者
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_55 | 父母: Agent_2 × Agent_42 | 第3代 | LineagePurityClass(category='hybrid', dominant_family=1, purity_score=0.125, family_distribution={1: 0.5, 11: 0.25, 10: 0.125, 12: 0.125})
+INFO:prometheus.core.agent_v5:🆕 Agent Agent_56 诞生 | 第3代 | 资金$10000.00 | 家族[(4, 0.5), (11, 0.25), (10, 0.125)] | 性格:极度好奇
+INFO:prometheus.core.evolution_manager_v5:   👶 Agent_56 | 父母: Agent_5 × Agent_42 | 第3代 | LineagePurityClass(category='hybrid', dominant_family=4, purity_score=0.125, family_distribution={4: 0.5, 11: 0.25, 10: 0.125, 12: 0.125})
+INFO:prometheus.core.evolution_manager_v5:   ✅ 繁殖成功：6/6 (100.0%)
+INFO:prometheus.core.evolution_manager_v5:   ⚖️ 种群平衡
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_51
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_52
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_53
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_54
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_55
+INFO:prometheus.core.ledger_system:账户系统创建: Agent_56
+INFO:prometheus.core.evolution_manager_v5:
+🧬 进化周期完成:
+INFO:prometheus.core.evolution_manager_v5:   新生: 6个
+INFO:prometheus.core.evolution_manager_v5:   当前种群: 20个
+INFO:prometheus.core.evolution_manager_v5:   累计出生: 36
+INFO:prometheus.core.evolution_manager_v5:   累计死亡: 36
+INFO:prometheus.core.evolution_manager_v5:======================================================================
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 181 | DiversityMetrics(cycle=181, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 182 | DiversityMetrics(cycle=182, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 183 | DiversityMetrics(cycle=183, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 184 | DiversityMetrics(cycle=184, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 185 | DiversityMetrics(cycle=185, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 186 | DiversityMetrics(cycle=186, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 187 | DiversityMetrics(cycle=187, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 188 | DiversityMetrics(cycle=188, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 189 | DiversityMetrics(cycle=189, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 190 | DiversityMetrics(cycle=190, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 191 | DiversityMetrics(cycle=191, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 192 | DiversityMetrics(cycle=192, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 193 | DiversityMetrics(cycle=193, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 194 | DiversityMetrics(cycle=194, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 195 | DiversityMetrics(cycle=195, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 196 | DiversityMetrics(cycle=196, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 197 | DiversityMetrics(cycle=197, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 198 | DiversityMetrics(cycle=198, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 199 | DiversityMetrics(cycle=199, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+ERROR:prometheus.core.diversity_monitor:🚨 严重警报 | 基因熵过低: 0.156 < 2.000 | 增加变异率或引入新基因
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 活跃家族过少: 9 < 10 | 降低弱势家族淘汰率
+WARNING:prometheus.core.diversity_monitor:⚠️ 警告 | 多样性综合得分过低: 0.356 < 0.500 | 启动强制多样性保护机制
+INFO:prometheus.core.diversity_monitor:周期 200 | DiversityMetrics(cycle=200, gene_entropy=0.156, strategy_entropy=4.022, diversity_score=0.356, healthy=⚠️)
+INFO:prometheus.facade.v6_facade:已保存指标: results/backtest/20251207/ultimate_test_1_20251207T081502Z/metrics.json
+INFO:prometheus.core.ledger_system:账簿调节器已初始化
+INFO:prometheus.facade.v6_facade:对账完成: 20 agents 已检查
+
+================================================================================
+📋 账簿系统详细检查
+================================================================================
+
+Agent_1:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_2:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_3:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_4:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_5:
+  私账交易数: 150
+  公账交易数: 150
+  私账资金: $11401.51
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_6:
+  私账交易数: 136
+  公账交易数: 136
+  私账资金: $10442.26
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_7:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_8:
+  私账交易数: 142
+  公账交易数: 142
+  私账资金: $12019.51
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_9:
+  私账交易数: 144
+  公账交易数: 144
+  私账资金: $11131.09
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_27:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_29:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_35:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_42:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_47:
+  私账交易数: 38
+  公账交易数: 38
+  私账资金: $10961.16
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_51:
+  私账交易数: 13
+  公账交易数: 13
+  私账资金: $10104.96
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_52:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_53:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_54:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_55:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+Agent_56:
+  私账交易数: 0
+  公账交易数: 0
+  私账资金: $10000.00
+  多头持仓: 0.0000
+  空头持仓: 0.0000
+
+================================================================================
+🔍 执行对账验证...
+================================================================================
+
+✅ 所有Agent账簿完全一致!
+✅ ROI: +3.0% | 幸存: 20/20 | 账簿: 正常
+
+================================================================================
+📊 测试报告
+================================================================================
+✅ 成功测试: 1/1
+📈 平均ROI: +3.03%
+👥 平均幸存: 20.0/20
+📋 账簿问题: 0/1 次测试
+
+🎉 所有测试账簿完全一致! 账簿系统工作正常!
+
+✅ 结果已保存: results/backtest/ultimate_v6_correct_20251207_161503.json
+================================================================================

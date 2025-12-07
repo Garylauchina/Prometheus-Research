@@ -1,0 +1,134 @@
+[INFO] __main__ - Creating Moirai...
+[INFO] prometheus.core.indicator_calculator - 技术指标计算器已初始化
+[INFO] prometheus.core.market_state_analyzer - 市场状态分析器已初始化
+[INFO] prometheus.core.medal_system - 奖章系统已初始化
+[INFO] prometheus.core.ledger_system - 公共账簿已创建
+[INFO] prometheus.core.ledger_system - 账簿调节器已初始化
+[INFO] prometheus.core.evolution_manager - ✅ 进化管理器初始化完成
+[INFO] prometheus.core.supervisor - 监督者已初始化(完整运营系统：市场分析 + Agent监控 + 双账簿系统 + 进化系统)
+[INFO] prometheus.core.moirai - ⚖️ Moirai（命运三女神）已初始化 [v5.0专用]
+[INFO] prometheus.core.moirai -    🧵 Clotho准备纺织新生命...
+[INFO] prometheus.core.moirai -    ⚖️ Lachesis准备分配命运...
+[INFO] prometheus.core.moirai -    ✂️ Atropos准备剪断失败者的生命之线...
+[INFO] prometheus.core.moirai -    📊 家族数量: 50
+[INFO] __main__ - Creating 10 Agents...
+[INFO] prometheus.core.moirai -    🧵 Clotho开始纺织10条生命之线...
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_0 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_1 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_1 诞生 | 第0代 | 资金$10000.00 | 家族[(0, 1.0)] | 性格:极度厌恶损失、极度好奇
+[DEBUG] prometheus.core.moirai -       ✅ Agent_1 | 家族0 | 策略['TrendFollowing', 'GridTrading'] | 本能:极度厌恶损失、极度好奇
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_1 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_2 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_2 诞生 | 第0代 | 资金$10000.00 | 家族[(1, 1.0)] | 性格:强烈的繁衍欲望、极度厌恶损失、保守派、墨守成规
+[DEBUG] prometheus.core.moirai -       ✅ Agent_2 | 家族1 | 策略['TrendFollowing', 'GridTrading'] | 本能:强烈的繁衍欲望、极度厌恶损失、保守派、墨守成规
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_2 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_3 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_3 诞生 | 第0代 | 资金$10000.00 | 家族[(2, 1.0)] | 性格:强烈的繁衍欲望
+[DEBUG] prometheus.core.moirai -       ✅ Agent_3 | 家族2 | 策略['TrendFollowing', 'GridTrading'] | 本能:强烈的繁衍欲望
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_3 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_4 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_4 诞生 | 第0代 | 资金$10000.00 | 家族[(3, 1.0)] | 性格:淡泊的繁衍欲望、保守派、墨守成规、长期主义者
+[DEBUG] prometheus.core.moirai -       ✅ Agent_4 | 家族3 | 策略['TrendFollowing', 'GridTrading'] | 本能:淡泊的繁衍欲望、保守派、墨守成规、长期主义者
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_4 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_5 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_5 诞生 | 第0代 | 资金$10000.00 | 家族[(4, 1.0)] | 性格:墨守成规、短期主义者
+[DEBUG] prometheus.core.moirai -       ✅ Agent_5 | 家族4 | 策略['TrendFollowing', 'GridTrading'] | 本能:墨守成规、短期主义者
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_5 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_6 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_6 诞生 | 第0代 | 资金$10000.00 | 家族[(5, 1.0)] | 性格:强烈的繁衍欲望、长期主义者
+[DEBUG] prometheus.core.moirai -       ✅ Agent_6 | 家族5 | 策略['TrendFollowing', 'GridTrading'] | 本能:强烈的繁衍欲望、长期主义者
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_6 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_7 策略池: ['GridTrading'] | 激活: ['GridTrading']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_7 诞生 | 第0代 | 资金$10000.00 | 家族[(6, 1.0)] | 性格:极度好奇、长期主义者
+[DEBUG] prometheus.core.moirai -       ✅ Agent_7 | 家族6 | 策略['GridTrading'] | 本能:极度好奇、长期主义者
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_7 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_8 策略池: ['GridTrading'] | 激活: ['GridTrading']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_8 诞生 | 第0代 | 资金$10000.00 | 家族[(7, 1.0)] | 性格:冒险家、长期主义者
+[DEBUG] prometheus.core.moirai -       ✅ Agent_8 | 家族7 | 策略['GridTrading'] | 本能:冒险家、长期主义者
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_8 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_9 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_9 诞生 | 第0代 | 资金$10000.00 | 家族[(8, 1.0)] | 性格:极度厌恶损失
+[DEBUG] prometheus.core.moirai -       ✅ Agent_9 | 家族8 | 策略['TrendFollowing', 'GridTrading'] | 本能:极度厌恶损失
+[DEBUG] prometheus.core.lineage - 创建创世血统: family_9 (纯度: 100%)
+[DEBUG] prometheus.core.genome - 创建创世基因组: 解锁3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_10 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_10 诞生 | 第0代 | 资金$10000.00 | 家族[(9, 1.0)] | 性格:淡泊的繁衍欲望、墨守成规、短期主义者
+[DEBUG] prometheus.core.moirai -       ✅ Agent_10 | 家族9 | 策略['TrendFollowing', 'GridTrading'] | 本能:淡泊的繁衍欲望、墨守成规、短期主义者
+[INFO] prometheus.core.moirai -    🧵 Clotho纺织完成: 10个Agent诞生
+[INFO] prometheus.core.moirai -       📊 家族分布: 10个家族参与
+[INFO] __main__ - Created 10 Agents
+[INFO] __main__ - Setting trading results...
+[INFO] __main__ -   Agent_1: +500 (profit)
+[INFO] __main__ -   Agent_2: +500 (profit)
+[INFO] __main__ -   Agent_3: +500 (profit)
+[INFO] __main__ -   Agent_4: +500 (profit)
+[INFO] __main__ -   Agent_5: +500 (profit)
+[INFO] __main__ -   Agent_6: -300 (loss)
+[INFO] __main__ -   Agent_7: -300 (loss)
+[INFO] __main__ -   Agent_8: -300 (loss)
+[INFO] __main__ -   Agent_9: -300 (loss)
+[INFO] __main__ -   Agent_10: -300 (loss)
+[INFO] __main__ - Creating EvolutionManager...
+[INFO] prometheus.core.dual_entropy - 🏥 普罗米修斯验血实验室已开业！
+[INFO] prometheus.core.evolution_manager_v5 - 🧬 EvolutionManagerV5已初始化
+[INFO] prometheus.core.evolution_manager_v5 -    精英比例: 20%
+[INFO] prometheus.core.evolution_manager_v5 -    淘汰比例: 30%
+[INFO] prometheus.core.evolution_manager_v5 -    生殖隔离阈值: 0.8
+[INFO] __main__ - 
+Initial population: 10
+[INFO] prometheus.core.evolution_manager_v5 - 
+======================================================================
+[INFO] prometheus.core.evolution_manager_v5 - 🧬 开始进化周期 - 第1代
+[INFO] prometheus.core.evolution_manager_v5 - ======================================================================
+[INFO] prometheus.core.evolution_manager_v5 - 🩺 种群健康检查:
+[INFO] prometheus.core.evolution_manager_v5 -    血统熵: 1.000
+[INFO] prometheus.core.evolution_manager_v5 -    基因熵: 0.303
+[INFO] prometheus.core.evolution_manager_v5 -    总体健康: warning
+[INFO] prometheus.core.evolution_manager_v5 - 📊 种群评估:
+[INFO] prometheus.core.evolution_manager_v5 -    总数: 10
+[INFO] prometheus.core.evolution_manager_v5 -    精英: 2 (永久保留)
+[INFO] prometheus.core.evolution_manager_v5 -    存活: 7
+[INFO] prometheus.core.evolution_manager_v5 -    淘汰: 3
+[INFO] prometheus.core.evolution_manager_v5 - 
+✂️ Atropos开始淘汰失败者...
+[INFO] prometheus.core.evolution_manager_v5 -    💀 Agent_8 (PnL=$-300.00)
+[WARNING] prometheus.core.moirai -    ✂️ Atropos剪断了Agent_8的生命之线 | 原因: 进化淘汰 | 资金剩余: $9700.00
+[INFO] prometheus.core.evolution_manager_v5 -    💀 Agent_9 (PnL=$-300.00)
+[WARNING] prometheus.core.moirai -    ✂️ Atropos剪断了Agent_9的生命之线 | 原因: 进化淘汰 | 资金剩余: $9700.00
+[INFO] prometheus.core.evolution_manager_v5 -    💀 Agent_10 (PnL=$-300.00)
+[WARNING] prometheus.core.moirai -    ✂️ Atropos剪断了Agent_10的生命之线 | 原因: 进化淘汰 | 资金剩余: $9700.00
+[INFO] prometheus.core.evolution_manager_v5 - 
+🧵 Clotho开始纺织新生命...
+[DEBUG] prometheus.core.lineage - 创建子代血统: 混合度 1.41
+[DEBUG] prometheus.core.genome - 交叉繁殖: 子代继承3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_11 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_11 诞生 | 第1代 | 资金$10000.00 | 家族[(2, 0.5), (1, 0.5)] | 性格:强烈的繁衍欲望、墨守成规
+[INFO] prometheus.core.evolution_manager_v5 -    👶 Agent_11 | 父母: Agent_3 × Agent_2 | 第1代 | LineagePurityClass(category='mixed', dominant_family=2, purity_score=0.5, family_distribution={2: 0.5, 1: 0.5})
+[DEBUG] prometheus.core.lineage - 创建子代血统: 混合度 1.41
+[DEBUG] prometheus.core.genome - 交叉繁殖: 子代继承3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_12 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_12 诞生 | 第1代 | 资金$10000.00 | 家族[(2, 0.5), (4, 0.5)] | 性格:墨守成规、短期主义者
+[INFO] prometheus.core.evolution_manager_v5 -    👶 Agent_12 | 父母: Agent_5 × Agent_3 | 第1代 | LineagePurityClass(category='mixed', dominant_family=2, purity_score=0.5, family_distribution={2: 0.5, 4: 0.5})
+[DEBUG] prometheus.core.lineage - 创建子代血统: 混合度 1.41
+[DEBUG] prometheus.core.genome - 交叉繁殖: 子代继承3个参数
+[DEBUG] prometheus.core.agent_v5 - Agent Agent_13 策略池: ['TrendFollowing', 'GridTrading'] | 激活: ['TrendFollowing']
+[INFO] prometheus.core.agent_v5 - 🆕 Agent Agent_13 诞生 | 第1代 | 资金$10000.00 | 家族[(1, 0.5), (6, 0.5)] | 性格:强烈的繁衍欲望、保守派
+[INFO] prometheus.core.evolution_manager_v5 -    👶 Agent_13 | 父母: Agent_2 × Agent_7 | 第1代 | LineagePurityClass(category='mixed', dominant_family=1, purity_score=0.5, family_distribution={1: 0.5, 6: 0.5})
+[INFO] prometheus.core.evolution_manager_v5 - 
+🧬 进化周期完成:
+[INFO] prometheus.core.evolution_manager_v5 -    新生: 3个
+[INFO] prometheus.core.evolution_manager_v5 -    当前种群: 10个
+[INFO] prometheus.core.evolution_manager_v5 -    累计出生: 3
+[INFO] prometheus.core.evolution_manager_v5 -    累计死亡: 3
+[INFO] prometheus.core.evolution_manager_v5 - ======================================================================
+[INFO] __main__ - 
+Detailed log written to: DEBUG_V2.txt
