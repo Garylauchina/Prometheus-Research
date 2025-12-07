@@ -54,8 +54,15 @@ def run_phase1():
     # 加载历史数据
     logger.info("📊 加载历史数据...")
     try:
-        df_btc = pd.read_csv('data/btc_usdt_1h.csv')
+        df_btc = pd.read_csv('data/okx/BTC_USDT_1d_20251206.csv')
+        if df_btc.empty:
+            logger.error("❌ 数据文件为空")
+            return None
         logger.info(f"✅ 数据加载成功: {len(df_btc)} 条记录")
+    except FileNotFoundError:
+        logger.error("❌ 数据文件不存在: data/okx/BTC_USDT_1d_20251206.csv")
+        logger.error("💡 请先下载数据: python3 tools/download_okx_data.py")
+        return None
     except Exception as e:
         logger.error(f"❌ 数据加载失败: {e}")
         return None
@@ -112,11 +119,8 @@ def run_phase1():
         initial_capital = agent_count * 10000
         system_return = (total_capital - initial_capital) / initial_capital * 100
         
-        # 统计交易
-        total_trades = sum(
-            len(facade.account_system.get_agent_account(a.agent_id).private_ledger.trade_history)
-            for a in alive_agents
-        )
+        # 统计交易（从公共账簿获取）
+        total_trades = len(facade.public_ledger.trade_history)
         
         logger.info("")
         logger.info("=" * 80)
