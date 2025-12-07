@@ -211,7 +211,7 @@ class EvolutionManagerV5:
         actual_breeding_ratio = len(new_agents) / eliminate_count
         population_change = len(new_agents) - eliminate_count  # 正数=增长，负数=萎缩
         
-        if len(new_agents) >= target_breeding_count:
+        if len(new_agents) >= target_replication_count:
             # 达到目标
             if population_change > 0:
                 logger.info(f"   ✅ 繁殖成功：{len(new_agents)}/{eliminate_count} ({actual_breeding_ratio:.1%})")
@@ -602,8 +602,8 @@ class EvolutionManagerV5:
         Returns:
             复制的子代Agent
         """
-        child_id = f"agent_{self.moirai.agent_birth_counter:04d}"
-        self.moirai.agent_birth_counter += 1
+        child_id = f"Agent_{self.moirai.next_agent_id}"
+        self.moirai.next_agent_id += 1
         child_generation = elite.generation + 1
         
         # 1. 克隆Lineage
