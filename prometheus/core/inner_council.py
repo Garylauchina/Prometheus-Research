@@ -291,28 +291,26 @@ class Daimon:
         has_position = position.get('amount', 0) != 0
         position_side = position.get('side')  # 'long' or 'short'
         
-        # 1. 趋势偏好
-        trend_pref = active_params.get('trend_pref', 0.5)
+        # 1. 趋势偏好（激进版：移除限制！）
         market_trend = context.get('market_data', {}).get('trend', 'neutral')
         
-        if trend_pref > 0.35:
-            # ✅ V6修复：区分"开仓"和"持仓中的应对"
-            if not has_position:
-                # 无持仓：可以开新仓
-                if market_trend == 'bullish':
-                    votes.append(Vote(
-                        action='buy',
-                        confidence=trend_pref * 0.8,
-                        voter_category='genome',
-                        reason=f"趋势偏好({trend_pref:.1%}): 顺势做多"
-                    ))
-                elif market_trend == 'bearish':
-                    votes.append(Vote(
-                        action='short',  # ✅ 明确用short，不是sell
-                        confidence=trend_pref * 0.8,
-                        voter_category='genome',
-                        reason=f"趋势偏好({trend_pref:.1%}): 顺势做空"
-                    ))
+        # ⚔️ 自由演化：移除trend_pref限制，让所有Agent都能开仓
+        if not has_position:
+            # 无持仓：市场趋势明确时开仓
+            if market_trend == 'bullish':
+                votes.append(Vote(
+                    action='buy',
+                    confidence=0.75,  # 固定高置信度
+                    voter_category='genome',
+                    reason=f"自由演化: 牛市做多"
+                ))
+            elif market_trend == 'bearish':
+                votes.append(Vote(
+                    action='short',
+                    confidence=0.75,  # 固定高置信度
+                    voter_category='genome',
+                    reason=f"自由演化: 熊市做空"
+                ))
             else:
                 # ✅ 有持仓：检查趋势是否与持仓方向一致
                 if position_side == 'long' and market_trend == 'bearish':
@@ -547,43 +545,27 @@ class Daimon:
                 reason=f"持仓到期: {holding_periods} > {expected_holding:.0f}周期"
             ))
         
-        # ========== 4. 开仓方向选择 ==========
+        # ========== 4. 开仓方向选择（激进版：移除限制！）==========
         if not has_position:
             market_trend = context.get('market_data', {}).get('trend', 'neutral')
             
-            # 基于trend_following_strength选择顺势或逆势
-            if params.trend_following_strength > 0.5:
-                # 顺势策略
-                if market_trend == 'bullish' and params.directional_bias < 0.7:
-                    votes.append(Vote(
-                        action='buy',
-                        confidence=params.trend_following_strength,
-                        voter_category='strategy',
-                        reason=f"顺势做多"
-                    ))
-                elif market_trend == 'bearish' and params.directional_bias > 0.3:
-                    votes.append(Vote(
-                        action='short',
-                        confidence=params.trend_following_strength,
-                        voter_category='strategy',
-                        reason=f"顺势做空"
-                    ))
-            else:
-                # 逆势策略（均值回归）
-                if market_trend == 'bullish' and params.directional_bias > 0.3:
-                    votes.append(Vote(
-                        action='short',
-                        confidence=1 - params.trend_following_strength,
-                        voter_category='strategy',
-                        reason=f"逆势做空"
-                    ))
-                elif market_trend == 'bearish' and params.directional_bias < 0.7:
-                    votes.append(Vote(
-                        action='buy',
-                        confidence=1 - params.trend_following_strength,
-                        voter_category='strategy',
-                        reason=f"逆势做多"
-                    ))
+            # ⚔️ 自由演化：只要趋势明确，就开仓！
+            # 移除所有参数限制，让所有Agent都有机会参与！
+            if market_trend == 'bullish':
+                votes.append(Vote(
+                    action='buy',
+                    confidence=0.80,  # 高置信度
+                    voter_category='strategy',
+                    reason=f"自由演化: 牛市做多"
+                ))
+            elif market_trend == 'bearish':
+                votes.append(Vote(
+                    action='short',
+                    confidence=0.80,  # 高置信度
+                    voter_category='strategy',
+                    reason=f"自由演化: 熊市做空"
+                ))
+            # neutral时不开仓（观望）
         
         return votes
     
