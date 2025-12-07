@@ -151,7 +151,8 @@ class V6Facade:
         # 让 moirai 持有同一公共账簿，供 attach_accounts 使用
         self.moirai.public_ledger = self.public_ledger
         self.exchange = exchange  # 可为 OKXExchange 或 MockExchange，需兼容接口
-        self.metrics_history: List[DiversityMetrics] = []
+        # AlphaZero式：移除metrics_history
+        # self.metrics_history: List[DiversityMetrics] = []
         
         # ✅ Prophet（先知）- 市场分析专家，生成WorldSignature
         if WORLD_SIGNATURE_AVAILABLE:
@@ -644,7 +645,7 @@ class V6Facade:
         
         return bulletins
     
-    def maybe_inject_immigrants(self, metrics: Optional[DiversityMetrics] = None, force: bool = False):
+    def maybe_inject_immigrants(self, metrics: Optional[Dict] = None, force: bool = False):  # AlphaZero式：移除DiversityMetrics
         return self.evolution.maybe_inject_immigrants(metrics=metrics, force=force)
 
     def run(self, total_cycles: int, market_feed=None, evo_interval: int = 1):
