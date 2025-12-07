@@ -849,11 +849,11 @@ class EvolutionManagerV5:
         # 计算子代代数
         child_generation = max(parent1.generation, parent2.generation) + 1
         
-        # 3. 🧬 继承本能（Instinct）
-        child_instinct = Instinct.inherit_from_parents(
-            parent1.instinct,
-            parent2.instinct,
-            child_generation
+        # 3. 🧬 继承策略参数（StrategyParams）- AlphaZero式
+        from prometheus.core.strategy_params import StrategyParams
+        child_strategy_params = parent1.strategy_params.crossover(
+            parent2.strategy_params,
+            generation=child_generation
         )
         
         # 4. 🧬 继承元基因组（MetaGenome）- v5.1新增
@@ -871,15 +871,15 @@ class EvolutionManagerV5:
             from prometheus.core.meta_genome import MetaGenome
             child_meta_genome = MetaGenome.create_genesis()
         
-        # 5. 创建子代Agent
+        # 5. 创建子代Agent - AlphaZero式
         child = AgentV5(
             agent_id=child_id,
             initial_capital=parent1.initial_capital,  # 继承父母的初始资金
             lineage=child_lineage,
             genome=child_genome,
-            instinct=child_instinct,
+            strategy_params=child_strategy_params,  # AlphaZero式：使用StrategyParams
             generation=child_generation,
-            meta_genome=child_meta_genome  # v5.1新增
+            meta_genome=child_meta_genome
         )
         # 确保血统携带family_id（优先父母的dominant family）
         if hasattr(child_lineage, "family_id"):
