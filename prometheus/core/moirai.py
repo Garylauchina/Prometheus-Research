@@ -188,10 +188,26 @@ class Moirai(Supervisor):
                 family_id = self._family_counter % self.num_families
                 self._family_counter += 1
                 
+                # ✅ v6.0: 从资金池分配资金
+                if self.capital_pool:
+                    allocated_capital = self.capital_pool.allocate(
+                        amount=capital_per_agent,
+                        agent_id=agent_id,
+                        reason="genesis"
+                    )
+                    if allocated_capital < capital_per_agent:
+                        logger.warning(
+                            f"      ⚠️ 资金池不足：期望${capital_per_agent:.2f}，"
+                            f"实际${allocated_capital:.2f}"
+                        )
+                else:
+                    # 如果没有资金池，使用默认值（向后兼容）
+                    allocated_capital = capital_per_agent
+                
                 # 2. 创建AgentV5
                 agent = AgentV5.create_genesis(
                     agent_id=agent_id,
-                    initial_capital=capital_per_agent,
+                    initial_capital=allocated_capital,  # ✅ 使用从资金池分配的资金
                     family_id=family_id,
                     num_families=self.num_families,
                     full_genome_unlock=full_genome_unlock  # ✨ 传递参数

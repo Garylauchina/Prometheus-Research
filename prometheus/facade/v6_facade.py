@@ -195,16 +195,26 @@ class V6Facade:
         创世人口初始化
         
         步骤：
-        1. 调用Moirai创建Agents
-        2. 挂载账簿系统
-        3. 初始化适应度
-        4. 验证创世质量
+        1. ✅ 系统注资到资金池
+        2. 调用Moirai创建Agents（从资金池分配）
+        3. 挂载账簿系统
+        4. 初始化适应度
+        5. 验证创世质量
         
         Args:
             agent_count: Agent数量
             capital_per_agent: 每个Agent的初始资金
             full_genome_unlock: 是否解锁所有50个基因参数（激进模式）
         """
+        # ✅ v6.0: Step 1 - 系统注资到资金池
+        total_investment = agent_count * capital_per_agent
+        self.capital_pool.invest(
+            amount=total_investment,
+            source="genesis"
+        )
+        logger.info(f"💰 系统注资: ${total_investment:,.2f} ({agent_count} agents × ${capital_per_agent:,.2f})")
+        
+        # Step 2 - 创建Agents（moirai会从资金池分配）
         agents = self.moirai._genesis_create_agents(
             agent_count=agent_count,
             gene_pool=None,
@@ -212,13 +222,21 @@ class V6Facade:
             full_genome_unlock=full_genome_unlock  # ✨ 传递参数
         )
         self.moirai.agents = agents
+        
+        # Step 3 - 挂载账簿系统
         attach_accounts(agents, self.public_ledger)
+        
+        # Step 4 - 初始化适应度
         for agent in agents:
             if not hasattr(agent, "fitness"):
                 agent.fitness = 1.0
         
-        # ✅ 创世验证
+        # Step 5 - 创世验证
         self._validate_genesis(agents)
+        
+        # ✅ v6.0: 显示资金池状态
+        pool_summary = self.capital_pool.get_summary()
+        logger.info(f"💰 资金池状态: 已分配${pool_summary['total_allocated']:,.2f}, 余额${pool_summary['available_pool']:,.2f}")
         
         logger.info(f"✅ 创世完成并通过验证：{len(agents)} agents")
         return agents
@@ -680,20 +698,21 @@ class V6Facade:
             # if result:
             #     logger.debug(f"cycle {c}: diversity_score={result.diversity_score:.3f}")
 
-    def reconcile(self):
+    def reconcile(self, current_price: float = 0):
         """
-        对账：使用 LedgerReconciler 比对私有/公共账簿（回测/Mock场景）
-        OKX 场景仍需结合实际持仓比对（后续可扩展传入 okx_position）
+        完整对账：Agent级 + 系统级
+        
+        Args:
+            current_price: 当前市场价格（用于计算未实现盈亏）
         
         Returns:
             dict: {
-                "all_passed": bool,  # 是否所有Agent都通过对账
-                "total_agents": int,  # 检查的Agent总数
-                "passed_agents": int,  # 通过的Agent数量
-                "failed_agents": int,  # 未通过的Agent数量
-                "details": dict  # 每个Agent的详细对账结果
+                "all_passed": bool,          # 是否所有对账都通过
+                "agent_reconcile": {...},    # Agent级对账结果
+                "system_reconcile": {...}    # 系统级对账结果
             }
         """
+        # ========== Agent级对账（私有 vs 公共账簿）==========
         rec = LedgerReconciler()
         details = {}
         passed_count = 0
@@ -718,8 +737,7 @@ class V6Facade:
                 passed_count += 1
             else:
                 failed_count += 1
-                # 记录未通过的详细信息
-                logger.warning(f"⚠️ 对账未通过: {agent.agent_id} - 修复动作: {action_values}")
+                logger.warning(f"⚠️ Agent级对账未通过: {agent.agent_id} - 修复动作: {action_values}")
             
             details[agent.agent_id] = {
                 "passed": passed,
@@ -727,22 +745,44 @@ class V6Facade:
             }
         
         total = passed_count + failed_count
-        all_passed = (failed_count == 0 and total > 0)
+        agent_all_passed = (failed_count == 0 and total > 0)
         
-        summary = {
-            "all_passed": all_passed,
+        agent_reconcile = {
+            "all_passed": agent_all_passed,
             "total_agents": total,
             "passed_agents": passed_count,
             "failed_agents": failed_count,
             "details": details
         }
         
-        if all_passed:
-            logger.info(f"✅ 对账全部通过: {total} agents 已检查")
+        if agent_all_passed:
+            logger.info(f"✅ Agent级对账全部通过: {total} agents")
         else:
-            logger.warning(f"⚠️ 对账发现问题: {failed_count}/{total} agents 未通过")
+            logger.warning(f"⚠️ Agent级对账发现问题: {failed_count}/{total} agents 未通过")
         
-        return summary
+        # ========== 系统级对账（资金守恒验证）==========
+        system_reconcile = self.capital_pool.reconcile(
+            agents=self.moirai.agents,
+            current_price=current_price
+        )
+        
+        # ========== 综合判断 ==========
+        all_passed = agent_all_passed and system_reconcile["passed"]
+        
+        if all_passed:
+            logger.info("🎉 对账全部通过（Agent级 + 系统级）")
+        else:
+            logger.error("❌ 对账失败:")
+            if not agent_all_passed:
+                logger.error(f"   - Agent级: {failed_count}/{total} agents 未通过")
+            if not system_reconcile["passed"]:
+                logger.error(f"   - 系统级: 资金差异 ${system_reconcile['discrepancy']:.2f}")
+        
+        return {
+            "all_passed": all_passed,
+            "agent_reconcile": agent_reconcile,
+            "system_reconcile": system_reconcile
+        }
 
     def close_all(self):
         """
@@ -756,6 +796,92 @@ class V6Facade:
             logger.info("已调用交易封装清仓")
         else:
             logger.warning("清仓跳过：交易封装未提供 close_all_positions")
+    
+    def get_capital_report(self, current_price: float = 0) -> Dict:
+        """
+        生成完整的资金统计报告
+        
+        Args:
+            current_price: 当前市场价格（用于计算未实现盈亏）
+        
+        Returns:
+            dict: {
+                "system": {
+                    "total_invested": float,      # 系统总注资
+                    "total_agent_capital": float, # Agent总资金（实盈+浮盈）
+                    "pool_balance": float,        # 资金池余额
+                    "system_total": float,        # 系统总资金
+                    "roi_pct": float              # 系统ROI
+                },
+                "agents": {
+                    "total_count": int,
+                    "total_initial": float,       # Agent初始资金总和
+                    "total_realized": float,      # 已实现总资金
+                    "total_unrealized_pnl": float,# 未实现盈亏
+                    "avg_roi_pct": float          # 平均ROI
+                },
+                "pool": {
+                    "total_invested": float,      # 总注资
+                    "available": float,           # 可用余额
+                    "allocated": float,           # 累计分配
+                    "reclaimed": float,           # 累计回收
+                    "net_flow": float             # 净流出
+                }
+            }
+        """
+        # 1. 资金池统计
+        pool_summary = self.capital_pool.get_summary()
+        
+        # 2. Agent统计
+        total_count = len(self.moirai.agents)
+        total_initial = 0.0
+        total_realized = 0.0
+        total_unrealized_pnl = 0.0
+        
+        for agent in self.moirai.agents:
+            if hasattr(agent, 'account') and agent.account:
+                total_initial += agent.account.private_ledger.initial_capital
+                total_realized += agent.account.private_ledger.virtual_capital
+                
+                if current_price > 0 and hasattr(agent, 'calculate_unrealized_pnl'):
+                    total_unrealized_pnl += agent.calculate_unrealized_pnl(current_price)
+        
+        # 3. 系统级统计
+        total_agent_capital = total_realized + total_unrealized_pnl
+        system_total = total_agent_capital + pool_summary['available_pool']
+        
+        system_roi = 0.0
+        if pool_summary['total_invested'] > 0:
+            system_roi = ((system_total - pool_summary['total_invested']) / 
+                         pool_summary['total_invested'] * 100)
+        
+        avg_roi = 0.0
+        if total_count > 0 and total_initial > 0:
+            avg_roi = ((total_agent_capital - total_initial) / total_initial * 100)
+        
+        return {
+            "system": {
+                "total_invested": pool_summary['total_invested'],
+                "total_agent_capital": total_agent_capital,
+                "pool_balance": pool_summary['available_pool'],
+                "system_total": system_total,
+                "roi_pct": system_roi
+            },
+            "agents": {
+                "total_count": total_count,
+                "total_initial": total_initial,
+                "total_realized": total_realized,
+                "total_unrealized_pnl": total_unrealized_pnl,
+                "avg_roi_pct": avg_roi
+            },
+            "pool": {
+                "total_invested": pool_summary['total_invested'],
+                "available": pool_summary['available_pool'],
+                "allocated": pool_summary['total_allocated'],
+                "reclaimed": pool_summary['total_reclaimed'],
+                "net_flow": pool_summary['net_flow']
+            }
+        }
 
     def report_status(self) -> Dict:
         """
