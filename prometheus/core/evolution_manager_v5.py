@@ -644,9 +644,14 @@ class EvolutionManagerV5:
                 child_meta_genome.mutate(mutation_rate=mutation_rate)
         
         # 5. 创建子代
+        # ✅ 继承父代的当前资金（含盈亏），而不是初始资金
+        inherited_capital = elite.initial_capital  # 默认值
+        if hasattr(elite, 'account') and elite.account:
+            inherited_capital = elite.account.private_ledger.virtual_capital
+        
         child = AgentV5(
             agent_id=child_id,
-            initial_capital=elite.initial_capital,
+            initial_capital=inherited_capital,  # ✅ 继承父代当前资金
             lineage=child_lineage,
             genome=child_genome,
             strategy_params=child_strategy_params,

@@ -1759,35 +1759,45 @@ class AgentAccountSystem:
         pnl = None
         before_private_count = len(self.private_ledger.trade_history)
         
-        if trade_type == 'buy':
-            self.private_ledger.record_buy(
-                amount, price, confidence,
-                caller_role=Role.MOIRAI, caller_id='system',
-                okx_order_id=okx_order_id
-            )
-        elif trade_type == 'sell':
-            pnl = self.private_ledger.record_sell(
-                price, confidence,
-                caller_role=Role.MOIRAI, caller_id='system',
-                okx_order_id=okx_order_id
-            )
-        elif trade_type == 'short':
-            self.private_ledger.record_short(
-                amount, price, confidence,
-                caller_role=Role.MOIRAI, caller_id='system',
-                okx_order_id=okx_order_id
-            )
-        elif trade_type == 'cover':
-            pnl = self.private_ledger.record_cover(
-                price, confidence,
-                caller_role=Role.MOIRAI, caller_id='system',
-                okx_order_id=okx_order_id
-            )
+        try:
+            if trade_type == 'buy':
+                self.private_ledger.record_buy(
+                    amount, price, confidence,
+                    caller_role=Role.MOIRAI, caller_id='system',
+                    okx_order_id=okx_order_id
+                )
+            elif trade_type == 'sell':
+                pnl = self.private_ledger.record_sell(
+                    price, confidence,
+                    caller_role=Role.MOIRAI, caller_id='system',
+                    okx_order_id=okx_order_id
+                )
+            elif trade_type == 'short':
+                self.private_ledger.record_short(
+                    amount, price, confidence,
+                    caller_role=Role.MOIRAI, caller_id='system',
+                    okx_order_id=okx_order_id
+                )
+            elif trade_type == 'cover':
+                pnl = self.private_ledger.record_cover(
+                    price, confidence,
+                    caller_role=Role.MOIRAI, caller_id='system',
+                    okx_order_id=okx_order_id
+                )
+        except Exception as e:
+            logger.error(f"{self.agent_id}: 私账{trade_type}操作失败: {e}")
+            raise
         
         # 2. 提交到公共账簿（使用私有账簿的最后一笔交易记录，确保trade_id一致）
         after_private_count = len(self.private_ledger.trade_history)
         if after_private_count != before_private_count + 1:
-            raise RuntimeError(f"{self.agent_id}: 私账写入计数异常 before={before_private_count}, after={after_private_count}")
+            # 获取当前持仓状态用于诊断
+            long_pos_amt = self.private_ledger.long_position.amount if self.private_ledger.long_position else 0
+            short_pos_amt = self.private_ledger.short_position.amount if self.private_ledger.short_position else 0
+            raise RuntimeError(
+                f"{self.agent_id}: 私账写入计数异常 before={before_private_count}, after={after_private_count}, "
+                f"trade_type={trade_type}, long_pos={long_pos_amt}, short_pos={short_pos_amt}"
+            )
         last_trade = self.private_ledger.trade_history[-1]
         self.public_ledger.record_trade(last_trade, caller_role=caller_role)
 

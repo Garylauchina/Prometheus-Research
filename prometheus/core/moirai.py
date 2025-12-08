@@ -704,7 +704,9 @@ class Moirai(Supervisor):
             logger.debug(f"✅ 交易已记录: Agent {agent.agent_id} {trade_result['action']} {trade_result['amount']:.4f} @ {trade_result['fill_price']:.2f}")
             
         except Exception as e:
+            import traceback
             logger.error(f"记录交易到账簿失败: {e}")
+            logger.error(f"详细堆栈:\n{traceback.format_exc()}")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -84,34 +84,36 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
         # 构建配置
         cycles = 500
         genesis_size = 50
-        scenario = "backtest"
         full_genome_unlock = True  # AlphaZero模式：全参数解锁
         
-        # 构建Facade（遵守三大铁律：统一封装）
-        facade = build_facade(
-            mode=scenario,
-            agent_count=genesis_size,
-            num_families=genesis_size,
-            seed=seed,
-            evolution_seed=None,  # 使用真随机，确保演化多样性
-            full_genome_unlock=full_genome_unlock
-        )
+        # 创建market_feed函数
+        prices = data['close'].values
+        def make_market_feed():
+            def feed(cycle):
+                idx = min(cycle - 1, len(prices) - 1)
+                return {'price': prices[idx]}, {}
+            return feed
         
-        # 初始化种群
-        facade.init_population(
+        # 运行测试（遵守三大铁律：统一封装）
+        facade = run_scenario(
+            mode="backtest",
+            total_cycles=cycles,
+            market_feed=make_market_feed(),
+            
+            # 种群配置
+            num_families=genesis_size,
             agent_count=genesis_size,
             capital_per_agent=10000.0,
-            full_genome_unlock=full_genome_unlock
-        )
-        
-        logger.info(f"✅ 种群初始化完成: {len(facade.moirai.agents)}个Agent")
-        
-        # 运行测试（遵守三大铁律：完整系统逻辑链）
-        result = run_scenario(
-            scenario=scenario,
-            data=data,
-            cycles=cycles,
-            facade=facade
+            
+            # 进化配置
+            evo_interval=10,  # 每10个周期进化一次
+            
+            # 种子配置
+            seed=seed,
+            evolution_seed=None,  # 演化随机
+            
+            # AlphaZero式配置
+            full_genome_unlock=full_genome_unlock  # 全参数解锁
         )
         
         # 提取结果
@@ -122,12 +124,16 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
         worst_agent_return = 0.0
         
         if facade.moirai and facade.moirai.agents:
-            # 计算系统平均收益
+            # 计算系统平均收益（包含未实现盈亏）
             returns = []
+            # 获取最终价格
+            final_price = data['close'].values[-1]
+            
             for agent in facade.moirai.agents:
                 if hasattr(agent, 'account') and agent.account:
-                    initial = agent.account.initial_capital
-                    current = agent.account.private_ledger.virtual_capital
+                    initial = agent.account.private_ledger.initial_capital
+                    # ✅ 包含未实现盈亏（持仓价值）
+                    current = agent.account.private_ledger.virtual_capital + agent.calculate_unrealized_pnl(final_price)
                     agent_return = ((current - initial) / initial) * 100
                     returns.append(agent_return)
                     total_trades += agent.account.private_ledger.trade_count

@@ -555,6 +555,17 @@ class AgentV5:
         action = guidance.action
         current_price = market_data.get('price', 0)
         
+        # ✅ 将Daimon的'close'转换成具体的平仓动作
+        if action == 'close':
+            position = self._get_position_from_ledger()
+            if position.get('long') is not None:
+                action = 'sell'  # 平多头
+            elif position.get('short') is not None:
+                action = 'cover'  # 平空头
+            else:
+                # 无持仓，忽略close请求
+                return None
+        
         # 计算仓位大小（基于genome和confidence）
         # ✨ V6修复：提高默认仓位到80%（原来10%太保守！）
         max_position_pct = self.genome.active_params.get('max_position_pct', 0.8)
