@@ -673,19 +673,64 @@ class V6Facade:
         """
         对账：使用 LedgerReconciler 比对私有/公共账簿（回测/Mock场景）
         OKX 场景仍需结合实际持仓比对（后续可扩展传入 okx_position）
+        
+        Returns:
+            dict: {
+                "all_passed": bool,  # 是否所有Agent都通过对账
+                "total_agents": int,  # 检查的Agent总数
+                "passed_agents": int,  # 通过的Agent数量
+                "failed_agents": int,  # 未通过的Agent数量
+                "details": dict  # 每个Agent的详细对账结果
+            }
         """
         rec = LedgerReconciler()
-        summary = {}
+        details = {}
+        passed_count = 0
+        failed_count = 0
+        
         for agent in getattr(self.moirai, "agents", []):
             acct = getattr(agent, "account", None)
             if not acct or not hasattr(acct, "private_ledger"):
                 logger.warning(f"对账跳过: Agent {agent.agent_id} 无account/private_ledger")
                 continue
+            
             private_ledger = acct.private_ledger
             public_ledger = self.public_ledger
             actions = rec.reconcile_all(agent.agent_id, private_ledger, public_ledger, okx_position=None)
-            summary[agent.agent_id] = [a.value for a in actions]
-        logger.info(f"对账完成: {len(summary)} agents 已检查")
+            
+            # 判断是否通过：actions为空或只包含NO_ACTION
+            action_values = [a.value for a in actions]
+            passed = (len(actions) == 0 or 
+                     all(a == ReconciliationAction.NO_ACTION.value for a in action_values))
+            
+            if passed:
+                passed_count += 1
+            else:
+                failed_count += 1
+                # 记录未通过的详细信息
+                logger.warning(f"⚠️ 对账未通过: {agent.agent_id} - 修复动作: {action_values}")
+            
+            details[agent.agent_id] = {
+                "passed": passed,
+                "actions": action_values
+            }
+        
+        total = passed_count + failed_count
+        all_passed = (failed_count == 0 and total > 0)
+        
+        summary = {
+            "all_passed": all_passed,
+            "total_agents": total,
+            "passed_agents": passed_count,
+            "failed_agents": failed_count,
+            "details": details
+        }
+        
+        if all_passed:
+            logger.info(f"✅ 对账全部通过: {total} agents 已检查")
+        else:
+            logger.warning(f"⚠️ 对账发现问题: {failed_count}/{total} agents 未通过")
+        
         return summary
 
     def close_all(self):
