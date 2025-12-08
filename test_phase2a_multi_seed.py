@@ -124,18 +124,27 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
         worst_agent_return = 0.0
         
         if facade.moirai and facade.moirai.agents:
-            # 计算系统平均收益（包含未实现盈亏）
+            # 计算系统收益（分别统计实盈和浮盈）
             returns = []
+            realized_pnls = []  # 实盈（已实现盈亏）
+            unrealized_pnls = []  # 浮盈（未实现盈亏）
+            
             # 获取最终价格
             final_price = data['close'].values[-1]
             
             for agent in facade.moirai.agents:
                 if hasattr(agent, 'account') and agent.account:
                     initial = agent.account.private_ledger.initial_capital
-                    # ✅ 包含未实现盈亏（持仓价值）
-                    current = agent.account.private_ledger.virtual_capital + agent.calculate_unrealized_pnl(final_price)
+                    realized_capital = agent.account.private_ledger.virtual_capital
+                    unrealized_pnl = agent.calculate_unrealized_pnl(final_price)
+                    
+                    # 总资金 = 已实现资金 + 未实现盈亏
+                    current = realized_capital + unrealized_pnl
                     agent_return = ((current - initial) / initial) * 100
+                    
                     returns.append(agent_return)
+                    realized_pnls.append(realized_capital - initial)
+                    unrealized_pnls.append(unrealized_pnl)
                     total_trades += agent.account.private_ledger.trade_count
             
             if returns:
@@ -143,6 +152,8 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
                 best_agent_return = np.max(returns)
                 worst_agent_return = np.min(returns)
                 avg_trades = total_trades / len(returns)
+                avg_realized_pnl = np.mean(realized_pnls)
+                avg_unrealized_pnl = np.mean(unrealized_pnls)
         
         # 对账验证（遵守三大铁律：对账验证）
         reconcile_summary = facade.reconcile()
@@ -152,6 +163,8 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
             "seed": seed,
             "test_number": test_number,
             "system_return_pct": round(system_return, 2),
+            "avg_realized_pnl": round(avg_realized_pnl, 2),  # 实盈
+            "avg_unrealized_pnl": round(avg_unrealized_pnl, 2),  # 浮盈
             "total_trades": total_trades,
             "avg_trades_per_agent": round(avg_trades, 1),
             "best_agent_return_pct": round(best_agent_return, 2),
@@ -162,7 +175,7 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
                 "seed": seed,
                 "cycles": cycles,
                 "genesis_size": genesis_size,
-                "scenario": scenario,
+                "mode": "backtest",
                 "full_genome_unlock": full_genome_unlock
             }
         }
@@ -170,6 +183,8 @@ def run_single_seed_test(seed: int, data: pd.DataFrame, test_number: int, total_
         logger.info("=" * 80)
         logger.info(f"✅ 测试 {test_number}/{total_tests} 完成")
         logger.info(f"   系统收益: {system_return:+.2f}%")
+        logger.info(f"     ├─ 实盈: ${avg_realized_pnl:+.2f}")
+        logger.info(f"     └─ 浮盈: ${avg_unrealized_pnl:+.2f}")
         logger.info(f"   总交易数: {total_trades}笔")
         logger.info(f"   最佳Agent: {best_agent_return:+.2f}%")
         logger.info(f"   最差Agent: {worst_agent_return:+.2f}%")
@@ -224,8 +239,16 @@ def analyze_results(results: list):
     mean_trades = np.mean(trades)
     std_trades = np.std(trades)
     
+    # 提取实盈和浮盈数据
+    realized_pnls = [r['avg_realized_pnl'] for r in successful]
+    unrealized_pnls = [r['avg_unrealized_pnl'] for r in successful]
+    mean_realized = np.mean(realized_pnls)
+    mean_unrealized = np.mean(unrealized_pnls)
+    
     logger.info("📈 收益统计:")
     logger.info(f"   平均收益: {mean_return:+.2f}%")
+    logger.info(f"     ├─ 平均实盈: ${mean_realized:+.2f}")
+    logger.info(f"     └─ 平均浮盈: ${mean_unrealized:+.2f}")
     logger.info(f"   标准差: {std_return:.2f}%")
     logger.info(f"   中位数: {median_return:+.2f}%")
     logger.info(f"   最高收益: {max_return:+.2f}% (Seed {successful[returns.index(max_return)]['seed']})")
