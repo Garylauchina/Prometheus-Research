@@ -387,11 +387,11 @@ class Moirai(Supervisor):
                 # 平多头
                 if has_long:
                     amount = ledger.long_position.amount
-                    avg_price = ledger.long_position.avg_price
-                    pnl = (current_price - avg_price) * amount
+                    entry_price = ledger.long_position.entry_price  # ✅ 使用entry_price
+                    pnl = (current_price - entry_price) * amount
                     
                     logger.info(
-                        f"      📉 平多: {amount:.4f} @ ${avg_price:.2f} → "
+                        f"      📉 平多: {amount:.4f} @ ${entry_price:.2f} → "
                         f"${current_price:.2f} | PnL: ${pnl:+.2f}"
                     )
                     
@@ -411,11 +411,11 @@ class Moirai(Supervisor):
                 # 平空头
                 if has_short:
                     amount = ledger.short_position.amount
-                    avg_price = ledger.short_position.avg_price
-                    pnl = (avg_price - current_price) * amount
+                    entry_price = ledger.short_position.entry_price  # ✅ 使用entry_price
+                    pnl = (entry_price - current_price) * amount
                     
                     logger.info(
-                        f"      📈 平空: {amount:.4f} @ ${avg_price:.2f} → "
+                        f"      📈 平空: {amount:.4f} @ ${entry_price:.2f} → "
                         f"${current_price:.2f} | PnL: ${pnl:+.2f}"
                     )
                     
