@@ -168,8 +168,12 @@ class EvolutionManagerV5:
             eliminated_ids.append(agent.agent_id)
             logger.info(f"   💀 {agent.agent_id} (PnL=${pnl:+.2f})")
             
-            # 标记死亡
-            self.moirai._atropos_eliminate_agent(agent, "进化淘汰")
+            # 标记死亡（传入current_price以便平仓）
+            self.moirai._atropos_eliminate_agent(
+                agent=agent, 
+                reason="进化淘汰",
+                current_price=current_price  # ✅ 传入当前价格
+            )
             self.total_deaths += 1
         
         # 3. 🦠 病毒式复制（Viral Replication）

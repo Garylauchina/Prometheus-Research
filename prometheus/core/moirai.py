@@ -343,17 +343,92 @@ class Moirai(Supervisor):
         
         return to_eliminate
     
-    def _atropos_eliminate_agent(self, agent: AgentV5, reason: str):
+    def _atropos_eliminate_agent(self, agent: AgentV5, reason: str, current_price: float = 0):
         """
         ✂️ Atropos剪断生命之线（v5.0专用）
         
         无情地淘汰失败的Agent，并回收其剩余资金
         
+        流程：
+        1. 先平仓所有持仓（如果有）
+        2. 平仓后资金归入virtual_capital
+        3. 回收资金到资金池
+        
         Args:
             agent: 要淘汰的AgentV5
             reason: 淘汰原因
+            current_price: 当前市场价格（用于平仓）
         """
-        # ✅ v6.0: 回收Agent剩余资金到资金池
+        # ✅ v6.0: Step 1 - 先平仓所有持仓
+        if hasattr(agent, 'account') and agent.account and current_price > 0:
+            ledger = agent.account.private_ledger
+            has_long = ledger.long_position and ledger.long_position.amount > 0
+            has_short = ledger.short_position and ledger.short_position.amount > 0
+            
+            if has_long or has_short:
+                logger.info(f"   💀 {agent.agent_id} 死亡前强制平仓...")
+                
+                # 平多头
+                if has_long:
+                    amount = ledger.long_position.amount
+                    avg_price = ledger.long_position.avg_price
+                    pnl = (current_price - avg_price) * amount
+                    
+                    logger.info(
+                        f"      📉 平多: {amount:.4f} @ ${avg_price:.2f} → "
+                        f"${current_price:.2f} | PnL: ${pnl:+.2f}"
+                    )
+                    
+                    # 调用账簿系统记录平仓
+                    try:
+                        from .ledger_system import Role
+                        agent.account.record_trade(
+                            trade_type='sell',
+                            amount=amount,
+                            price=current_price,
+                            confidence=1.0,
+                            caller_role=Role.MOIRAI
+                        )
+                    except Exception as e:
+                        logger.error(f"      ❌ 平多失败: {e}")
+                
+                # 平空头
+                if has_short:
+                    amount = ledger.short_position.amount
+                    avg_price = ledger.short_position.avg_price
+                    pnl = (avg_price - current_price) * amount
+                    
+                    logger.info(
+                        f"      📈 平空: {amount:.4f} @ ${avg_price:.2f} → "
+                        f"${current_price:.2f} | PnL: ${pnl:+.2f}"
+                    )
+                    
+                    # 调用账簿系统记录平仓
+                    try:
+                        from .ledger_system import Role
+                        agent.account.record_trade(
+                            trade_type='cover',
+                            amount=amount,
+                            price=current_price,
+                            confidence=1.0,
+                            caller_role=Role.MOIRAI
+                        )
+                    except Exception as e:
+                        logger.error(f"      ❌ 平空失败: {e}")
+        elif hasattr(agent, 'account') and agent.account and current_price == 0:
+            # 如果没有传入价格，发出警告
+            ledger = agent.account.private_ledger
+            has_position = (
+                (ledger.long_position and ledger.long_position.amount > 0) or
+                (ledger.short_position and ledger.short_position.amount > 0)
+            )
+            if has_position:
+                logger.warning(
+                    f"      ⚠️ Agent死亡时仍有持仓，但未传入current_price！"
+                    f"未实现盈亏将丢失！"
+                )
+        
+        # ✅ v6.0: Step 2 - 回收Agent剩余资金到资金池
         remaining_capital = 0.0
         if hasattr(agent, 'account') and agent.account:
             remaining_capital = agent.account.private_ledger.virtual_capital

@@ -16,6 +16,8 @@ from prometheus.exchange.okx_api import OKXExchange
 from prometheus.exchange.okx_api import OKXExchange as OKXExchangeType  # alias for type hints
 from prometheus.core.ledger_system import PublicLedger, PrivateLedger, LedgerReconciler, TradeRecord, Role
 from prometheus.ledger.attach_accounts import attach_accounts
+# ✅ v6.0: 资金池系统
+from prometheus.core.capital_pool import CapitalPool
 
 # ✅ WorldSignature系统（Prophet的世界认知）
 try:
@@ -138,13 +140,22 @@ class V6Facade:
                  bulletin_board: Optional[BulletinBoard] = None,
                  match_config: Optional[Dict] = None):
         self.bulletin_board = bulletin_board or BulletinBoard(board_name="facade_board")
+        
+        # ✅ v6.0: 初始化资金池
+        self.capital_pool = CapitalPool()
+        
         self.moirai: Moirai = Moirai(
             bulletin_board=self.bulletin_board,
             num_families=num_families,
             exchange=exchange,
-            match_config=match_config
+            match_config=match_config,
+            capital_pool=self.capital_pool  # ✅ 传递资金池
         )
-        self.evolution = EvolutionManagerV5(moirai=self.moirai, num_families=num_families)
+        self.evolution = EvolutionManagerV5(
+            moirai=self.moirai, 
+            num_families=num_families,
+            capital_pool=self.capital_pool  # ✅ 传递资金池
+        )
         # AlphaZero式：移除diversity_monitor
         # self.diversity_monitor = self.evolution.diversity_monitor
         self.public_ledger = PublicLedger()
