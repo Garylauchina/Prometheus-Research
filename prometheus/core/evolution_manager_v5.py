@@ -196,7 +196,11 @@ class EvolutionManagerV5:
                     continue
                 
                 # 2. 病毒式复制：克隆 + 变异
-                child = self._viral_replicate(elite, mutation_rate=mutation_rate)
+                child = self._viral_replicate(
+                    elite=elite, 
+                    mutation_rate=mutation_rate,
+                    current_price=current_price  # ✅ 传入当前价格用于平仓
+                )
                 
                 new_agents.append(child)
                 self.total_births += 1
@@ -604,7 +608,7 @@ class EvolutionManagerV5:
         probabilities = [f / total for f in fitnesses]
         return random.choices(agents, weights=probabilities, k=1)[0]
     
-    def _viral_replicate(self, elite: AgentV5, mutation_rate: float) -> AgentV5:
+    def _viral_replicate(self, elite: AgentV5, mutation_rate: float, current_price: float = 0) -> AgentV5:
         """
         🦠 病毒式复制：克隆精英 + 随机变异
         
@@ -658,30 +662,33 @@ class EvolutionManagerV5:
                 child_meta_genome.mutate(mutation_rate=mutation_rate)
         
         # 5. 创建子代
-        # ✅ v6.0: 从资金池分配资金（固定初始资金$10,000）
-        desired_capital = 10000.0  # 标准初始资金
+        # ✅ v6.0: 父代资金分割机制
         
-        # 从资金池分配
-        if self.capital_pool:
-            allocated_capital = self.capital_pool.allocate(
-                amount=desired_capital,
-                agent_id=child_id,
+        # Step 1: 繁殖前强制父代全仓平仓（套现）
+        if current_price > 0:
+            parent_capital = self.moirai._lachesis_force_close_all(
+                agent=elite,
+                current_price=current_price,
                 reason="breeding"
             )
-            
-            if allocated_capital < desired_capital:
-                logger.warning(
-                    f"⚠️ 资金池不足：期望${desired_capital:.2f}，"
-                    f"实际${allocated_capital:.2f}"
-                )
         else:
-            # 如果没有资金池，使用默认值（向后兼容）
-            allocated_capital = desired_capital
-            logger.warning("⚠️ 未配置资金池，使用默认初始资金")
+            # 如果没有价格，只能用现有实盈
+            parent_capital = elite.account.private_ledger.virtual_capital if hasattr(elite, 'account') and elite.account else elite.initial_capital
         
+        # Step 2: 资金分割（父代分一半给子代）
+        split_ratio = 0.5
+        child_capital = parent_capital * split_ratio
+        parent_remaining = parent_capital - child_capital
+        
+        # Step 3: 从父代扣除资金
+        if hasattr(elite, 'account') and elite.account:
+            elite.account.private_ledger.virtual_capital = parent_remaining
+            logger.info(f"      💰 资金分割: 父代${parent_capital:,.2f} → 父代${parent_remaining:,.2f} + 子代${child_capital:,.2f}")
+        
+        # Step 4: 创建子代（使用从父代分割的资金）
         child = AgentV5(
             agent_id=child_id,
-            initial_capital=allocated_capital,  # ✅ 从资金池分配的资金
+            initial_capital=child_capital,  # ✅ 从父代分割的资金
             lineage=child_lineage,
             genome=child_genome,
             strategy_params=child_strategy_params,
@@ -689,7 +696,7 @@ class EvolutionManagerV5:
             meta_genome=child_meta_genome
         )
         
-        logger.debug(f"   🦠 {elite.agent_id[:8]} → {child_id[:8]} (G{child_generation}, ${allocated_capital:.2f})")
+        logger.debug(f"   🦠 {elite.agent_id[:8]} → {child_id[:8]} (G{child_generation}, ${child_capital:,.2f})")
         self.total_births += 1
         return child
     

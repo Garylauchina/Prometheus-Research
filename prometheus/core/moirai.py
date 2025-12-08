@@ -474,6 +474,79 @@ class Moirai(Supervisor):
         elif reason == "资金耗尽":
             agent.death_reason = DeathReason.CAPITAL_DEPLETION
     
+    def _lachesis_force_close_all(self, agent: AgentV5, current_price: float, reason: str = "breeding") -> float:
+        """
+        ⚖️ Lachesis强制清仓Agent所有持仓
+        
+        用于繁殖前套现，实现所有浮盈/浮亏
+        
+        Args:
+            agent: 要平仓的Agent
+            current_price: 当前市场价格
+            reason: 平仓原因
+        
+        Returns:
+            float: 平仓后的实盈资金
+        """
+        if not hasattr(agent, 'account') or not agent.account or current_price <= 0:
+            return agent.account.private_ledger.virtual_capital if hasattr(agent, 'account') and agent.account else 0.0
+        
+        ledger = agent.account.private_ledger
+        has_long = ledger.long_position and ledger.long_position.amount > 0
+        has_short = ledger.short_position and ledger.short_position.amount > 0
+        
+        if not has_long and not has_short:
+            # 无持仓，直接返回现金
+            return ledger.virtual_capital
+        
+        logger.info(f"   🔄 {agent.agent_id} 繁殖前强制平仓...")
+        
+        # 平多头
+        if has_long:
+            amount = ledger.long_position.amount
+            entry_price = ledger.long_position.entry_price
+            pnl = (current_price - entry_price) * amount
+            
+            logger.info(f"      📉 平多: {amount:.4f} @ ${entry_price:.2f} → ${current_price:.2f} | PnL: ${pnl:+,.2f}")
+            
+            try:
+                from .ledger_system import Role
+                agent.account.record_trade(
+                    trade_type='sell',
+                    amount=amount,
+                    price=current_price,
+                    confidence=1.0,
+                    caller_role=Role.MOIRAI
+                )
+            except Exception as e:
+                logger.error(f"      ❌ 平多失败: {e}")
+        
+        # 平空头
+        if has_short:
+            amount = ledger.short_position.amount
+            entry_price = ledger.short_position.entry_price
+            pnl = (entry_price - current_price) * amount
+            
+            logger.info(f"      📈 平空: {amount:.4f} @ ${entry_price:.2f} → ${current_price:.2f} | PnL: ${pnl:+,.2f}")
+            
+            try:
+                from .ledger_system import Role
+                agent.account.record_trade(
+                    trade_type='cover',
+                    amount=amount,
+                    price=current_price,
+                    confidence=1.0,
+                    caller_role=Role.MOIRAI
+                )
+            except Exception as e:
+                logger.error(f"      ❌ 平空失败: {e}")
+        
+        # 返回平仓后的实盈资金
+        final_capital = ledger.virtual_capital
+        logger.info(f"      💰 平仓后资金: ${final_capital:,.2f}")
+        
+        return final_capital
+    
     def _atropos_check_and_eliminate(self) -> int:
         """
         ✂️ Atropos执行淘汰检查
