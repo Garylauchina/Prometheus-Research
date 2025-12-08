@@ -73,6 +73,7 @@ class Moirai(Supervisor):
                  num_families: int = 50,
                  exchange=None,
                  match_config: Optional[Dict] = None,
+                 capital_pool=None,
                  **kwargs):
         """
         初始化命运三女神（v5.0专用，不向后兼容）
@@ -82,6 +83,7 @@ class Moirai(Supervisor):
             num_families: 家族数量
             exchange: 交易所接口（OKXExchange或模拟交易所）
             match_config: 撮合配置
+            capital_pool: 资金池（CapitalPool实例）
             **kwargs: 其他参数传递给Supervisor
         """
         # 继承Supervisor的初始化
@@ -92,6 +94,9 @@ class Moirai(Supervisor):
         
         # 家族分配计数器（用于创世Agent）
         self._family_counter = 0
+        
+        # ✅ v6.0: 资金池（统一资金管理）
+        self.capital_pool = capital_pool
         
         # 交易撮合配置
         self.exchange = exchange
@@ -342,16 +347,29 @@ class Moirai(Supervisor):
         """
         ✂️ Atropos剪断生命之线（v5.0专用）
         
-        无情地淘汰失败的Agent
+        无情地淘汰失败的Agent，并回收其剩余资金
         
         Args:
             agent: 要淘汰的AgentV5
             reason: 淘汰原因
         """
+        # ✅ v6.0: 回收Agent剩余资金到资金池
+        remaining_capital = 0.0
+        if hasattr(agent, 'account') and agent.account:
+            remaining_capital = agent.account.private_ledger.virtual_capital
+            
+            # 只有当有资金池时才回收
+            if self.capital_pool and remaining_capital > 0:
+                self.capital_pool.reclaim(
+                    amount=remaining_capital,
+                    agent_id=agent.agent_id,
+                    reason=reason
+                )
+        
         logger.warning(
             f"   ✂️ Atropos剪断了{agent.agent_id}的生命之线 | "
             f"原因: {reason} | "
-            f"资金剩余: ${agent.current_capital:.2f}"
+            f"资金剩余: ${remaining_capital:.2f}"
         )
         
         # 从活跃Agent列表中移除
@@ -364,8 +382,6 @@ class Moirai(Supervisor):
             agent.death_reason = DeathReason.SUICIDE
         elif reason == "资金耗尽":
             agent.death_reason = DeathReason.CAPITAL_DEPLETION
-        
-        # TODO: 是否需要记录到某个"亡者名单"？
     
     def _atropos_check_and_eliminate(self) -> int:
         """
