@@ -49,7 +49,8 @@ class EvolutionManagerV5:
                  moirai,  # Moirai实例（替代supervisor）
                  elite_ratio: float = 0.2,
                  elimination_ratio: float = 0.3,
-                 num_families: int = 50):
+                 num_families: int = 50,
+                 capital_pool=None):
         """
         初始化进化管理器
         
@@ -58,11 +59,15 @@ class EvolutionManagerV5:
             elite_ratio: 精英比例
             elimination_ratio: 淘汰比例
             num_families: 家族数量
+            capital_pool: 资金池（CapitalPool实例）
         """
         self.moirai = moirai
         self.elite_ratio = elite_ratio
         self.elimination_ratio = elimination_ratio
         self.num_families = num_families
+        
+        # ✅ v6.0: 资金池（统一资金管理）
+        self.capital_pool = capital_pool
         
         # AlphaZero式：极简统计
         self.generation = 0
@@ -644,14 +649,30 @@ class EvolutionManagerV5:
                 child_meta_genome.mutate(mutation_rate=mutation_rate)
         
         # 5. 创建子代
-        # ✅ 继承父代的当前资金（含盈亏），而不是初始资金
-        inherited_capital = elite.initial_capital  # 默认值
-        if hasattr(elite, 'account') and elite.account:
-            inherited_capital = elite.account.private_ledger.virtual_capital
+        # ✅ v6.0: 从资金池分配资金（固定初始资金$10,000）
+        desired_capital = 10000.0  # 标准初始资金
+        
+        # 从资金池分配
+        if self.capital_pool:
+            allocated_capital = self.capital_pool.allocate(
+                amount=desired_capital,
+                agent_id=child_id,
+                reason="breeding"
+            )
+            
+            if allocated_capital < desired_capital:
+                logger.warning(
+                    f"⚠️ 资金池不足：期望${desired_capital:.2f}，"
+                    f"实际${allocated_capital:.2f}"
+                )
+        else:
+            # 如果没有资金池，使用默认值（向后兼容）
+            allocated_capital = desired_capital
+            logger.warning("⚠️ 未配置资金池，使用默认初始资金")
         
         child = AgentV5(
             agent_id=child_id,
-            initial_capital=inherited_capital,  # ✅ 继承父代当前资金
+            initial_capital=allocated_capital,  # ✅ 从资金池分配的资金
             lineage=child_lineage,
             genome=child_genome,
             strategy_params=child_strategy_params,
@@ -659,7 +680,7 @@ class EvolutionManagerV5:
             meta_genome=child_meta_genome
         )
         
-        logger.debug(f"   🦠 {elite.agent_id[:8]} → {child_id[:8]} (G{child_generation})")
+        logger.debug(f"   🦠 {elite.agent_id[:8]} → {child_id[:8]} (G{child_generation}, ${allocated_capital:.2f})")
         self.total_births += 1
         return child
     
