@@ -524,6 +524,11 @@ class EvolutionManagerV5:
         Returns:
             float: Fitness分数（绝对收益，不交易则惩罚）
         """
+        # ✅ v6.0: 处理initial_capital为0的情况（资金池耗尽时）
+        if agent.initial_capital <= 0:
+            logger.warning(f"⚠️ Agent {agent.agent_id} initial_capital={agent.initial_capital}, 返回最低fitness")
+            return -1.0  # 返回最低fitness，将被淘汰
+        
         # 1. 计算最终资金（现金 + 未实现盈亏）
         current_liquid_capital = agent.account.private_ledger.virtual_capital if hasattr(agent, 'account') and agent.account else agent.current_capital
         unrealized_pnl = agent.calculate_unrealized_pnl(current_price) if current_price > 0 else 0.0
