@@ -74,6 +74,7 @@ class Moirai(Supervisor):
                  exchange=None,
                  match_config: Optional[Dict] = None,
                  capital_pool=None,
+                 experience_db=None,
                  **kwargs):
         """
         初始化命运三女神（v5.0专用，不向后兼容）
@@ -84,10 +85,14 @@ class Moirai(Supervisor):
             exchange: 交易所接口（OKXExchange或模拟交易所）
             match_config: 撮合配置
             capital_pool: 资金池（CapitalPool实例）
+            experience_db: 经验数据库（ExperienceDB实例，用于智能创世）
             **kwargs: 其他参数传递给Supervisor
         """
         # 继承Supervisor的初始化
         super().__init__(bulletin_board=bulletin_board, **kwargs)
+        
+        # v6.0: 经验数据库（智能创世）
+        self.experience_db = experience_db
         
         # v5.0配置
         self.num_families = num_families
@@ -159,7 +164,7 @@ class Moirai(Supervisor):
         
         为每个Agent纺织生命之线：
         1. 分配家族（Lineage）
-        2. 创建基因组（Genome）
+        2. 创建基因组（Genome）- v6.0: 支持智能创世
         3. 赋予本能（Instinct）
         4. 初始化策略池（Strategy Pool）
         5. 赋予记忆（PersonalInsights）
@@ -175,6 +180,42 @@ class Moirai(Supervisor):
             List[AgentV5]: 创建的AgentV5列表
         """
         agents = []
+        
+        # ✨ v6.0: 智能创世（读取Prophet的创世策略）
+        genesis_genomes = []  # 历史优秀基因组列表
+        genesis_mode = "random"  # 默认随机创世
+        
+        if self.bulletin_board and self.experience_db:
+            try:
+                # 从公告板读取Prophet的创世策略
+                strategy_bulletin = self.bulletin_board.get_latest_strategy()
+                if strategy_bulletin:
+                    genesis_strategy = strategy_bulletin.get("genesis_strategy", {})
+                    genesis_mode = genesis_strategy.get("mode", "random")
+                    
+                    # 根据模式决定是否使用历史基因
+                    if genesis_mode in ["adaptive", "mixed"]:
+                        # 获取当前市场WorldSignature
+                        world_sig = self.bulletin_board.get_current_world_signature()
+                        if world_sig:
+                            # 从ExperienceDB查询相似的优秀基因
+                            similar_count = agent_count if genesis_mode == "adaptive" else agent_count // 2
+                            genesis_genomes = self.experience_db.smart_genesis(
+                                world_signature=world_sig,
+                                top_k=similar_count,
+                                similarity_threshold=0.7  # 相似度阈值
+                            )
+                            logger.info(
+                                f"   ✨ 智能创世（{genesis_mode}）: "
+                                f"从数据库匹配到{len(genesis_genomes)}个历史优秀基因"
+                            )
+                        else:
+                            logger.warning("   ⚠️ 未找到WorldSignature，回退到随机创世")
+                    else:
+                        logger.info(f"   🎲 随机创世模式")
+                        
+            except Exception as e:
+                logger.warning(f"   ⚠️ 智能创世失败（{e}），回退到随机创世")
         
         mode_msg = "🔥 激进模式（50参数）" if full_genome_unlock else "渐进模式（3参数）"
         logger.info(f"   🧵 Clotho开始纺织{agent_count}条生命之线...{mode_msg}")
@@ -205,13 +246,30 @@ class Moirai(Supervisor):
                     allocated_capital = capital_per_agent
                 
                 # 2. 创建AgentV5
+                # ✨ v6.0: 如果有历史基因（策略参数），使用它；否则随机创建
                 agent = AgentV5.create_genesis(
                     agent_id=agent_id,
-                    initial_capital=allocated_capital,  # ✅ 使用从资金池分配的资金
+                    initial_capital=allocated_capital,
                     family_id=family_id,
                     num_families=self.num_families,
-                    full_genome_unlock=full_genome_unlock  # ✨ 传递参数
+                    full_genome_unlock=full_genome_unlock
                 )
+                
+                if i < len(genesis_genomes):
+                    # ✅ 使用历史优秀的策略参数（这才是真正控制行为的参数！）
+                    historical_params = genesis_genomes[i]  # 这是一个字典
+                    
+                    # 更新Agent的策略参数
+                    if hasattr(agent, 'strategy_params') and agent.strategy_params:
+                        from prometheus.core.strategy_params import StrategyParams
+                        agent.strategy_params = StrategyParams.from_dict(historical_params)
+                        logger.debug(f"      ✨ {agent_id} 使用历史策略参数（智能创世）")
+                    else:
+                        logger.debug(f"      ⚠️ {agent_id} 无strategy_params，降级到随机基因")
+                else:
+                    # 随机创建（已在create_genesis中完成）
+                    logger.debug(f"      🎲 {agent_id} 使用随机基因")
+                
                 # 确保血统携带family_id供多样性/移民统计使用
                 agent.lineage.family_id = family_id
                 
@@ -473,6 +531,76 @@ class Moirai(Supervisor):
             agent.death_reason = DeathReason.SUICIDE
         elif reason == "资金耗尽":
             agent.death_reason = DeathReason.CAPITAL_DEPLETION
+    
+    # ========== 资金池生死线守护（v6.0新增）==========
+    TARGET_RESERVE_RATIO = 0.20  # 目标：20%资金池（硬约束）
+    FIXED_TAX_RATE = 0.10        # 固定税率：10%（可测试调整）
+    
+    def _lachesis_calculate_breeding_tax(self, elite_agent: AgentV5, current_price: float) -> float:
+        """
+        ⚖️ Lachesis计算繁殖税（极简版）
+        
+        税率逻辑（AlphaZero式极简）：
+        - 资金池 >= 20%：不征税（0%）
+        - 资金池 < 20%：固定征税（10%）
+        
+        不分级，不预判，让系统自然平衡。
+        如果10%不够，测试会告诉我们。
+        
+        Args:
+            elite_agent: 准备繁殖的精英Agent
+            current_price: 当前市场价格
+        
+        Returns:
+            float: 税额（绝对值）
+        """
+        if not self.capital_pool:
+            return 0.0  # 无资金池，不征税
+        
+        # 1. 计算系统资金状态
+        agent_total_capital = 0.0
+        for agent in self.agents:
+            if agent.state != AgentState.DEAD and hasattr(agent, 'account') and agent.account:
+                realized = agent.account.private_ledger.virtual_capital
+                # 繁殖时已经强制平仓，所以这里主要是realized，unrealized应该为0
+                unrealized = 0.0
+                if hasattr(agent, 'calculate_unrealized_pnl'):
+                    try:
+                        unrealized = agent.calculate_unrealized_pnl(current_price)
+                    except:
+                        unrealized = 0.0
+                agent_total_capital += (realized + unrealized)
+        
+        pool_balance = self.capital_pool.available_pool
+        system_total = agent_total_capital + pool_balance
+        
+        if system_total <= 0:
+            logger.warning("   ⚠️ 系统总资金<=0，禁止繁殖")
+            return float('inf')  # 返回无穷大，阻止繁殖
+        
+        reserve_ratio = pool_balance / system_total
+        
+        # 2. 极简税率逻辑
+        if reserve_ratio >= self.TARGET_RESERVE_RATIO:
+            tax_rate = 0.0
+        else:
+            tax_rate = self.FIXED_TAX_RATE
+        
+        # 3. 计算税额（基于已实现资金）
+        if hasattr(elite_agent, 'account') and elite_agent.account:
+            elite_capital = elite_agent.account.private_ledger.virtual_capital
+        else:
+            elite_capital = 0.0
+        tax_amount = elite_capital * tax_rate
+        
+        logger.info(
+            f"   💰 繁殖税: 资金池{reserve_ratio*100:.1f}% "
+            f"(目标{self.TARGET_RESERVE_RATIO*100:.0f}%) "
+            f"→ 税率{tax_rate*100:.0f}% "
+            f"→ 税额${tax_amount:,.0f}"
+        )
+        
+        return tax_amount
     
     def _lachesis_force_close_all(self, agent: AgentV5, current_price: float, reason: str = "breeding") -> float:
         """

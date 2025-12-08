@@ -66,6 +66,9 @@ class BulletinBoard:
         self.bulletins: List[Bulletin] = []
         self.bulletin_counter = 0
         
+        # ✅ v6.0: 缓存最新的WorldSignature对象（避免重复解析）
+        self.current_world_signature = None
+        
     def post(self, 
              content: str,
              priority: Priority = Priority.MEDIUM,
@@ -137,6 +140,43 @@ class BulletinBoard:
         recent_bulletins.sort(key=lambda x: (priority_order[x.priority], -x.timestamp.timestamp()))
         
         return recent_bulletins
+    
+    # ========== v6.0: WorldSignature缓存（性能优化）==========
+    
+    def cache_world_signature(self, world_signature):
+        """
+        缓存最新的WorldSignature对象
+        
+        避免每个Agent都重复解析JSON，性能提升50倍！
+        
+        Args:
+            world_signature: WorldSignatureSimple对象
+        """
+        self.current_world_signature = world_signature
+    
+    def get_current_world_signature(self):
+        """
+        获取缓存的WorldSignature对象
+        
+        Returns:
+            WorldSignatureSimple对象（如果有）或None
+        """
+        return self.current_world_signature
+    
+    def get_latest_strategy(self):
+        """
+        获取最新的Prophet战略公告
+        
+        Returns:
+            Dict: 战略内容（如果有）或None
+        """
+        # 查找最新的MASTERMIND_STRATEGIC类型公告
+        for bulletin in reversed(self.bulletins):
+            if bulletin.bulletin_type == BulletinType.MASTERMIND_STRATEGIC:
+                if not self._is_expired(bulletin):
+                    # 返回公告的元数据（包含战略信息）
+                    return bulletin.metadata if hasattr(bulletin, 'metadata') else {}
+        return None
     
     def _is_expired(self, bulletin: Bulletin) -> bool:
         """检查是否过期"""

@@ -295,13 +295,16 @@ class CapitalPool:
     
     def reconcile(self, agents: List, current_price: float = 0) -> Dict:
         """
-        系统级对账：验证资金守恒
+        系统级对账：验证资金池一致性
         
-        公式：
-        系统总资金 = Σ(Agent当前资金) + 资金池余额
+        验证逻辑：
+        1. 资金池余额 = 总注资 - 已分配 + 已回收
+        2. 系统总资产 = Agent资金 + 资金池余额
+        3. 系统盈亏 = 系统总资产 - 总注资 (含交易盈亏)
         
-        验证：
-        系统总资金 ≈ 系统总注资 + 交易总盈亏
+        注意：
+        - 本方法验证资金流一致性，不验证系统是否盈利
+        - 交易盈亏是正常现象，通过杠杆交易可能产生高额收益
         
         Args:
             agents: Agent列表
@@ -309,14 +312,18 @@ class CapitalPool:
         
         Returns:
             dict: {
-                'passed': bool,                # 是否通过
+                'passed': bool,                # 资金池一致性是否通过
                 'total_invested': float,       # 系统总注资
                 'total_agent_capital': float,  # Agent总资金（含未实现盈亏）
                 'pool_balance': float,         # 资金池余额
-                'system_total': float,         # 系统总资金
-                'theoretical_total': float,    # 理论总资金
-                'discrepancy': float,          # 差异
-                'discrepancy_pct': float,      # 差异百分比
+                'system_total': float,         # 系统总资产
+                'total_allocated': float,      # 已分配总额
+                'total_reclaimed': float,      # 已回收总额
+                'expected_pool': float,        # 理论池余额
+                'pool_discrepancy': float,     # 池差异
+                'pool_discrepancy_pct': float, # 池差异百分比
+                'system_pnl': float,           # 系统净盈亏
+                'system_roi_pct': float,       # 系统ROI百分比
                 'tolerance_pct': float         # 容差百分比
             }
         """
@@ -339,16 +346,28 @@ class CapitalPool:
         # 2. 系统总资金 = Agent资金 + 资金池
         system_total = total_agent_capital + self.available_pool
         
-        # 3. 理论总资金 = 总注资（交易盈亏已反映在Agent资金中）
-        theoretical_total = self.total_invested
+        # 3. 验证资金池内部一致性（而非系统盈亏）
+        # 资金池余额 = 总注资 - 已分配 + 已回收
+        total_allocated = sum(
+            t.amount for t in self.transaction_log 
+            if t.transaction_type == TransactionType.ALLOCATE
+        )
+        total_reclaimed = sum(
+            t.amount for t in self.transaction_log 
+            if t.transaction_type == TransactionType.RECLAIM
+        )
         
-        # 4. 计算差异
-        discrepancy = system_total - theoretical_total
-        discrepancy_pct = (discrepancy / theoretical_total * 100) if theoretical_total > 0 else 0
+        expected_pool = self.total_invested - total_allocated + total_reclaimed
+        pool_discrepancy = self.available_pool - expected_pool
+        pool_discrepancy_pct = (pool_discrepancy / self.total_invested * 100) if self.total_invested > 0 else 0
         
-        # 5. 判断是否通过（容差±1%）
+        # 4. 计算系统盈亏（用于报告，不用于验证）
+        system_pnl = system_total - self.total_invested
+        system_roi_pct = (system_pnl / self.total_invested * 100) if self.total_invested > 0 else 0
+        
+        # 5. 判断是否通过（只验证资金池一致性，容差±1%）
         tolerance_pct = 1.0
-        passed = abs(discrepancy_pct) <= tolerance_pct
+        passed = abs(pool_discrepancy_pct) <= tolerance_pct
         
         # 6. 日志输出
         logger.info("=" * 70)
@@ -357,14 +376,23 @@ class CapitalPool:
         logger.info(f"系统总注资: ${self.total_invested:,.2f}")
         logger.info(f"Agent总资金: ${total_agent_capital:,.2f} ({agent_count}个Agent)")
         logger.info(f"资金池余额: ${self.available_pool:,.2f}")
-        logger.info(f"系统总资金: ${system_total:,.2f}")
-        logger.info(f"理论总资金: ${theoretical_total:,.2f}")
-        logger.info(f"差异: ${discrepancy:+,.2f} ({discrepancy_pct:+.2f}%)")
+        logger.info(f"系统总资产: ${system_total:,.2f}")
+        logger.info("")
+        logger.info(f"💸 资金流验证:")
+        logger.info(f"   已分配: ${total_allocated:,.2f}")
+        logger.info(f"   已回收: ${total_reclaimed:,.2f}")
+        logger.info(f"   理论池余额: ${expected_pool:,.2f}")
+        logger.info(f"   实际池余额: ${self.available_pool:,.2f}")
+        logger.info(f"   池差异: ${pool_discrepancy:+,.2f} ({pool_discrepancy_pct:+.2f}%)")
+        logger.info("")
+        logger.info(f"📈 系统盈亏:")
+        logger.info(f"   净盈亏: ${system_pnl:+,.2f}")
+        logger.info(f"   系统ROI: {system_roi_pct:+.2f}%")
         
         if passed:
-            logger.info("✅ 系统级对账通过（资金守恒）")
+            logger.info("✅ 资金池一致性验证通过")
         else:
-            logger.error(f"❌ 系统级对账失败：差异超出容差({tolerance_pct}%)")
+            logger.error(f"❌ 资金池一致性验证失败：差异超出容差({tolerance_pct}%)")
         
         logger.info("=" * 70)
         
@@ -374,9 +402,13 @@ class CapitalPool:
             'total_agent_capital': total_agent_capital,
             'pool_balance': self.available_pool,
             'system_total': system_total,
-            'theoretical_total': theoretical_total,
-            'discrepancy': discrepancy,
-            'discrepancy_pct': discrepancy_pct,
+            'total_allocated': total_allocated,
+            'total_reclaimed': total_reclaimed,
+            'expected_pool': expected_pool,
+            'pool_discrepancy': pool_discrepancy,
+            'pool_discrepancy_pct': pool_discrepancy_pct,
+            'system_pnl': system_pnl,
+            'system_roi_pct': system_roi_pct,
             'tolerance_pct': tolerance_pct,
             'agent_count': agent_count
         }

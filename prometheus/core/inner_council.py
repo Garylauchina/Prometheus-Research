@@ -589,37 +589,62 @@ class Daimon:
                 reason=f"持仓到期: {holding_periods} > {expected_holding:.0f}周期"
             ))
         
-        # ========== 4. 开仓/加仓方向选择（修复版：支持加仓！）==========
-        market_trend = context.get('market_data', {}).get('trend', 'neutral')
+        # ========== 4. 开仓/加仓方向选择（v6.0修复：基于基因参数！）==========
+        # ✨ 关键修复：不依赖外部trend，直接基于Agent的directional_bias参数！
+        # 这样Agent才能真正"执行"自己的基因策略
         
         if not has_position:
-            # 无持仓：开新仓
-            if market_trend == 'bullish':
+            # 无持仓：基于directional_bias开新仓
+            if params.directional_bias > 0.6:
+                # 激进做多型：直接做多
                 votes.append(Vote(
                     action='buy',
-                    confidence=0.85,  # 高置信度
+                    confidence=0.80,
                     voter_category='strategy',
-                    reason=f"开仓做多"
+                    reason=f"基因驱动：做多偏好{params.directional_bias:.2f}"
                 ))
-            elif market_trend == 'bearish':
+            elif params.directional_bias < 0.4:
+                # 激进做空型：直接做空
                 votes.append(Vote(
                     action='short',
-                    confidence=0.85,  # 高置信度
+                    confidence=0.80,
                     voter_category='strategy',
-                    reason=f"开仓做空"
+                    reason=f"基因驱动：做空偏好{params.directional_bias:.2f}"
                 ))
+            else:
+                # 中性型：基于简单价格变化
+                market_data = context.get('market_data', {})
+                if isinstance(market_data, dict) and 'close' in market_data:
+                    # 如果有价格数据，基于短期价格变化
+                    recent_prices = market_data.get('recent_closes', [])
+                    if len(recent_prices) >= 2:
+                        price_change = (recent_prices[-1] - recent_prices[-2]) / recent_prices[-2]
+                        if price_change > 0.01:  # 涨1%+
+                            votes.append(Vote(
+                                action='buy',
+                                confidence=0.65,
+                                voter_category='strategy',
+                                reason=f"中性型：顺势做多（价格+{price_change:.2%}）"
+                            ))
+                        elif price_change < -0.01:  # 跌1%+
+                            votes.append(Vote(
+                                action='short',
+                                confidence=0.65,
+                                voter_category='strategy',
+                                reason=f"中性型：顺势做空（价格{price_change:.2%}）"
+                            ))
         else:
-            # ✨ 关键修复：有持仓也可以加仓！
-            if current_side == 'long' and market_trend == 'bullish':
-                # 多头 + 牛市 → 加仓做多！
+            # 有持仓：根据类型和当前持仓方向决定是否加仓
+            if params.directional_bias > 0.6 and current_side == 'long':
+                # 做多型 + 已持多仓 → 可以加仓
                 votes.append(Vote(
                     action='buy',
-                    confidence=0.70,  # 加仓confidence稍低
+                    confidence=0.70,
                     voter_category='strategy',
-                    reason=f"加仓做多"
+                    reason=f"基因驱动：加仓做多"
                 ))
-            elif current_side == 'short' and market_trend == 'bearish':
-                # 空头 + 熊市 → 加仓做空！
+            elif params.directional_bias < 0.4 and current_side == 'short':
+                # 做空型 + 已持空仓 → 可以加仓
                 votes.append(Vote(
                     action='short',
                     confidence=0.70,

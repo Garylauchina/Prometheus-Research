@@ -165,6 +165,23 @@ class StrategyParams:
             'generation': self.generation,
         }
     
+    @classmethod
+    def from_dict(cls, data: dict) -> 'StrategyParams':
+        """
+        从字典创建StrategyParams
+        
+        ✨ v6.0: 用于智能创世，从ExperienceDB加载历史优秀策略参数
+        """
+        return cls(
+            position_size_base=data.get('position_size_base', 0.3),
+            holding_preference=data.get('holding_preference', 0.5),
+            directional_bias=data.get('directional_bias', 0.5),
+            stop_loss_threshold=data.get('stop_loss_threshold', 0.05),
+            take_profit_threshold=data.get('take_profit_threshold', 0.1),
+            trend_following_strength=data.get('trend_following_strength', 0.5),
+            generation=data.get('generation', 0)
+        )
+    
     def get_display_string(self) -> str:
         """获取显示字符串"""
         strategy_type = self._get_strategy_type()

@@ -1,17 +1,17 @@
-# 🔥 Prometheus-Quant v5.0 - 下一代AI交易系统
+# 🔥 Prometheus-Quant v6.0-Stage1 - 下一代AI交易系统
 
 > 💡 **在黑暗中寻找亮光**  
 > 📐 **在混沌中寻找规则**  
 > 💀→🌱 **在死亡中寻找生命**  
 > 💰 **不忘初心，方得始终**
 
-**完全重构的Agent系统 + 双熵遗传学 + 智能决策中枢**
+**范式转变：从"让Agent变聪明"到"在极简环境筛选强基因"**
 
-[![Version](https://img.shields.io/badge/version-5.0_dev-blue)](#)
+[![Version](https://img.shields.io/badge/version-6.0--Stage1-blue)](#)
 [![Python](https://img.shields.io/badge/python-3.13+-green)](#)
 [![License](https://img.shields.io/badge/license-MIT-orange)](#)
-[![Architecture](https://img.shields.io/badge/architecture-modular-brightgreen)](#)
-[![Status](https://img.shields.io/badge/status-core_complete-yellow)](#)
+[![Architecture](https://img.shields.io/badge/architecture-AlphaZero--style-brightgreen)](#)
+[![Status](https://img.shields.io/badge/status-Stage1_Complete-success)](#)
 
 ---
 
@@ -40,11 +40,82 @@
 
 ---
 
-## 🎯 v5.0核心成就
+## 🎉 v6.0-Stage1：范式转变
 
-v5.0是对整个Agent系统的**完全重构**，不向后兼容，追求最优架构设计。
+### 🌟 重大架构升级（2025-12-09）
 
-### ⭐ 三大突破
+v6.0标志着Prometheus的**范式转变**：
+
+```
+从：让Agent变聪明（v1.0-5.0）
+到：在极简环境筛选强基因（v6.0+）
+
+从：市场驱动
+到：生态驱动
+
+从：个体智能
+到：种群进化 + 中央调度
+```
+
+### ✅ v6.0-Stage1 已完成
+
+#### 核心架构
+- ✨ **V6Facade**：统一入口，严格封装
+- ✨ **MockTrainingSchool**：极简训练环境（无噪音）
+- ✨ **StrategyParams**：6参数简化（从50→6）
+- ✨ **Prophet**：战略层（市场分析 + 相似度匹配）
+- ✨ **ExperienceDB**：经验积累（300+条基因）
+- ✨ **加权欧氏距离**：相似度匹配（区分度0.179）
+
+#### 实战验证
+- ⚡ **进化速度**：50代 → 0-1代找到最优基因
+- ⚡ **牛市ROI**：0.7% → 28%+（1000周期）
+- ⚡ **基因积累**：300条（牛/熊/震荡各100）
+- ⚡ **系统稳定**：1000周期无崩溃
+
+#### 核心文档
+- 📚 `docs/STAGE1_GOLDEN_RULES.md`（10条黄金规则）⭐ 必读
+- 📚 `docs/STAGE1_IMPLEMENTATION_PLAN.md`（实施计划）
+- 📚 `docs/SIMILARITY_ARCHITECTURE_V6.md`（相似度架构）
+- 📚 `docs/V6_ARCHITECTURE.md`（完整架构）
+- 📚 多个分析报告（基因分析、WorldSignature等）
+
+### ⏳ v6.1-Stage1.1 计划中（2-3天）
+
+基于**复杂系统黄金规则**的改进：
+- 🔄 结构切换市场（Trend→Range→Fake Breakout）
+- 🔄 固定滑点机制（0.05%）
+- 🔄 Profit Factor为主导（简化奖励信号）
+- 🔄 完整的Stage 1黄金规则（70% → 100%）
+
+### 🗺️ 完整路线图
+
+```
+v6.0-Stage1: 极简环境基因筛选        ✅ 当前（2025-12-09）
+v6.1-Stage1.1: 完整黄金规则          ⏳ 2-3天
+v6.2-Stage2: 气候变化（Regime切换）  📅 1-2周
+v6.3-Stage3: 历史数据回测            📅 2-3周
+v6.4-Stage4: 实盘验证                📅 1-2月
+```
+
+### 🔬 为什么这是正确的？
+
+v6.0的方法论基于三大复杂系统黄金定律：
+1. **AlphaZero/self-play系统**：简单规则 + 大量自对弈 = 涌现策略
+2. **生物进化理论**：简单环境中的突变 = 快速进化
+3. **Quality-Diversity系统**：渐进复杂化 = 可迁移的解
+
+**核心洞察**：复杂智能只能从简化环境中首先出现（不在复杂环境中直接涌现）
+
+---
+
+## 📜 v5.0核心成就（已废弃）
+
+v5.0是对整个Agent系统的**完全重构**，但走错了方向（试图让Agent变聪明）。
+
+v6.0修正了这个方向，回到正确的道路。
+
+### ⭐ v5.0的三大突破（已保留但不再使用）
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

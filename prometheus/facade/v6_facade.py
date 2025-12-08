@@ -18,6 +18,8 @@ from prometheus.core.ledger_system import PublicLedger, PrivateLedger, LedgerRec
 from prometheus.ledger.attach_accounts import attach_accounts
 # ✅ v6.0: 资金池系统
 from prometheus.core.capital_pool import CapitalPool
+# ✅ v6.0: 资金配置系统
+from prometheus.config.capital_config import SystemCapitalConfig
 
 # ✅ WorldSignature系统（Prophet的世界认知）
 try:
@@ -138,22 +140,37 @@ class V6Facade:
                  num_families: int = 50,
                  exchange: Optional[OKXExchange] = None,
                  bulletin_board: Optional[BulletinBoard] = None,
-                 match_config: Optional[Dict] = None):
+                 match_config: Optional[Dict] = None,
+                 elite_ratio: float = 0.2,
+                 elimination_rate: float = 0.3,
+                 experience_db=None):
         self.bulletin_board = bulletin_board or BulletinBoard(board_name="facade_board")
         
         # ✅ v6.0: 初始化资金池
         self.capital_pool = CapitalPool()
+        
+        # ✨ v6.0: 初始化经验数据库（智能创世）
+        self.experience_db = experience_db
+        
+        # ✨ v6.0: 初始化先知（Prophet - 战略层）
+        from prometheus.core.prophet import Prophet
+        self.prophet = Prophet(
+            bulletin_board=self.bulletin_board
+        )
         
         self.moirai: Moirai = Moirai(
             bulletin_board=self.bulletin_board,
             num_families=num_families,
             exchange=exchange,
             match_config=match_config,
-            capital_pool=self.capital_pool  # ✅ 传递资金池
+            capital_pool=self.capital_pool,  # ✅ 传递资金池
+            experience_db=self.experience_db  # ✨ 传递经验数据库
         )
         self.evolution = EvolutionManagerV5(
             moirai=self.moirai, 
             num_families=num_families,
+            elite_ratio=elite_ratio,  # ✅ 传递精英比例
+            elimination_ratio=elimination_rate,  # ✅ 传递淘汰率
             capital_pool=self.capital_pool  # ✅ 传递资金池
         )
         # AlphaZero式：移除diversity_monitor
@@ -190,36 +207,181 @@ class V6Facade:
         # 🎭 场景类型（由build_facade设置）
         self.scenario: str = "backtest"  # backtest/mock/live_demo
 
-    def init_population(self, agent_count: int, capital_per_agent: float, full_genome_unlock: bool = False):
+    def invest_system_capital(
+        self,
+        total_amount: float,
+        allocation_ratio: float = 1.0,
+        purpose: str = "investment",
+        reason: str = ""
+    ) -> Dict:
         """
-        创世人口初始化
+        💰 系统注资统一入口（v6.0核心封装）
         
-        步骤：
-        1. ✅ 系统注资到资金池
-        2. 调用Moirai创建Agents（从资金池分配）
-        3. 挂载账簿系统
-        4. 初始化适应度
-        5. 验证创世质量
+        功能：
+        - 创世时调用（allocation_ratio=0.2，80%储备）
+        - 中途追加投资（allocation_ratio=1.0，全部可用）
+        - 紧急救援（allocation_ratio=1.0，立即可用）
+        - Mock模拟场景
+        
+        Args:
+            total_amount: 系统注资总额
+            allocation_ratio: 立即可用比例（0.0-1.0）
+                             剩余部分进入储备池
+            purpose: 注资目的 (genesis/expansion/rescue/mock/adjustment)
+            reason: 详细原因说明
+        
+        Returns:
+            dict: {
+                "invested": float,           # 本次注资
+                "immediate_available": float,# 立即可用
+                "reserved": float,           # 进入储备
+                "pool_balance": float,       # 资金池余额
+                "allocation_ratio": float,   # 分配比例
+                "timestamp": str            # 时间戳
+            }
+        
+        示例：
+            # 创世注资（20%配资，80%储备）
+            result = facade.invest_system_capital(
+                total_amount=500000,
+                allocation_ratio=0.2,
+                purpose="genesis"
+            )
+            
+            # 中途追加投资（100%可用）
+            result = facade.invest_system_capital(
+                total_amount=100000,
+                allocation_ratio=1.0,
+                purpose="expansion",
+                reason="bull_market_opportunity"
+            )
+            
+            # 紧急救援（100%立即可用）
+            result = facade.invest_system_capital(
+                total_amount=50000,
+                allocation_ratio=1.0,
+                purpose="rescue",
+                reason="capital_pool_depleted"
+            )
+        """
+        # 参数验证
+        if total_amount <= 0:
+            raise ValueError(f"total_amount必须 > 0，当前: {total_amount}")
+        
+        if not (0 <= allocation_ratio <= 1.0):
+            raise ValueError(f"allocation_ratio必须在[0, 1]之间，当前: {allocation_ratio}")
+        
+        # 1. 注资到资金池
+        source_label = f"{purpose}_{reason}" if reason else purpose
+        self.capital_pool.invest(
+            amount=total_amount,
+            source=source_label
+        )
+        
+        # 2. 计算分配和储备
+        immediate_available = total_amount * allocation_ratio
+        reserved = total_amount - immediate_available
+        
+        # 3. 生成时间戳
+        timestamp = datetime.now().isoformat()
+        
+        # 4. 日志输出
+        logger.info(f"💰 系统注资: ${total_amount:,.2f}")
+        logger.info(f"   目的: {purpose} {f'({reason})' if reason else ''}")
+        logger.info(f"   立即可用: ${immediate_available:,.2f} ({allocation_ratio:.0%})")
+        logger.info(f"   进入储备: ${reserved:,.2f} ({(1-allocation_ratio):.0%})")
+        logger.info(f"   资金池余额: ${self.capital_pool.available_pool:,.2f}")
+        
+        # 5. 返回结果
+        return {
+            "invested": total_amount,
+            "immediate_available": immediate_available,
+            "reserved": reserved,
+            "pool_balance": self.capital_pool.available_pool,
+            "allocation_ratio": allocation_ratio,
+            "purpose": purpose,
+            "reason": reason,
+            "timestamp": timestamp
+        }
+    
+    def init_population(
+        self, 
+        agent_count: int, 
+        capital_per_agent: float, 
+        full_genome_unlock: bool = False,
+        genesis_allocation_ratio: float = 0.2
+    ):
+        """
+        🌱 创世：初始化Agent种群（创世探索方案）
+        
+        ✅ v6.0流程（使用统一注资接口）：
+        1. ✅ 系统注资（调用invest_system_capital）
+        2. ✅ 创世时只分配部分资金（默认20%，探索阶段）
+        3. ✅ 保留大部分资金作为储备（80%，支持长期演化）
+        4. 调用Moirai创建Agents（从资金池分配）
+        5. 挂载账簿系统
+        6. 初始化适应度
+        7. 验证创世质量
         
         Args:
             agent_count: Agent数量
-            capital_per_agent: 每个Agent的初始资金
+            capital_per_agent: 系统目标规模（每个Agent的理论资金规模）
             full_genome_unlock: 是否解锁所有50个基因参数（激进模式）
-        """
-        # ✅ v6.0: Step 1 - 系统注资到资金池
-        total_investment = agent_count * capital_per_agent
-        self.capital_pool.invest(
-            amount=total_investment,
-            source="genesis"
-        )
-        logger.info(f"💰 系统注资: ${total_investment:,.2f} ({agent_count} agents × ${capital_per_agent:,.2f})")
+            genesis_allocation_ratio: 创世配资比例（默认0.2=20%）
+                                     剩余资金留在资金池作为储备
         
-        # Step 2 - 创建Agents（moirai会从资金池分配）
+        示例：
+            agent_count=50, capital_per_agent=10000, genesis_allocation_ratio=0.2
+            → 系统注资: $500,000
+            → 创世分配: $100,000 (20%)
+            → 每个Agent: $2,000
+            → 资金池储备: $400,000 (80%)
+        """
+        # ✨ v6.0: Step 0 - Prophet分析市场并制定创世策略
+        # 这一步会让Prophet计算WorldSignature并发布到公告板
+        # Moirai稍后会读取这个策略来决定是使用历史基因还是随机创世
+        if self.prophet:
+            try:
+                # Prophet需要初始市场数据，如果有exchange则从exchange获取
+                # 如果没有，则跳过（将使用随机创世）
+                initial_market_data = None
+                if self.exchange and hasattr(self.exchange, 'get_recent_klines'):
+                    initial_market_data = self.exchange.get_recent_klines()
+                
+                if initial_market_data is not None:
+                    logger.info("   🔮 Prophet正在分析市场...")
+                    self.prophet.genesis_strategy(
+                        initial_market_data=initial_market_data,
+                        genesis_mode='adaptive'  # 默认智能创世
+                    )
+                    logger.info("   ✅ Prophet创世策略已发布到公告板")
+                else:
+                    logger.info("   ⏭️ 无市场数据，跳过Prophet策略（将使用随机创世）")
+            except Exception as e:
+                logger.warning(f"   ⚠️ Prophet创世策略失败（{e}），将使用随机创世")
+        
+        # ✅ v6.0: Step 1 - 使用统一注资接口
+        total_system_capital = agent_count * capital_per_agent
+        
+        investment_result = self.invest_system_capital(
+            total_amount=total_system_capital,
+            allocation_ratio=genesis_allocation_ratio,
+            purpose="genesis",
+            reason="initial_population"
+        )
+        
+        # ✅ v6.0: Step 2 - 计算每个Agent实际资金
+        actual_capital_per_agent = investment_result['immediate_available'] / agent_count
+        
+        logger.info(f"   每个Agent实际资金: ${actual_capital_per_agent:,.2f}")
+        
+        # Step 4 - 创建Agents（moirai会从资金池分配实际金额）
+        # 此时Moirai会读取公告板上的Prophet策略，决定是否使用智能创世
         agents = self.moirai._genesis_create_agents(
             agent_count=agent_count,
             gene_pool=None,
-            capital_per_agent=capital_per_agent,
-            full_genome_unlock=full_genome_unlock  # ✨ 传递参数
+            capital_per_agent=actual_capital_per_agent,  # ✅ 使用实际配资金额（而非目标规模）
+            full_genome_unlock=full_genome_unlock
         )
         self.moirai.agents = agents
         
@@ -328,9 +490,10 @@ class V6Facade:
                   market_data: Optional[Dict] = None,
                   bulletins: Optional[Dict] = None,
                   cycle_count: int = 0,
-                  scenario: str = "backtest"):
+                  scenario: str = "backtest",
+                  breeding_tax_rate: float = None):
         """
-        ⚖️ Moirai统一执行周期
+        ⚖️ Moirai统一执行周期 + 动态税收调控
         
         流程：
         0. 增强market_data（补充必要字段）⭐
@@ -338,13 +501,14 @@ class V6Facade:
         2. Agent决策
         3. Moirai撮合交易（统一入口）
         4. 多样性监控
-        5. 进化
+        5. 进化（含动态税收调控）⭐
         
         Args:
             market_data: 市场数据（至少包含price）
             bulletins: 公告板信息（可选，不提供则自动获取）
             cycle_count: 周期计数
             scenario: 场景类型（backtest/mock/live_demo）
+            breeding_tax_rate: 繁殖税率（None=自动计算，目标80%利用率）
         """
         # 0. ⭐ 增强market_data - 统一封装！补充Daimon决策所需的所有字段
         if market_data:
@@ -440,11 +604,14 @@ class V6Facade:
         # metrics = self.diversity_monitor.monitor(self.moirai.agents, cycle_count)
         # self.metrics_history.append(metrics)
         
-        # 5. 进化
+        # 5. 进化（税收机制已封装在Moirai内部）
         if self.evo_interval and self.evo_interval > 0:
             if cycle_count % self.evo_interval == 0:
                 if hasattr(self.evolution, "run_evolution_cycle"):
-                    self.evolution.run_evolution_cycle(current_price=price)
+                    self.evolution.run_evolution_cycle(
+                        current_price=price
+                        # ❌ breeding_tax_rate已废除，税收由Moirai内部管理
+                    )
                 elif hasattr(self.evolution, "evolve_population"):
                     self.evolution.evolve_population()
         
@@ -1003,6 +1170,295 @@ class V6Facade:
         with open(path, "w") as f:
             json.dump(metrics, f, indent=2)
         logger.info(f"已保存指标: {path}")
+    
+    # ========== v6.0 Mock训练统一入口 ==========
+    def run_mock_training(
+        self,
+        market_data: 'pd.DataFrame',
+        config: 'MockTrainingConfig'
+    ) -> 'MockTrainingResult':
+        """
+        运行Mock训练（v6.0统一封装入口）
+        
+        严格封装原则（三大铁律第1条）：
+        1. 所有底层模块均在内部创建和管理
+        2. 不对外暴露任何底层模块的引用
+        3. 只返回结果数据，不返回模块实例
+        
+        Args:
+            market_data: 市场K线数据（必须包含timestamp/open/high/low/close/volume）
+            config: Mock训练配置
+        
+        Returns:
+            MockTrainingResult: 训练结果（完全封装）
+        """
+        # 延迟导入以避免循环依赖
+        import pandas as pd
+        from prometheus.config.mock_training_config import MockTrainingConfig, MockTrainingResult
+        from prometheus.core.world_signature_simple import WorldSignatureSimple
+        from prometheus.core.experience_db import ExperienceDB
+        
+        logger.info("="*80)
+        logger.info("Mock训练 - v6.0统一封装入口")
+        logger.info("="*80)
+        logger.info(f"训练配置:")
+        logger.info(f"  周期数: {config.cycles}")
+        logger.info(f"  系统资金: ${config.total_system_capital:,.0f}")
+        logger.info(f"  Agent数量: {config.agent_count}")
+        logger.info(f"  创世配比: {config.genesis_allocation_ratio*100:.0f}%给Agent，{(1-config.genesis_allocation_ratio)*100:.0f}%资金池")
+        logger.info(f"  进化间隔: {config.evolution_interval}周期")
+        logger.info(f"  市场类型: {config.market_type}")
+        logger.info("")
+        
+        # 0. 重新初始化EvolutionManagerV5，使用config中的参数
+        from prometheus.core.evolution_manager_v5 import EvolutionManagerV5
+        self.evolution = EvolutionManagerV5(
+            moirai=self.moirai,
+            num_families=len(self.moirai.families) if hasattr(self.moirai, 'families') else 50,
+            elite_ratio=config.elite_ratio,
+            elimination_ratio=config.elimination_rate,
+            capital_pool=self.capital_pool
+        )
+        logger.info(f"✅ EvolutionManagerV5已重新初始化（精英{config.elite_ratio:.0%}，淘汰{config.elimination_rate:.0%}）")
+        logger.info("")
+        
+        # 1. 初始化ExperienceDB（如果需要）
+        if config.experience_db_path:
+            self.experience_db = ExperienceDB(db_path=config.experience_db_path)
+            # 将experience_db传递给Moirai（用于智能创世）
+            self.moirai.experience_db = self.experience_db
+            logger.info(f"✅ ExperienceDB已加载: {config.experience_db_path}")
+        else:
+            self.experience_db = None
+            self.moirai.experience_db = None
+            logger.info("⏭️  未指定ExperienceDB，将使用随机创世")
+        
+        # ✨ 1.5. Prophet分析初始市场数据（为创世准备）
+        if self.prophet and len(market_data) > 0:
+            try:
+                logger.info("🔮 Prophet正在分析初始市场...")
+                # 取前100根K线作为初始分析数据
+                initial_data = market_data.head(min(100, len(market_data)))
+                self.prophet.genesis_strategy(
+                    initial_market_data=initial_data,
+                    genesis_mode=config.genesis_strategy
+                )
+                logger.info("✅ Prophet创世策略已发布")
+            except Exception as e:
+                logger.warning(f"⚠️  Prophet创世策略失败（{e}），将使用默认随机创世")
+        
+        # 2. 创世（使用已有的init_population方法，内部会自动调用invest_system_capital）
+        capital_per_agent = config.total_system_capital / config.agent_count
+        
+        self.init_population(
+            agent_count=config.agent_count,
+            capital_per_agent=capital_per_agent,
+            full_genome_unlock=config.full_genome_unlock,  # ✅ 使用配置参数
+            genesis_allocation_ratio=config.genesis_allocation_ratio
+        )
+        
+        logger.info(f"✅ 创世完成: {len(self.moirai.agents)}个Agent")
+        logger.info("")
+        
+        # 4. 运行训练循环
+        from datetime import datetime
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        logger.info(f"🏃 开始训练循环: {config.cycles}周期")
+        logger.info(f"Run ID: {run_id}")
+        logger.info("")
+        
+        for cycle in range(config.cycles):
+            # 获取当前K线
+            if cycle >= len(market_data):
+                logger.warning(f"市场数据耗尽，在周期{cycle}停止训练")
+                break
+            
+            kline = market_data.iloc[cycle]
+            current_price = float(kline['close'])
+            
+            # 简化的市场数据格式
+            market_data_dict = {
+                'open': float(kline['open']),
+                'high': float(kline['high']),
+                'low': float(kline['low']),
+                'close': current_price,
+                'price': current_price,  # ✅ 添加price字段（run_cycle需要）
+                'volume': float(kline['volume']),
+                'timestamp': kline['timestamp'] if 'timestamp' in kline else cycle
+            }
+            
+            # 运行一个周期（使用已有的run_cycle方法）
+            try:
+                self.run_cycle(
+                    market_data=market_data_dict,
+                    bulletins={},  # 简化：不使用公告板
+                    cycle_count=cycle
+                )
+            except Exception as e:
+                logger.error(f"Cycle {cycle} 失败: {e}")
+                continue
+            
+            # 进化
+            if cycle > 0 and cycle % config.evolution_interval == 0:
+                try:
+                    self.evolution.run_evolution_cycle(current_price=current_price)
+                except Exception as e:
+                    logger.error(f"进化失败 (cycle {cycle}): {e}")
+            
+            # 间隔保存ExperienceDB
+            if self.experience_db and config.save_experience_interval > 0:
+                if cycle > 0 and cycle % config.save_experience_interval == 0:
+                    try:
+                        # 计算当前WorldSignature
+                        start_idx = max(0, cycle - config.ws_window_size + 1)
+                        ws_data = market_data.iloc[start_idx:cycle+1]
+                        ws = WorldSignatureSimple.from_market_data(ws_data)
+                        
+                        # 排序Agent
+                        alive_agents = [a for a in self.moirai.agents if a.state.value != 'dead']
+                        sorted_agents = sorted(
+                            alive_agents,
+                            key=lambda a: (a.account.private_ledger.virtual_capital - a.initial_capital) / a.initial_capital if hasattr(a, 'account') and a.account else 0,
+                            reverse=True
+                        )
+                        
+                        # 保存当前最佳Agent
+                        if len(sorted_agents) > 0:
+                            self.experience_db.save_best_genomes(
+                                run_id=f"{run_id}_cycle{cycle}",
+                                market_type=config.market_type,
+                                world_signature=ws,
+                                agents=sorted_agents,
+                                top_k=config.top_k_to_save
+                            )
+                            logger.info(f"💾 Cycle {cycle}: 已保存{min(len(sorted_agents), config.top_k_to_save)}个最佳Agent到ExperienceDB")
+                    except Exception as e:
+                        logger.warning(f"ExperienceDB保存失败 (cycle {cycle}): {e}")
+            
+            # 定期日志
+            if cycle % config.log_interval == 0:
+                alive_count = sum(1 for a in self.moirai.agents if a.state.value != 'dead')
+                logger.info(f"Cycle {cycle:4d}: 存活Agent={alive_count}")
+        
+        logger.info("")
+        logger.info("✅ 训练循环完成")
+        logger.info("")
+        
+        # 5. 计算最终指标
+        final_price = float(market_data.iloc[-1]['close']) if len(market_data) > 0 else current_price
+        
+        # Agent统计
+        alive_agents = [a for a in self.moirai.agents if a.state.value != 'dead']
+        if alive_agents:
+            # 计算每个Agent的ROI
+            agent_rois = []
+            for agent in alive_agents:
+                if hasattr(agent, 'account') and agent.account:
+                    final_capital = agent.account.private_ledger.virtual_capital
+                    roi = (final_capital - agent.initial_capital) / agent.initial_capital if agent.initial_capital > 0 else 0.0
+                    agent_rois.append(roi)
+            
+            agent_avg_roi = sum(agent_rois) / len(agent_rois) if agent_rois else 0.0
+            agent_median_roi = sorted(agent_rois)[len(agent_rois)//2] if agent_rois else 0.0
+            agent_best_roi = max(agent_rois) if agent_rois else 0.0
+        else:
+            agent_avg_roi = agent_median_roi = agent_best_roi = 0.0
+        
+        # 系统ROI
+        agent_total_capital = sum(
+            a.account.private_ledger.virtual_capital 
+            for a in self.moirai.agents 
+            if hasattr(a, 'account') and a.account
+        )
+        pool_balance = self.capital_pool.available_pool
+        system_total_capital = agent_total_capital + pool_balance
+        system_roi = (system_total_capital - config.total_system_capital) / config.total_system_capital
+        
+        # BTC基准
+        initial_price = float(market_data.iloc[0]['close'])
+        btc_benchmark_roi = (final_price - initial_price) / initial_price
+        
+        # 6. 保存到ExperienceDB（如果需要）
+        if self.experience_db and config.top_k_to_save > 0:
+            # 计算WorldSignature
+            ws = WorldSignatureSimple.from_market_data(
+                market_data.tail(config.ws_window_size)
+            )
+            
+            # 排序Agent
+            sorted_agents = sorted(
+                alive_agents,
+                key=lambda a: (a.account.private_ledger.virtual_capital - a.initial_capital) / a.initial_capital if hasattr(a, 'account') and a.account else 0,
+                reverse=True
+            )
+            
+            # 保存最佳Agent
+            if self.experience_db:
+                self.experience_db.save_best_genomes(
+                    run_id=run_id,
+                market_type=config.market_type,
+                world_signature=ws,
+                agents=sorted_agents,
+                top_k=config.top_k_to_save
+            )
+            logger.info(f"✅ 已保存{config.top_k_to_save}个最佳Agent到ExperienceDB")
+        
+        # 7. 对账验证
+        reconciliation_passed = True
+        reconciliation_details = {}
+        try:
+            recon_result = self.reconcile(final_price)
+            reconciliation_passed = recon_result.get('all_passed', False)
+            reconciliation_details = recon_result
+        except Exception as e:
+            logger.error(f"对账失败: {e}")
+            reconciliation_passed = False
+            reconciliation_details = {'error': str(e)}
+        
+        # 8. 构建结果
+        result = MockTrainingResult(
+            run_id=run_id,
+            actual_cycles=cycle + 1,
+            system_roi=system_roi,
+            system_total_capital=system_total_capital,
+            btc_benchmark_roi=btc_benchmark_roi,
+            outperformance=system_roi - btc_benchmark_roi,
+            agent_count_final=len(alive_agents),
+            agent_avg_roi=agent_avg_roi,
+            agent_median_roi=agent_median_roi,
+            agent_best_roi=agent_best_roi,
+            agent_avg_trade_count=0.0,  # TODO: 计算平均交易次数
+            capital_pool_balance=pool_balance,
+            capital_utilization=agent_total_capital / system_total_capital if system_total_capital > 0 else 0,
+            best_agents=[],  # TODO: 返回最佳Agent信息
+            experience_db_records=self.experience_db.get_statistics(config.market_type)['total_records'] if self.experience_db else 0,
+            experience_saved=self.experience_db is not None and config.top_k_to_save > 0,
+            log_file="",  # TODO: 日志文件路径
+            report_file="",  # TODO: 报告文件路径
+            reconciliation_passed=reconciliation_passed,
+            reconciliation_details=reconciliation_details
+        )
+        
+        # 9. 清理
+        if self.experience_db:
+            self.experience_db.close()
+        
+        # 10. 打印总结
+        logger.info("="*80)
+        logger.info("Mock训练完成")
+        logger.info("="*80)
+        logger.info(f"Run ID: {run_id}")
+        logger.info(f"系统ROI: {system_roi:+.2%}")
+        logger.info(f"BTC基准: {btc_benchmark_roi:+.2%}")
+        logger.info(f"超越BTC: {result.outperformance:+.2%}")
+        logger.info(f"Agent平均ROI: {agent_avg_roi:+.2%}")
+        logger.info(f"最佳Agent ROI: {agent_best_roi:+.2%}")
+        logger.info(f"资金池余额: ${pool_balance:,.0f} ({result.capital_utilization*100:.1f}%资金利用)")
+        logger.info(f"对账验证: {'✅ 通过' if reconciliation_passed else '❌ 失败'}")
+        logger.info("="*80)
+        
+        return result
 
 
 def build_facade(mode: str,

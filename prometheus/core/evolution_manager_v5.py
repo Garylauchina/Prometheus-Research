@@ -110,13 +110,22 @@ class EvolutionManagerV5:
     
     def run_evolution_cycle(self, current_price: float = 0):
         """
-        🧬 执行一轮进化周期 - AlphaZero式极简版
+        🧬 执行一轮进化周期 - AlphaZero式极简版（v6.0）
         
         流程：
         1. 评估Agent表现（纯Fitness）
         2. 淘汰最差的
-        3. 让最好的繁殖
-        4. 固定变异率（0.1）
+        3. 计算动态税率（系统级调控）⭐
+        4. 让最好的繁殖（含税收机制）
+        5. 固定变异率（0.1）
+        
+        税收机制（系统级调控）：
+        ✅ 动态税率：根据资金利用率自动调整
+        ✅ 目标：维持80%资金利用率
+        ✅ 繁殖时强制父代平仓（套现浮盈）
+        ✅ 收取税收 → 资金池
+        ✅ 父代保留剩余资金
+        ✅ 子代从资金池获得配资
         
         移除：
         ❌ 双熵健康检查
@@ -126,7 +135,7 @@ class EvolutionManagerV5:
         ❌ 多样性保护
         
         Args:
-            current_price: 当前市场价格
+            current_price: 当前市场价格（用于强制平仓和税收计算）
         """
         logger.info(f"\n{'='*70}")
         logger.info(f"🧬 开始进化周期 - 第{self.generation + 1}代 (AlphaZero式)")
@@ -134,6 +143,9 @@ class EvolutionManagerV5:
         
         # AlphaZero式：固定变异率
         mutation_rate = 0.1
+        
+        # ✅ v6.0极简税率：Moirai自动保证20%资金池生死线
+        logger.info(f"💰 税率机制: Moirai自动计算（保证{self.moirai.TARGET_RESERVE_RATIO*100:.0f}%资金池生死线）")
         
         # 1. 评估Agent表现（纯Fitness排序）
         rankings = self._rank_agents(current_price=current_price)
@@ -195,12 +207,18 @@ class EvolutionManagerV5:
                     logger.warning(f"   无法选择精英，跳过本次复制")
                     continue
                 
-                # 2. 病毒式复制：克隆 + 变异
+                # 2. 病毒式复制：克隆 + 变异 + 税收（v6.0极简版）
+                # Moirai会自动计算税率，保证20%资金池生死线
                 child = self._viral_replicate(
                     elite=elite, 
                     mutation_rate=mutation_rate,
-                    current_price=current_price  # ✅ 传入当前价格用于平仓
+                    current_price=current_price  # ✅ 传入当前价格用于平仓和税收计算
                 )
+                
+                # 子代创建成功
+                if child is None:
+                    logger.warning(f"   ⚠️ {elite.agent_id} 繁殖失败")
+                    continue
                 
                 new_agents.append(child)
                 self.total_births += 1
@@ -507,6 +525,10 @@ class EvolutionManagerV5:
         
         return max(fitness, 0.001)  # 确保非负
     
+    # ✅ v6.0已移除：_calculate_dynamic_tax_rate()
+    # 税率计算已统一封装到 Moirai._lachesis_calculate_breeding_tax()
+    # 严格遵守"统一封装，严禁旁路"原则
+    
     def _calculate_fitness_alphazero(self, agent: AgentV5, current_price: float = 0.0) -> float:
         """
         ⚔️ AlphaZero式极简Fitness v2 - 绝对收益 + 参与惩罚
@@ -608,18 +630,29 @@ class EvolutionManagerV5:
         probabilities = [f / total for f in fitnesses]
         return random.choices(agents, weights=probabilities, k=1)[0]
     
-    def _viral_replicate(self, elite: AgentV5, mutation_rate: float, current_price: float = 0) -> AgentV5:
+    def _viral_replicate(
+        self, 
+        elite: AgentV5, 
+        mutation_rate: float, 
+        current_price: float = 0
+    ) -> AgentV5:
         """
-        🦠 病毒式复制：克隆精英 + 随机变异
+        🦠 病毒式复制：克隆精英 + 随机变异 + 税收机制（v6.0极简版）
         
         流程：
-        1. 克隆所有基因（Genome, StrategyParams, Lineage）
-        2. 应用随机变异
-        3. 创建新Agent
+        1. 强制父代全仓平仓（浮盈→实盈）
+        2. Moirai自动计算繁殖税（保证20%资金池生死线）
+        3. 收取繁殖税 → 资金池
+        4. 父代保留剩余资金
+        5. 克隆所有基因（Genome, StrategyParams, Lineage）
+        6. 应用随机变异
+        7. 子代从资金池获得配资
+        8. 创建新Agent
         
         Args:
-            elite: 被复制的精英
-            mutation_rate: 变异率
+            elite: 被复制的精英Agent
+            mutation_rate: 变异率（0.0-1.0）
+            current_price: 当前市场价格（用于强制平仓和税收计算）
         
         Returns:
             复制的子代Agent
@@ -649,7 +682,8 @@ class EvolutionManagerV5:
             generation=child_generation,
             parent_params=(sp.to_dict(),)  # 记录父代参数
         )
-        child_strategy_params.mutate(mutation_rate=mutation_rate)
+        # ✅ 关键修复：mutate返回新对象，必须赋值回去！
+        child_strategy_params = child_strategy_params.mutate(mutation_rate=mutation_rate)
         
         # 4. 克隆MetaGenome（如果有）
         child_meta_genome = None
@@ -661,34 +695,93 @@ class EvolutionManagerV5:
             except TypeError:
                 child_meta_genome.mutate(mutation_rate=mutation_rate)
         
-        # 5. 创建子代
-        # ✅ v6.0: 父代资金分割机制
+        # 5. 创建子代（含税收机制）
+        # ✅ v6.0税收机制: 强制平仓 → 收税 → 父代保留 → 子代配资
         
-        # Step 1: 繁殖前强制父代全仓平仓（套现）
-        if current_price > 0:
-            parent_capital = self.moirai._lachesis_force_close_all(
-                agent=elite,
-                current_price=current_price,
-                reason="breeding"
-            )
+        # Step 1: 强制父代全仓平仓（浮盈→实盈）
+        parent_capital_before = 0.0
+        if current_price > 0 and hasattr(elite, 'account') and elite.account:
+            try:
+                parent_capital_before = elite.account.private_ledger.virtual_capital
+                parent_capital_after = self.moirai._lachesis_force_close_all(
+                    agent=elite,
+                    current_price=current_price,
+                    reason="breeding_tax_settlement"
+                )
+                logger.debug(f"      🔄 强制平仓: {elite.agent_id[:8]} ${parent_capital_before:,.2f} → ${parent_capital_after:,.2f}")
+            except Exception as e:
+                logger.warning(f"      ⚠️ 强制平仓失败: {e}，使用当前资金")
+                parent_capital_after = parent_capital_before
         else:
-            # 如果没有价格，只能用现有实盈
-            parent_capital = elite.account.private_ledger.virtual_capital if hasattr(elite, 'account') and elite.account else elite.initial_capital
+            # 如果没有价格或账户，使用当前资金
+            parent_capital_after = elite.account.private_ledger.virtual_capital if hasattr(elite, 'account') and elite.account else elite.initial_capital
         
-        # Step 2: 资金分割（父代分一半给子代）
-        split_ratio = 0.5
-        child_capital = parent_capital * split_ratio
-        parent_remaining = parent_capital - child_capital
+        # Step 2: Moirai自动计算繁殖税（v6.0极简版）
+        breeding_tax = self.moirai._lachesis_calculate_breeding_tax(
+            elite_agent=elite,
+            current_price=current_price
+        )
         
-        # Step 3: 从父代扣除资金
+        # 检查是否允许繁殖（税额为无穷大表示资金池耗尽）
+        if breeding_tax == float('inf'):
+            logger.error(f"      ❌ 资金池耗尽，无法繁殖")
+            return None
+        
+        parent_remaining = parent_capital_after - breeding_tax
+        
+        if parent_remaining < 0:
+            logger.error(f"      ❌ {elite.agent_id} 资金不足以支付繁殖税")
+            return None
+        
+        # Step 3: 收取繁殖税 → 资金池
+        if self.capital_pool and breeding_tax > 0:
+            try:
+                self.capital_pool.reclaim(
+                    amount=breeding_tax,
+                    agent_id=elite.agent_id,
+                    reason="breeding_tax"
+                )
+                logger.info(
+                    f"      💰 [繁殖税收] {elite.agent_id[:8]} "
+                    f"${parent_capital_after:,.2f} → "
+                    f"税${breeding_tax:,.2f} + "
+                    f"保留${parent_remaining:,.2f}"
+                )
+            except Exception as e:
+                logger.error(f"      ❌ 税收回收失败: {e}")
+                # 如果回收失败，不扣税
+                parent_remaining = parent_capital_after
+                breeding_tax = 0
+        
+        # Step 3: 父代保留剩余资金
         if hasattr(elite, 'account') and elite.account:
             elite.account.private_ledger.virtual_capital = parent_remaining
-            logger.info(f"      💰 资金分割: 父代${parent_capital:,.2f} → 父代${parent_remaining:,.2f} + 子代${child_capital:,.2f}")
         
-        # Step 4: 创建子代（使用从父代分割的资金）
+        # Step 4: 子代从资金池获得配资
+        default_child_capital = 2000.0  # 固定配资
+        
+        if self.capital_pool:
+            try:
+                child_capital = self.capital_pool.allocate(
+                    amount=default_child_capital,
+                    agent_id=child_id,
+                    reason="breeding_allocation"
+                )
+                logger.info(f"      💰 [资金池配资] 子代{child_id[:8]} ← ${child_capital:,.2f}")
+            except Exception as e:
+                logger.error(f"      ❌ 资金池配资失败: {e}")
+                # 如果资金池耗尽，使用最小配资
+                child_capital = 100.0
+                logger.warning(f"      ⚠️ 资金池不足，使用最小配资: ${child_capital:,.2f}")
+        else:
+            # 无资金池时，使用默认值（不应该发生）
+            child_capital = default_child_capital
+            logger.warning(f"      ⚠️ 无资金池，使用默认配资: ${child_capital:,.2f}")
+        
+        # Step 5: 创建子代（使用从资金池分配的资金）
         child = AgentV5(
             agent_id=child_id,
-            initial_capital=child_capital,  # ✅ 从父代分割的资金
+            initial_capital=child_capital,  # ✅ 从资金池分配的资金
             lineage=child_lineage,
             genome=child_genome,
             strategy_params=child_strategy_params,
