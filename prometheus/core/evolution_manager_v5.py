@@ -50,7 +50,8 @@ class EvolutionManagerV5:
                  elite_ratio: float = 0.2,
                  elimination_ratio: float = 0.3,
                  num_families: int = 50,
-                 capital_pool=None):
+                 capital_pool=None,
+                 fitness_mode: str = 'profit_factor'):
         """
         初始化进化管理器
         
@@ -60,11 +61,15 @@ class EvolutionManagerV5:
             elimination_ratio: 淘汰比例
             num_families: 家族数量
             capital_pool: 资金池（CapitalPool实例）
+            fitness_mode: Fitness计算模式
+                - 'profit_factor': Profit Factor主导（Stage 1.1默认）
+                - 'absolute_return': 绝对收益（v6.0原版）
         """
         self.moirai = moirai
         self.elite_ratio = elite_ratio
         self.elimination_ratio = elimination_ratio
         self.num_families = num_families
+        self.fitness_mode = fitness_mode  # ✅ Stage 1.1: 添加fitness模式
         
         # ✅ v6.0: 资金池（统一资金管理）
         self.capital_pool = capital_pool
@@ -78,6 +83,7 @@ class EvolutionManagerV5:
         logger.info(f"   精英比例: {elite_ratio:.0%}")
         logger.info(f"   淘汰比例: {elimination_ratio:.0%}")
         logger.info(f"   繁殖方式: 病毒式复制（固定变异率0.1）")
+        logger.info(f"   Fitness模式: {fitness_mode}  ✅ Stage 1.1")
     
     def _calculate_dynamic_mutation_rate(self, gene_entropy: float) -> float:
         """
@@ -573,11 +579,84 @@ class EvolutionManagerV5:
         # 如果有交易，直接返回绝对收益
         return absolute_return
     
+    def _calculate_fitness_profit_factor(self, agent: AgentV5, current_price: float = 0.0) -> float:
+        """
+        ⚔️ Stage 1.1: Profit Factor主导的Fitness计算
+        
+        核心原则：
+        ✅ Profit Factor是主要指标（盈利交易/亏损交易）
+        ✅ 对策略行为高度敏感
+        ✅ 不容易被单次暴利扰乱
+        ✅ 更简单，更直接
+        
+        计算公式：
+            PF = total_profit / abs(total_loss)
+            
+            如果 total_loss == 0:
+                PF = total_profit（假设loss=1）
+            
+            PF > 2.0 = 优秀
+            PF > 1.5 = 良好
+            PF > 1.0 = 盈利
+            PF < 1.0 = 亏损
+        
+        Args:
+            agent: 待评估的Agent
+            current_price: 当前市场价格（用于计算未实现盈亏）
+        
+        Returns:
+            float: Fitness分数（基于Profit Factor）
+        """
+        # 1. 检查初始资本
+        if agent.initial_capital <= 0:
+            logger.warning(f"⚠️ Agent {agent.agent_id} initial_capital={agent.initial_capital}")
+            return -1.0
+        
+        # 2. 检查交易记录
+        if not hasattr(agent, 'account') or not agent.account:
+            return -1.0  # 无账户，淘汰
+        
+        trade_count = agent.account.private_ledger.trade_count
+        if trade_count == 0:
+            return -1.0  # 从未交易，淘汰
+        
+        # 3. 计算Profit Factor
+        total_profit = 0.0
+        total_loss = 0.0
+        
+        for trade in agent.account.private_ledger.trade_history:
+            pnl = getattr(trade, 'pnl', 0.0)
+            if pnl is None:
+                pnl = 0.0  # ✅ 防止None值
+            if pnl > 0:
+                total_profit += pnl
+            elif pnl < 0:
+                total_loss += abs(pnl)
+        
+        # 4. 计算PF
+        if total_loss > 0:
+            profit_factor = total_profit / total_loss
+        elif total_profit > 0:
+            # 无亏损交易，PF = 总盈利（假设loss=1）
+            profit_factor = total_profit
+        else:
+            # 无盈利无亏损（异常情况）
+            profit_factor = 0.0
+        
+        # 5. 如果PF < 1.0，返回负值（加速淘汰）
+        if profit_factor < 1.0:
+            return profit_factor - 1.0  # 例如 PF=0.8 → fitness=-0.2
+        
+        # 如果PF >= 1.0，直接返回PF
+        return profit_factor
+    
     def _rank_agents(self, current_price: float = 0.0) -> List[Tuple[AgentV5, float]]:
         """
-        ⚔️ 评估并排序Agent（AlphaZero式极简版）
+        ⚔️ 评估并排序Agent（Stage 1.1: 支持多种Fitness模式）
         
-        评估标准：纯绝对收益
+        评估标准（根据fitness_mode）：
+        - 'profit_factor': Profit Factor主导（默认）
+        - 'absolute_return': 纯绝对收益
         
         Args:
             current_price: 当前市场价格（用于计算未实现盈亏）
@@ -588,8 +667,12 @@ class EvolutionManagerV5:
         rankings = []
         
         for agent in self.moirai.agents:
-            # AlphaZero式：使用极简Fitness（只有绝对收益）
-            fitness = self._calculate_fitness_alphazero(agent, current_price)
+            # ✅ Stage 1.1: 根据配置选择Fitness计算方法
+            if self.fitness_mode == 'profit_factor':
+                fitness = self._calculate_fitness_profit_factor(agent, current_price)
+            else:  # 默认使用absolute_return
+                fitness = self._calculate_fitness_alphazero(agent, current_price)
+            
             rankings.append((agent, fitness))
         
         # 按fitness排序（从高到低）

@@ -56,6 +56,7 @@ class ExperienceDB:
                 sharpe REAL,
                 max_drawdown REAL,
                 trade_count INTEGER,
+                profit_factor REAL,
                 timestamp TEXT NOT NULL
             )
         """)
@@ -66,6 +67,11 @@ class ExperienceDB:
         
         self.conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_roi ON best_genomes(roi DESC)
+        """)
+        
+        # ✅ Stage 1.1: 添加Profit Factor索引（主要排序指标）
+        self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_profit_factor ON best_genomes(profit_factor DESC)
         """)
         
         self.conn.commit()
@@ -109,9 +115,31 @@ class ExperienceDB:
             
             # ✅ 修复：从Account获取交易统计（如果有）
             trade_count = 0
+            total_profit = 0.0
+            total_loss = 0.0
+            
             if hasattr(agent, 'account') and agent.account:
                 private_ledger = agent.account.private_ledger
                 trade_count = len(private_ledger.trade_history)
+                
+                # ✅ Stage 1.1: 计算Profit Factor（主要指标）
+                # PF = total_profit / abs(total_loss)
+                for trade in private_ledger.trade_history:
+                    pnl = getattr(trade, 'pnl', 0.0)
+                    if pnl is None:
+                        pnl = 0.0  # ✅ 防止None值
+                    if pnl > 0:
+                        total_profit += pnl
+                    elif pnl < 0:
+                        total_loss += abs(pnl)
+            
+            # ✅ 计算Profit Factor
+            if total_loss > 0:
+                profit_factor = total_profit / total_loss
+            elif total_profit > 0:
+                profit_factor = total_profit  # 无亏损交易，PF = 总盈利
+            else:
+                profit_factor = 0.0  # 无交易或无盈亏
             
             # Sharpe和MaxDrawdown暂时简化（需要完整的PnL序列来计算）
             sharpe = roi / 0.1 if roi != 0 else 0.0  # 简化：假设波动率0.1
@@ -119,8 +147,8 @@ class ExperienceDB:
             
             self.conn.execute("""
                 INSERT INTO best_genomes 
-                (run_id, market_type, world_signature, genome, roi, sharpe, max_drawdown, trade_count, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (run_id, market_type, world_signature, genome, roi, sharpe, max_drawdown, trade_count, profit_factor, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 run_id,
                 market_type,
@@ -130,6 +158,7 @@ class ExperienceDB:
                 sharpe,
                 max_drawdown,
                 trade_count,
+                profit_factor,
                 timestamp
             ))
         
@@ -155,16 +184,18 @@ class ExperienceDB:
         返回：
           - 基因列表（按相似度降序）
         """
-        # 查询所有历史记录
+        # 查询所有历史记录（✅ Stage 1.1: 添加profit_factor）
         if market_type:
             cursor = self.conn.execute("""
-                SELECT world_signature, genome, roi, sharpe, max_drawdown
+                SELECT world_signature, genome, roi, sharpe, max_drawdown, 
+                       COALESCE(profit_factor, 0.0) as profit_factor
                 FROM best_genomes
                 WHERE market_type = ?
             """, (market_type,))
         else:
             cursor = self.conn.execute("""
-                SELECT world_signature, genome, roi, sharpe, max_drawdown
+                SELECT world_signature, genome, roi, sharpe, max_drawdown,
+                       COALESCE(profit_factor, 0.0) as profit_factor
                 FROM best_genomes
             """)
         
@@ -180,11 +211,12 @@ class ExperienceDB:
                     'genome': json.loads(row[1]),
                     'roi': row[2],
                     'sharpe': row[3],
-                    'max_drawdown': row[4]
+                    'max_drawdown': row[4],
+                    'profit_factor': row[5]  # ✅ Stage 1.1: 添加PF
                 })
         
-        # 排序（先按相似度，再按ROI）
-        candidates.sort(key=lambda x: (x['similarity'], x['roi']), reverse=True)
+        # ✅ Stage 1.1: 排序改为先按相似度，再按Profit Factor（主要指标）
+        candidates.sort(key=lambda x: (x['similarity'], x['profit_factor']), reverse=True)
         
         logger.info(
             f"查询相似基因: 找到{len(candidates)}个相似记录 "

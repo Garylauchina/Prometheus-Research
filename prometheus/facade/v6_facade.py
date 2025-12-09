@@ -171,7 +171,8 @@ class V6Facade:
             num_families=num_families,
             elite_ratio=elite_ratio,  # ✅ 传递精英比例
             elimination_ratio=elimination_rate,  # ✅ 传递淘汰率
-            capital_pool=self.capital_pool  # ✅ 传递资金池
+            capital_pool=self.capital_pool,  # ✅ 传递资金池
+            fitness_mode='profit_factor'  # ✅ Stage 1.1: 默认使用PF主导
         )
         # AlphaZero式：移除diversity_monitor
         # self.diversity_monitor = self.evolution.diversity_monitor
@@ -1361,9 +1362,10 @@ class V6Facade:
             num_families=len(self.moirai.families) if hasattr(self.moirai, 'families') else 50,
             elite_ratio=config.elite_ratio,
             elimination_ratio=config.elimination_rate,
-            capital_pool=self.capital_pool
+            capital_pool=self.capital_pool,
+            fitness_mode=config.fitness_mode  # ✅ Stage 1.1: 从配置读取fitness模式
         )
-        logger.info(f"✅ EvolutionManagerV5已重新初始化（精英{config.elite_ratio:.0%}，淘汰{config.elimination_rate:.0%}）")
+        logger.info(f"✅ EvolutionManagerV5已重新初始化（精英{config.elite_ratio:.0%}，淘汰{config.elimination_rate:.0%}，Fitness模式: {config.fitness_mode}）")
         logger.info("")
         
         # 1. 初始化ExperienceDB（如果需要）

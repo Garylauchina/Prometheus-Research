@@ -31,6 +31,7 @@ class MockTrainingConfig:
     evolution_interval: int = 10             # 进化周期（每N周期进化一次）
     elimination_rate: float = 0.3            # 淘汰率（0.3=淘汰30%）
     elite_ratio: float = 0.2                 # 精英比例（0.2=保留20%精英）
+    fitness_mode: str = 'profit_factor'      # ✅ Stage 1.1: Fitness计算模式（profit_factor/absolute_return）
     
     # ========== 创世参数（完全自由） ==========
     genesis_strategy: str = 'adaptive'       # 创世策略: 'pure_random', 'adaptive', 'hybrid'
