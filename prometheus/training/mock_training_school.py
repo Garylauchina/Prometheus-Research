@@ -32,19 +32,26 @@ logger = logging.getLogger(__name__)
 
 class MockMarketExecutor:
     """
-    Mock市场执行器（Phase 1：极简版）
+    Mock市场执行器（Stage 1.1：添加固定滑点）
     
     特点：
       - 100%成交
-      - 无滑点
-      - 只考虑手续费
+      - 固定滑点0.05%
+      - 手续费0.05%
+    
+    Stage 1.1更新（2025-12-09）：
+      ✅ 添加固定滑点机制
+      ✅ 买入向上滑点，卖出向下滑点
+      ✅ 滑点成本单独记录
     """
     
     FEE_RATE = 0.0005  # 0.05% taker
+    SLIPPAGE_RATE = 0.0005  # 0.05% 固定滑点
     
     def __init__(self, market_data: pd.DataFrame):
         self.market_data = market_data
         self.current_cycle = 0
+        self.total_slippage_cost = 0.0  # 累计滑点成本
     
     def get_current_price(self) -> float:
         """获取当前K线的收盘价"""
@@ -64,69 +71,117 @@ class MockMarketExecutor:
     
     def execute_trade(self, agent: AgentV5, action: Dict) -> Dict:
         """
-        执行交易（100%成交，无滑点）
+        执行交易（100%成交，固定滑点0.05%）
         
         参数：
           - agent: Agent对象
           - action: {'type': 'buy'/'sell'/'close', 'amount': 0.1}
         
         返回：
-          - {'success': True/False, 'price': 50000, 'amount': 0.1, 'fee': 25}
+          - {'success': True/False, 'price': 50000, 'amount': 0.1, 'fee': 25, 'slippage': 2.5}
         """
-        current_price = self.get_current_price()
+        market_price = self.get_current_price()
         action_type = action.get('type')
         amount = action.get('amount', 0)
         
         if amount <= 0:
             return {'success': False, 'reason': 'invalid_amount'}
         
-        fee = current_price * amount * self.FEE_RATE
+        # ✅ Stage 1.1: 应用固定滑点
+        if action_type == 'buy':
+            # 买入：向上滑点（买贵）
+            fill_price = market_price * (1 + self.SLIPPAGE_RATE)
+        elif action_type in ['sell', 'close']:
+            # 卖出/平仓：向下滑点（卖便宜）
+            fill_price = market_price * (1 - self.SLIPPAGE_RATE)
+        else:
+            fill_price = market_price
         
-        # 检查资金
+        # 计算滑点成本
+        slippage_cost = abs(fill_price - market_price) * amount
+        self.total_slippage_cost += slippage_cost
+        
+        # 计算手续费（基于成交价）
+        fee = fill_price * amount * self.FEE_RATE
+        
+        # 检查资金（基于成交价 + 手续费）
         if action_type in ['buy', 'sell']:
-            cost = current_price * amount + fee
+            cost = fill_price * amount + fee
             if agent.account.private_ledger.virtual_capital < cost:
                 return {'success': False, 'reason': 'insufficient_capital'}
         
-        # 执行交易（通过Agent的account）
+        # 执行交易（通过Agent的account，使用成交价）
         try:
             if action_type == 'buy':
-                # 开多
+                # 开多（使用滑点后的成交价）
                 agent.account.record_trade(
                     trade_type='buy',
-                    price=current_price,
+                    price=fill_price,
                     amount=amount,
                     confidence=0.5
                 )
-                return {'success': True, 'price': current_price, 'amount': amount, 'fee': fee}
+                return {
+                    'success': True, 
+                    'price': fill_price, 
+                    'market_price': market_price,
+                    'amount': amount, 
+                    'fee': fee,
+                    'slippage': slippage_cost
+                }
             
             elif action_type == 'sell':
-                # 开空
+                # 开空（使用滑点后的成交价）
                 agent.account.record_trade(
                     trade_type='sell',
-                    price=current_price,
+                    price=fill_price,
                     amount=amount,
                     confidence=0.5
                 )
-                return {'success': True, 'price': current_price, 'amount': amount, 'fee': fee}
+                return {
+                    'success': True, 
+                    'price': fill_price, 
+                    'market_price': market_price,
+                    'amount': amount, 
+                    'fee': fee,
+                    'slippage': slippage_cost
+                }
             
             elif action_type == 'close':
-                # 平仓
+                # 平仓（使用滑点后的成交价）
                 if abs(agent.account.private_ledger.long_position + agent.account.private_ledger.short_position) > 0:
                     close_type = 'cover' if agent.account.private_ledger.short_position < 0 else 'sell'
                     agent.account.record_trade(
                         trade_type=close_type,
-                        price=current_price,
+                        price=fill_price,
                         amount=abs(agent.account.private_ledger.long_position + agent.account.private_ledger.short_position),
                         confidence=0.5
                     )
-                    return {'success': True, 'price': current_price, 'pnl': 0, 'fee': fee}
+                    return {
+                        'success': True, 
+                        'price': fill_price, 
+                        'market_price': market_price,
+                        'pnl': 0, 
+                        'fee': fee,
+                        'slippage': slippage_cost
+                    }
                 else:
                     return {'success': False, 'reason': 'no_position'}
         
         except Exception as e:
             logger.error(f"交易执行失败: {e}")
             return {'success': False, 'reason': str(e)}
+    
+    def get_slippage_stats(self) -> Dict:
+        """
+        获取滑点统计信息
+        
+        返回：
+          - {'total_slippage': 125.5, 'slippage_rate': 0.0005}
+        """
+        return {
+            'total_slippage': self.total_slippage_cost,
+            'slippage_rate': self.SLIPPAGE_RATE
+        }
     
     def next_cycle(self):
         """进入下一个周期"""
