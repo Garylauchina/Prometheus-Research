@@ -21,7 +21,7 @@ Task 3.4: 退休机制训练（v4最终验证）
    - ✅ pool_ratio监控（不干预）
 
 3. 验证基因多样性
-   - 打破"祖先Agent垄断"
+   - 打破'祖先Agent垄断'
    - 收集更多样化的优秀基因
    - 为v7.0角色系统积累基因库
 
@@ -387,7 +387,7 @@ def analyze_v4_results(results: list):
     print("      - pool_ratio监控（不干预）")
     print("")
     print("   3. 基因多样性")
-    print("      - 打破"祖先Agent垄断"")
+    print("      - 打破'祖先Agent垄断'")
     print("      - 收集更多样化的优秀基因")
     print("      - 为v7.0角色系统积累基因库")
     print("")

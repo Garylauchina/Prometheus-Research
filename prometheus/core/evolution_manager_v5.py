@@ -1207,10 +1207,9 @@ class EvolutionManagerV5:
         logger.info(f"🚁 Immigration触发: 注入{count}个移民 | 原因: {reason or '未知'}")
         
         for i in range(count):
-            # ✅ Stage 1.1: 使用Moirai的创世方法创建移民
-            immigrant = self.moirai._create_random_agent(
-                agent_id_suffix=f"immigrant_{i}",
-                generation=0  # 移民从第0代开始
+            # ✅ v6.0: 使用Moirai的Clotho女神创建移民
+            immigrant = self.moirai._clotho_create_single_agent(
+                allow_new_family=allow_new_family
             )
             immigrants.append(immigrant)
         
