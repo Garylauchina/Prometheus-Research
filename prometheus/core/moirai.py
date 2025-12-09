@@ -36,6 +36,21 @@ from .genome import GenomeVector
 logger = logging.getLogger(__name__)
 
 
+class TerminationReason:
+    """
+    Agent生命终结原因（v6.0 Stage 1.1）
+    
+    设计理念：
+    - 明确区分终结原因
+    - 决定是否载入史册
+    - 决定最终状态
+    """
+    BANKRUPTCY = 'bankruptcy'              # 破产（资金<10%初始资金）
+    POOR_PERFORMANCE = 'poor_performance'  # 性能淘汰（PF最低）
+    RETIREMENT_HERO = 'retirement_hero'    # 光荣退休（5个奖章）✨
+    RETIREMENT_AGE = 'retirement_age'      # 寿终正寝（10代）
+
+
 class Moirai(Supervisor):
     """
     摩伊莱 - 命运三女神
@@ -423,9 +438,123 @@ class Moirai(Supervisor):
         
         return to_eliminate
     
+    def terminate_agent(
+        self,
+        agent: AgentV5,
+        reason: str,  # TerminationReason的值
+        current_price: float,
+        save_to_history: bool = False
+    ) -> float:
+        """
+        ✂️ Atropos剪断生命之线（v6.0 Stage 1.1统一封装）
+        
+        🌟 统一生命终结接口 - 三女神协作：
+        1. Lachesis协助平仓（套现未实现盈亏）
+        2. Atropos回收资金（100%回Pool）
+        3. 载入史册（如果光荣退休）
+        4. 标记状态（DEAD/RETIRED）
+        
+        适用场景：
+        - BANKRUPTCY: 破产（资金<10%初始资金）
+        - POOR_PERFORMANCE: 性能淘汰（PF最低）
+        - RETIREMENT_HERO: 光荣退休（5个奖章）✨
+        - RETIREMENT_AGE: 寿终正寝（10代）
+        
+        Args:
+            agent: 要终结的AgentV5
+            reason: 终结原因（TerminationReason的值）
+            current_price: 当前市场价格（用于平仓）
+            save_to_history: 是否载入史册（光荣退休=True）
+        
+        Returns:
+            float: 回收的资金数额
+        """
+        logger.info(f"\n💀 ===== Agent生命终结 =====")
+        logger.info(f"   Agent: {agent.agent_id}")
+        logger.info(f"   原因: {reason}")
+        
+        # ✅ Step 1: 统一调用Lachesis强制平仓（避免代码重复）
+        final_capital = self._lachesis_force_close_all(
+            agent=agent,
+            current_price=current_price,
+            reason=f"terminate_{reason}"
+        )
+        
+        # ✅ Step 2: Atropos回收资金到资金池（100%）
+        reclaimed_amount = 0.0
+        if self.capital_pool and final_capital > 0:
+            self.capital_pool.reclaim(
+                amount=final_capital,
+                agent_id=agent.agent_id,
+                reason=reason
+            )
+            reclaimed_amount = final_capital
+            logger.info(f"   💰 资金回收: ${reclaimed_amount:,.2f}")
+        
+        # ✅ Step 3: 载入史册（如果是光荣退休）
+        if save_to_history and hasattr(self, 'experience_db') and self.experience_db:
+            try:
+                # 获取当前WorldSignature
+                world_sig = None
+                if hasattr(self, 'prophet') and self.prophet:
+                    world_sig = self.prophet.get_current_world_signature()
+                
+                # 保存到ExperienceDB
+                self.experience_db.save_best_genomes(
+                    agents=[agent],
+                    world_signature=world_sig,
+                    round_id=f"gen_{getattr(self, 'generation', 0)}"
+                )
+                
+                # 计算ROI用于日志
+                roi = (final_capital / agent.initial_capital - 1.0) \
+                      if agent.initial_capital > 0 else 0.0
+                logger.info(f"   📜 载入史册: ROI={roi*100:.2f}%")
+            except Exception as e:
+                logger.error(f"   ❌ 史册记录失败: {e}")
+        
+        # ✅ Step 4: 标记状态并移除
+        if reason == TerminationReason.RETIREMENT_HERO:
+            agent.state = AgentState.RETIRED_HERO
+        elif reason == TerminationReason.RETIREMENT_AGE:
+            agent.state = AgentState.RETIRED_AGE
+        else:
+            agent.state = AgentState.DEAD
+        
+        if agent in self.agents:
+            self.agents.remove(agent)
+        
+        logger.info(f"   ✅ 生命终结完成 | 状态: {agent.state.value}")
+        logger.info(f"💀 ========================\n")
+        
+        return reclaimed_amount
+    
     def _atropos_eliminate_agent(self, agent: AgentV5, reason: str, current_price: float = 0):
         """
-        ✂️ Atropos剪断生命之线（v6.0 Stage 1.1版）
+        ⚠️ 已废弃！请使用 terminate_agent() 代替
+        
+        保留此方法仅为向后兼容性
+        
+        Args:
+            agent: 要淘汰的AgentV5
+            reason: 淘汰原因（例如："进化淘汰"/"资金耗尽"）
+            current_price: 当前市场价格（用于平仓）
+        """
+        logger.warning(f"⚠️ _atropos_eliminate_agent已废弃，请使用terminate_agent()")
+        
+        # 转换为新接口
+        return self.terminate_agent(
+            agent=agent,
+            reason=reason,
+            current_price=current_price,
+            save_to_history=False
+        )
+    
+    def _atropos_eliminate_agent_old(self, agent: AgentV5, reason: str, current_price: float = 0):
+        """
+        ✂️ Atropos剪断生命之线（v6.0 Stage 1.1版）- 旧实现
+        
+        ⚠️ 已废弃！保留用于参考
         
         ⚠️ 注意：这是**执行淘汰**，不负责判断（判断由调用者完成）
         

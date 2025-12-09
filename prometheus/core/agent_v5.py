@@ -40,13 +40,16 @@ logger = logging.getLogger(__name__)
 
 
 class AgentState(Enum):
-    """Agent状态"""
+    """Agent状态（v6.0 Stage 1.1扩展）"""
     NEWBORN = "newborn"      # 新生（保护期）
     ACTIVE = "active"        # 活跃
     MATURE = "mature"        # 成熟
     STRUGGLING = "struggling"  # 挣扎
     DYING = "dying"          # 濒死
     DEAD = "dead"            # 死亡
+    # ✅ v6.0 新增：退休状态
+    RETIRED_HERO = "retired_hero"    # 光荣退休（5个奖章，可召回）
+    RETIRED_AGE = "retired_age"      # 寿终正寝（10代，可召回但优先级低）
 
 
 class DeathReason(Enum):
