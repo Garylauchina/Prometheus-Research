@@ -30,6 +30,7 @@ class MetaGenome:
     1. Daimon权重（6个）- 决定各个声音的影响力
     2. 行为特征（4个）- 学习速度、探索欲等
     3. 策略偏好（3个）- 对不同策略的偏好
+    4. 里程碑记录（v6.0新增）- 记录Agent的荣誉时刻
     """
     
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -56,6 +57,11 @@ class MetaGenome:
     prefer_trend_following: float = 0.5      # 趋势跟随偏好
     prefer_mean_reversion: float = 0.3       # 均值回归偏好
     prefer_grid_trading: float = 0.2         # 网格交易偏好
+    
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # 4. 里程碑记录（v6.0新增）
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    milestones: list = field(default_factory=list)  # 奖章/里程碑记录
     
     @classmethod
     def create_genesis(cls) -> 'MetaGenome':

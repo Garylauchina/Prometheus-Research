@@ -16,6 +16,7 @@ from typing import List, Tuple, Dict, Optional
 import logging
 import numpy as np
 import random  # v5.2: 用于变异率随机化
+from datetime import datetime  # v6.0: 用于奖章时间戳
 
 from .agent_v5 import AgentV5
 from .lineage import LineageVector
@@ -288,7 +289,13 @@ class EvolutionManagerV5:
         except Exception as e:
             logger.warning(f"新Agent挂账簿失败: {e}")
         
-        # 6.5. ✅ v6.0: 退休检查（光荣退休/寿终正寝）
+        # 6.5. ✅ v6.0: 颁发奖章给Top Performers
+        if hasattr(self, 'retirement_enabled') and self.retirement_enabled:
+            awarded_count = self._award_top_performers(rankings, top_k=5)
+            if awarded_count > 0:
+                logger.info(f"   🎖️ 颁发奖章: {awarded_count}个Agent进入Top5")
+        
+        # 6.6. ✅ v6.0: 退休检查（光荣退休/寿终正寝）
         retired_count = 0
         if hasattr(self, 'retirement_enabled') and self.retirement_enabled:
             retired_agents = self._check_and_retire_agents(current_price)
@@ -1212,6 +1219,88 @@ class EvolutionManagerV5:
         
         return immigrants
 
+    def _award_top_performers(self, ranked_agents: List[Tuple[AgentV5, float]], top_k: int = 5) -> int:
+        """
+        🎖️ 颁发奖章给Top Performers（v6.0 Stage 1.1）
+        
+        极简奖章机制：
+        - 只有一种奖章：TOP_PERFORMER 🏅
+        - 颁发给Fitness排名Top K的Agent
+        - 记录在Agent.meta_genome.milestones中
+        
+        Args:
+            ranked_agents: 已排序的Agent列表（按Fitness降序）
+            top_k: Top K数量（默认5）
+        
+        Returns:
+            int: 实际颁发的奖章数量
+        """
+        awarded_count = 0
+        
+        for rank, (agent, fitness) in enumerate(ranked_agents[:top_k], 1):
+            # 颁发奖章
+            milestone = {
+                'type': 'top_performer',
+                'generation': self.generation,
+                'rank': rank,
+                'fitness': fitness,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            # 记录到MetaGenome.milestones
+            if hasattr(agent, 'meta_genome') and agent.meta_genome:
+                if not hasattr(agent.meta_genome, 'milestones'):
+                    agent.meta_genome.milestones = []
+                agent.meta_genome.milestones.append(milestone)
+                awarded_count += 1
+                
+                # 统计总奖章数
+                total_awards = len(agent.meta_genome.milestones)
+                logger.debug(f"      🎖️ {agent.agent_id}: 第{rank}名 → 奖章×{total_awards}")
+        
+        return awarded_count
+    
+    def _award_top_performers(self, ranked_agents: List[Tuple[AgentV5, float]], top_k: int = 5) -> int:
+        """
+        🎖️ 颁发奖章给Top Performers（v6.0 Stage 1.1）
+        
+        极简奖章机制：
+        - 只有一种奖章：TOP_PERFORMER 🏅
+        - 颁发给Fitness排名Top K的Agent
+        - 记录在Agent.meta_genome.milestones中
+        
+        Args:
+            ranked_agents: 已排序的Agent列表（按Fitness降序）
+            top_k: Top K数量（默认5）
+        
+        Returns:
+            int: 实际颁发的奖章数量
+        """
+        awarded_count = 0
+        
+        for rank, (agent, fitness) in enumerate(ranked_agents[:top_k], 1):
+            # 颁发奖章
+            milestone = {
+                'type': 'top_performer',
+                'generation': self.generation,
+                'rank': rank,
+                'fitness': fitness,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            # 记录到MetaGenome.milestones
+            if hasattr(agent, 'meta_genome') and agent.meta_genome:
+                if not hasattr(agent.meta_genome, 'milestones'):
+                    agent.meta_genome.milestones = []
+                agent.meta_genome.milestones.append(milestone)
+                awarded_count += 1
+                
+                # 统计总奖章数
+                total_awards = len(agent.meta_genome.milestones)
+                logger.debug(f"      🎖️ {agent.agent_id}: 第{rank}名 → 奖章×{total_awards}")
+        
+        return awarded_count
+    
     def _check_and_retire_agents(self, current_price: float) -> List[AgentV5]:
         """
         🏆 检查并执行Agent退休（v6.0 Stage 1.1）
