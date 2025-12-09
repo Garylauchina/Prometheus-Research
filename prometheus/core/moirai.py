@@ -392,12 +392,18 @@ class Moirai(Supervisor):
     
     def _atropos_judge_agents(self) -> List[Tuple[AgentV5, str]]:
         """
-        ✂️ Atropos判断哪些Agent应该被淘汰（v5.0专用）
+        ✂️ Atropos判断哪些Agent应该被淘汰（v6.0 Stage 1.1版）
+        
+        ⚠️ 注意：这是**即时淘汰**机制（破产保护），不同于EvolutionManager的周期性淘汰
         
         判断标准：
-        1. Agent主动自杀（should_commit_suicide）
-        2. 资金耗尽（capital < 阈值）
-        3. 长期表现不佳
+        1. 资金耗尽（capital < 10%初始资金）→ 即时淘汰（破产保护）
+        2. ❌ 移除"长期表现不佳"判断 → 由EvolutionManager基于PF周期性淘汰
+        
+        ✅ Stage 1.1一致性：
+        - Moirai只负责"破产保护"（资金耗尽）
+        - EvolutionManager负责"优胜劣汰"（基于Profit Factor）
+        - 两者互补，不冲突
         
         Returns:
             List[(AgentV5, reason)]: 应该被淘汰的Agent列表
@@ -406,8 +412,8 @@ class Moirai(Supervisor):
         
         for agent in self.agents:
             try:
-                # AlphaZero式：只基于客观指标判断淘汰
-                # 移除"自杀"机制，由EvolutionManager强制淘汰
+                # ✅ Stage 1.1: 只检查资金耗尽（破产保护）
+                # 不检查表现（由EvolutionManager基于PF判断）
                 if agent.current_capital < agent.initial_capital * 0.1:
                     to_eliminate.append((agent, "资金耗尽"))
                     
@@ -419,9 +425,13 @@ class Moirai(Supervisor):
     
     def _atropos_eliminate_agent(self, agent: AgentV5, reason: str, current_price: float = 0):
         """
-        ✂️ Atropos剪断生命之线（v5.0专用）
+        ✂️ Atropos剪断生命之线（v6.0 Stage 1.1版）
         
-        无情地淘汰失败的Agent，并回收其剩余资金
+        ⚠️ 注意：这是**执行淘汰**，不负责判断（判断由调用者完成）
+        
+        调用者：
+        1. EvolutionManager.run_evolution_cycle() → 基于Profit Factor淘汰弱者
+        2. Moirai._atropos_check_and_eliminate() → 破产保护（资金耗尽）
         
         流程：
         1. 先平仓所有持仓（如果有）
@@ -430,7 +440,7 @@ class Moirai(Supervisor):
         
         Args:
             agent: 要淘汰的AgentV5
-            reason: 淘汰原因
+            reason: 淘汰原因（例如："进化淘汰"/"资金耗尽"）
             current_price: 当前市场价格（用于平仓）
         """
         # ✅ v6.0: Step 1 - 先平仓所有持仓
@@ -538,17 +548,25 @@ class Moirai(Supervisor):
     
     def _lachesis_calculate_breeding_tax(self, elite_agent: AgentV5, current_price: float) -> float:
         """
-        ⚖️ Lachesis计算繁殖税（极简版）
+        ⚖️ Lachesis计算繁殖税（v6.0 Stage 1.1版）
+        
+        ⚠️ 注意：税率**不基于Agent表现**，只基于系统资金池状态
         
         税率逻辑（AlphaZero式极简）：
         - 资金池 >= 20%：不征税（0%）
         - 资金池 < 20%：固定征税（10%）
         
-        不分级，不预判，让系统自然平衡。
-        如果10%不够，测试会告诉我们。
+        ✅ Stage 1.1一致性：
+        - 税收是**系统级调控**，不涉及Agent表现评估
+        - Elite选择由EvolutionManager基于Profit Factor完成
+        - Moirai只负责执行税收，不判断"谁该繁殖"
+        
+        设计理念：
+        - 不分级，不预判，让系统自然平衡
+        - 如果10%不够，测试会告诉我们
         
         Args:
-            elite_agent: 准备繁殖的精英Agent
+            elite_agent: 准备繁殖的精英Agent（由EvolutionManager基于PF选出）
             current_price: 当前市场价格
         
         Returns:
@@ -677,7 +695,17 @@ class Moirai(Supervisor):
     
     def _atropos_check_and_eliminate(self) -> int:
         """
-        ✂️ Atropos执行淘汰检查
+        ✂️ Atropos执行淘汰检查（v6.0 Stage 1.1版）
+        
+        ⚠️ 注意：这是**即时淘汰**（破产保护），不同于EvolutionManager的周期性淘汰
+        
+        触发时机：
+        - 每个交易周期后（可选）
+        - 只淘汰资金耗尽的Agent（< 10%初始资金）
+        
+        ✅ Stage 1.1一致性：
+        - 不基于Profit Factor（由EvolutionManager负责）
+        - 只基于资金耗尽（破产保护）
         
         Returns:
             int: 淘汰的Agent数量
