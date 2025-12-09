@@ -50,20 +50,18 @@ class EvolutionManagerV5:
                  moirai,  # Moirai实例（替代supervisor）
                  elite_ratio: float = 0.2,
                  elimination_ratio: float = 0.3,
-                 num_families: int = 50,
                  capital_pool=None,
                  fitness_mode: str = 'profit_factor',
                  retirement_enabled: bool = False,
                  medal_system_enabled: bool = False,
                  immigration_enabled: bool = True):
         """
-        初始化进化管理器
+        初始化进化管理器（v6.0极简版）
         
         Args:
             moirai: Moirai实例
             elite_ratio: 精英比例
             elimination_ratio: 淘汰比例
-            num_families: 家族数量
             capital_pool: 资金池（CapitalPool实例）
             fitness_mode: Fitness计算模式
                 - 'profit_factor': Profit Factor主导（Stage 1.1默认）
@@ -75,7 +73,6 @@ class EvolutionManagerV5:
         self.moirai = moirai
         self.elite_ratio = elite_ratio
         self.elimination_ratio = elimination_ratio
-        self.num_families = num_families
         self.fitness_mode = fitness_mode  # ✅ Stage 1.1: 添加fitness模式
         self.retirement_enabled = retirement_enabled  # ✅ v6.0: 退休机制
         self.medal_system_enabled = medal_system_enabled  # ✅ v6.0: 奖章系统
@@ -320,13 +317,12 @@ class EvolutionManagerV5:
             logger.info(f"   🔄 退休触发Immigration: 补充{retired_count}个")
             immigrants_from_retirement = self.inject_immigrants(
                 count=retired_count,
-                allow_new_family=True,
                 reason=f"补充退休({retired_count}个)"
             )
             immigrants.extend(immigrants_from_retirement)
         
-        # 7b. 常规Immigration检查
-        immigrants_from_diversity = self.maybe_inject_immigrants(allow_new_family=True, force=False)
+        # 7b. 常规Immigration检查（v6.0极简版，无家族机制）
+        immigrants_from_diversity = self.maybe_inject_immigrants(force=False)
         immigrants.extend(immigrants_from_diversity)
         
         if immigrants:
@@ -1164,12 +1160,6 @@ class EvolutionManagerV5:
             generation=child_generation,
             meta_genome=child_meta_genome
         )
-        # 确保血统携带family_id（优先父母的dominant family）
-        if hasattr(child_lineage, "family_id"):
-            child.lineage.family_id = child_lineage.family_id
-        else:
-            dom_family = child_lineage.get_dominant_family()
-            child.lineage.family_id = dom_family
         
         # 🔧 修复：为新Agent设置初始fitness（多样性保护器需要）
         # 新生儿还没有交易记录，使用基准fitness = 1.0
@@ -1179,7 +1169,6 @@ class EvolutionManagerV5:
     
     def inject_immigrants(self, 
                           count: Optional[int] = None,
-                          allow_new_family: bool = True,
                           reason: Optional[str] = None) -> List[AgentV5]:
         """
         ✅ Stage 1.1: 简化Immigration机制（维护多样性）
@@ -1188,7 +1177,6 @@ class EvolutionManagerV5:
         
         Args:
             count: 注入数量（None=自动计算）
-            allow_new_family: 是否允许新家族
             reason: 触发原因
         
         Returns:
@@ -1208,10 +1196,8 @@ class EvolutionManagerV5:
         logger.info(f"🚁 Immigration触发: 注入{count}个移民 | 原因: {reason or '未知'}")
         
         for i in range(count):
-            # ✅ v6.0: 使用Moirai的Clotho女神创建移民
-            immigrant = self.moirai._clotho_create_single_agent(
-                allow_new_family=allow_new_family
-            )
+            # ✅ v6.0 极简版: 使用Moirai的Clotho女神创建移民（无家族机制）
+            immigrant = self.moirai._clotho_create_single_agent()
             immigrants.append(immigrant)
         
         # 将移民添加到种群
@@ -1364,19 +1350,17 @@ class EvolutionManagerV5:
     
     def maybe_inject_immigrants(self,
                                 metrics: Optional['DiversityMetrics'] = None,
-                                allow_new_family: bool = True,
                                 force: bool = False) -> List[AgentV5]:
         """
-        ✅ Stage 1.1: 简化Immigration触发逻辑
+        ✅ Stage 1.1: 简化Immigration触发逻辑（v6.0极简版）
         
         触发条件（任一满足）：
         - force=True 强制
         - 种群过小（<初始种群的50%）
-        - 进化代数过高（平均代数>10，易出现方向垄断）
+        - 进化代数过高（平均代数>20，易出现方向垄断）
         
         Args:
             metrics: 多样性指标（暂时不使用）
-            allow_new_family: 是否允许新家族
             force: 是否强制注入
         
         Returns:
@@ -1392,7 +1376,6 @@ class EvolutionManagerV5:
         if force:
             return self.inject_immigrants(
                 count=None,
-                allow_new_family=allow_new_family,
                 reason="强制Immigration"
             )
         
@@ -1404,7 +1387,6 @@ class EvolutionManagerV5:
             logger.warning(f"⚠️ 种群过小: {current_pop} < {initial_pop * 0.5:.0f}")
             return self.inject_immigrants(
                 count=max(1, initial_pop // 10),
-                allow_new_family=allow_new_family,
                 reason=f"种群过小({current_pop})"
             )
         
@@ -1418,7 +1400,6 @@ class EvolutionManagerV5:
                 logger.warning(f"⚠️ 平均代数过高: {avg_gen:.1f} > 20")
                 return self.inject_immigrants(
                     count=max(1, current_pop // 10),
-                    allow_new_family=allow_new_family,
                     reason=f"平均代数过高({avg_gen:.1f})"
                 )
         

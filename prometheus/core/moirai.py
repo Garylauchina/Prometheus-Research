@@ -315,31 +315,24 @@ class Moirai(Supervisor):
         
         return agents
 
-    def _clotho_create_single_agent(self, allow_new_family: bool = False) -> AgentV5:
+    def _clotho_create_single_agent(self) -> AgentV5:
         """
-        v5.3 移民机制需要的单Agent创建接口
+        🧵 Clotho创造单个Agent（v6.0极简版）
         
-        Args:
-            allow_new_family: 是否允许创建新家族（用于移民注入）
+        用途：
+        - Immigration注入新移民
+        - 无家族机制（v6.0已移除双熵系统）
         """
         agent_id = f"Agent_{self.next_agent_id}"
         self.next_agent_id += 1
         
-        if allow_new_family:
-            family_id = self.num_families  # 新家族
-            self.num_families += 1
-        else:
-            family_id = self._family_counter % self.num_families
-            self._family_counter += 1
-        
+        # ✅ v6.0极简版：固定family_id=0（无家族机制）
         agent = AgentV5.create_genesis(
             agent_id=agent_id,
             initial_capital=self.initial_capital_per_agent if hasattr(self, 'initial_capital_per_agent') else 10000.0,
-            family_id=family_id,
-            num_families=self.num_families
+            family_id=0,  # v6.0: 固定为0，无家族区分
+            num_families=1  # v6.0: 固定为1，无家族系统
         )
-        # 确保血统携带family_id
-        agent.lineage.family_id = family_id
         return agent
     
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -167,8 +167,7 @@ class V6Facade:
             experience_db=self.experience_db  # ✨ 传递经验数据库
         )
         self.evolution = EvolutionManagerV5(
-            moirai=self.moirai, 
-            num_families=num_families,
+            moirai=self.moirai,
             elite_ratio=elite_ratio,  # ✅ 传递精英比例
             elimination_ratio=elimination_rate,  # ✅ 传递淘汰率
             capital_pool=self.capital_pool,  # ✅ 传递资金池
@@ -1359,7 +1358,6 @@ class V6Facade:
         from prometheus.core.evolution_manager_v5 import EvolutionManagerV5
         self.evolution = EvolutionManagerV5(
             moirai=self.moirai,
-            num_families=len(self.moirai.families) if hasattr(self.moirai, 'families') else 50,
             elite_ratio=config.elite_ratio,
             elimination_ratio=config.elimination_rate,
             capital_pool=self.capital_pool,
