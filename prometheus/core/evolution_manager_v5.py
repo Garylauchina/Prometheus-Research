@@ -51,7 +51,9 @@ class EvolutionManagerV5:
                  elimination_ratio: float = 0.3,
                  num_families: int = 50,
                  capital_pool=None,
-                 fitness_mode: str = 'profit_factor'):
+                 fitness_mode: str = 'profit_factor',
+                 retirement_enabled: bool = False,
+                 immigration_enabled: bool = True):
         """
         初始化进化管理器
         
@@ -64,12 +66,16 @@ class EvolutionManagerV5:
             fitness_mode: Fitness计算模式
                 - 'profit_factor': Profit Factor主导（Stage 1.1默认）
                 - 'absolute_return': 绝对收益（v6.0原版）
+            retirement_enabled: 是否启用退休机制（v6.0新增）
+            immigration_enabled: 是否启用Immigration机制
         """
         self.moirai = moirai
         self.elite_ratio = elite_ratio
         self.elimination_ratio = elimination_ratio
         self.num_families = num_families
         self.fitness_mode = fitness_mode  # ✅ Stage 1.1: 添加fitness模式
+        self.retirement_enabled = retirement_enabled  # ✅ v6.0: 退休机制
+        self.immigration_enabled = immigration_enabled  # ✅ v6.0: Immigration机制
         
         # ✅ v6.0: 资金池（统一资金管理）
         self.capital_pool = capital_pool
@@ -84,6 +90,8 @@ class EvolutionManagerV5:
         logger.info(f"   淘汰比例: {elimination_ratio:.0%}")
         logger.info(f"   繁殖方式: 病毒式复制（固定变异率0.1）")
         logger.info(f"   Fitness模式: {fitness_mode}  ✅ Stage 1.1")
+        logger.info(f"   退休机制: {'启用' if retirement_enabled else '禁用'}  ✅ v6.0")
+        logger.info(f"   Immigration: {'启用' if immigration_enabled else '禁用'}  ✅ v6.0")
     
     def _calculate_dynamic_mutation_rate(self, gene_entropy: float) -> float:
         """
@@ -280,10 +288,43 @@ class EvolutionManagerV5:
         except Exception as e:
             logger.warning(f"新Agent挂账簿失败: {e}")
         
+        # 6.5. ✅ v6.0: 退休检查（光荣退休/寿终正寝）
+        retired_count = 0
+        if hasattr(self, 'retirement_enabled') and self.retirement_enabled:
+            retired_agents = self._check_and_retire_agents(current_price)
+            retired_count = len(retired_agents)
+            if retired_count > 0:
+                logger.info(f"\n🏆 ===== 退休检查 =====")
+                logger.info(f"   退休Agent: {retired_count}个")
+                logger.info(f"   当前种群: {len(self.moirai.agents)}个")
+                logger.info(f"🏆 ====================\n")
+        
         # 7. ✅ Stage 1.1: Immigration检查（维护多样性）
-        immigrants = self.maybe_inject_immigrants(allow_new_family=True, force=False)
+        # ✅ v6.0: 退休触发Immigration（1:1补充）
+        immigrants = []
+        
+        # 7a. 退休触发Immigration（优先）
+        if retired_count > 0:
+            logger.info(f"   🔄 退休触发Immigration: 补充{retired_count}个")
+            immigrants_from_retirement = self.inject_immigrants(
+                count=retired_count,
+                allow_new_family=True,
+                reason=f"补充退休({retired_count}个)"
+            )
+            immigrants.extend(immigrants_from_retirement)
+        
+        # 7b. 常规Immigration检查
+        immigrants_from_diversity = self.maybe_inject_immigrants(allow_new_family=True, force=False)
+        immigrants.extend(immigrants_from_diversity)
+        
         if immigrants:
-            logger.info(f"   🚁 Immigration: 注入{len(immigrants)}个移民")
+            total_immigrants = len(immigrants)
+            logger.info(f"   🚁 Immigration: 注入{total_immigrants}个移民")
+            if retired_count > 0:
+                logger.info(f"      └─ 退休补充: {retired_count}个")
+            if immigrants_from_diversity:
+                logger.info(f"      └─ 多样性注入: {len(immigrants_from_diversity)}个")
+            
             # 为移民挂载账簿
             try:
                 from prometheus.ledger.attach_accounts import attach_accounts
@@ -1171,6 +1212,63 @@ class EvolutionManagerV5:
         
         return immigrants
 
+    def _check_and_retire_agents(self, current_price: float) -> List[AgentV5]:
+        """
+        🏆 检查并执行Agent退休（v6.0 Stage 1.1）
+        
+        退休条件：
+        1. 光荣退休：获得5个奖章（连续5次Top5）
+        2. 寿终正寝：存活10个进化周期
+        
+        Args:
+            current_price: 当前市场价格（用于平仓）
+        
+        Returns:
+            List[AgentV5]: 已退休的Agent列表
+        """
+        retired_agents = []
+        
+        for agent in list(self.moirai.agents):  # 使用list()避免迭代中修改
+            # 计算Agent年龄（代数）
+            agent_age = self.generation - getattr(agent, 'birth_generation', self.generation)
+            
+            # 计算奖章数量（从MetaGenome.milestones中统计）
+            awards = 0
+            if hasattr(agent, 'meta_genome') and agent.meta_genome:
+                milestones = getattr(agent.meta_genome, 'milestones', [])
+                awards = sum(1 for m in milestones if m.get('type') == 'top_performer')
+            
+            # 检查退休条件
+            should_retire = False
+            retire_reason = None
+            
+            # 条件1：光荣退休（5个奖章）
+            if awards >= 5:
+                should_retire = True
+                retire_reason = 'hero'
+                logger.info(f"   🏆 {agent.agent_id}: {awards}个奖章 → 光荣退休")
+            
+            # 条件2：寿终正寝（10代）
+            elif agent_age >= 10:
+                should_retire = True
+                retire_reason = 'age'
+                logger.info(f"   📜 {agent.agent_id}: {agent_age}代 → 寿终正寝")
+            
+            # 执行退休
+            if should_retire:
+                try:
+                    self.moirai.retire_agent(
+                        agent=agent,
+                        reason=retire_reason,
+                        current_price=current_price,
+                        awards=awards
+                    )
+                    retired_agents.append(agent)
+                except Exception as e:
+                    logger.error(f"   ❌ {agent.agent_id}退休失败: {e}")
+        
+        return retired_agents
+    
     def maybe_inject_immigrants(self,
                                 metrics: Optional['DiversityMetrics'] = None,
                                 allow_new_family: bool = True,
