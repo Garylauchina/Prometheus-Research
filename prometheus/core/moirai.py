@@ -601,26 +601,6 @@ class Moirai(Supervisor):
         
         return reclaimed_amount
     
-    def _atropos_eliminate_agent(self, agent: AgentV5, reason: str, current_price: float = 0):
-        """
-        ⚠️ 已废弃！请使用 retire_agent() 或 terminate_agent() 代替
-        
-        保留此方法仅为向后兼容性
-        
-        Args:
-            agent: 要淘汰的AgentV5
-            reason: 淘汰原因（例如："进化淘汰"/"资金耗尽"）
-            current_price: 当前市场价格（用于平仓）
-        """
-        logger.warning(f"⚠️ _atropos_eliminate_agent已废弃，请使用retire_agent()或terminate_agent()")
-        
-        # 转换为新接口（只有死亡，不是退休）
-        return self.terminate_agent(
-            agent=agent,
-            reason=reason,
-            current_price=current_price
-        )
-    
     def _atropos_eliminate_agent_old(self, agent: AgentV5, reason: str, current_price: float = 0):
         """
         ✂️ Atropos剪断生命之线（v6.0 Stage 1.1版）- 旧实现
@@ -916,7 +896,13 @@ class Moirai(Supervisor):
             logger.info(f"\n   ✂️ Atropos发现{len(to_eliminate)}个失败者需要淘汰")
             
             for agent, reason in to_eliminate:
-                self._atropos_eliminate_agent(agent, reason)
+                # ✅ v6.0: 使用统一的terminate_agent接口
+                self.terminate_agent(
+                    agent=agent,
+                    reason=TerminationReason.BANKRUPT,  # Moirai的判定都是破产保护
+                    current_price=0.0,  # 价格由_lachesis_force_close_all获取
+                    save_to_history=False  # 破产者不保存到历史
+                )
             
             logger.info(f"   ✂️ Atropos淘汰完成 | 剩余Agent: {len(self.agents)}")
         

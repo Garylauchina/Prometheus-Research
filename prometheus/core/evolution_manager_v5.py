@@ -199,11 +199,13 @@ class EvolutionManagerV5:
             eliminated_ids.append(agent.agent_id)
             logger.info(f"   💀 {agent.agent_id} (PnL=${pnl:+.2f})")
             
-            # 标记死亡（传入current_price以便平仓）
-            self.moirai._atropos_eliminate_agent(
-                agent=agent, 
-                reason="进化淘汰",
-                current_price=current_price  # ✅ 传入当前价格
+            # ✅ v6.0: 使用统一的terminate_agent接口
+            from prometheus.core.moirai import TerminationReason
+            self.moirai.terminate_agent(
+                agent=agent,
+                reason=TerminationReason.POOR_PERFORMANCE,
+                current_price=current_price,
+                save_to_history=False  # 淘汰者不保存到历史
             )
             self.total_deaths += 1
         
