@@ -54,6 +54,7 @@ class EvolutionManagerV5:
                  capital_pool=None,
                  fitness_mode: str = 'profit_factor',
                  retirement_enabled: bool = False,
+                 medal_system_enabled: bool = False,
                  immigration_enabled: bool = True):
         """
         初始化进化管理器
@@ -68,6 +69,7 @@ class EvolutionManagerV5:
                 - 'profit_factor': Profit Factor主导（Stage 1.1默认）
                 - 'absolute_return': 绝对收益（v6.0原版）
             retirement_enabled: 是否启用退休机制（v6.0新增）
+            medal_system_enabled: 是否启用奖章系统（v6.0新增）
             immigration_enabled: 是否启用Immigration机制
         """
         self.moirai = moirai
@@ -76,6 +78,7 @@ class EvolutionManagerV5:
         self.num_families = num_families
         self.fitness_mode = fitness_mode  # ✅ Stage 1.1: 添加fitness模式
         self.retirement_enabled = retirement_enabled  # ✅ v6.0: 退休机制
+        self.medal_system_enabled = medal_system_enabled  # ✅ v6.0: 奖章系统
         self.immigration_enabled = immigration_enabled  # ✅ v6.0: Immigration机制
         
         # ✅ v6.0: 资金池（统一资金管理）
@@ -92,6 +95,7 @@ class EvolutionManagerV5:
         logger.info(f"   繁殖方式: 病毒式复制（固定变异率0.1）")
         logger.info(f"   Fitness模式: {fitness_mode}  ✅ Stage 1.1")
         logger.info(f"   退休机制: {'启用' if retirement_enabled else '禁用'}  ✅ v6.0")
+        logger.info(f"   奖章系统: {'启用' if medal_system_enabled else '禁用'}  ✅ v6.0")
         logger.info(f"   Immigration: {'启用' if immigration_enabled else '禁用'}  ✅ v6.0")
     
     def _calculate_dynamic_mutation_rate(self, gene_entropy: float) -> float:

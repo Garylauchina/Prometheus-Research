@@ -33,6 +33,10 @@ class MockTrainingConfig:
     elite_ratio: float = 0.2                 # 精英比例（0.2=保留20%精英）
     fitness_mode: str = 'profit_factor'      # ✅ Stage 1.1: Fitness计算模式（profit_factor/absolute_return）
     
+    # ========== v4新增：退休机制（可选） ==========
+    retirement_enabled: bool = False         # 🎖️ 是否启用退休机制（光荣退休+寿终正寝）
+    medal_system_enabled: bool = False       # 🏅 是否启用奖章系统（Top5颁发奖章）
+    
     # ========== 创世参数（完全自由） ==========
     genesis_strategy: str = 'adaptive'       # 创世策略: 'pure_random', 'adaptive', 'hybrid'
     genesis_seed: Optional[int] = None       # 创世随机种子（None=真随机）

@@ -1363,9 +1363,12 @@ class V6Facade:
             elite_ratio=config.elite_ratio,
             elimination_ratio=config.elimination_rate,
             capital_pool=self.capital_pool,
-            fitness_mode=config.fitness_mode  # ✅ Stage 1.1: 从配置读取fitness模式
+            fitness_mode=config.fitness_mode,  # ✅ Stage 1.1: 从配置读取fitness模式
+            retirement_enabled=config.retirement_enabled,  # 🎖️ v4: 退休机制
+            medal_system_enabled=config.medal_system_enabled  # 🏅 v4: 奖章系统
         )
         logger.info(f"✅ EvolutionManagerV5已重新初始化（精英{config.elite_ratio:.0%}，淘汰{config.elimination_rate:.0%}，Fitness模式: {config.fitness_mode}）")
+        logger.info(f"   🎖️ 退休机制: {'启用' if config.retirement_enabled else '禁用'}, 奖章系统: {'启用' if config.medal_system_enabled else '禁用'}")
         logger.info("")
         
         # 1. 初始化ExperienceDB（如果需要）
