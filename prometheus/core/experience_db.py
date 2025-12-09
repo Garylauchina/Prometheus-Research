@@ -44,7 +44,7 @@ class ExperienceDB:
         logger.info(f"ExperienceDB初始化: {db_path}")
     
     def _init_tables(self):
-        """初始化数据库表"""
+        """初始化数据库表（v6.0 Stage 1.1扩展）"""
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS best_genomes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +57,12 @@ class ExperienceDB:
                 max_drawdown REAL,
                 trade_count INTEGER,
                 profit_factor REAL,
-                timestamp TEXT NOT NULL
+                timestamp TEXT NOT NULL,
+                -- ✅ v6.0 新增：奖章机制
+                awards INTEGER DEFAULT 0,
+                retirement_reason TEXT,
+                agent_id TEXT,
+                generation INTEGER
             )
         """)
         
@@ -72,6 +77,15 @@ class ExperienceDB:
         # ✅ Stage 1.1: 添加Profit Factor索引（主要排序指标）
         self.conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_profit_factor ON best_genomes(profit_factor DESC)
+        """)
+        
+        # ✅ v6.0: 添加奖章索引（退休机制）
+        self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_awards ON best_genomes(awards DESC)
+        """)
+        
+        self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_retirement_reason ON best_genomes(retirement_reason)
         """)
         
         self.conn.commit()
@@ -174,6 +188,118 @@ class ExperienceDB:
         
         self.conn.commit()
         logger.info(f"保存{top_k}个最佳基因: {run_id} ({market_type})")
+    
+    def save_retired_agent(
+        self,
+        agent,
+        world_signature: Optional[WorldSignatureSimple],
+        awards: int = 0,
+        retirement_reason: str = 'unknown',
+        generation: int = 0,
+        run_id: str = 'unknown',
+        market_type: str = 'unknown'
+    ):
+        """
+        保存退休Agent到史册（v6.0 Stage 1.1新方法）
+        
+        🏆 专门用于退休机制：
+        - 保存单个退休Agent（不是Top K列表）
+        - 记录奖章数量
+        - 记录退休原因（hero/age）
+        - 记录Agent唯一标识
+        
+        参数：
+          - agent: 退休的Agent
+          - world_signature: 当前市场状态（可选）
+          - awards: 获得的奖章数量
+          - retirement_reason: 退休原因（'hero' or 'age'）
+          - generation: 退休时的代数
+          - run_id: 训练ID
+          - market_type: 市场类型
+        """
+        # World Signature
+        ws_json = json.dumps(world_signature.to_dict()) if world_signature else '{}'
+        timestamp = datetime.now().isoformat()
+        
+        # Agent基因
+        if hasattr(agent, 'strategy_params') and agent.strategy_params:
+            genome_dict = agent.strategy_params.to_dict()
+        elif hasattr(agent, 'genome') and hasattr(agent.genome, 'to_dict'):
+            genome_dict = agent.genome.to_dict()
+        else:
+            genome_dict = {}
+        
+        # 性能指标
+        initial_capital = getattr(agent, 'initial_capital', 1.0)
+        if hasattr(agent, 'account') and agent.account:
+            current_capital = agent.account.private_ledger.virtual_capital
+        else:
+            current_capital = getattr(agent, 'current_capital', 1.0)
+        roi = (current_capital / initial_capital - 1.0) if initial_capital > 0 else 0.0
+        
+        # 交易统计
+        trade_count = 0
+        total_profit = 0.0
+        total_loss = 0.0
+        
+        if hasattr(agent, 'account') and agent.account:
+            private_ledger = agent.account.private_ledger
+            trade_count = len([t for t in private_ledger.trade_history if getattr(t, 'closed', False)])
+            
+            # Profit Factor
+            for trade in private_ledger.trade_history:
+                if not getattr(trade, 'closed', False):
+                    continue
+                pnl = getattr(trade, 'pnl', 0.0) or 0.0
+                if pnl > 0:
+                    total_profit += pnl
+                elif pnl < 0:
+                    total_loss += abs(pnl)
+        
+        # Profit Factor
+        if total_loss > 0:
+            profit_factor = total_profit / total_loss
+        elif total_profit > 0:
+            profit_factor = total_profit
+        else:
+            profit_factor = 0.0
+        
+        # Sharpe和MaxDrawdown
+        sharpe = roi / 0.1 if roi != 0 else 0.0
+        max_drawdown = getattr(agent, 'max_drawdown', 0.0)
+        
+        # Agent ID
+        agent_id = getattr(agent, 'agent_id', 'unknown')
+        
+        # 插入数据库
+        self.conn.execute("""
+            INSERT INTO best_genomes 
+            (run_id, market_type, world_signature, genome, roi, sharpe, max_drawdown, 
+             trade_count, profit_factor, timestamp, awards, retirement_reason, agent_id, generation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            run_id,
+            market_type,
+            ws_json,
+            json.dumps(genome_dict),
+            roi,
+            sharpe,
+            max_drawdown,
+            trade_count,
+            profit_factor,
+            timestamp,
+            awards,
+            retirement_reason,
+            agent_id,
+            generation
+        ))
+        
+        self.conn.commit()
+        
+        if retirement_reason == 'hero':
+            logger.info(f"🏆 {agent_id}载入史册: {awards}个奖章, ROI={roi*100:.2f}%, PF={profit_factor:.2f}")
+        else:
+            logger.info(f"📜 {agent_id}记录生平: ROI={roi*100:.2f}%, PF={profit_factor:.2f}")
     
     def query_similar_genomes(
         self,

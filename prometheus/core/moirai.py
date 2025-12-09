@@ -507,22 +507,21 @@ class Moirai(Supervisor):
                 if hasattr(self, 'prophet') and self.prophet:
                     world_sig = self.prophet.get_current_world_signature()
                 
-                # 保存到ExperienceDB
-                self.experience_db.save_best_genomes(
-                    agents=[agent],
+                # ✅ v6.0: 使用专门的save_retired_agent()方法
+                self.experience_db.save_retired_agent(
+                    agent=agent,
                     world_signature=world_sig,
-                    round_id=f"gen_{getattr(self, 'generation', 0)}"
+                    awards=awards,
+                    retirement_reason=reason,
+                    generation=getattr(self, 'generation', 0),
+                    run_id=getattr(self, 'run_id', 'unknown'),
+                    market_type=getattr(self, 'current_market_type', 'unknown')
                 )
                 
-                # 计算ROI用于日志
-                roi = (final_capital / agent.initial_capital - 1.0) \
-                      if agent.initial_capital > 0 else 0.0
-                
                 if reason == 'hero':
-                    logger.info(f"   📜 载入史册: ROI={roi*100:.2f}%")
                     logger.info(f"   🏆 {agent.agent_id}的荣光将永远传颂！")
                 else:
-                    logger.info(f"   📜 记录生平: ROI={roi*100:.2f}%")
+                    logger.info(f"   📜 生平已记录")
             except Exception as e:
                 logger.error(f"   ❌ 史册记录失败: {e}")
         
