@@ -28,6 +28,33 @@
 
 ---
 
+## 💎 **完美主义者的优化**
+
+### **退休 ≠ 死亡**
+
+```
+用户洞察（2025-12-09晚）：
+  "退休的方法是否可以和终结生命分开处理？
+   '剪断生命之线'太悲伤，
+   'Agent-###的荣光载入史册'更优雅！"
+
+✅ 采纳！分离语义，提升体验：
+
+🏆 retire_agent()
+   → "🏆 Agent-1042的荣光将永远传颂！"
+   → 荣耀、传奇、永生
+   → 载入史册 ✅
+
+💀 terminate_agent()
+   → "✂️ Atropos剪断了Agent-1042的生命之线"
+   → 终结、淘汰、消逝
+   → 不载入史册 ❌
+
+💡 代码即诗，优雅至上！
+```
+
+---
+
 ## 🎯 **重构内容**
 
 ### **1. 新增枚举类型**
@@ -58,26 +85,58 @@ class AgentState(Enum):
 
 ---
 
-### **2. 统一terminate_agent()方法**
+### **2. 双接口设计：退休 vs 死亡**
 
-#### **核心接口**
+#### **接口1：retire_agent()（光荣退休）**
+
+```python
+def retire_agent(
+    self,
+    agent: AgentV5,
+    reason: str,  # 'hero' or 'age'
+    current_price: float,
+    awards: int = 0
+) -> float:
+    """
+    🏆 Agent光荣退休（v6.0 Stage 1.1）
+    
+    💎 退休 ≠ 死亡
+    - 退休是荣耀，死亡是终结
+    - 退休载入史册，死亡被遗忘
+    - 退休可被召回，死亡不可逆
+    
+    适用场景：
+    - RETIREMENT_HERO: 光荣退休（5个奖章）🏆
+    - RETIREMENT_AGE: 寿终正寝（10代）
+    
+    日志输出：
+    - "🏆 Agent-1042的荣光将永远传颂！"
+    """
+```
+
+#### **接口2：terminate_agent()（死亡终结）**
 
 ```python
 def terminate_agent(
     self,
     agent: AgentV5,
     reason: str,  # TerminationReason的值
-    current_price: float,
-    save_to_history: bool = False
+    current_price: float
 ) -> float:
     """
-    ✂️ Atropos剪断生命之线（v6.0 Stage 1.1统一封装）
+    ✂️ Atropos剪断生命之线（v6.0 Stage 1.1）
     
-    🌟 统一生命终结接口 - 三女神协作：
+    💀 死亡终结 - 三女神协作：
     1. Lachesis协助平仓（套现未实现盈亏）
     2. Atropos回收资金（100%回Pool）
-    3. 载入史册（如果光荣退休）
-    4. 标记状态（DEAD/RETIRED）
+    3. 标记状态（DEAD）
+    
+    适用场景：
+    - BANKRUPTCY: 破产（资金<10%初始资金）
+    - POOR_PERFORMANCE: 性能淘汰（PF最低）
+    
+    日志输出：
+    - "✂️ Atropos剪断了Agent-1042的生命之线"
     """
 ```
 
@@ -115,13 +174,13 @@ Step 4: 标记状态
 # 旧代码
 self._atropos_eliminate_agent(agent, '资金耗尽', current_price)
 
-# 新代码
+# 💀 新代码
 self.terminate_agent(
     agent=agent,
-    reason=TerminationReason.BANKRUPTCY,
-    current_price=current_price,
-    save_to_history=False  # 破产不载入史册
+    reason='bankruptcy',
+    current_price=current_price
 )
+# 输出：✂️ Atropos剪断了Agent-1042的生命之线
 ```
 
 #### **路径2：EvolutionManager性能淘汰**
@@ -130,35 +189,36 @@ self.terminate_agent(
 # 旧代码
 self.moirai._atropos_eliminate_agent(agent, '进化淘汰', current_price)
 
-# 新代码
+# 💀 新代码
 self.moirai.terminate_agent(
     agent=agent,
-    reason=TerminationReason.POOR_PERFORMANCE,
-    current_price=current_price,
-    save_to_history=False  # 性能淘汰不载入史册
+    reason='poor_performance',
+    current_price=current_price
 )
+# 输出：✂️ Atropos剪断了Agent-1042的生命之线
 ```
 
-#### **路径3：退休机制（待实现）**
+#### **路径3：退休机制（优雅的新接口）**
 
 ```python
-# 光荣退休
+# 🏆 光荣退休
 if agent.awards >= 5:
-    self.moirai.terminate_agent(
+    self.moirai.retire_agent(
         agent=agent,
-        reason=TerminationReason.RETIREMENT_HERO,
+        reason='hero',  # 光荣退休
         current_price=current_price,
-        save_to_history=True  # ✅ 载入史册！
+        awards=agent.awards
     )
+    # 输出：🏆 Agent-1042的荣光将永远传颂！
 
-# 寿终正寝
+# 🏆 寿终正寝
 if agent.age >= 10:
-    self.moirai.terminate_agent(
+    self.moirai.retire_agent(
         agent=agent,
-        reason=TerminationReason.RETIREMENT_AGE,
-        current_price=current_price,
-        save_to_history=False  # 不载入史册
+        reason='age',  # 寿终正寝
+        current_price=current_price
     )
+    # 输出：📜 记录生平
 ```
 
 ---
