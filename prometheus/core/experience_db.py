@@ -110,7 +110,12 @@ class ExperienceDB:
             
             # ✅ 修复：从Agent的实际数据计算ROI
             initial_capital = getattr(agent, 'initial_capital', 1.0)
-            current_capital = getattr(agent, 'current_capital', 1.0)
+            # ✅ Stage 1.1 Bug修复：使用account.private_ledger.virtual_capital而不是current_capital
+            # current_capital可能没被更新，真实资金在账簿中！
+            if hasattr(agent, 'account') and agent.account:
+                current_capital = agent.account.private_ledger.virtual_capital
+            else:
+                current_capital = getattr(agent, 'current_capital', 1.0)
             roi = (current_capital / initial_capital - 1.0) if initial_capital > 0 else 0.0
             
             # ✅ 修复：从Account获取交易统计（如果有）
@@ -124,7 +129,12 @@ class ExperienceDB:
                 
                 # ✅ Stage 1.1: 计算Profit Factor（主要指标）
                 # PF = total_profit / abs(total_loss)
+                # ⚠️ 重要：只统计平仓交易（closed=True），开仓交易pnl=None
                 for trade in private_ledger.trade_history:
+                    # 只统计平仓交易
+                    if not getattr(trade, 'closed', False):
+                        continue
+                    
                     pnl = getattr(trade, 'pnl', 0.0)
                     if pnl is None:
                         pnl = 0.0  # ✅ 防止None值

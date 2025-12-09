@@ -635,10 +635,15 @@ class EvolutionManagerV5:
             return -1.0  # 从未交易，淘汰
         
         # 3. 计算Profit Factor
+        # ⚠️ 重要：只统计平仓交易（closed=True），开仓交易pnl=None
         total_profit = 0.0
         total_loss = 0.0
         
         for trade in agent.account.private_ledger.trade_history:
+            # 只统计平仓交易
+            if not getattr(trade, 'closed', False):
+                continue
+            
             pnl = getattr(trade, 'pnl', 0.0)
             if pnl is None:
                 pnl = 0.0  # ✅ 防止None值

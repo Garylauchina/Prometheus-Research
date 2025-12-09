@@ -1491,8 +1491,27 @@ class V6Facade:
         logger.info("✅ 训练循环完成")
         logger.info("")
         
-        # 5. 计算最终指标
+        # 4.5. ✅ Stage 1.1: 训练结束前强制平仓所有Agent（计算最终PnL）
         final_price = float(market_data.iloc[-1]['close']) if len(market_data) > 0 else current_price
+        logger.info(f"💰 训练结束：强制平仓所有Agent（最终价格=${final_price:.2f}）")
+        
+        for agent in self.moirai.agents:
+            if agent.state.value == 'dead':
+                continue
+            try:
+                # 使用Moirai的强制平仓方法
+                self.moirai._lachesis_force_close_all(
+                    agent=agent,
+                    current_price=final_price,
+                    reason="training_end"
+                )
+            except Exception as e:
+                logger.warning(f"   ⚠️ Agent {agent.agent_id} 强制平仓失败: {e}")
+        
+        logger.info(f"✅ 强制平仓完成")
+        logger.info("")
+        
+        # 5. 计算最终指标
         
         # Agent统计
         alive_agents = [a for a in self.moirai.agents if a.state.value != 'dead']
