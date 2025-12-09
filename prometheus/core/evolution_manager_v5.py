@@ -1408,13 +1408,14 @@ class EvolutionManagerV5:
                 reason=f"种群过小({current_pop})"
             )
         
-        # 3. 检查平均代数（>10代，易方向垄断）
+        # 3. 检查平均代数（>20代，易方向垄断）
+        # ⚠️ 注意：阈值从10→20，避免与10代退休机制冲突
         if self.moirai.agents:
             generations = [agent.generation for agent in self.moirai.agents]
             avg_gen = np.mean(generations)
             
-            if avg_gen > 10:
-                logger.warning(f"⚠️ 平均代数过高: {avg_gen:.1f} > 10")
+            if avg_gen > 20:
+                logger.warning(f"⚠️ 平均代数过高: {avg_gen:.1f} > 20")
                 return self.inject_immigrants(
                     count=max(1, current_pop // 10),
                     allow_new_family=allow_new_family,
