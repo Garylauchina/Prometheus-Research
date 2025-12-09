@@ -280,11 +280,25 @@ class EvolutionManagerV5:
         except Exception as e:
             logger.warning(f"新Agent挂账簿失败: {e}")
         
-        # 7. 记录统计
+        # 7. ✅ Stage 1.1: Immigration检查（维护多样性）
+        immigrants = self.maybe_inject_immigrants(allow_new_family=True, force=False)
+        if immigrants:
+            logger.info(f"   🚁 Immigration: 注入{len(immigrants)}个移民")
+            # 为移民挂载账簿
+            try:
+                from prometheus.ledger.attach_accounts import attach_accounts
+                public_ledger = getattr(self.moirai, "public_ledger", None)
+                attach_accounts(immigrants, public_ledger)
+            except Exception as e:
+                logger.warning(f"移民挂账簿失败: {e}")
+        
+        # 8. 记录统计
         self.generation += 1
         
         logger.info(f"\n🧬 进化周期完成:")
         logger.info(f"   新生: {len(new_agents)}个")
+        if immigrants:
+            logger.info(f"   移民: {len(immigrants)}个  ✅ Stage 1.1")
         logger.info(f"   当前种群: {len(self.moirai.agents)}个")
         logger.info(f"   累计出生: {self.total_births}")
         logger.info(f"   累计死亡: {self.total_deaths}")
@@ -1099,39 +1113,109 @@ class EvolutionManagerV5:
                           count: Optional[int] = None,
                           allow_new_family: bool = True,
                           reason: Optional[str] = None) -> List[AgentV5]:
-        """AlphaZero式：不使用Immigration机制"""
-        logger.debug("AlphaZero式：Immigration已禁用")
-        return []
+        """
+        ✅ Stage 1.1: 简化Immigration机制（维护多样性）
+        
+        作用：防止"方向垄断崩溃"（Monopoly Lineage Collapse）
+        
+        Args:
+            count: 注入数量（None=自动计算）
+            allow_new_family: 是否允许新家族
+            reason: 触发原因
+        
+        Returns:
+            List[AgentV5]: 注入的移民
+        """
+        if not hasattr(self, 'immigration_enabled'):
+            self.immigration_enabled = True  # ✅ Stage 1.1: 默认启用
+        
+        if not self.immigration_enabled:
+            return []
+        
+        # 自动计算注入数量（10%种群）
+        if count is None:
+            count = max(1, len(self.moirai.agents) // 10)
+        
+        immigrants = []
+        logger.info(f"🚁 Immigration触发: 注入{count}个移民 | 原因: {reason or '未知'}")
+        
+        for i in range(count):
+            # ✅ Stage 1.1: 使用Moirai的创世方法创建移民
+            immigrant = self.moirai._create_random_agent(
+                agent_id_suffix=f"immigrant_{i}",
+                generation=0  # 移民从第0代开始
+            )
+            immigrants.append(immigrant)
+        
+        # 将移民添加到种群
+        self.moirai.agents.extend(immigrants)
+        self.total_births += len(immigrants)
+        
+        logger.info(f"✅ Immigration完成: 成功注入{len(immigrants)}个移民")
+        logger.info(f"   当前种群: {len(self.moirai.agents)}个Agent")
+        
+        return immigrants
 
     def maybe_inject_immigrants(self,
                                 metrics: Optional['DiversityMetrics'] = None,
                                 allow_new_family: bool = True,
                                 force: bool = False) -> List[AgentV5]:
         """
-        先知/战略层调用：基于多样性健康状况决定是否注入移民
+        ✅ Stage 1.1: 简化Immigration触发逻辑
         
         触发条件（任一满足）：
         - force=True 强制
-        - 活跃家族远低于阈值（< 70% * active_families_min）
-        - 多样性综合得分远低于阈值（< 70% * diversity_score_min）
-        - 基因/血统熵低于阈值（< 70%）
+        - 种群过小（<初始种群的50%）
+        - 进化代数过高（平均代数>10，易出现方向垄断）
         
         Args:
-            metrics: DiversityMonitor 计算出的 DiversityMetrics
-            allow_new_family: 是否允许创建新家族
+            metrics: 多样性指标（暂时不使用）
+            allow_new_family: 是否允许新家族
             force: 是否强制注入
         
         Returns:
             List[AgentV5]: 实际注入的移民列表
         """
+        if not hasattr(self, 'immigration_enabled'):
+            self.immigration_enabled = True
+        
         if not self.immigration_enabled:
             return []
         
-        if metrics is None and not force:
-            return []
+        # 1. 强制触发
+        if force:
+            return self.inject_immigrants(
+                count=None,
+                allow_new_family=allow_new_family,
+                reason="强制Immigration"
+            )
         
-        # AlphaZero式：移除Immigration机制
-        logger.debug("AlphaZero式：不使用Immigration")
+        # 2. 检查种群大小（低于初始50%）
+        current_pop = len(self.moirai.agents)
+        initial_pop = getattr(self.moirai, 'initial_population_size', 50)
+        
+        if current_pop < initial_pop * 0.5:
+            logger.warning(f"⚠️ 种群过小: {current_pop} < {initial_pop * 0.5:.0f}")
+            return self.inject_immigrants(
+                count=max(1, initial_pop // 10),
+                allow_new_family=allow_new_family,
+                reason=f"种群过小({current_pop})"
+            )
+        
+        # 3. 检查平均代数（>10代，易方向垄断）
+        if self.moirai.agents:
+            generations = [agent.generation for agent in self.moirai.agents]
+            avg_gen = np.mean(generations)
+            
+            if avg_gen > 10:
+                logger.warning(f"⚠️ 平均代数过高: {avg_gen:.1f} > 10")
+                return self.inject_immigrants(
+                    count=max(1, current_pop // 10),
+                    allow_new_family=allow_new_family,
+                    reason=f"平均代数过高({avg_gen:.1f})"
+                )
+        
+        # 不触发
         return []
     
     def get_population_stats(self) -> Dict:

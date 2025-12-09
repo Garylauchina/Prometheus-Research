@@ -135,18 +135,35 @@ class StrategyParams:
             parent_params=(parent1, parent2)
         )
     
-    def mutate(self, mutation_rate: float = 0.1) -> 'StrategyParams':
+    def mutate(self, mutation_rate: float = 0.1, diversity_boost: float = 1.0) -> 'StrategyParams':
         """
-        突变（高斯噪声）
+        ✅ Stage 1.1: 增强突变机制（可控多样性）
+        
+        突变策略：
+        1. 基础突变：高斯噪声（mutation_rate）
+        2. 多样性增强：diversity_boost（1.0=正常，2.0=2倍幅度）
+        3. 关键参数（directional_bias）获得更大突变幅度
+        
+        Args:
+            mutation_rate: 基础突变率（默认0.1）
+            diversity_boost: 多样性增强系数（1.0=正常，2.0=双倍）
+        
+        Returns:
+            新的突变StrategyParams
         """
+        # ✅ Stage 1.1: 关键参数（directional_bias）获得1.5倍突变幅度
+        # 原因：directional_bias决定多空方向，是多样性的核心
+        directional_mutation_rate = mutation_rate * 1.5 * diversity_boost
+        standard_mutation_rate = mutation_rate * diversity_boost
+        
         mutated = StrategyParams(
-            position_size_base=self.position_size_base + np.random.normal(0, mutation_rate),
-            holding_preference=self.holding_preference + np.random.normal(0, mutation_rate),
-            directional_bias=self.directional_bias + np.random.normal(0, mutation_rate),
-            stop_loss_threshold=self.stop_loss_threshold + np.random.normal(0, mutation_rate),
-            take_profit_threshold=self.take_profit_threshold + np.random.normal(0, mutation_rate),
-            trend_following_strength=self.trend_following_strength + np.random.normal(0, mutation_rate),
-            leverage_preference=self.leverage_preference + np.random.normal(0, mutation_rate),  # ✨ 杠杆突变
+            position_size_base=self.position_size_base + np.random.normal(0, standard_mutation_rate),
+            holding_preference=self.holding_preference + np.random.normal(0, standard_mutation_rate),
+            directional_bias=self.directional_bias + np.random.normal(0, directional_mutation_rate),  # ✅ 增强
+            stop_loss_threshold=self.stop_loss_threshold + np.random.normal(0, standard_mutation_rate),
+            take_profit_threshold=self.take_profit_threshold + np.random.normal(0, standard_mutation_rate),
+            trend_following_strength=self.trend_following_strength + np.random.normal(0, standard_mutation_rate),
+            leverage_preference=self.leverage_preference + np.random.normal(0, standard_mutation_rate),
             generation=self.generation,
             parent_params=self.parent_params
         )
