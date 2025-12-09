@@ -32,18 +32,25 @@ logger = logging.getLogger(__name__)
 
 class EvolutionManagerV5:
     """
-    v6.0 AlphaZero式进化管理器
+    v6.0 AlphaZero式进化管理器（极简训练版）
     
     核心职责：
     1. 评估种群表现（纯Fitness）
-    2. 淘汰最差Agent
+    2. 淘汰最差Agent（性能淘汰）
     3. 病毒式复制（克隆精英+变异）
+    4. 退休/死亡检查（5奖章/10代）
+    5. 直接创建新生（离开→新生，1:1补充）
     
-    移除：
+    已移除（v6.0极简化）：
     ❌ 生殖隔离检查
     ❌ 双熵监控
-    ❌ Immigration
+    ❌ 家族系统
     ❌ 多样性保护
+    ❌ Immigration机制（已封存，留给v7.0 Prophet）
+    
+    v7.0预留：
+    🔮 inject_immigrants() - Prophet战略注入
+    🔮 maybe_inject_immigrants() - Prophet种群管理
     """
     
     def __init__(self, 
@@ -298,56 +305,49 @@ class EvolutionManagerV5:
                 logger.info(f"   🎖️ 颁发奖章: {awarded_count}个Agent进入Top5")
         
         # 6.6. ✅ v6.0: 退休检查（光荣退休/寿终正寝）
-        retired_count = 0
+        departed_count = 0  # 统计所有离开者（退休+死亡）
         if hasattr(self, 'retirement_enabled') and self.retirement_enabled:
-            retired_agents = self._check_and_retire_agents(current_price)
-            retired_count = len(retired_agents)
-            if retired_count > 0:
-                logger.info(f"\n🏆 ===== 退休检查 =====")
-                logger.info(f"   退休Agent: {retired_count}个")
+            departed_agents = self._check_and_retire_agents(current_price)
+            departed_count = len(departed_agents)
+            if departed_count > 0:
+                logger.info(f"\n🏆 ===== 退休/死亡检查 =====")
+                logger.info(f"   离开Agent: {departed_count}个")
                 logger.info(f"   当前种群: {len(self.moirai.agents)}个")
                 logger.info(f"🏆 ====================\n")
         
-        # 7. ✅ Stage 1.1: Immigration检查（维护多样性）
-        # ✅ v6.0: 退休触发Immigration（1:1补充）
-        immigrants = []
+        # 7. ✅ v6.0极简主义: 离开→新生（1:1补充）
+        # 🔮 Immigration机制已封存，留给v7.0 Prophet战略调用
+        new_births = []
         
-        # 7a. 退休触发Immigration（优先）
-        if retired_count > 0:
-            logger.info(f"   🔄 退休触发Immigration: 补充{retired_count}个")
-            immigrants_from_retirement = self.inject_immigrants(
-                count=retired_count,
-                reason=f"补充退休({retired_count}个)"
-            )
-            immigrants.extend(immigrants_from_retirement)
-        
-        # 7b. 常规Immigration检查（v6.0极简版，无家族机制）
-        immigrants_from_diversity = self.maybe_inject_immigrants(force=False)
-        immigrants.extend(immigrants_from_diversity)
-        
-        if immigrants:
-            total_immigrants = len(immigrants)
-            logger.info(f"   🚁 Immigration: 注入{total_immigrants}个移民")
-            if retired_count > 0:
-                logger.info(f"      └─ 退休补充: {retired_count}个")
-            if immigrants_from_diversity:
-                logger.info(f"      └─ 多样性注入: {len(immigrants_from_diversity)}个")
+        if departed_count > 0:
+            logger.info(f"   🧵 Clotho创造新生: 补充{departed_count}个离开者")
             
-            # 为移民挂载账簿
+            for i in range(departed_count):
+                # 直接调用Clotho创造新Agent（不使用Immigration）
+                new_agent = self.moirai._clotho_create_single_agent()
+                new_births.append(new_agent)
+                self.total_births += 1
+            
+            # 添加到种群
+            self.moirai.agents.extend(new_births)
+            
+            # 挂载账簿
             try:
                 from prometheus.ledger.attach_accounts import attach_accounts
                 public_ledger = getattr(self.moirai, "public_ledger", None)
-                attach_accounts(immigrants, public_ledger)
+                attach_accounts(new_births, public_ledger)
             except Exception as e:
-                logger.warning(f"移民挂账簿失败: {e}")
+                logger.warning(f"新Agent挂账簿失败: {e}")
+            
+            logger.info(f"   ✅ 新生完成: {len(new_births)}个Agent")
         
         # 8. 记录统计
         self.generation += 1
         
         logger.info(f"\n🧬 进化周期完成:")
-        logger.info(f"   新生: {len(new_agents)}个")
-        if immigrants:
-            logger.info(f"   移民: {len(immigrants)}个  ✅ Stage 1.1")
+        logger.info(f"   繁殖新生: {len(new_agents)}个")
+        if new_births:
+            logger.info(f"   补充新生: {len(new_births)}个（补充离开者）")
         logger.info(f"   当前种群: {len(self.moirai.agents)}个")
         logger.info(f"   累计出生: {self.total_births}")
         logger.info(f"   累计死亡: {self.total_deaths}")
@@ -1171,7 +1171,15 @@ class EvolutionManagerV5:
                           count: Optional[int] = None,
                           reason: Optional[str] = None) -> List[AgentV5]:
         """
-        ✅ Stage 1.1: 简化Immigration机制（维护多样性）
+        🔮 Immigration机制（v7.0 Prophet专用，v6.0已封存）
+        
+        ⚠️ v6.0训练系统不使用此方法！
+        ⚠️ 此方法保留给v7.0 Prophet战略调用！
+        
+        v7.0使用场景：
+        - Prophet分析市场环境
+        - Prophet决定需要注入哪些基因
+        - Prophet调用此方法注入移民/召回传奇
         
         作用：防止"方向垄断崩溃"（Monopoly Lineage Collapse）
         
@@ -1352,7 +1360,15 @@ class EvolutionManagerV5:
                                 metrics: Optional['DiversityMetrics'] = None,
                                 force: bool = False) -> List[AgentV5]:
         """
-        ✅ Stage 1.1: 简化Immigration触发逻辑（v6.0极简版）
+        🔮 Immigration触发检查（v7.0 Prophet专用，v6.0已封存）
+        
+        ⚠️ v6.0训练系统不使用此方法！
+        ⚠️ 此方法保留给v7.0 Prophet战略调用！
+        
+        v7.0使用场景：
+        - Prophet分析种群状态
+        - Prophet决定是否需要注入多样性
+        - Prophet调用此方法或inject_immigrants
         
         触发条件（任一满足）：
         - force=True 强制
@@ -1360,7 +1376,7 @@ class EvolutionManagerV5:
         - 进化代数过高（平均代数>20，易出现方向垄断）
         
         Args:
-            metrics: 多样性指标（暂时不使用）
+            metrics: 多样性指标（v7.0 Prophet使用）
             force: 是否强制注入
         
         Returns:
