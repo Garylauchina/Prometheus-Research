@@ -204,8 +204,7 @@ class EvolutionManagerV5:
             self.moirai.terminate_agent(
                 agent=agent,
                 reason=TerminationReason.POOR_PERFORMANCE,
-                current_price=current_price,
-                save_to_history=False  # 淘汰者不保存到历史
+                current_price=current_price
             )
             self.total_deaths += 1
         

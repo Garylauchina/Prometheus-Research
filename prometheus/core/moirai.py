@@ -900,8 +900,7 @@ class Moirai(Supervisor):
                 self.terminate_agent(
                     agent=agent,
                     reason=TerminationReason.BANKRUPT,  # Moirai的判定都是破产保护
-                    current_price=0.0,  # 价格由_lachesis_force_close_all获取
-                    save_to_history=False  # 破产者不保存到历史
+                    current_price=0.0  # 价格由_lachesis_force_close_all获取
                 )
             
             logger.info(f"   ✂️ Atropos淘汰完成 | 剩余Agent: {len(self.agents)}")
