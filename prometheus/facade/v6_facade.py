@@ -1171,6 +1171,150 @@ class V6Facade:
             json.dump(metrics, f, indent=2)
         logger.info(f"已保存指标: {path}")
     
+    # ========== v6.0 市场数据生成统一入口（Stage 1.1封装改进）==========
+    def generate_training_market(
+        self,
+        market_type: str = 'stage1_switching',
+        total_bars: int = 5000,
+        structures: list = None,
+        bars_per_structure: int = 300,
+        random_seed: int = None,
+        save_path: str = None
+    ) -> 'pd.DataFrame':
+        """
+        生成训练市场数据（v6.0统一封装入口）
+        
+        封装原则（三大铁律第1条）：
+        1. 统一入口，禁止旁路调用
+        2. 所有市场数据生成通过此方法
+        3. 支持多种市场类型和配置
+        
+        Args:
+            market_type: 市场类型
+                - 'stage1_switching': Stage 1结构切换市场（默认）
+                - 'bull': 纯牛市
+                - 'bear': 纯熊市
+                - 'range': 纯震荡
+                - 'fake_breakout': 纯假突破
+            total_bars: 总bars数
+            structures: 结构序列（仅stage1_switching需要）
+            bars_per_structure: 每个结构bars数
+            random_seed: 随机种子（可复现性）
+            save_path: 保存路径（可选）
+            
+        Returns:
+            pd.DataFrame: 市场数据（包含timestamp/open/high/low/close/volume/structure_type）
+            
+        示例：
+            >>> facade = V6Facade(...)
+            >>> # 生成Stage 1标准市场
+            >>> market_data = facade.generate_training_market(
+            ...     market_type='stage1_switching',
+            ...     total_bars=5000,
+            ...     random_seed=42
+            ... )
+            >>> # 运行训练
+            >>> result = facade.run_mock_training(market_data, config)
+        """
+        import pandas as pd
+        from prometheus.utils.market_generator import MarketStructureGenerator
+        
+        logger.info("="*80)
+        logger.info("市场数据生成 - v6.0统一封装入口")
+        logger.info("="*80)
+        logger.info(f"市场类型: {market_type}")
+        logger.info(f"总bars数: {total_bars}")
+        
+        if market_type == 'stage1_switching':
+            # Stage 1: 结构切换市场
+            generator = MarketStructureGenerator(
+                base_price=40000.0,
+                base_volatility=0.003,  # 0.3% ATR
+                random_seed=random_seed
+            )
+            
+            if structures is None:
+                structures = ['trend_up', 'range', 'trend_down', 'fake_breakout']
+            
+            logger.info(f"结构序列: {structures}")
+            logger.info(f"每结构bars: {bars_per_structure}")
+            
+            market_data = generator.generate_switching_market(
+                structures=structures,
+                bars_per_structure=bars_per_structure,
+                total_bars=total_bars,
+                structure_cycle=True
+            )
+            
+        elif market_type == 'bull':
+            # 纯牛市
+            generator = MarketStructureGenerator(
+                base_price=40000.0,
+                base_volatility=0.003,
+                random_seed=random_seed
+            )
+            market_data = generator.generate_switching_market(
+                structures=['trend_up'],
+                bars_per_structure=total_bars,
+                total_bars=total_bars,
+                structure_cycle=False
+            )
+            
+        elif market_type == 'bear':
+            # 纯熊市
+            generator = MarketStructureGenerator(
+                base_price=40000.0,
+                base_volatility=0.003,
+                random_seed=random_seed
+            )
+            market_data = generator.generate_switching_market(
+                structures=['trend_down'],
+                bars_per_structure=total_bars,
+                total_bars=total_bars,
+                structure_cycle=False
+            )
+            
+        elif market_type == 'range':
+            # 纯震荡
+            generator = MarketStructureGenerator(
+                base_price=40000.0,
+                base_volatility=0.003,
+                random_seed=random_seed
+            )
+            market_data = generator.generate_switching_market(
+                structures=['range'],
+                bars_per_structure=total_bars,
+                total_bars=total_bars,
+                structure_cycle=False
+            )
+            
+        elif market_type == 'fake_breakout':
+            # 纯假突破
+            generator = MarketStructureGenerator(
+                base_price=40000.0,
+                base_volatility=0.003,
+                random_seed=random_seed
+            )
+            market_data = generator.generate_switching_market(
+                structures=['fake_breakout'],
+                bars_per_structure=total_bars,
+                total_bars=total_bars,
+                structure_cycle=False
+            )
+            
+        else:
+            raise ValueError(f"不支持的市场类型: {market_type}")
+        
+        # 保存数据（可选）
+        if save_path:
+            market_data.to_csv(save_path, index=False)
+            logger.info(f"✅ 市场数据已保存: {save_path}")
+        
+        logger.info(f"✅ 市场数据生成完成: {len(market_data)} bars")
+        logger.info(f"   价格范围: [{market_data['low'].min():.2f}, {market_data['high'].max():.2f}]")
+        
+        return market_data
+    
     # ========== v6.0 Mock训练统一入口 ==========
     def run_mock_training(
         self,

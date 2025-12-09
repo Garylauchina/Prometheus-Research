@@ -4,6 +4,7 @@
 - Task 1.2: 固定滑点机制
 
 创建日期: 2025-12-09
+更新日期: 2025-12-09（封装改进：使用V6Facade统一入口）
 """
 
 import sys
@@ -11,7 +12,7 @@ sys.path.insert(0, '.')
 
 import pandas as pd
 import numpy as np
-from prometheus.utils.market_generator import generate_stage1_market, MarketStructureGenerator
+from prometheus.facade.v6_facade import V6Facade
 from prometheus.training.mock_training_school import MockMarketExecutor
 from prometheus.core.agent_v5 import AgentV5
 from prometheus.core.genome import GenomeVector
@@ -29,16 +30,27 @@ def test_task_1_1_market_generator():
     ✅ ATR标准差 < 0.0005
     ✅ 无price gap
     ✅ 可视化验证（已在主函数中）
+    
+    封装改进（2025-12-09）：
+    ✅ 使用V6Facade.generate_training_market()统一入口
+    ✅ 符合三大铁律第1条：统一封装,统一调用
     """
     print("\n" + "="*60)
-    print("🧪 Task 1.1: 测试结构切换市场生成器")
+    print("🧪 Task 1.1: 测试结构切换市场生成器（v6.0封装版）")
     print("="*60)
     
-    # 生成市场数据
-    df = generate_stage1_market(
+    # ✅ 使用V6Facade统一入口生成市场数据
+    print("  创建Facade...")
+    facade = V6Facade()
+    
+    print("  通过Facade生成市场数据...")
+    df = facade.generate_training_market(
+        market_type='stage1_switching',
         total_bars=5000,
         random_seed=42
     )
+    
+    print(f"  ✅ 市场数据生成完成（通过统一入口）")
     
     # 验证1: 总行数
     print(f"\n✓ 验证1: 总行数")
