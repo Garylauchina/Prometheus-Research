@@ -162,15 +162,15 @@ class EvolutionManagerV5:
         
         total_agents = len(rankings)
         
-        # 2. 识别精英、存活者和淘汰者（AlphaZero式：纯实力）
+        # 2. 识别精英、存活者和淘汰者（✅ Stage 1.1: 基于Profit Factor）
         elite_count = max(1, int(total_agents * self.elite_ratio))
         eliminate_count = max(1, int(total_agents * self.elimination_ratio))
         
-        elite_agents = rankings[:elite_count]
+        elite_agents = rankings[:elite_count]  # ✅ 前20%，基于PF排序
         survivors = rankings[:-eliminate_count] if eliminate_count < total_agents else []
-        to_eliminate = rankings[-eliminate_count:]
+        to_eliminate = rankings[-eliminate_count:]  # ✅ 后30%，基于PF排序
         
-        # AlphaZero式：没有多样性保护，纯实力淘汰
+        # ✅ Stage 1.1: 纯实力淘汰（Profit Factor主导，无多样性保护）
         
         logger.info(f"📊 种群评估:")
         logger.info(f"   总数: {total_agents}")
@@ -696,12 +696,17 @@ class EvolutionManagerV5:
     
     def _select_elite_weighted(self, elite_agents: List[Tuple[AgentV5, float]]) -> Optional[AgentV5]:
         """
-        🦠 病毒式复制：按fitness加权选择精英
+        🦠 病毒式复制：按fitness加权选择精英（v6.0 Stage 1.1版）
+        
+        ✅ Stage 1.1一致性：
+        - fitness = Profit Factor（当fitness_mode='profit_factor'时）
+        - elite_agents已由_rank_agents基于PF排序和筛选
         
         规则：fitness越高，被选中概率越大（轮盘赌选择）
         
         Args:
             elite_agents: 精英Agent列表 [(agent, fitness), ...]
+                         其中fitness = PF（Stage 1.1默认）
         
         Returns:
             被选中的精英Agent
@@ -734,7 +739,12 @@ class EvolutionManagerV5:
         current_price: float = 0
     ) -> AgentV5:
         """
-        🦠 病毒式复制：克隆精英 + 随机变异 + 税收机制（v6.0极简版）
+        🦠 病毒式复制：克隆精英 + 随机变异 + 税收机制（v6.0 Stage 1.1版）
+        
+        ✅ Stage 1.1一致性：
+        - elite由_select_elite_weighted基于Profit Factor选出
+        - 税收由Moirai计算，不涉及表现评估
+        - 只负责"执行繁殖"，不负责"选择谁繁殖"
         
         流程：
         1. 强制父代全仓平仓（浮盈→实盈）
@@ -742,12 +752,12 @@ class EvolutionManagerV5:
         3. 收取繁殖税 → 资金池
         4. 父代保留剩余资金
         5. 克隆所有基因（Genome, StrategyParams, Lineage）
-        6. 应用随机变异
+        6. 应用随机变异（✅ Stage 1.1: directional_bias增强1.5倍）
         7. 子代从资金池获得配资
         8. 创建新Agent
         
         Args:
-            elite: 被复制的精英Agent
+            elite: 被复制的精英Agent（由PF评估选出）
             mutation_rate: 变异率（0.0-1.0）
             current_price: 当前市场价格（用于强制平仓和税收计算）
         
