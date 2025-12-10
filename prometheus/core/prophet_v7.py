@@ -43,6 +43,7 @@ class ProphetV7:
         self, 
         bulletin_board: BulletinBoard,
         experience_db: Optional[ExperienceDB] = None,
+        public_ledger = None,  # ⭐ 新增：用于审计
         run_id: str = "default"
     ):
         """
@@ -51,10 +52,12 @@ class ProphetV7:
         Args:
             bulletin_board: 公告板（用于发布信息）
             experience_db: 经验数据库（用于保存系统指标）
+            public_ledger: 公共账簿（用于审计和风控）⭐
             run_id: 运行ID
         """
         self.bulletin_board = bulletin_board
         self.experience_db = experience_db
+        self.public_ledger = public_ledger
         self.run_id = run_id
         
         # ===== v7.0核心：三维监控器⭐⭐⭐ =====
@@ -94,8 +97,11 @@ class ProphetV7:
             'total_agents': 100
         }
         
+        # ===== 步骤0.5：审计账簿⭐⭐⭐（Prophet主动掌控）=====
+        audit_result = self.audit_ledgers()
+        
         # ===== 步骤1：基础计算 =====
-        base_S = self._introspection()
+        base_S = self._introspection(audit_result)
         E = self._listening()
         
         # ===== 步骤2：三维异常检测⭐⭐⭐ =====
@@ -157,7 +163,7 @@ class ProphetV7:
             logger.warning(f"   ⚠️ 检测到{anomaly_result['total_anomaly_dims']}维异常！")
         logger.info(f"   → Moirai和Agent，根据这个信息自主决策！⭐")
     
-    def _introspection(self) -> float:
+    def _introspection(self, audit_result: dict) -> float:
         """
         自省（Introspection）⭐
         
@@ -168,49 +174,78 @@ class ProphetV7:
           S高 → Agent活得好 → 系统与市场匹配
           S低 → Agent死得多 → 系统与市场不匹配
         
+        Args:
+            audit_result: 账簿审计结果（Prophet主动查询）⭐
+        
         Returns:
             S（繁殖指数，0-1）
         """
         
-        # ===== 从Moirai获取种群状态 =====
-        moirai_report = self.bulletin_board.get('moirai_report')
-        
-        if not moirai_report:
-            # 如果还没有报告，返回中性值
-            logger.warning("⚠️ 未找到Moirai报告，使用默认值")
-            return 0.5
-        
-        # ===== 核心指标⭐⭐⭐ =====
+        # ===== 核心指标⭐⭐⭐（从audit_result获取）=====
         
         # 1. 存活率（Agent活得好不好）
-        survival_rate = moirai_report.get('survival_rate', 0.5)
+        survival_rate = audit_result.get('survival_rate', 0.5)
         
         # 2. 平均ROI（Agent赚不赚钱）
-        avg_roi = moirai_report.get('avg_roi', 0.0)
+        avg_roi = audit_result.get('avg_roi', 0.0)
         # ROI归一化到0-1（假设ROI范围-100%到+100%）
         avg_roi_normalized = (avg_roi + 1.0) / 2.0
         avg_roi_normalized = max(0, min(1, avg_roi_normalized))
         
         # 3. 基因多样性（种群是否健康）
-        diversity = moirai_report.get('diversity', 0.5)
+        # TODO: 从audit_result获取多样性
+        diversity = 0.6
         
-        # ===== 计算S（繁殖指数）⭐⭐⭐ =====
+        # ===== 计算S期望值⭐⭐⭐ =====
         # 计算各项贡献
         survival_contribution = survival_rate * 0.4
         roi_contribution = avg_roi_normalized * 0.4
         diversity_contribution = diversity * 0.2
         
-        S = survival_contribution + roi_contribution + diversity_contribution
+        S_desired = survival_contribution + roi_contribution + diversity_contribution
         
-        # 确保在0-1范围内
-        S = max(0, min(1, S))
+        # ===== 凯利护栏⭐⭐⭐（从audit_result获取）=====
+        win_rate = audit_result.get('system_win_rate', 0.5)
+        profit_factor = audit_result.get('avg_profit_factor', 1.0)
+        volatility = audit_result.get('roi_volatility', 0.2)
+        avg_leverage = audit_result.get('avg_leverage', 1.0)
         
-        # ⭐ v7.0增强：详细日志，显示各项贡献
+        # 计算凯利比例
+        if profit_factor > 0:
+            kelly_fraction = (win_rate * profit_factor - (1 - win_rate)) / profit_factor
+            kelly_fraction = max(0, min(1, kelly_fraction))
+        else:
+            kelly_fraction = 0
+        
+        # 半凯利（保守）
+        safe_kelly = kelly_fraction * 0.5
+        
+        # 考虑杠杆调整
+        if avg_leverage > 1:
+            safe_kelly = safe_kelly / avg_leverage
+        
+        # 考虑波动率调整
+        if volatility > 0.3:
+            safe_kelly = safe_kelly * 0.7
+        
+        # S不能超过凯利上限⭐
+        S = min(S_desired, safe_kelly)
+        
+        # 确保在合理范围
+        S = max(0.1, min(0.9, S))
+        
+        # ⭐ v7.0增强：详细日志
         logger.debug(f"🧘 自省（Introspection）:")
         logger.debug(f"   存活率: {survival_rate:.2%} → 贡献: {survival_contribution:.3f} (40%权重)")
         logger.debug(f"   平均ROI: {avg_roi:.2%} → 贡献: {roi_contribution:.3f} (40%权重)")
         logger.debug(f"   多样性: {diversity:.2%} → 贡献: {diversity_contribution:.3f} (20%权重)")
-        logger.debug(f"   → S（繁殖指数）: {S:.2f} = {survival_contribution:.3f} + {roi_contribution:.3f} + {diversity_contribution:.3f}")
+        logger.debug(f"   → S期望: {S_desired:.2f}")
+        logger.debug(f"🛡️ 凯利护栏:")
+        logger.debug(f"   胜率: {win_rate:.2%}, 盈亏比: {profit_factor:.2f}")
+        logger.debug(f"   凯利比例: {kelly_fraction:.2%} → 安全凯利: {safe_kelly:.2%}")
+        if S < S_desired:
+            logger.info(f"   ⚠️ S被凯利限制: {S_desired:.2%} → {S:.2%}")
+        logger.debug(f"   → 最终S: {S:.2f}")
         
         return S
     
@@ -273,6 +308,102 @@ class ProphetV7:
         logger.debug(f"   → E（趋势值）: {E:+.2f}")
         
         return E
+    
+    def audit_ledgers(self) -> dict:
+        """
+        审计账簿系统（Prophet的风控职责）⭐⭐⭐
+        
+        职责：
+        1. 从PublicLedger查询系统级统计
+        2. 计算凯利公式需要的指标
+        3. 检查账簿一致性（TODO）
+        
+        Returns:
+            audit_result: {
+                'system_win_rate': float,
+                'avg_profit_factor': float,
+                'roi_volatility': float,
+                'avg_leverage': float,
+                'total_agents': int,
+                'survival_rate': float,
+                'avg_roi': float,
+            }
+        """
+        if not self.public_ledger:
+            logger.warning("⚠️ PublicLedger未设置，返回默认值")
+            return {
+                'system_win_rate': 0.5,
+                'avg_profit_factor': 1.0,
+                'roi_volatility': 0.2,
+                'avg_leverage': 1.0,
+                'total_agents': 0,
+                'survival_rate': 0.5,
+                'avg_roi': 0.0,
+            }
+        
+        # 从PublicLedger查询所有Agent统计
+        from prometheus.core.ledger_system import Role
+        all_stats = self.public_ledger.get_all_agent_stats(caller_role=Role.SUPERVISOR)
+        
+        if not all_stats:
+            logger.warning("⚠️ 未找到Agent统计数据")
+            return {
+                'system_win_rate': 0.5,
+                'avg_profit_factor': 1.0,
+                'roi_volatility': 0.2,
+                'avg_leverage': 1.0,
+                'total_agents': 0,
+                'survival_rate': 0.5,
+                'avg_roi': 0.0,
+            }
+        
+        # 统计系统级指标
+        total_agents = len(all_stats)
+        
+        # 1. 系统胜率
+        total_wins = 0
+        total_trades = 0
+        for agent_id, stats in all_stats.items():
+            total_wins += stats.get('winning_trades', 0)
+            total_trades += stats.get('total_trades', 0)
+        
+        system_win_rate = total_wins / total_trades if total_trades > 0 else 0.5
+        
+        # 2. 平均盈亏比
+        profit_factors = [stats.get('profit_factor', 1.0) for stats in all_stats.values()]
+        avg_profit_factor = sum(profit_factors) / len(profit_factors) if profit_factors else 1.0
+        
+        # 3. ROI波动率
+        rois = [stats.get('total_roi', 0.0) for stats in all_stats.values()]
+        import numpy as np
+        roi_volatility = float(np.std(rois)) if len(rois) > 1 else 0.2
+        
+        # 4. 平均杠杆（TODO: 需要从stats中获取）
+        avg_leverage = 1.0  # 暂时使用默认值
+        
+        # 5. 存活率
+        profitable_count = sum(1 for stats in all_stats.values() if stats.get('total_roi', 0) > 0)
+        survival_rate = profitable_count / total_agents if total_agents > 0 else 0.5
+        
+        # 6. 平均ROI
+        avg_roi = sum(rois) / len(rois) if rois else 0.0
+        
+        logger.debug(f"📊 账簿审计结果:")
+        logger.debug(f"   总Agent: {total_agents}")
+        logger.debug(f"   系统胜率: {system_win_rate:.2%}")
+        logger.debug(f"   平均盈亏比: {avg_profit_factor:.2f}")
+        logger.debug(f"   ROI波动率: {roi_volatility:.2%}")
+        logger.debug(f"   平均杠杆: {avg_leverage:.2f}")
+        
+        return {
+            'system_win_rate': system_win_rate,
+            'avg_profit_factor': avg_profit_factor,
+            'roi_volatility': roi_volatility,
+            'avg_leverage': avg_leverage,
+            'total_agents': total_agents,
+            'survival_rate': survival_rate,
+            'avg_roi': avg_roi,
+        }
     
     def _format_message(self, S: float, E: float, risk_level: str = 'safe') -> str:
         """

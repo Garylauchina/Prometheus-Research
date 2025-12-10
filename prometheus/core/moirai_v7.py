@@ -290,7 +290,11 @@ class MoiraiV7:
     
     def _should_evolve(self, cycle: int, risk_level: str) -> bool:
         """
-        判断是否应该进化（动态周期）⭐⭐⭐
+        判断是否应该进化（固定周期 + 紧急机制）⭐⭐⭐
+        
+        设计理念：
+        - 固定周期进化：保证稳定的质量控制
+        - 紧急进化：风险critical时立即响应
         
         Args:
             cycle: 当前周期
@@ -299,18 +303,12 @@ class MoiraiV7:
         Returns:
             是否应该进化
         """
+        # 紧急情况：立即进化
         if risk_level == 'critical':
-            # 三维异常：立即进化
             return True
-        elif risk_level == 'danger':
-            # 二维异常：每5周期进化
-            return cycle % 5 == 0
-        elif risk_level == 'warning':
-            # 一维异常：每10周期进化
-            return cycle % 10 == 0
-        else:  # safe
-            # 无异常：每30周期进化
-            return cycle % 30 == 0
+        
+        # 正常情况：固定每5周期进化
+        return cycle % 5 == 0
     
     def _run_evolution(self, current_price: float):
         """
