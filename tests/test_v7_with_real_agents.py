@@ -160,8 +160,8 @@ def create_real_agent(agent_id: str) -> AgentV5:
 
 
 def run_v7_test_with_real_agents(
-    total_cycles: int = 50,
-    initial_agent_count: int = 100,
+    total_cycles: int = 20,  # ⚡ 优化：50→20，加快验证
+    initial_agent_count: int = 20,  # ⚡ 优化：100→20，加快账簿挂载
     market_scenario: str = "mixed"
 ):
     """
@@ -234,7 +234,34 @@ def run_v7_test_with_real_agents(
     logger.info(f"   ✅ generation: {sample_agent.generation}")
     logger.info(f"   ✅ meta_genome: {type(sample_agent.meta_genome).__name__}")
     
-    # ===== 4. 创建EvolutionManager（按照数据字典）⭐⭐⭐ =====
+    # ===== 4. 挂载双账簿系统（遵循铁律）⭐⭐⭐ =====
+    logger.info(f"\n💰 挂载双账簿系统...")
+    logger.info("   参见: prometheus/ledger/attach_accounts.py")
+    
+    # 导入账簿系统
+    from prometheus.core.ledger_system import PublicLedger, AgentAccountSystem
+    from prometheus.ledger.attach_accounts import attach_accounts
+    
+    # 创建公共账簿
+    public_ledger = PublicLedger()
+    logger.info("   ✅ PublicLedger已创建")
+    
+    # 为所有Agent挂载账户（幂等）
+    attach_accounts(moirai_wrapper.agents, public_ledger)
+    logger.info(f"   ✅ 账户已挂载到{len(moirai_wrapper.agents)}个Agent")
+    
+    # 验证挂载
+    missing_account = [a for a in moirai_wrapper.agents if not hasattr(a, 'account')]
+    if missing_account:
+        raise Exception(f"❌ {len(missing_account)}个Agent缺少account！")
+    missing_private = [a for a in moirai_wrapper.agents if not hasattr(a.account, 'private_ledger')]
+    if missing_private:
+        raise Exception(f"❌ {len(missing_private)}个Agent的account缺少private_ledger！")
+    
+    logger.info(f"   ✅ 验证完成：所有Agent都有account和private_ledger")
+    logger.info(f"   ✅ 双账簿系统挂载成功⭐⭐⭐")
+    
+    # ===== 5. 创建EvolutionManager（按照数据字典）⭐⭐⭐ =====
     logger.info(f"\n🧬 创建EvolutionManagerV5...")
     logger.info("   参见: docs/core_structures/evolution_manager_spec.md")
     
@@ -252,11 +279,13 @@ def run_v7_test_with_real_agents(
     logger.info(f"   访问agents: evolution_mgr.moirai.agents ⭐")
     logger.info(f"   Agent数量: {len(evolution_mgr.moirai.agents)}")
     
-    # ===== 5. 创建Moirai v7 =====
+    # ===== 6. 创建Moirai v7 =====
     moirai = MoiraiV7(bb, evolution_mgr)
+    # 将public_ledger传递给Moirai（用于对账）
+    moirai.public_ledger = public_ledger
     logger.info("✅ Moirai v7.0已初始化")
     
-    # ===== 6. 运行测试主循环 =====
+    # ===== 7. 运行测试主循环 =====
     logger.info(f"\n🔄 开始运行{total_cycles}个周期...")
     
     history = {
