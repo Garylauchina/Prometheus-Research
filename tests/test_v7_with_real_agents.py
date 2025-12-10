@@ -89,47 +89,23 @@ def create_real_agent(agent_id: str) -> AgentV5:
     genome = GenomeVector(np.random.rand(50))
     
     # 5. strategy_params: StrategyParams
-    # TODO: 需要查询StrategyParams的正确初始化方法
-    # 现在使用简化版本，但标注为待完善
-    # strategy_params = StrategyParams(...)
+    # ⭐ v7.0完整版：使用真正的StrategyParams.create_genesis()
+    # 参见：prometheus/core/strategy_params.py
+    from prometheus.core.strategy_params import StrategyParams
     
-    # 临时方案：创建一个最小可用的strategy_params
-    # 这不完全符合铁律，但比Mock好
-    # ⭐ v7.0更新：添加EvolutionManagerV5繁殖所需的所有属性
-    class MinimalStrategyParams:
-        def __init__(self):
-            # 基础属性
-            self.entry_threshold = 0.5
-            self.exit_threshold = 0.3
-            self.position_size_base = 0.1
-            self.max_holding_periods = 20
-            
-            # ⭐ EvolutionManagerV5繁殖必需属性
-            self.holding_preference = 0.5  # 持仓偏好（0-1）
-            self.directional_bias = 0.0    # 方向偏好（-1到1，负=空头，正=多头）
-            self.stop_loss_threshold = 0.05  # 止损阈值
-            self.take_profit_threshold = 0.10  # 止盈阈值
-            self.trend_following_strength = 0.5  # 趋势跟随强度（0-1）
-            self.generation = 0  # 代数
-            self.parent_params = ()  # 父代参数（空元组）
-        
-        def get_display_string(self):
-            """返回显示字符串"""
-            return f"entry={self.entry_threshold},exit={self.exit_threshold}"
-        
-        def to_dict(self):
-            """返回字典形式（繁殖时需要）"""
-            return {
-                'position_size_base': self.position_size_base,
-                'holding_preference': self.holding_preference,
-                'directional_bias': self.directional_bias,
-                'stop_loss_threshold': self.stop_loss_threshold,
-                'take_profit_threshold': self.take_profit_threshold,
-                'trend_following_strength': self.trend_following_strength,
-                'generation': self.generation
-            }
+    strategy_params = StrategyParams.create_genesis()
     
-    strategy_params = MinimalStrategyParams()
+    # 注意：create_genesis()使用Beta(2, 2)分布创建多样性参数
+    # 所有参数都在0-1范围内，已经包含：
+    # - position_size_base（基础仓位）
+    # - holding_preference（持仓时长偏好）
+    # - directional_bias（方向偏好）
+    # - stop_loss_threshold（止损阈值）
+    # - take_profit_threshold（止盈阈值）
+    # - trend_following_strength（趋势跟踪强度）
+    # - leverage_preference（杠杆偏好）
+    # - generation（代数，默认0）
+    # - parent_params（父代参数，默认None）
     
     # 6. generation
     generation = 0
