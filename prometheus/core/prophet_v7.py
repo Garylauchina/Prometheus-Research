@@ -22,8 +22,10 @@ Prometheus v7.0 - Prophet核心模块
 
 import time
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 from prometheus.core.bulletin_board import BulletinBoard
+from prometheus.core.three_dimension_monitor import ThreeDimensionMonitor
+from prometheus.core.experience_db import ExperienceDB
 
 # 使用标准logging
 logger = logging.getLogger(__name__)
@@ -37,36 +39,94 @@ class ProphetV7:
     只发布信息，不发布命令
     """
     
-    def __init__(self, bulletin_board: BulletinBoard):
+    def __init__(
+        self, 
+        bulletin_board: BulletinBoard,
+        experience_db: Optional[ExperienceDB] = None,
+        run_id: str = "default"
+    ):
         """
         初始化Prophet
         
         Args:
             bulletin_board: 公告板（用于发布信息）
+            experience_db: 经验数据库（用于保存系统指标）
+            run_id: 运行ID
         """
         self.bulletin_board = bulletin_board
+        self.experience_db = experience_db
+        self.run_id = run_id
+        
+        # ===== v7.0核心：三维监控器⭐⭐⭐ =====
+        self.three_dim_monitor = ThreeDimensionMonitor(
+            window_size=100,
+            save_interval=10
+        )
+        
+        # 周期计数器
+        self.cycle_count = 0
         
         logger.info("🧘 Prophet v7.0 已初始化")
-        logger.info("   职责：自省 + 聆听")
-        logger.info("   输出：繁殖指数 + 压力指数")
+        logger.info("   职责：自省 + 聆听 + 三维监控")
+        logger.info("   输出：繁殖指数 + 压力指数 + 风险等级")
     
     def run_decision_cycle(self):
         """
-        Prophet的唯一工作⭐⭐⭐
+        Prophet的核心工作⭐⭐⭐
         
-        1. 计算两个指数
-        2. 发布公告
-        
-        就这么简单！
+        1. 三维异常检测
+        2. 计算S（考虑异常）
+        3. 计算E
+        4. 发布公告
         """
         
-        # ===== 能力1：自省⭐ =====
-        # 向内看：我现在活得好不好？
-        S = self._introspection()
+        self.cycle_count += 1
         
-        # ===== 能力2：聆听⭐ =====
-        # 向外听：世界在告诉我什么？
+        # ===== 步骤0：获取必要数据 =====
+        world_sig = self.bulletin_board.get('world_signature') or {}
+        friction_data = self.bulletin_board.get('friction_data') or {
+            'slippage': 0.001,
+            'latency_norm': 0.02,
+            'fill_rate': 0.98
+        }
+        death_stats = self.bulletin_board.get('death_stats') or {
+            'abnormal_deaths': 0,
+            'total_agents': 100
+        }
+        
+        # ===== 步骤1：基础计算 =====
+        base_S = self._introspection()
         E = self._listening()
+        
+        # ===== 步骤2：三维异常检测⭐⭐⭐ =====
+        # 先计算Prophet决策（用于保存）
+        temp_decision = {
+            'S': base_S,
+            'E': E,
+            'scale': 0.5  # 临时值
+        }
+        
+        anomaly_result = self.three_dim_monitor.monitor_cycle(
+            cycle=self.cycle_count,
+            run_id=self.run_id,
+            world_signature=world_sig,
+            friction_data=friction_data,
+            death_stats=death_stats,
+            prophet_decision=temp_decision,
+            experience_db=self.experience_db
+        )
+        
+        # ===== 步骤3：根据异常调整S⭐⭐⭐ =====
+        risk_level = anomaly_result['risk_level']
+        
+        if risk_level == 'safe':
+            S = base_S
+        elif risk_level == 'warning':
+            S = base_S * 0.9  # 一维异常：-10%
+        elif risk_level == 'danger':
+            S = base_S * 0.7  # 二维异常：-30%
+        else:  # critical
+            S = 0.2  # 三维异常：强制收缩到20%
         
         # ===== 发布极简公告⭐⭐⭐ =====
         self.bulletin_board.publish('prophet_announcement', {
@@ -78,8 +138,12 @@ class ProphetV7:
             'S': S,
             'E': E,
             
+            # v7.0新增：风险等级⭐
+            'risk_level': risk_level,
+            'anomaly_dims': anomaly_result['total_anomaly_dims'],
+            
             # 人话解释
-            'message': self._format_message(S, E),
+            'message': self._format_message(S, E, risk_level),
             
             # 时间戳
             'timestamp': time.time(),
@@ -88,6 +152,9 @@ class ProphetV7:
         logger.info(f"📢 Prophet公告已发布:")
         logger.info(f"   繁殖指数目标: {S:.2f} ({S:.0%})")
         logger.info(f"   压力指数: {abs(E):.2f} ({abs(E):.0%})")
+        logger.info(f"   风险等级: {risk_level}")
+        if anomaly_result['total_anomaly_dims'] > 0:
+            logger.warning(f"   ⚠️ 检测到{anomaly_result['total_anomaly_dims']}维异常！")
         logger.info(f"   → Moirai和Agent，根据这个信息自主决策！⭐")
     
     def _introspection(self) -> float:
@@ -203,18 +270,27 @@ class ProphetV7:
         
         return E
     
-    def _format_message(self, S: float, E: float) -> str:
+    def _format_message(self, S: float, E: float, risk_level: str = 'safe') -> str:
         """
         格式化人话消息⭐
         
         Args:
             S: 繁殖指数
             E: 趋势值
+            risk_level: 风险等级
         
         Returns:
             人话解释
         """
         pressure = abs(E)
+        
+        # 风险等级emoji
+        risk_emoji = {
+            'safe': '✅',
+            'warning': '⚠️',
+            'danger': '⚠️⚠️',
+            'critical': '🚨🚨🚨'
+        }.get(risk_level, '❓')
         
         # 繁殖指数解释
         if S > 0.7:
@@ -246,7 +322,16 @@ class ProphetV7:
         else:
             market_msg = "市场稳定"
         
+        # 风险等级说明
+        risk_msg = {
+            'safe': "正常运行",
+            'warning': "一维异常，轻微调整",
+            'danger': "二维异常，大幅收缩",
+            'critical': "三维异常，紧急逃命！"
+        }.get(risk_level, "")
+        
         return f"""
+{risk_emoji} 风险等级: {risk_level.upper()} - {risk_msg}
 {repro_emoji} 繁殖指数目标: {S:.0%} - {repro_msg}
 {pressure_emoji} 压力指数: {pressure:.0%} - {pressure_msg}
 📊 市场状态: {market_msg} (E = {E:+.2f})

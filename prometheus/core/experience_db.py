@@ -44,7 +44,8 @@ class ExperienceDB:
         logger.info(f"ExperienceDB初始化: {db_path}")
     
     def _init_tables(self):
-        """初始化数据库表（v6.0 Stage 1.1扩展）"""
+        """初始化数据库表（v6.0 Stage 1.1扩展 + v7.0扩展）"""
+        # ===== 表1：best_genomes（Agent基因，保持不变）=====
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS best_genomes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +64,38 @@ class ExperienceDB:
                 retirement_reason TEXT,
                 agent_id TEXT,
                 generation INTEGER
+            )
+        """)
+        
+        # ===== 表2：system_metrics（v7.0新增：三维异常检测）⭐⭐⭐ =====
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS system_metrics (
+                -- 基础
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT NOT NULL,
+                cycle INTEGER NOT NULL,
+                timestamp TEXT NOT NULL,
+                
+                -- 三维原始值⭐
+                ws_score REAL,
+                friction_index REAL,
+                death_rate REAL,
+                
+                -- 三维异常标志⭐
+                ws_anomaly INTEGER DEFAULT 0,
+                friction_anomaly INTEGER DEFAULT 0,
+                death_anomaly INTEGER DEFAULT 0,
+                
+                -- 综合结果⭐⭐⭐
+                total_anomaly_dims INTEGER,
+                risk_level TEXT,
+                
+                -- Prophet决策
+                prophet_S REAL,
+                prophet_E REAL,
+                system_scale REAL,
+                
+                UNIQUE(run_id, cycle)
             )
         """)
         
@@ -86,6 +119,19 @@ class ExperienceDB:
         
         self.conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_retirement_reason ON best_genomes(retirement_reason)
+        """)
+        
+        # ===== v7.0: system_metrics表的索引 =====
+        self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_system_metrics_run ON system_metrics(run_id)
+        """)
+        
+        self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_system_metrics_cycle ON system_metrics(cycle)
+        """)
+        
+        self.conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_system_metrics_risk ON system_metrics(risk_level)
         """)
         
         self.conn.commit()
@@ -485,6 +531,168 @@ class ExperienceDB:
             'max_roi': row[2] if row[2] else 0.0,
             'min_roi': row[3] if row[3] else 0.0,
             'avg_sharpe': row[4] if row[4] else 0.0
+        }
+    
+    # ========== v7.0新增：系统指标管理⭐⭐⭐ ==========
+    
+    def save_system_metrics(
+        self,
+        run_id: str,
+        cycle: int,
+        ws_score: float,
+        friction_index: float,
+        death_rate: float,
+        ws_anomaly: bool,
+        friction_anomaly: bool,
+        death_anomaly: bool,
+        total_anomaly_dims: int,
+        risk_level: str,
+        prophet_S: float,
+        prophet_E: float,
+        system_scale: float
+    ):
+        """
+        保存系统指标（v7.0三维异常检测）⭐⭐⭐
+        
+        Args:
+            run_id: 运行ID
+            cycle: 周期编号
+            ws_score: WorldSignature综合得分
+            friction_index: 摩擦综合指数
+            death_rate: 非正常死亡率
+            ws_anomaly: WorldSignature异常标志
+            friction_anomaly: 摩擦异常标志
+            death_anomaly: 死亡率异常标志
+            total_anomaly_dims: 异常维度数（0-3）
+            risk_level: 风险等级（safe/warning/danger/critical）
+            prophet_S: Prophet的S值
+            prophet_E: Prophet的E值
+            system_scale: 系统规模
+        """
+        try:
+            self.conn.execute("""
+                INSERT INTO system_metrics (
+                    run_id, cycle, timestamp,
+                    ws_score, friction_index, death_rate,
+                    ws_anomaly, friction_anomaly, death_anomaly,
+                    total_anomaly_dims, risk_level,
+                    prophet_S, prophet_E, system_scale
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                run_id, cycle, datetime.now().isoformat(),
+                ws_score, friction_index, death_rate,
+                int(ws_anomaly), int(friction_anomaly), int(death_anomaly),
+                total_anomaly_dims, risk_level,
+                prophet_S, prophet_E, system_scale
+            ))
+            self.conn.commit()
+            logger.debug(f"💾 系统指标已保存: cycle={cycle}, risk={risk_level}")
+        except sqlite3.IntegrityError:
+            # 如果记录已存在，更新它
+            self.conn.execute("""
+                UPDATE system_metrics SET
+                    ws_score=?, friction_index=?, death_rate=?,
+                    ws_anomaly=?, friction_anomaly=?, death_anomaly=?,
+                    total_anomaly_dims=?, risk_level=?,
+                    prophet_S=?, prophet_E=?, system_scale=?,
+                    timestamp=?
+                WHERE run_id=? AND cycle=?
+            """, (
+                ws_score, friction_index, death_rate,
+                int(ws_anomaly), int(friction_anomaly), int(death_anomaly),
+                total_anomaly_dims, risk_level,
+                prophet_S, prophet_E, system_scale,
+                datetime.now().isoformat(),
+                run_id, cycle
+            ))
+            self.conn.commit()
+    
+    def query_history(
+        self,
+        run_id: str,
+        end_cycle: int,
+        window: int = 100
+    ) -> Dict[str, List[float]]:
+        """
+        查询历史数据（用于异常检测）⭐
+        
+        Args:
+            run_id: 运行ID
+            end_cycle: 结束周期
+            window: 历史窗口大小（默认100）
+        
+        Returns:
+            {
+                'ws_scores': [0.05, 0.06, ...],
+                'friction_indices': [0.02, 0.03, ...],
+                'death_rates': [0.10, 0.12, ...]
+            }
+        """
+        cursor = self.conn.execute("""
+            SELECT ws_score, friction_index, death_rate
+            FROM system_metrics
+            WHERE run_id = ?
+              AND cycle >= ?
+              AND cycle < ?
+            ORDER BY cycle ASC
+        """, (run_id, max(0, end_cycle - window), end_cycle))
+        
+        rows = cursor.fetchall()
+        
+        if not rows:
+            return {
+                'ws_scores': [],
+                'friction_indices': [],
+                'death_rates': []
+            }
+        
+        return {
+            'ws_scores': [r[0] for r in rows if r[0] is not None],
+            'friction_indices': [r[1] for r in rows if r[1] is not None],
+            'death_rates': [r[2] for r in rows if r[2] is not None]
+        }
+    
+    def get_risk_summary(self, run_id: str) -> Dict:
+        """
+        获取风险摘要统计⭐
+        
+        Args:
+            run_id: 运行ID
+        
+        Returns:
+            统计信息
+        """
+        cursor = self.conn.execute("""
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN risk_level='safe' THEN 1 ELSE 0 END) as safe_count,
+                SUM(CASE WHEN risk_level='warning' THEN 1 ELSE 0 END) as warning_count,
+                SUM(CASE WHEN risk_level='danger' THEN 1 ELSE 0 END) as danger_count,
+                SUM(CASE WHEN risk_level='critical' THEN 1 ELSE 0 END) as critical_count,
+                AVG(total_anomaly_dims) as avg_anomaly_dims
+            FROM system_metrics
+            WHERE run_id = ?
+        """, (run_id,))
+        
+        row = cursor.fetchone()
+        
+        if not row or row[0] == 0:
+            return {
+                'total': 0,
+                'safe': 0,
+                'warning': 0,
+                'danger': 0,
+                'critical': 0,
+                'avg_anomaly_dims': 0
+            }
+        
+        return {
+            'total': row[0],
+            'safe': row[1],
+            'warning': row[2],
+            'danger': row[3],
+            'critical': row[4],
+            'avg_anomaly_dims': row[5]
         }
     
     def close(self):

@@ -56,13 +56,15 @@ class MoiraiV7:
         logger.info("   职责：繁殖/淘汰")
         logger.info("   公式：delta = (S - current) × |E|")
     
-    def run_cycle(self):
+    def run_cycle(self, cycle: int, current_price: float = None):
         """
         Moirai的工作流程⭐⭐⭐
         
         1. 读取Prophet公告
         2. 自主决策（5行公式）
-        3. 执行调整
+        3. 轻量级调整（每周期）
+        4. 重量级调整（动态周期）
+        5. 上报结果
         """
         
         # ===== 1. 读取Prophet公告⭐ =====
@@ -75,18 +77,25 @@ class MoiraiV7:
         S = announcement['reproduction_target']  # 繁殖指数目标
         E_raw = announcement.get('E', 0.0)       # 原始E值
         pressure = announcement['pressure_level']  # 压力指数
+        risk_level = announcement.get('risk_level', 'safe')  # v7.0新增
         
         logger.info(f"📖 Moirai读取Prophet公告:")
         logger.info(f"   繁殖指数目标: {S:.2f} ({S:.0%})")
         logger.info(f"   压力指数: {pressure:.2f} ({pressure:.0%})")
+        logger.info(f"   风险等级: {risk_level}")
         
         # ===== 2. 自主决策（5行核心代码）⭐⭐⭐ =====
         new_scale = self.decide(S, E_raw)
         
-        # ===== 3. 执行调整 =====
-        self._adjust_population(new_scale)
+        # ===== 3. 轻量级调整（每周期）⭐⭐⭐ =====
+        self._adjust_agent_capital(new_scale)
         
-        # ===== 4. 上报执行结果 =====
+        # ===== 4. 重量级调整（动态周期）⭐⭐⭐ =====
+        should_evolve = self._should_evolve(cycle, risk_level)
+        if should_evolve:
+            self._run_evolution(current_price or 50000.0)
+        
+        # ===== 5. 上报执行结果 =====
         self._report_to_prophet()
     
     def decide(self, S: float, E: float) -> float:
@@ -226,6 +235,83 @@ class MoiraiV7:
             self.evolution_manager.agents.remove(agent)
             logger.debug(f"   ⚰️ 淘汰Agent #{agent.agent_id} (ROI: {agent.total_roi:.2%})")
     
+    def _adjust_agent_capital(self, target_scale: float):
+        """
+        轻量级调整：调整Agent资本配额⭐⭐⭐
+        
+        不改变Agent数量，只调整每个Agent可用的资本
+        
+        Args:
+            target_scale: 目标规模（0-1）
+        """
+        # EvolutionManagerV5不存储agents，通过moirai.agents访问
+        agents = self.evolution_manager.moirai.agents
+        
+        if not agents:
+            return
+        
+        # 假设每个Agent的最大资本为10,000
+        max_capital_per_agent = 10000.0
+        
+        # 计算目标资本
+        target_capital = max_capital_per_agent * target_scale
+        
+        logger.debug(f"💰 调整Agent资本配额:")
+        logger.debug(f"   目标规模: {target_scale:.0%}")
+        logger.debug(f"   目标资本/Agent: ${target_capital:.2f}")
+        
+        # 调整每个Agent的配额
+        for agent in agents:
+            # 设置资本配额（v7.0新增字段）
+            if not hasattr(agent, 'allocated_capital'):
+                agent.allocated_capital = max_capital_per_agent
+            
+            old_capital = agent.allocated_capital
+            agent.allocated_capital = target_capital
+            
+            # 如果资本大幅减少，记录警告
+            if target_capital < old_capital * 0.7:
+                logger.debug(f"   ⚠️ {agent.agent_id}: ${old_capital:.0f} → ${target_capital:.0f}")
+    
+    def _should_evolve(self, cycle: int, risk_level: str) -> bool:
+        """
+        判断是否应该进化（动态周期）⭐⭐⭐
+        
+        Args:
+            cycle: 当前周期
+            risk_level: 风险等级
+        
+        Returns:
+            是否应该进化
+        """
+        if risk_level == 'critical':
+            # 三维异常：立即进化
+            return True
+        elif risk_level == 'danger':
+            # 二维异常：每5周期进化
+            return cycle % 5 == 0
+        elif risk_level == 'warning':
+            # 一维异常：每10周期进化
+            return cycle % 10 == 0
+        else:  # safe
+            # 无异常：每30周期进化
+            return cycle % 30 == 0
+    
+    def _run_evolution(self, current_price: float):
+        """
+        执行进化（繁殖/淘汰/退休）⭐
+        
+        Args:
+            current_price: 当前价格（用于退休平仓）
+        """
+        logger.info(f"🔄 执行进化周期...")
+        
+        # 调用EvolutionManagerV5的进化逻辑
+        if hasattr(self.evolution_manager, 'run_evolution_cycle'):
+            self.evolution_manager.run_evolution_cycle(current_price=current_price)
+        else:
+            logger.warning("⚠️ EvolutionManager没有run_evolution_cycle方法")
+    
     def _report_to_prophet(self):
         """
         向Prophet报告执行结果⭐
@@ -233,7 +319,8 @@ class MoiraiV7:
         报告当前种群状态，供Prophet下次计算S使用
         """
         
-        agents = self.evolution_manager.agents
+        # EvolutionManagerV5不存储agents，通过moirai.agents访问
+        agents = self.evolution_manager.moirai.agents
         
         if not agents:
             return
