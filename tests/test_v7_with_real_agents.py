@@ -503,8 +503,13 @@ def simulate_agent_trading(agents, market_data, scenario):
             
             is_long = random.random() < direction_bias
             
-            # 计算交易金额（10%仓位）
-            position_size = agent.current_capital * 0.1
+            # ⭐ v7.0关键修复：使用allocated_capital而不是current_capital！
+            # Prophet通过Moirai调整allocated_capital来控制系统规模
+            # Agent必须遵守allocated_capital的限制
+            available_capital = getattr(agent, 'allocated_capital', agent.current_capital)
+            
+            # 计算交易金额（10%可用仓位）
+            position_size = available_capital * 0.1
             amount = position_size / current_price if current_price > 0 else 0
             
             # 模拟滑点（0.05%）
