@@ -195,20 +195,22 @@ class ProphetV7:
         diversity = moirai_report.get('diversity', 0.5)
         
         # ===== 计算S（繁殖指数）⭐⭐⭐ =====
-        S = (
-            survival_rate * 0.4 +          # 存活率权重40%
-            avg_roi_normalized * 0.4 +     # ROI权重40%
-            diversity * 0.2                # 多样性权重20%
-        )
+        # 计算各项贡献
+        survival_contribution = survival_rate * 0.4
+        roi_contribution = avg_roi_normalized * 0.4
+        diversity_contribution = diversity * 0.2
+        
+        S = survival_contribution + roi_contribution + diversity_contribution
         
         # 确保在0-1范围内
         S = max(0, min(1, S))
         
+        # ⭐ v7.0增强：详细日志，显示各项贡献
         logger.debug(f"🧘 自省（Introspection）:")
-        logger.debug(f"   存活率: {survival_rate:.2f}")
-        logger.debug(f"   平均ROI: {avg_roi:.2%} → {avg_roi_normalized:.2f}")
-        logger.debug(f"   多样性: {diversity:.2f}")
-        logger.debug(f"   → S（繁殖指数）: {S:.2f}")
+        logger.debug(f"   存活率: {survival_rate:.2%} → 贡献: {survival_contribution:.3f} (40%权重)")
+        logger.debug(f"   平均ROI: {avg_roi:.2%} → 贡献: {roi_contribution:.3f} (40%权重)")
+        logger.debug(f"   多样性: {diversity:.2%} → 贡献: {diversity_contribution:.3f} (20%权重)")
+        logger.debug(f"   → S（繁殖指数）: {S:.2f} = {survival_contribution:.3f} + {roi_contribution:.3f} + {diversity_contribution:.3f}")
         
         return S
     
@@ -253,20 +255,22 @@ class ProphetV7:
         volatility_change_normalized = max(-1, min(1, volatility_change / 0.1))
         
         # ===== 计算E（趋势值）⭐⭐⭐ =====
-        E = (
-            price_change_normalized * 0.5 +      # 价格变化权重50%
-            volume_change_normalized * 0.3 +     # 成交量变化权重30%
-            volatility_change_normalized * 0.2   # 波动率变化权重20%
-        )
+        # 计算各项贡献
+        price_contribution = price_change_normalized * 0.5
+        volume_contribution = volume_change_normalized * 0.3
+        volatility_contribution = volatility_change_normalized * 0.2
+        
+        E = price_contribution + volume_contribution + volatility_contribution
         
         # 确保在-1到+1范围内
         E = max(-1, min(1, E))
         
+        # ⭐ v7.0增强：详细日志，显示各项贡献
         logger.debug(f"👂 聆听（Listening）:")
-        logger.debug(f"   价格变化: {price_change:.2%} → {price_change_normalized:.2f}")
-        logger.debug(f"   成交量比: {volume_ratio:.2f} → {volume_change_normalized:.2f}")
-        logger.debug(f"   波动率变化: {volatility_change:.2%} → {volatility_change_normalized:.2f}")
-        logger.debug(f"   → E（趋势值）: {E:.2f}")
+        logger.debug(f"   价格变化: {price_change:.2%} → 贡献: {price_contribution:+.3f} (50%权重)")
+        logger.debug(f"   成交量比: {volume_ratio:.2f} → 贡献: {volume_contribution:+.3f} (30%权重)")
+        logger.debug(f"   波动率变化: {volatility_change:.2%} → 贡献: {volatility_contribution:+.3f} (20%权重)")
+        logger.debug(f"   → E（趋势值）: {E:+.2f}")
         
         return E
     
