@@ -91,10 +91,11 @@ class EvolutionManagerV5:
         # AlphaZero式：极简统计
         self.generation = 0
         self.total_births = 0
-        self.total_deaths = 0  # 总死亡数（淘汰+非正常+英雄榜）
-        self.total_eliminations = 0  # ⭐ v7.0：末尾淘汰（fitness低）
+        self.total_deaths = 0  # 总死亡数（正常+非正常+淘汰+英雄）
+        self.total_natural_deaths = 0  # ⭐ v7.0：正常死亡（10代寿终正寝）
         self.total_abnormal_deaths = 0  # ⭐ v7.0：非正常死亡（破产爆仓）
-        self.total_hero_hall = 0  # ⭐ v7.0：载入英雄榜（5枚奖章/寿终正寝）
+        self.total_eliminations = 0  # ⭐ v7.0：末尾淘汰（fitness低）
+        self.total_hero_hall = 0  # ⭐ v7.0：英雄退场（5枚奖章）
         
         logger.info(f"🦠 EvolutionManagerV5已初始化 (v6.0 AlphaZero式)")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
@@ -354,10 +355,11 @@ class EvolutionManagerV5:
             logger.info(f"   补充新生: {len(new_births)}个（补充离开者）")
         logger.info(f"   当前种群: {len(self.moirai.agents)}个")
         logger.info(f"   累计出生: {self.total_births}")
-        logger.info(f"   累计末尾淘汰: {self.total_eliminations}")  # ⭐ v7.0
-        logger.info(f"   累计非正常死亡: {self.total_abnormal_deaths}")  # ⭐ v7.0
-        logger.info(f"   累计载入英雄榜: {self.total_hero_hall}")  # ⭐ v7.0（5枚奖章/寿终正寝）
-        logger.info(f"   (总死亡: {self.total_deaths} = 淘汰{self.total_eliminations} + 非正常{self.total_abnormal_deaths} + 英雄榜{self.total_hero_hall})")
+        logger.info(f"   累计正常死亡: {self.total_natural_deaths}")  # ⭐ v7.0（10代寿终正寝）
+        logger.info(f"   累计非正常死亡: {self.total_abnormal_deaths}")  # ⭐ v7.0（破产爆仓）
+        logger.info(f"   累计末尾淘汰: {self.total_eliminations}")  # ⭐ v7.0（fitness低）
+        logger.info(f"   累计英雄退场: {self.total_hero_hall}")  # ⭐ v7.0（5枚奖章）
+        logger.info(f"   (总死亡: {self.total_deaths} = 正常{self.total_natural_deaths} + 非正常{self.total_abnormal_deaths} + 淘汰{self.total_eliminations} + 英雄{self.total_hero_hall})")
         logger.info(f"{'='*70}")
     
     def _calculate_fitness_v2(self, agent: AgentV5, total_cycles: int) -> float:
@@ -1358,7 +1360,13 @@ class EvolutionManagerV5:
                         awards=awards
                     )
                     retired_agents.append(agent)
-                    self.total_hero_hall += 1  # ⭐ v7.0：载入英雄榜
+                    
+                    # ⭐ v7.0：区分统计
+                    if retire_reason == 'hero':
+                        self.total_hero_hall += 1  # 英雄退场（5枚奖章）
+                    elif retire_reason == 'age':
+                        self.total_natural_deaths += 1  # 正常死亡（10代寿终正寝）
+                    
                     self.total_deaths += 1  # 总死亡数
                 except Exception as e:
                     logger.error(f"   ❌ {agent.agent_id}退休失败: {e}")
@@ -1450,7 +1458,8 @@ class EvolutionManagerV5:
             'max_generation': max(generations) if generations else 0,
             'total_births': self.total_births,
             'total_deaths': self.total_deaths,
-            'total_eliminations': self.total_eliminations,  # ⭐ v7.0
-            'total_abnormal_deaths': self.total_abnormal_deaths,  # ⭐ v7.0
-            'total_hero_hall': self.total_hero_hall,  # ⭐ v7.0（载入英雄榜）
+            'total_natural_deaths': self.total_natural_deaths,  # ⭐ v7.0（10代寿终正寝）
+            'total_abnormal_deaths': self.total_abnormal_deaths,  # ⭐ v7.0（破产爆仓）
+            'total_eliminations': self.total_eliminations,  # ⭐ v7.0（fitness低）
+            'total_hero_hall': self.total_hero_hall,  # ⭐ v7.0（5枚奖章）
         }
