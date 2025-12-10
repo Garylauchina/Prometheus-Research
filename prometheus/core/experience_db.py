@@ -347,6 +347,43 @@ class ExperienceDB:
         else:
             logger.info(f"📜 {agent_id}记录生平: ROI={roi*100:.2f}%, PF={profit_factor:.2f}")
     
+    def get_best_genomes(self, top_k: int = 10, min_pf: float = 1.0) -> List[Dict]:
+        """
+        获取最佳基因（v7.0智能召回英雄）⭐⭐⭐
+        
+        Args:
+            top_k: 返回前K个最佳基因
+            min_pf: 最低Profit Factor阈值
+        
+        Returns:
+            List[Dict]: 基因列表，按Profit Factor降序排序
+        """
+        cursor = self.conn.execute("""
+            SELECT genome, roi, sharpe, max_drawdown, 
+                   COALESCE(profit_factor, 0.0) as profit_factor,
+                   world_signature, market_type
+            FROM best_genomes
+            WHERE COALESCE(profit_factor, 0.0) >= ?
+            ORDER BY profit_factor DESC
+            LIMIT ?
+        """, (min_pf, top_k))
+        
+        results = []
+        for row in cursor:
+            results.append({
+                'genome': row[0],  # JSON string
+                'strategy_params': row[0],  # 实际上是strategy_params
+                'roi': row[1],
+                'sharpe': row[2],
+                'max_drawdown': row[3],
+                'profit_factor': row[4],
+                'world_signature': row[5],
+                'market_type': row[6]
+            })
+        
+        logger.debug(f"🏆 查询最佳基因: 找到{len(results)}个英雄 (PF >= {min_pf})")
+        return results
+    
     def query_similar_genomes(
         self,
         current_ws: WorldSignatureSimple,

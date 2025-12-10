@@ -265,7 +265,8 @@ def run_v7_test_with_real_agents(
         fitness_mode='profit_factor',
         retirement_enabled=True,
         medal_system_enabled=True,
-        immigration_enabled=False
+        immigration_enabled=True,  # ⭐ v7.0启用Immigration（智能召回英雄）
+        experience_db=exp_db  # ⭐ v7.0传入ExperienceDB
     )
     logger.info("✅ EvolutionManagerV5已初始化")
     

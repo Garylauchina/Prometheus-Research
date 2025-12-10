@@ -61,7 +61,8 @@ class EvolutionManagerV5:
                  fitness_mode: str = 'profit_factor',
                  retirement_enabled: bool = False,
                  medal_system_enabled: bool = False,
-                 immigration_enabled: bool = True):
+                 immigration_enabled: bool = True,
+                 experience_db=None):  # ⭐ v7.0新增：ExperienceDB实例
         """
         初始化进化管理器（v6.0极简版）
         
@@ -76,6 +77,7 @@ class EvolutionManagerV5:
             retirement_enabled: 是否启用退休机制（v6.0新增）
             medal_system_enabled: 是否启用奖章系统（v6.0新增）
             immigration_enabled: 是否启用Immigration机制
+            experience_db: ExperienceDB实例（v7.0新增，用于智能召回英雄）⭐
         """
         self.moirai = moirai
         self.elite_ratio = elite_ratio
@@ -84,6 +86,7 @@ class EvolutionManagerV5:
         self.retirement_enabled = retirement_enabled  # ✅ v6.0: 退休机制
         self.medal_system_enabled = medal_system_enabled  # ✅ v6.0: 奖章系统
         self.immigration_enabled = immigration_enabled  # ✅ v6.0: Immigration机制
+        self.experience_db = experience_db  # ⭐ v7.0: ExperienceDB
         
         # ✅ v6.0: 资金池（统一资金管理）
         self.capital_pool = capital_pool
@@ -320,23 +323,35 @@ class EvolutionManagerV5:
                 logger.info(f"   当前种群: {len(self.moirai.agents)}个")
                 logger.info(f"🏆 ====================\n")
         
-        # 7. ✅ v6.0极简主义: 离开→新生（1:1补充）
-        # 🔮 Immigration机制已封存，留给v7.0 Prophet战略调用
+        # 7. ✅ v7.0智能创世: 离开→新生（智能召回英雄）⭐⭐⭐
         new_births = []
         
         if departed_count > 0:
+            # 获取Prophet公告（从BulletinBoard）
+            prophet_announcement = {}
+            if hasattr(self.moirai, 'bulletin_board'):
+                prophet_announcement = self.moirai.bulletin_board.get('prophet_announcement') or {}
+            
+            # 提取Prophet的S和E值
+            S = prophet_announcement.get('S', 0.5)
+            E = prophet_announcement.get('E', 0.0)
+            risk_level = prophet_announcement.get('risk_level', 'safe')
+            anomaly_dims = prophet_announcement.get('anomaly_dims', 0)
+            
+            # ⭐ 计算英雄回归比例（根据7种场景）
+            hero_ratio = self._calculate_hero_ratio(S, E, risk_level, anomaly_dims)
+            
             logger.info(f"   🧵 Clotho创造新生: 补充{departed_count}个离开者")
+            logger.info(f"   📊 当前场景: S={S:.2f}, E={E:+.2f}, 风险={risk_level}")
             
-            for i in range(departed_count):
-                # 直接调用Clotho创造新Agent（不使用Immigration）
-                new_agent = self.moirai._clotho_create_single_agent()
-                new_births.append(new_agent)
-                self.total_births += 1
+            # ⭐ 调用Immigration机制（智能召回英雄）
+            new_births = self.inject_immigrants(
+                count=departed_count,
+                hero_ratio=hero_ratio,
+                reason="补充离开者（智能召回）"
+            )
             
-            # 添加到种群
-            self.moirai.agents.extend(new_births)
-            
-            # 挂载账簿
+            # 挂载账簿（Immigration已经添加到种群，这里只需挂账簿）
             try:
                 from prometheus.ledger.attach_accounts import attach_accounts
                 public_ledger = getattr(self.moirai, "public_ledger", None)
@@ -344,7 +359,7 @@ class EvolutionManagerV5:
             except Exception as e:
                 logger.warning(f"新Agent挂账簿失败: {e}")
             
-            logger.info(f"   ✅ 新生完成: {len(new_births)}个Agent")
+            logger.info(f"   ✅ 智能新生完成: {len(new_births)}个Agent（英雄{hero_ratio:.0%}）")
         
         # 8. 记录统计
         self.generation += 1
@@ -1176,31 +1191,165 @@ class EvolutionManagerV5:
         
         return child
     
+    def _calculate_hero_ratio(self, 
+                              S: float, 
+                              E: float, 
+                              risk_level: str, 
+                              anomaly_dims: int) -> float:
+        """
+        计算英雄回归比例（v7.0）⭐⭐⭐
+        
+        根据7种场景动态调整英雄回归比例
+        
+        Args:
+            S: 繁殖指数（0-1）
+            E: 压力指数（-1到1）
+            risk_level: 风险等级
+            anomaly_dims: 异常维度数（0-3）
+        
+        Returns:
+            float: 英雄回归比例（0.1-0.9）
+        """
+        # 🚨 特殊情况：大灭绝态（三维全异常）
+        if anomaly_dims >= 3 and risk_level == 'critical':
+            logger.warning("   🦖 大灭绝态触发！英雄回归比例→90%")
+            return 0.9  # 统一用90%，不再区分轻度/重度 ⭐
+        
+        # 基础比例
+        base = 0.5
+        
+        # 稳定性加成（基于压力指数）
+        pressure = abs(E)
+        if pressure < 0.2:
+            stability_bonus = 0.2  # 稳定市场，英雄更有效
+        elif pressure > 0.4:
+            stability_bonus = -0.2  # 剧变市场，需要创新
+        else:
+            stability_bonus = 0.0
+        
+        # 场景调整（基于繁殖指数）
+        if S > 0.6:  # 扩张
+            if pressure < 0.2:
+                scene_adjust = 0.0  # 稳定扩张：用英雄赚钱！⭐
+            else:
+                scene_adjust = -0.2  # 危机扩张：需要创新！
+        elif S < 0.4:  # 收缩
+            if pressure > 0.4:
+                scene_adjust = 0.2  # 危机收缩：保守用英雄！
+            else:
+                scene_adjust = 0.3  # 稳定收缩：精英模式！
+        else:  # 维持
+            scene_adjust = 0.0
+        
+        # 最终比例
+        ratio = base + stability_bonus + scene_adjust
+        
+        # 限制在[0.1, 0.9]之间
+        final_ratio = max(0.1, min(0.9, ratio))
+        
+        logger.debug(f"   📊 英雄比例计算: base={base:.1f} + stability={stability_bonus:+.1f} + scene={scene_adjust:+.1f} = {final_ratio:.1%}")
+        
+        return final_ratio
+    
+    def _clotho_create_from_hero(self) -> Optional[AgentV5]:
+        """
+        从ExperienceDB召回英雄基因创建Agent（v7.0）⭐⭐⭐
+        
+        Returns:
+            Optional[AgentV5]: 创建的英雄Agent，如果没有英雄基因则返回None
+        """
+        if not self.experience_db:
+            logger.warning("⚠️ ExperienceDB未初始化，无法召回英雄")
+            return None
+        
+        # 从ExperienceDB获取最佳基因
+        try:
+            best_genomes = self.experience_db.get_best_genomes(top_k=10, min_pf=1.0)
+            if not best_genomes:
+                logger.debug("   📭 ExperienceDB中暂无英雄基因")
+                return None
+            
+            # 随机选择一个英雄（避免总是用同一个）
+            import random
+            genome_data = random.choice(best_genomes)
+            
+            # 从基因数据重建Agent
+            from prometheus.core.agent_v5 import AgentV5, LineageVector, GenomeVector
+            from prometheus.core.strategy_params import StrategyParams
+            from prometheus.core.meta_genome import MetaGenome
+            import numpy as np
+            import json
+            
+            # 生成新Agent ID
+            agent_id = f"Hero_{self.moirai.next_agent_id}"
+            self.moirai.next_agent_id += 1
+            
+            # 解析基因数据（假设是JSON格式）
+            if isinstance(genome_data, dict):
+                genome_json = genome_data.get('genome', '{}')
+                strategy_json = genome_data.get('strategy_params', '{}')
+            else:
+                # 如果是其他格式，降级为随机创世
+                logger.warning("   ⚠️ 英雄基因格式不支持，降级为随机创世")
+                return None
+            
+            # 创建Agent
+            agent = AgentV5(
+                agent_id=agent_id,
+                initial_capital=2000.0,
+                lineage=LineageVector(np.random.rand(10)),  # 简化版：随机血统
+                genome=GenomeVector(np.random.rand(50)),  # TODO: 从genome_json解析
+                strategy_params=StrategyParams.from_dict(json.loads(strategy_json)) if strategy_json != '{}' else StrategyParams.create_genesis(),
+                generation=0,  # 重生从0代开始
+                meta_genome=MetaGenome()
+            )
+            
+            # 初始化运行时属性
+            agent.total_roi = 0.0
+            agent.allocated_capital = 2000.0
+            agent.profit_factor = 1.0
+            agent.winning_trades = 0
+            agent.losing_trades = 0
+            agent.total_profit = 0.0
+            agent.total_loss = 0.01
+            agent.awards = 0
+            
+            logger.debug(f"   🏆 英雄召回: {agent_id}")
+            return agent
+            
+        except Exception as e:
+            logger.warning(f"   ❌ 召回英雄失败: {e}")
+            return None
+    
     def inject_immigrants(self, 
                           count: Optional[int] = None,
+                          hero_ratio: float = 0.5,  # ⭐ v7.0新增：英雄回归比例
                           reason: Optional[str] = None) -> List[AgentV5]:
         """
-        🔮 Immigration机制（v7.0 Prophet专用，v6.0已封存）
+        🔮 Immigration机制（v7.0智能召回英雄）⭐⭐⭐
         
-        ⚠️ v6.0训练系统不使用此方法！
-        ⚠️ 此方法保留给v7.0 Prophet战略调用！
+        v6.0：只创建随机Agent
+        v7.0：智能召回英雄 + 随机创世
         
         v7.0使用场景：
-        - Prophet分析市场环境
-        - Prophet决定需要注入哪些基因
-        - Prophet调用此方法注入移民/召回传奇
+        - 稳定扩张 → hero_ratio=0.7（赚钱模式）
+        - 危机扩张 → hero_ratio=0.3（探索模式）
+        - 大灭绝态 → hero_ratio=0.9（凤凰涅槃）
         
-        作用：防止"方向垄断崩溃"（Monopoly Lineage Collapse）
+        作用：
+        - 防止"方向垄断崩溃"（Monopoly Lineage Collapse）
+        - 召回历史英雄，快速适应市场
         
         Args:
             count: 注入数量（None=自动计算）
+            hero_ratio: 英雄回归比例（0-1）⭐
             reason: 触发原因
         
         Returns:
             List[AgentV5]: 注入的移民
         """
         if not hasattr(self, 'immigration_enabled'):
-            self.immigration_enabled = True  # ✅ Stage 1.1: 默认启用
+            self.immigration_enabled = True
         
         if not self.immigration_enabled:
             return []
@@ -1210,10 +1359,25 @@ class EvolutionManagerV5:
             count = max(1, len(self.moirai.agents) // 10)
         
         immigrants = []
-        logger.info(f"🚁 Immigration触发: 注入{count}个移民 | 原因: {reason or '未知'}")
+        hero_count = int(count * hero_ratio)
+        random_count = count - hero_count
         
-        for i in range(count):
-            # ✅ v6.0 极简版: 使用Moirai的Clotho女神创建移民（无家族机制）
+        logger.info(f"🚁 Immigration触发: 注入{count}个Agent | 原因: {reason or '未知'}")
+        logger.info(f"   英雄回归: {hero_count}个 ({hero_ratio:.0%})")
+        logger.info(f"   随机创世: {random_count}个 ({1-hero_ratio:.0%})")
+        
+        # ⭐ 从ExperienceDB召回英雄
+        for i in range(hero_count):
+            hero_agent = self._clotho_create_from_hero()
+            if hero_agent:
+                immigrants.append(hero_agent)
+            else:
+                # 如果没有英雄基因，降级为随机创世
+                immigrant = self.moirai._clotho_create_single_agent()
+                immigrants.append(immigrant)
+        
+        # 随机创世
+        for i in range(random_count):
             immigrant = self.moirai._clotho_create_single_agent()
             immigrants.append(immigrant)
         
@@ -1221,7 +1385,8 @@ class EvolutionManagerV5:
         self.moirai.agents.extend(immigrants)
         self.total_births += len(immigrants)
         
-        logger.info(f"✅ Immigration完成: 成功注入{len(immigrants)}个移民")
+        logger.info(f"✅ Immigration完成: 成功注入{len(immigrants)}个Agent")
+        logger.info(f"   英雄召回: {hero_count}个")
         logger.info(f"   当前种群: {len(self.moirai.agents)}个Agent")
         
         return immigrants
