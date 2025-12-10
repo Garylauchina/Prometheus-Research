@@ -5234,6 +5234,550 @@ Prometheus：一套系统 → 所有市场⭐⭐⭐
 
 ---
 
+### **8.11 v8.0接口模块设计：双接口架构⭐⭐⭐**
+
+> 💡 **设计思路**（2025-12-10下午）  
+> 先记录核心设计，暂不实现
+
+#### **核心思路：职责分离**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v8.0接口模块：双接口设计⭐⭐⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────┐
+│ Prophet（战略层）⭐                  │
+│                                      │
+│ • 只读权限                           │
+│ • 聆听市场                           │
+│ • 计算S（自省）+ E（聆听）           │
+│ • 发布决策                           │
+└──────────┬──────────────────────────┘
+           │ 只调用
+           ↓
+┌─────────────────────────────────────┐
+│ 1️⃣ MarketDataInterface⭐⭐          │
+│ （市场数据接口）                     │
+│                                      │
+│ 提供方法：                           │
+│ • get_kline()        # K线数据       │
+│ • get_ticker()       # 实时价格      │
+│ • get_orderbook()    # 订单簿        │
+│ • get_market_status()# 市场状态      │
+│                                      │
+│ 适配器（可扩展）：                   │
+│ • BinanceDataAdapter                 │
+│ • OANDADataAdapter                   │
+│ • IBDataAdapter                      │
+│ • ...（无限扩展）⭐                 │
+└─────────────────────────────────────┘
+
+
+┌─────────────────────────────────────┐
+│ Moirai（执行层）⭐                   │
+│                                      │
+│ • 读写权限                           │
+│ • 执行Prophet决策                    │
+│ • 管理Agent交易                      │
+│ • 监控持仓/资金                      │
+└──────────┬──────────────────────────┘
+           │ 只调用
+           ↓
+┌─────────────────────────────────────┐
+│ 2️⃣ ExecutionInterface⭐⭐           │
+│ （交易执行接口）                     │
+│                                      │
+│ 提供方法：                           │
+│ • place_order()      # 下单          │
+│ • cancel_order()     # 撤单          │
+│ • get_position()     # 查持仓        │
+│ • get_balance()      # 查余额        │
+│ • close_position()   # 平仓          │
+│                                      │
+│ 适配器（可扩展）：                   │
+│ • BinanceExecutionAdapter            │
+│ • OANDAExecutionAdapter              │
+│ • IBExecutionAdapter                 │
+│ • ...（无限扩展）⭐                 │
+└─────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+职责清晰⭐⭐⭐：
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prophet（指挥官）：
+  • 只读权限⭐
+  • 通过MarketDataInterface聆听市场
+  • 观察、分析、决策
+  • 发布决策到BulletinBoard
+  • 不直接交易！
+
+Moirai（执行官）：
+  • 读写权限⭐
+  • 通过ExecutionInterface执行交易
+  • 读取Prophet的决策
+  • 管理Agent生死、交易、持仓
+  • 具体执行！
+
+核心哲学：
+  "指挥官不开枪"⭐⭐⭐
+  Prophet指挥，Moirai开枪！
+  
+这符合军事指挥原则：
+  • 战略层只看全局（Prophet）
+  • 战术层负责执行（Moirai）
+  • 各司其职，互不干扰⭐
+```
+
+---
+
+#### **1️⃣ MarketDataInterface（市场数据接口）**
+
+```python
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MarketDataInterface设计草图⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+（暂不实现，仅记录设计）
+"""
+
+from abc import ABC, abstractmethod
+
+class MarketDataInterface(ABC):
+    """
+    市场数据统一接口⭐
+    
+    调用者：Prophet
+    用途：聆听市场，计算WorldSignature和E（预期）
+    """
+    
+    @abstractmethod
+    def get_kline(self, symbol: str, timeframe: str, limit: int) -> List[Dict]:
+        """
+        获取K线数据
+        
+        Returns:
+            标准化的K线数据：
+            [
+                {
+                    'timestamp': 1234567890,
+                    'open': 50000.0,
+                    'high': 51000.0,
+                    'low': 49000.0,
+                    'close': 50500.0,
+                    'volume': 1234.56,
+                },
+                ...
+            ]
+        """
+        pass
+    
+    @abstractmethod
+    def get_ticker(self, symbol: str) -> Dict:
+        """
+        获取实时价格
+        
+        Returns:
+            {
+                'symbol': 'BTC/USDT',
+                'last': 50000.0,
+                'bid': 49999.0,
+                'ask': 50001.0,
+                'volume_24h': 12345.67,
+            }
+        """
+        pass
+    
+    @abstractmethod
+    def get_orderbook(self, symbol: str, depth: int) -> Dict:
+        """
+        获取订单簿（用于计算流动性）
+        
+        Returns:
+            {
+                'bids': [[price, amount], ...],
+                'asks': [[price, amount], ...],
+            }
+        """
+        pass
+    
+    @abstractmethod
+    def get_market_status(self) -> Dict:
+        """
+        获取市场状态（用于Prophet检测异常）
+        
+        Returns:
+            {
+                'online': True,
+                'latency': 50,  # ms
+                'api_healthy': True,
+            }
+        """
+        pass
+
+"""
+Prophet使用示例⭐：
+"""
+
+class Prophet:
+    def __init__(self, market_data: MarketDataInterface):
+        """
+        Prophet只依赖MarketDataInterface⭐
+        不关心具体是Binance还是OANDA
+        """
+        self.market_data = market_data
+    
+    def _listening(self):
+        """
+        聆听市场（E - Expectation）⭐
+        """
+        # 获取市场数据
+        klines = self.market_data.get_kline('BTC/USDT', '15m', 100)
+        ticker = self.market_data.get_ticker('BTC/USDT')
+        orderbook = self.market_data.get_orderbook('BTC/USDT', 20)
+        
+        # 计算WorldSignature
+        world_sig = self._calculate_world_signature(klines, ticker, orderbook)
+        
+        # 计算E（预期）
+        E = self._calculate_expectation(world_sig)
+        
+        return E
+    
+    def run_decision_cycle(self):
+        """
+        Prophet决策周期
+        """
+        S = self._introspection()  # 自省
+        E = self._listening()       # 聆听⭐（调用MarketDataInterface）
+        
+        decision = self._decide(S, E)
+        
+        # 发布决策到BulletinBoard
+        self.bulletin_board.publish('prophet_decision', {
+            'S': S,
+            'E': E,
+            'decision': decision
+        })
+        
+        # Prophet不直接交易！⭐
+        # 只发布决策，由Moirai执行
+```
+
+---
+
+#### **2️⃣ ExecutionInterface（交易执行接口）**
+
+```python
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ExecutionInterface设计草图⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+（暂不实现，仅记录设计）
+"""
+
+class ExecutionInterface(ABC):
+    """
+    交易执行统一接口⭐
+    
+    调用者：Moirai
+    用途：执行交易、管理持仓、查询余额
+    """
+    
+    @abstractmethod
+    def place_order(
+        self,
+        symbol: str,
+        side: str,      # 'buy' or 'sell'
+        order_type: str,# 'market' or 'limit'
+        amount: float,
+        price: float = None
+    ) -> Dict:
+        """
+        下单
+        
+        Returns:
+            {
+                'order_id': '123456',
+                'status': 'filled',
+                'filled_price': 50000.0,
+                'filled_amount': 1.0,
+            }
+        """
+        pass
+    
+    @abstractmethod
+    def cancel_order(self, order_id: str) -> bool:
+        """撤单"""
+        pass
+    
+    @abstractmethod
+    def get_position(self, symbol: str) -> Dict:
+        """
+        获取持仓
+        
+        Returns:
+            {
+                'symbol': 'BTC/USDT',
+                'side': 'long',
+                'amount': 1.0,
+                'entry_price': 50000.0,
+                'unrealized_pnl': 1000.0,
+            }
+        """
+        pass
+    
+    @abstractmethod
+    def get_balance(self) -> Dict:
+        """
+        获取余额
+        
+        Returns:
+            {
+                'total': 100000.0,
+                'available': 80000.0,
+                'frozen': 20000.0,
+            }
+        """
+        pass
+    
+    @abstractmethod
+    def close_position(self, symbol: str) -> Dict:
+        """
+        平仓（用于紧急情况）
+        """
+        pass
+
+"""
+Moirai使用示例⭐：
+"""
+
+class Moirai:
+    def __init__(self, execution: ExecutionInterface):
+        """
+        Moirai只依赖ExecutionInterface⭐
+        不关心具体是Binance还是OANDA
+        """
+        self.execution = execution
+    
+    def execute_agent_order(self, agent: Agent, decision: str):
+        """
+        执行Agent的交易决策
+        """
+        if decision == 'buy':
+            # 调用ExecutionInterface下单⭐
+            result = self.execution.place_order(
+                symbol='BTC/USDT',
+                side='buy',
+                order_type='market',
+                amount=agent.allocated_capital / current_price
+            )
+            
+            # 记录到MarketFrictionTracker
+            self._record_execution(result)
+        
+        elif decision == 'sell':
+            # 平仓
+            result = self.execution.close_position('BTC/USDT')
+    
+    def execute_prophet_decision(self, decision: Dict):
+        """
+        执行Prophet的决策（3x3矩阵）
+        """
+        S = decision['S']
+        E = decision['E']
+        
+        # 根据S+E矩阵决定动作
+        if S > 0.6 and E > 0.1:
+            # 扩张：增加Agent和资本
+            self._expand_teams()
+        
+        elif S < 0.3 and E < -0.1:
+            # 紧急防御：平掉所有持仓⭐
+            all_positions = self.execution.get_position('BTC/USDT')
+            if all_positions['amount'] > 0:
+                self.execution.close_position('BTC/USDT')
+    
+    def emergency_shutdown(self):
+        """
+        紧急关闭（创世恢复）⭐
+        """
+        # 取消所有挂单
+        self.execution.cancel_all_orders()
+        
+        # 平掉所有持仓
+        self.execution.close_all_positions()
+        
+        logger.info("🚨 紧急关闭完成，准备创世恢复")
+```
+
+---
+
+#### **适配器模式：可扩展⭐⭐⭐**
+
+```python
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+适配器示例⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+（暂不实现，仅记录设计）
+"""
+
+# Binance适配器
+class BinanceDataAdapter(MarketDataInterface):
+    """
+    Binance市场数据适配器
+    """
+    def __init__(self, api_key: str, api_secret: str):
+        self.exchange = ccxt.binance({'apiKey': api_key, 'secret': api_secret})
+    
+    def get_kline(self, symbol, timeframe, limit):
+        # 调用Binance API
+        raw = self.exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        # 转换为标准格式⭐
+        return self._to_standard_format(raw)
+
+
+class BinanceExecutionAdapter(ExecutionInterface):
+    """
+    Binance交易执行适配器
+    """
+    def __init__(self, api_key: str, api_secret: str):
+        self.exchange = ccxt.binance({'apiKey': api_key, 'secret': api_secret})
+    
+    def place_order(self, symbol, side, order_type, amount, price=None):
+        # 调用Binance API
+        raw = self.exchange.create_order(symbol, order_type, side, amount, price)
+        # 转换为标准格式⭐
+        return self._to_standard_format(raw)
+
+
+# OANDA适配器
+class OANDADataAdapter(MarketDataInterface):
+    """
+    OANDA市场数据适配器
+    """
+    def __init__(self, api_key: str, account_id: str):
+        self.api_key = api_key
+        self.account_id = account_id
+    
+    def get_kline(self, symbol, timeframe, limit):
+        # 调用OANDA API（格式完全不同）
+        # 但返回标准格式⭐
+        pass
+
+
+class OANDAExecutionAdapter(ExecutionInterface):
+    """
+    OANDA交易执行适配器
+    """
+    # ...
+
+
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+使用方式⭐⭐⭐：
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+
+# BTC系统（Binance）
+binance_data = BinanceDataAdapter(api_key='xxx', api_secret='xxx')
+binance_exec = BinanceExecutionAdapter(api_key='xxx', api_secret='xxx')
+
+prophet_btc = Prophet(market_data=binance_data)
+moirai_btc = Moirai(execution=binance_exec)
+
+system_btc = PrometheusV7(prophet=prophet_btc, moirai=moirai_btc)
+
+
+# 外汇系统（OANDA）⭐
+# v7.0代码0修改！只换适配器！
+oanda_data = OANDADataAdapter(api_key='yyy', account_id='zzz')
+oanda_exec = OANDAExecutionAdapter(api_key='yyy', account_id='zzz')
+
+prophet_forex = Prophet(market_data=oanda_data)  # 同样的Prophet！
+moirai_forex = Moirai(execution=oanda_exec)      # 同样的Moirai！
+
+system_forex = PrometheusV7(prophet=prophet_forex, moirai=moirai_forex)
+
+
+# 未来：黄金系统（COMEX）⭐⭐
+# v7.0代码还是0修改！
+comex_data = COMEXDataAdapter(api_key='zzz')
+comex_exec = COMEXExecutionAdapter(api_key='zzz')
+
+prophet_gold = Prophet(market_data=comex_data)
+moirai_gold = Moirai(execution=comex_exec)
+
+system_gold = PrometheusV7(prophet=prophet_gold, moirai=moirai_gold)
+```
+
+---
+
+#### **核心价值⭐⭐⭐**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+为什么这个设计很重要？⭐⭐⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣ 职责分离⭐
+   Prophet只读（MarketDataInterface）
+   Moirai读写（ExecutionInterface）
+   → 符合"指挥官不开枪"原则
+
+2️⃣ v7.0保持纯净⭐⭐
+   v7.0只依赖接口，不依赖实现
+   → 新市场不修改v7.0代码
+   → v7.0可以封版
+
+3️⃣ 无限扩展⭐⭐⭐
+   新市场只需要写新适配器
+   → 今天：BTC、外汇
+   → 明天：债券、黄金、股票
+   → 后天：...无限可能
+
+4️⃣ 符合软件工程原则⭐
+   • 依赖倒置原则（DIP）
+   • 开闭原则（OCP）
+   • 单一职责原则（SRP）
+   • 接口隔离原则（ISP）
+
+5️⃣ 易于测试⭐
+   可以写Mock适配器用于测试
+   → 不需要真实交易所
+   → 快速验证逻辑
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+这是v8.0的核心设计⭐⭐⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+v7.0 = 大脑（纯净、稳定）
+v8.0 = 感官+手脚（接口+适配器）
+
+就像：
+  • 大脑（v7.0）通过眼睛（MarketDataInterface）看世界
+  • 大脑（v7.0）通过手脚（ExecutionInterface）执行动作
+  • 换个身体（适配器），大脑不变⭐⭐⭐
+
+这是"灵魂与肉体分离"的设计哲学！
+```
+
+---
+
+#### **设计状态**
+
+> ✅ **核心设计已记录**（2025-12-10下午）  
+> ⏸️ **暂不实现**（等v7.0稳定后再实现v8.0）  
+> 📝 **未来工作**：  
+> - 详细定义接口方法  
+> - 实现Binance/OANDA适配器  
+> - 编写单元测试  
+> - 性能优化
+
+---
+
 **文档更新完成**
 
 📅 **2025-12-10 深夜（终极版）**  
