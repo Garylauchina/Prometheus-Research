@@ -327,10 +327,12 @@ class EvolutionManagerV5:
         new_births = []
         
         if departed_count > 0:
-            # 获取Prophet公告（从BulletinBoard）
+            # 获取Prophet公告和WorldSignature（从BulletinBoard）
             prophet_announcement = {}
+            current_ws = None
             if hasattr(self.moirai, 'bulletin_board'):
                 prophet_announcement = self.moirai.bulletin_board.get('prophet_announcement') or {}
+                current_ws = self.moirai.bulletin_board.get('world_signature')  # ⭐ 获取当前市场环境
             
             # 提取Prophet的S和E值
             S = prophet_announcement.get('S', 0.5)
@@ -344,10 +346,11 @@ class EvolutionManagerV5:
             logger.info(f"   🧵 Clotho创造新生: 补充{departed_count}个离开者")
             logger.info(f"   📊 当前场景: S={S:.2f}, E={E:+.2f}, 风险={risk_level}")
             
-            # ⭐ 调用Immigration机制（智能召回英雄）
+            # ⭐ 调用Immigration机制（智能召回英雄，传入WorldSignature）
             new_births = self.inject_immigrants(
                 count=departed_count,
                 hero_ratio=hero_ratio,
+                current_ws=current_ws,  # ⭐ 传入当前市场环境
                 reason="补充离开者（智能召回）"
             )
             
@@ -1251,9 +1254,18 @@ class EvolutionManagerV5:
         
         return final_ratio
     
-    def _clotho_create_from_hero(self) -> Optional[AgentV5]:
+    def _clotho_create_from_hero(self, current_ws=None) -> Optional[AgentV5]:
         """
-        从ExperienceDB召回英雄基因创建Agent（v7.0）⭐⭐⭐
+        从ExperienceDB智能召回英雄基因创建Agent（v7.0）⭐⭐⭐
+        
+        智能召回逻辑：
+        1. 获取当前WorldSignature
+        2. 查询数据库中相似市场环境下的英雄
+        3. 选择在相似环境中表现最好的基因
+        4. 复制该基因创建新Agent
+        
+        Args:
+            current_ws: 当前WorldSignature（可选）
         
         Returns:
             Optional[AgentV5]: 创建的英雄Agent，如果没有英雄基因则返回None
@@ -1262,16 +1274,51 @@ class EvolutionManagerV5:
             logger.warning("⚠️ ExperienceDB未初始化，无法召回英雄")
             return None
         
-        # 从ExperienceDB获取最佳基因
+        # 智能召回：根据WorldSignature相似度查询 ⭐⭐⭐
         try:
-            best_genomes = self.experience_db.get_best_genomes(top_k=10, min_pf=1.0)
-            if not best_genomes:
-                logger.debug("   📭 ExperienceDB中暂无英雄基因")
-                return None
+            # 转换WorldSignature格式（如果需要）
+            from prometheus.core.world_signature_simple import WorldSignatureSimple
+            if current_ws and isinstance(current_ws, dict):
+                # 如果是字典，转换为WorldSignatureSimple
+                try:
+                    current_ws = WorldSignatureSimple(
+                        volatility=current_ws.get('volatility', 0.01),
+                        price_change=current_ws.get('price_change', 0.0),
+                        price_change_24h=current_ws.get('price_change_24h', 0.0)
+                    )
+                except Exception as e:
+                    logger.debug(f"   ⚠️ WorldSignature转换失败: {e}")
+                    current_ws = None
             
-            # 随机选择一个英雄（避免总是用同一个）
-            import random
-            genome_data = random.choice(best_genomes)
+            # 如果有current_ws，使用相似度查询
+            if current_ws:
+                similar_genomes = self.experience_db.query_similar_genomes(
+                    current_ws=current_ws,
+                    top_k=10,
+                    min_similarity=0.6  # 最低60%相似度
+                )
+                if similar_genomes:
+                    # 选择相似度最高且PF最好的英雄
+                    genome_data = similar_genomes[0]
+                    logger.debug(f"   🎯 智能召回: 相似度={genome_data.get('similarity', 0):.2%}, PF={genome_data.get('profit_factor', 0):.2f}")
+                else:
+                    # 如果没有相似的，降级为全局最佳
+                    best_genomes = self.experience_db.get_best_genomes(top_k=10, min_pf=1.0)
+                    if not best_genomes:
+                        logger.debug("   📭 ExperienceDB中暂无英雄基因")
+                        return None
+                    import random
+                    genome_data = random.choice(best_genomes)
+                    logger.debug(f"   🎲 降级召回: PF={genome_data.get('profit_factor', 0):.2f}")
+            else:
+                # 没有WorldSignature，使用全局最佳
+                best_genomes = self.experience_db.get_best_genomes(top_k=10, min_pf=1.0)
+                if not best_genomes:
+                    logger.debug("   📭 ExperienceDB中暂无英雄基因")
+                    return None
+                import random
+                genome_data = random.choice(best_genomes)
+                logger.debug(f"   🎲 随机召回: PF={genome_data.get('profit_factor', 0):.2f}")
             
             # 从基因数据重建Agent
             from prometheus.core.agent_v5 import AgentV5, LineageVector, GenomeVector
@@ -1324,6 +1371,7 @@ class EvolutionManagerV5:
     def inject_immigrants(self, 
                           count: Optional[int] = None,
                           hero_ratio: float = 0.5,  # ⭐ v7.0新增：英雄回归比例
+                          current_ws=None,  # ⭐ v7.0新增：当前WorldSignature
                           reason: Optional[str] = None) -> List[AgentV5]:
         """
         🔮 Immigration机制（v7.0智能召回英雄）⭐⭐⭐
@@ -1366,9 +1414,9 @@ class EvolutionManagerV5:
         logger.info(f"   英雄回归: {hero_count}个 ({hero_ratio:.0%})")
         logger.info(f"   随机创世: {random_count}个 ({1-hero_ratio:.0%})")
         
-        # ⭐ 从ExperienceDB召回英雄
+        # ⭐ 从ExperienceDB智能召回英雄（根据WorldSignature相似度）
         for i in range(hero_count):
-            hero_agent = self._clotho_create_from_hero()
+            hero_agent = self._clotho_create_from_hero(current_ws=current_ws)
             if hero_agent:
                 immigrants.append(hero_agent)
             else:
