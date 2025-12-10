@@ -65,6 +65,7 @@ class RealMoiraiWrapper:
         self.agents = []  # ⭐ 必须有此属性
         self.generation = 0
         self.TARGET_RESERVE_RATIO = 0.3  # EvolutionManagerV5需要
+        self.next_agent_id = 100  # ⭐ EvolutionManagerV5繁殖时需要（初始100，因为已有100个Agent）
     
     def retire_agent(self, agent, reason, current_price, awards=0):
         """退休方法"""
@@ -455,41 +456,74 @@ def calculate_death_stats(agents, scenario: str) -> dict:
 
 
 def simulate_agent_trading(agents, market_data, scenario):
-    """模拟Agent交易（简化版）"""
-    import random
+    """
+    模拟Agent交易（通过账簿系统）⭐⭐⭐
     
+    参见: prometheus/training/mock_training_school.py (execute_trade方法)
+    使用agent.account.record_trade()标准方式
+    """
+    import random
+    from prometheus.core.ledger_system import Role
+    
+    current_price = market_data['price']
     price_change = market_data['price_change_24h'] / 12
     
     for agent in agents:
+        # 确保Agent有account（应该在挂载时已经完成）
+        if not hasattr(agent, 'account'):
+            logger.warning(f"Agent {agent.agent_id} 缺少account，跳过交易")
+            continue
+        
+        # 30%概率交易
         if random.random() < 0.3:
+            # 根据市场趋势决定交易方向
             if scenario == "mixed" and price_change > 0:
-                direction_bias = 0.7
+                direction_bias = 0.7  # 牛市偏向做多
             elif scenario == "mixed" and price_change < 0:
-                direction_bias = 0.3
+                direction_bias = 0.3  # 熊市偏向做空
             else:
-                direction_bias = 0.5
+                direction_bias = 0.5  # 震荡随机
             
             is_long = random.random() < direction_bias
             
+            # 计算交易金额（10%仓位）
+            position_size = agent.current_capital * 0.1
+            amount = position_size / current_price if current_price > 0 else 0
+            
+            # 模拟滑点（0.05%）
+            slippage = 0.0005
             if is_long:
-                pnl = price_change * 100
+                fill_price = current_price * (1 + slippage)
+                trade_type = 'buy'
             else:
-                pnl = -price_change * 100
+                fill_price = current_price * (1 - slippage)
+                trade_type = 'sell'
             
-            agent.total_roi += pnl / agent.current_capital
-            agent.current_capital += pnl
-            
-            # 更新交易统计
-            if pnl > 0:
-                agent.winning_trades += 1
-                agent.total_profit += pnl
-            else:
-                agent.losing_trades += 1
-                agent.total_loss += abs(pnl)
-            
-            # 更新profit_factor
-            if agent.total_loss > 0:
-                agent.profit_factor = agent.total_profit / agent.total_loss
+            try:
+                # ⭐⭐⭐ 通过账簿系统记录交易（标准方式）
+                # 测试框架以Moirai身份调用（遵守权限规则）
+                agent.account.record_trade(
+                    trade_type=trade_type,
+                    price=fill_price,
+                    amount=amount,
+                    confidence=0.5,
+                    caller_role=Role.MOIRAI  # ✅ 测试框架扮演Moirai角色
+                )
+                
+                # 从private_ledger获取最新PnL
+                # total_pnl = realized_pnl + unrealized_pnl
+                realized_pnl = agent.account.private_ledger.total_pnl
+                unrealized_pnl = agent.account.private_ledger.get_unrealized_pnl(current_price)
+                total_pnl = realized_pnl + unrealized_pnl
+                
+                agent.total_pnl = total_pnl
+                agent.total_roi = total_pnl / agent.initial_capital if agent.initial_capital > 0 else 0
+                
+                # 更新current_capital（账簿系统会自动管理资金）
+                agent.current_capital = agent.account.private_ledger.virtual_capital
+                
+            except Exception as e:
+                logger.warning(f"Agent {agent.agent_id} 交易失败: {e}")
 
 
 if __name__ == "__main__":
