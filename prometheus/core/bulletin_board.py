@@ -163,6 +163,49 @@ class BulletinBoard:
         """
         return self.current_world_signature
     
+    # ========== v7.0: 通用键值对存储（Prophet/Moirai专用）⭐⭐⭐ ==========
+    
+    def publish(self, key: str, value: dict):
+        """
+        发布通用键值对数据（v7.0新增）⭐
+        
+        用于Prophet和Moirai之间的简单数据传递
+        不创建完整的Bulletin对象，直接存储
+        
+        Args:
+            key: 数据键（如'prophet_announcement', 'world_signature'）
+            value: 数据值（字典）
+        
+        使用场景：
+            - Prophet发布决策：bb.publish('prophet_announcement', {...})
+            - Moirai读取决策：data = bb.get('prophet_announcement')
+        """
+        if not hasattr(self, '_v7_data_store'):
+            self._v7_data_store = {}
+        
+        self._v7_data_store[key] = {
+            'data': value,
+            'timestamp': datetime.now(),
+        }
+    
+    def get(self, key: str) -> Optional[dict]:
+        """
+        获取通用键值对数据（v7.0新增）⭐
+        
+        Args:
+            key: 数据键
+        
+        Returns:
+            数据值（字典）或None
+        """
+        if not hasattr(self, '_v7_data_store'):
+            self._v7_data_store = {}
+        
+        entry = self._v7_data_store.get(key)
+        if entry:
+            return entry['data']
+        return None
+    
     def get_latest_strategy(self):
         """
         获取最新的Prophet战略公告
