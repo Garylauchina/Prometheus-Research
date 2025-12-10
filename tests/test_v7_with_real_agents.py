@@ -383,9 +383,16 @@ def run_v7_test_with_real_agents(
 
 # ===== 辅助函数（与之前相同）=====
 
+# ⭐ v7.0增强：记住历史数据用于计算变化
+_market_history = {
+    'prev_volatility': 0.01,
+    'prev_volume': 1.0
+}
+
 def generate_market_data(cycle: int, scenario: str, current_price: float) -> dict:
-    """生成模拟市场数据"""
+    """生成模拟市场数据（v7.0增强版）⭐"""
     import random
+    global _market_history
     
     if scenario == "mixed":
         if cycle <= 15:
@@ -397,16 +404,34 @@ def generate_market_data(cycle: int, scenario: str, current_price: float) -> dic
         
         current_price *= (1 + price_change)
         
+        # 🚨 黑天鹅事件
         if cycle == 35:
             price_change = -0.15
             current_price *= (1 + price_change)
             logger.warning(f"🚨 黑天鹅事件！价格暴跌{price_change:.0%}")
         
+        # ⭐ 计算当前指标
+        current_volatility = abs(price_change) * 2
+        current_volume = 1.0 + random.uniform(-0.2, 0.2)
+        
+        # ⭐ 计算变化（v7.0新增）
+        volatility_change = current_volatility - _market_history['prev_volatility']
+        volume_change = current_volume - _market_history['prev_volume']
+        
+        # ⭐ 更新历史
+        _market_history['prev_volatility'] = current_volatility
+        _market_history['prev_volume'] = current_volume
+        
         return {
             'price': current_price,
-            'price_change_24h': price_change * 12,
-            'volatility_24h': abs(price_change) * 2,
-            'volume_ratio': 1.0 + random.uniform(-0.2, 0.2)
+            'price_change': price_change,  # ⭐ 单周期变化
+            'price_change_24h': price_change * 12,  # 假设每5分钟一个周期
+            'volatility': current_volatility,  # ⭐ 当前波动率
+            'volatility_24h': current_volatility,
+            'volatility_change': volatility_change,  # ⭐ v7.0新增
+            'volume': current_volume,  # ⭐ 当前成交量
+            'volume_ratio': current_volume,
+            'volume_change': volume_change  # ⭐ v7.0新增
         }
 
 
