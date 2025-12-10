@@ -91,10 +91,10 @@ class EvolutionManagerV5:
         # AlphaZero式：极简统计
         self.generation = 0
         self.total_births = 0
-        self.total_deaths = 0  # 总死亡数（正常+非正常）
-        self.total_normal_eliminations = 0  # ⭐ v7.0新增：正常淘汰（fitness低）
-        self.total_abnormal_deaths = 0  # ⭐ v7.0新增：非正常死亡（破产等）
-        self.total_retirements = 0  # ⭐ v7.0新增：累计退休数
+        self.total_deaths = 0  # 总死亡数（正常+非正常+光荣）
+        self.total_normal_eliminations = 0  # ⭐ v7.0：正常淘汰（fitness低）
+        self.total_abnormal_deaths = 0  # ⭐ v7.0：非正常死亡（破产等）
+        self.total_honorable_deaths = 0  # ⭐ v7.0：光荣死亡（5枚奖章/寿终正寝）
         
         logger.info(f"🦠 EvolutionManagerV5已初始化 (v6.0 AlphaZero式)")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
@@ -354,10 +354,10 @@ class EvolutionManagerV5:
             logger.info(f"   补充新生: {len(new_births)}个（补充离开者）")
         logger.info(f"   当前种群: {len(self.moirai.agents)}个")
         logger.info(f"   累计出生: {self.total_births}")
-        logger.info(f"   累计正常淘汰: {self.total_normal_eliminations}")  # ⭐ v7.0新增
-        logger.info(f"   累计非正常死亡: {self.total_abnormal_deaths}")  # ⭐ v7.0新增
-        logger.info(f"   累计退休: {self.total_retirements}")
-        logger.info(f"   (总死亡: {self.total_deaths} = 正常{self.total_normal_eliminations} + 非正常{self.total_abnormal_deaths})")
+        logger.info(f"   累计正常淘汰: {self.total_normal_eliminations}")  # ⭐ v7.0
+        logger.info(f"   累计非正常死亡: {self.total_abnormal_deaths}")  # ⭐ v7.0
+        logger.info(f"   累计光荣死亡: {self.total_honorable_deaths}")  # ⭐ v7.0（原"退休"）
+        logger.info(f"   (总死亡: {self.total_deaths} = 正常{self.total_normal_eliminations} + 非正常{self.total_abnormal_deaths} + 光荣{self.total_honorable_deaths})")
         logger.info(f"{'='*70}")
     
     def _calculate_fitness_v2(self, agent: AgentV5, total_cycles: int) -> float:
@@ -1358,7 +1358,8 @@ class EvolutionManagerV5:
                         awards=awards
                     )
                     retired_agents.append(agent)
-                    self.total_retirements += 1  # ⭐ v7.0新增：累计退休数
+                    self.total_honorable_deaths += 1  # ⭐ v7.0：光荣死亡计数
+                    self.total_deaths += 1  # 总死亡数
                 except Exception as e:
                     logger.error(f"   ❌ {agent.agent_id}退休失败: {e}")
         
@@ -1449,7 +1450,7 @@ class EvolutionManagerV5:
             'max_generation': max(generations) if generations else 0,
             'total_births': self.total_births,
             'total_deaths': self.total_deaths,
-            'total_normal_eliminations': self.total_normal_eliminations,  # ⭐ v7.0新增
-            'total_abnormal_deaths': self.total_abnormal_deaths,  # ⭐ v7.0新增
-            'total_retirements': self.total_retirements,
+            'total_normal_eliminations': self.total_normal_eliminations,  # ⭐ v7.0
+            'total_abnormal_deaths': self.total_abnormal_deaths,  # ⭐ v7.0
+            'total_honorable_deaths': self.total_honorable_deaths,  # ⭐ v7.0（原"退休"）
         }
