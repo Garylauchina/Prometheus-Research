@@ -95,16 +95,39 @@ def create_real_agent(agent_id: str) -> AgentV5:
     
     # 临时方案：创建一个最小可用的strategy_params
     # 这不完全符合铁律，但比Mock好
+    # ⭐ v7.0更新：添加EvolutionManagerV5繁殖所需的所有属性
     class MinimalStrategyParams:
         def __init__(self):
+            # 基础属性
             self.entry_threshold = 0.5
             self.exit_threshold = 0.3
             self.position_size_base = 0.1
             self.max_holding_periods = 20
+            
+            # ⭐ EvolutionManagerV5繁殖必需属性
+            self.holding_preference = 0.5  # 持仓偏好（0-1）
+            self.directional_bias = 0.0    # 方向偏好（-1到1，负=空头，正=多头）
+            self.stop_loss_threshold = 0.05  # 止损阈值
+            self.take_profit_threshold = 0.10  # 止盈阈值
+            self.trend_following_strength = 0.5  # 趋势跟随强度（0-1）
+            self.generation = 0  # 代数
+            self.parent_params = ()  # 父代参数（空元组）
         
         def get_display_string(self):
             """返回显示字符串"""
             return f"entry={self.entry_threshold},exit={self.exit_threshold}"
+        
+        def to_dict(self):
+            """返回字典形式（繁殖时需要）"""
+            return {
+                'position_size_base': self.position_size_base,
+                'holding_preference': self.holding_preference,
+                'directional_bias': self.directional_bias,
+                'stop_loss_threshold': self.stop_loss_threshold,
+                'take_profit_threshold': self.take_profit_threshold,
+                'trend_following_strength': self.trend_following_strength,
+                'generation': self.generation
+            }
     
     strategy_params = MinimalStrategyParams()
     
@@ -435,13 +458,15 @@ def generate_friction_data(scenario: str, cycle: int) -> dict:
 def calculate_death_stats(agents, scenario: str) -> dict:
     """计算死亡统计"""
     if not agents:
-        return {'abnormal_deaths': 0, 'total_agents': 1}
+        return {'abnormal_deaths': 0, 'total_agents': 1, 'abnormal_death_rate': 0.0}
     
-    abnormal_deaths = sum(1 for a in agents if a.total_roi < -0.2)
+    # ⭐ 使用getattr防止新生Agent缺属性
+    abnormal_deaths = sum(1 for a in agents if getattr(a, 'total_roi', 0) < -0.2)
     
     return {
         'abnormal_deaths': abnormal_deaths,
-        'total_agents': len(agents)
+        'total_agents': len(agents),
+        'abnormal_death_rate': abnormal_deaths / len(agents) if len(agents) > 0 else 0.0
     }
 
 

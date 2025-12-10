@@ -343,12 +343,12 @@ class MoiraiV7:
         # 计算关键指标
         total_agents = len(agents)
         
-        # 存活率（简化版，基于ROI）
-        profitable_agents = [a for a in agents if a.total_roi > 0]
+        # 存活率（简化版，基于ROI）⭐ 使用getattr防止新生Agent缺属性
+        profitable_agents = [a for a in agents if getattr(a, 'total_roi', 0) > 0]
         survival_rate = len(profitable_agents) / total_agents if total_agents > 0 else 0
         
-        # 平均ROI
-        avg_roi = sum(a.total_roi for a in agents) / total_agents if total_agents > 0 else 0
+        # 平均ROI⭐ 使用getattr防止新生Agent缺属性
+        avg_roi = sum(getattr(a, 'total_roi', 0) for a in agents) / total_agents if total_agents > 0 else 0
         
         # 多样性（简化版，基于基因方差）
         # TODO: 实现更精确的多样性计算
@@ -400,6 +400,24 @@ class MoiraiV7:
         if agent in self.agents:
             self.agents.remove(agent)
             logger.info(f"   🏆 {agent.agent_id} 退休: {reason}, {awards}枚奖章")
+    
+    def _lachesis_calculate_breeding_tax(self, elite_agent, current_price: float) -> float:
+        """
+        计算繁殖税（EvolutionManagerV5调用）⭐
+        
+        v7.0简化版：固定税率或无税
+        未来可以根据系统状态动态调整
+        
+        Args:
+            elite_agent: 精英Agent
+            current_price: 当前价格
+        
+        Returns:
+            税额（0表示无税，float('inf')表示禁止繁殖）
+        """
+        # v7.0简化版：无税繁殖
+        # 未来可以根据资金池、系统规模等动态调整
+        return 0.0
 
 
 if __name__ == "__main__":
