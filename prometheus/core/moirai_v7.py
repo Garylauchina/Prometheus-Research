@@ -37,7 +37,8 @@ class MoiraiV7:
     def __init__(
         self, 
         bulletin_board: BulletinBoard,
-        evolution_manager: EvolutionManagerV5
+        evolution_manager: EvolutionManagerV5,
+        initial_agents: List = None  # ⭐ 新增：初始Agent列表
     ):
         """
         初始化Moirai
@@ -45,16 +46,30 @@ class MoiraiV7:
         Args:
             bulletin_board: 公告板
             evolution_manager: 进化管理器（v6.0）
+            initial_agents: 初始Agent列表（可选）
         """
         self.bulletin_board = bulletin_board
         self.evolution_manager = evolution_manager
         
+        # ⭐ Moirai直接管理agents
+        self.agents = initial_agents if initial_agents is not None else []
+        
         # 当前系统规模（0-1）
         self.current_scale = 0.5
+        
+        # ⭐ Agent ID计数器（用于繁殖）
+        self.next_agent_id = len(self.agents)
+        
+        # ⭐ 目标储备率（EvolutionManagerV5需要）
+        self.TARGET_RESERVE_RATIO = 0.3
+        
+        # ⭐ 代数计数器
+        self.generation = 0
         
         logger.info("⚖️ Moirai v7.0 已初始化")
         logger.info("   职责：繁殖/淘汰")
         logger.info("   公式：delta = (S - current) × |E|")
+        logger.info(f"   初始Agent数量: {len(self.agents)}")
     
     def run_cycle(self, cycle: int, current_price: float = None):
         """
@@ -244,8 +259,8 @@ class MoiraiV7:
         Args:
             target_scale: 目标规模（0-1）
         """
-        # EvolutionManagerV5不存储agents，通过moirai.agents访问
-        agents = self.evolution_manager.moirai.agents
+        # ⭐ Moirai直接管理agents
+        agents = self.agents
         
         if not agents:
             return
@@ -319,8 +334,8 @@ class MoiraiV7:
         报告当前种群状态，供Prophet下次计算S使用
         """
         
-        # EvolutionManagerV5不存储agents，通过moirai.agents访问
-        agents = self.evolution_manager.moirai.agents
+        # ⭐ Moirai直接管理agents
+        agents = self.agents
         
         if not agents:
             return
@@ -356,6 +371,35 @@ class MoiraiV7:
         logger.debug(f"   存活率: {survival_rate:.2%}")
         logger.debug(f"   平均ROI: {avg_roi:.2%}")
         logger.debug(f"   当前规模: {self.current_scale:.0%}")
+    
+    # ===== EvolutionManagerV5需要的方法⭐⭐⭐ =====
+    
+    def terminate_agent(self, agent, current_price: float, reason: str = "eliminated"):
+        """
+        淘汰Agent（EvolutionManagerV5调用）
+        
+        Args:
+            agent: 要淘汰的Agent
+            current_price: 当前价格
+            reason: 淘汰原因
+        """
+        if agent in self.agents:
+            self.agents.remove(agent)
+            logger.debug(f"   💀 {agent.agent_id} 已淘汰，原因: {reason}")
+    
+    def retire_agent(self, agent, reason: str, current_price: float, awards: int = 0):
+        """
+        退休Agent（EvolutionManagerV5调用）
+        
+        Args:
+            agent: 要退休的Agent
+            reason: 退休原因
+            current_price: 当前价格
+            awards: 奖章数
+        """
+        if agent in self.agents:
+            self.agents.remove(agent)
+            logger.info(f"   🏆 {agent.agent_id} 退休: {reason}, {awards}枚奖章")
 
 
 if __name__ == "__main__":

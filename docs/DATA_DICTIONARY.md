@@ -29,6 +29,7 @@
 
 - [AgentV5 完整规范](./core_structures/agent_v5_spec.md) ⭐⭐⭐
 - [EvolutionManagerV5 规范](./core_structures/evolution_manager_spec.md) ⭐⭐⭐
+- [MoiraiV7 规范](./core_structures/moirai_v7_spec.md) ⭐⭐⭐ **v7.0新增**
 - [MetaGenome 规范](./core_structures/genome_spec.md)
 - [WorldSignature 规范](./core_structures/world_signature_spec.md)
 - [BulletinBoard 规范](./core_structures/bulletin_board_spec.md)
@@ -59,6 +60,7 @@ Prometheus开发的根本原则，**绝对不可违反**：
 |------|---------|
 | 创建Agent | [agent_v5_spec.md](./core_structures/agent_v5_spec.md) |
 | 初始化EvolutionManager | [evolution_manager_spec.md](./core_structures/evolution_manager_spec.md) |
+| 初始化MoiraiV7 | [moirai_v7_spec.md](./core_structures/moirai_v7_spec.md) ⭐ v7.0 |
 | 使用Facade运行测试 | [facade_usage.md](./integration_patterns/facade_usage.md) |
 | 挂载双账簿 | [ledger_mounting.md](./integration_patterns/ledger_mounting.md) |
 | 写新测试 | [testing_patterns.md](./integration_patterns/testing_patterns.md) + [三大铁律](./three_iron_laws/README.md) |

@@ -55,29 +55,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class RealMoiraiWrapper:
-    """
-    真实的Moirai包装器（用于EvolutionManagerV5）
-    
-    按照 docs/core_structures/evolution_manager_spec.md 实现所有必需方法
-    """
-    def __init__(self):
-        self.agents = []  # ⭐ 必须有此属性
-        self.generation = 0
-        self.TARGET_RESERVE_RATIO = 0.3  # EvolutionManagerV5需要
-        self.next_agent_id = 100  # ⭐ EvolutionManagerV5繁殖时需要（初始100，因为已有100个Agent）
-    
-    def retire_agent(self, agent, reason, current_price, awards=0):
-        """退休方法"""
-        if agent in self.agents:
-            self.agents.remove(agent)
-            logger.info(f"   🏆 {agent.agent_id}退休: {reason}, {awards}枚奖章")
-    
-    def terminate_agent(self, agent, current_price, reason=None):
-        """淘汰方法"""
-        if agent in self.agents:
-            self.agents.remove(agent)
-            logger.debug(f"   💀 {agent.agent_id}淘汰")
+# ⭐⭐⭐ 不再需要RealMoiraiWrapper！MoiraiV7直接管理agents
 
 
 def create_real_agent(agent_id: str) -> AgentV5:
@@ -210,23 +188,24 @@ def run_v7_test_with_real_agents(
     logger.info(f"\n🧬 创建{initial_agent_count}个真实AgentV5...")
     logger.info("   参见: docs/core_structures/agent_v5_spec.md")
     
-    moirai_wrapper = RealMoiraiWrapper()
+    # ⭐ 直接创建agents列表（不使用wrapper）
+    agents = []
     
     start_time = time.time()
     for i in range(initial_agent_count):
         agent = create_real_agent(f"real_agent_{i}")
-        moirai_wrapper.agents.append(agent)
+        agents.append(agent)
         
         if (i + 1) % 20 == 0:
             logger.info(f"   已创建 {i+1}/{initial_agent_count} 个Agent...")
     
     creation_time = time.time() - start_time
     logger.info(f"✅ 创建完成，耗时{creation_time:.2f}秒")
-    logger.info(f"   Agent类型: {type(moirai_wrapper.agents[0]).__name__}")
-    logger.info(f"   Agent数量: {len(moirai_wrapper.agents)}")
+    logger.info(f"   Agent类型: {type(agents[0]).__name__}")
+    logger.info(f"   Agent数量: {len(agents)}")
     
     # 验证Agent完整性
-    sample_agent = moirai_wrapper.agents[0]
+    sample_agent = agents[0]
     logger.info(f"\n📋 Agent完整性检查:")
     logger.info(f"   ✅ agent_id: {sample_agent.agent_id}")
     logger.info(f"   ✅ initial_capital: {sample_agent.initial_capital}")
@@ -248,26 +227,39 @@ def run_v7_test_with_real_agents(
     logger.info("   ✅ PublicLedger已创建")
     
     # 为所有Agent挂载账户（幂等）
-    attach_accounts(moirai_wrapper.agents, public_ledger)
-    logger.info(f"   ✅ 账户已挂载到{len(moirai_wrapper.agents)}个Agent")
+    attach_accounts(agents, public_ledger)
+    logger.info(f"   ✅ 账户已挂载到{len(agents)}个Agent")
     
     # 验证挂载
-    missing_account = [a for a in moirai_wrapper.agents if not hasattr(a, 'account')]
+    missing_account = [a for a in agents if not hasattr(a, 'account')]
     if missing_account:
         raise Exception(f"❌ {len(missing_account)}个Agent缺少account！")
-    missing_private = [a for a in moirai_wrapper.agents if not hasattr(a.account, 'private_ledger')]
+    missing_private = [a for a in agents if not hasattr(a.account, 'private_ledger')]
     if missing_private:
         raise Exception(f"❌ {len(missing_private)}个Agent的account缺少private_ledger！")
     
     logger.info(f"   ✅ 验证完成：所有Agent都有account和private_ledger")
     logger.info(f"   ✅ 双账簿系统挂载成功⭐⭐⭐")
     
-    # ===== 5. 创建EvolutionManager（按照数据字典）⭐⭐⭐ =====
-    logger.info(f"\n🧬 创建EvolutionManagerV5...")
+    # ===== 5. 创建Moirai v7（先创建，暂不传EvolutionManager）⭐⭐⭐ =====
+    logger.info(f"\n⚖️ 创建MoiraiV7...")
     logger.info("   参见: docs/core_structures/evolution_manager_spec.md")
     
+    # ⭐ 先创建MoiraiV7（暂时传入None作为evolution_manager）
+    moirai = MoiraiV7(
+        bulletin_board=bb,
+        evolution_manager=None,  # 暂时为None，稍后注入
+        initial_agents=agents  # ⭐ 传入初始agents
+    )
+    # 将public_ledger传递给Moirai（用于对账）
+    moirai.public_ledger = public_ledger
+    logger.info("✅ Moirai v7.0已初始化（暂未注入EvolutionManager）")
+    
+    # ===== 6. 创建EvolutionManager并注入⭐⭐⭐ =====
+    logger.info(f"\n🧬 创建EvolutionManagerV5...")
+    
     evolution_mgr = EvolutionManagerV5(
-        moirai=moirai_wrapper,  # ⭐ 传入已包含agents的moirai
+        moirai=moirai,  # ⭐ 传入MoiraiV7实例
         elite_ratio=0.2,
         elimination_ratio=0.3,
         capital_pool=None,
@@ -277,14 +269,12 @@ def run_v7_test_with_real_agents(
         immigration_enabled=False
     )
     logger.info("✅ EvolutionManagerV5已初始化")
-    logger.info(f"   访问agents: evolution_mgr.moirai.agents ⭐")
-    logger.info(f"   Agent数量: {len(evolution_mgr.moirai.agents)}")
     
-    # ===== 6. 创建Moirai v7 =====
-    moirai = MoiraiV7(bb, evolution_mgr)
-    # 将public_ledger传递给Moirai（用于对账）
-    moirai.public_ledger = public_ledger
-    logger.info("✅ Moirai v7.0已初始化")
+    # ⭐ 将EvolutionManager注入MoiraiV7
+    moirai.evolution_manager = evolution_mgr
+    logger.info("✅ EvolutionManagerV5已注入MoiraiV7")
+    logger.info(f"   访问agents: moirai.agents ⭐")
+    logger.info(f"   Agent数量: {len(moirai.agents)}")
     
     # ===== 7. 运行测试主循环 =====
     logger.info(f"\n🔄 开始运行{total_cycles}个周期...")
@@ -311,14 +301,14 @@ def run_v7_test_with_real_agents(
         market_data = generate_market_data(cycle, market_scenario, current_price)
         current_price = market_data['price']
         
-        # 模拟Agent交易
-        simulate_agent_trading(moirai_wrapper.agents, market_data, market_scenario)
+        # 模拟Agent交易（使用moirai.agents）
+        simulate_agent_trading(moirai.agents, market_data, market_scenario)
         
         # 模拟摩擦数据
         friction_data = generate_friction_data(market_scenario, cycle)
         
         # 模拟死亡统计
-        death_stats = calculate_death_stats(moirai_wrapper.agents, market_scenario)
+        death_stats = calculate_death_stats(moirai.agents, market_scenario)
         
         # 发布到BulletinBoard
         bb.publish('world_signature', market_data)
@@ -335,7 +325,7 @@ def run_v7_test_with_real_agents(
         announcement = bb.get('prophet_announcement')
         history['cycle'].append(cycle)
         history['scale'].append(moirai.current_scale)
-        history['agent_count'].append(len(moirai_wrapper.agents))
+        history['agent_count'].append(len(moirai.agents))  # ⭐ 使用moirai.agents
         history['risk_level'].append(announcement.get('risk_level', 'safe'))
         history['S'].append(announcement.get('S', 0.5))
         history['E'].append(announcement.get('E', 0.0))
@@ -343,7 +333,7 @@ def run_v7_test_with_real_agents(
         # 周期性日志
         if cycle % 10 == 0:
             logger.info(f"\n📊 周期{cycle}状态:")
-            logger.info(f"   Agent数量: {len(moirai_wrapper.agents)}")
+            logger.info(f"   Agent数量: {len(moirai.agents)}")  # ⭐ 使用moirai.agents
             logger.info(f"   系统规模: {moirai.current_scale:.0%}")
             logger.info(f"   风险等级: {announcement.get('risk_level', 'safe')}")
             logger.info(f"   价格: ${current_price:.2f}")
@@ -354,7 +344,7 @@ def run_v7_test_with_real_agents(
     logger.info("="*80)
     
     logger.info(f"\n✅ 使用真实AgentV5:")
-    logger.info(f"   Agent类型: {type(moirai_wrapper.agents[0] if moirai_wrapper.agents else None).__name__}")
+    logger.info(f"   Agent类型: {type(moirai.agents[0] if moirai.agents else None).__name__}")  # ⭐ 使用moirai.agents
     logger.info(f"   创建方式: 按照数据字典（agent_v5_spec.md）")
     
     logger.info(f"\n系统规模变化:")

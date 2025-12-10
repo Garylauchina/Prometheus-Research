@@ -1,8 +1,9 @@
 # EvolutionManagerV5 完整规范
 
 **文件路径：** `prometheus/core/evolution_manager_v5.py`  
-**最后更新：** 2025-12-10 23:39  
-**重要程度：** ⭐⭐⭐（最容易出错的组件）
+**最后更新：** 2025-12-11 00:25  
+**重要程度：** ⭐⭐⭐（最容易出错的组件）  
+**v7.0更新：** 新增MoiraiV7接口要求
 
 ---
 
@@ -67,12 +68,39 @@ def __init__(
 ### **参数详解**
 
 #### **1. moirai** ⭐⭐⭐（最重要！）
-- **类型**：Moirai实例（或具有 `.agents` 属性的对象）
+- **类型**：Moirai实例（`MoiraiV7`或具有相同接口的对象）
+- **v7.0推荐**：直接使用`MoiraiV7`实例
 - **必须条件**：
   - moirai对象必须已经创建
   - moirai对象必须有 `agents` 属性（列表）
   - moirai.agents 中存储了所有Agent
+  - moirai对象必须有以下属性：
+    - `next_agent_id`: int - Agent ID计数器
+    - `TARGET_RESERVE_RATIO`: float - 目标储备率（通常0.3）
+    - `generation`: int - 代数计数器
+  - moirai对象必须实现以下方法：
+    - `terminate_agent(agent, current_price, reason)` - 淘汰Agent
+    - `retire_agent(agent, reason, current_price, awards)` - 退休Agent
 - **作用**：EvolutionManager通过 `self.moirai.agents` 访问和修改Agent列表
+
+**v7.0接口要求（完整）：**
+```python
+class MoiraiInterface:
+    # 必需属性
+    agents: List[AgentV5]           # Agent列表
+    next_agent_id: int              # Agent ID计数器
+    TARGET_RESERVE_RATIO: float     # 目标储备率
+    generation: int                 # 代数计数器
+    
+    # 必需方法
+    def terminate_agent(self, agent, current_price: float, reason: str):
+        """淘汰Agent"""
+        pass
+    
+    def retire_agent(self, agent, reason: str, current_price: float, awards: int):
+        """退休Agent"""
+        pass
+```
 
 #### **2. fitness_mode: str** ⭐
 - **可选值**：
@@ -96,34 +124,21 @@ def __init__(
 
 ## ✅ **正确的初始化方式**
 
-### **完整示例⭐⭐⭐**
+### **v7.0标准方式（使用MoiraiV7）⭐⭐⭐**
 
 ```python
-# Step 1: 先创建Moirai包装器
-class MoiraiWrapper:
-    def __init__(self):
-        self.agents = []  # ⭐ 必须有这个属性
-        self.generation = 0
-        self.TARGET_RESERVE_RATIO = 0.3  # 如果需要
-    
-    def retire_agent(self, agent, reason, current_price, awards=0):
-        """退休方法"""
-        if agent in self.agents:
-            self.agents.remove(agent)
-    
-    def terminate_agent(self, agent, current_price, reason=None):
-        """淘汰方法"""
-        if agent in self.agents:
-            self.agents.remove(agent)
-
-# Step 2: 创建Moirai实例
-moirai = MoiraiWrapper()
-
-# Step 3: 创建初始Agent列表
+from prometheus.core.moirai_v7 import MoiraiV7
+from prometheus.core.evolution_manager_v5 import EvolutionManagerV5
+from prometheus.core.bulletin_board import BulletinBoard
 from prometheus.core.agent_v5 import AgentV5, LineageVector, GenomeVector, StrategyParams
 from prometheus.core.meta_genome import MetaGenome
 import numpy as np
 
+# Step 1: 创建BulletinBoard
+bb = BulletinBoard(board_name="test_board")
+
+# Step 2: 创建初始Agent列表
+agents = []
 for i in range(100):
     agent = AgentV5(
         agent_id=f"agent_{i}",
@@ -134,11 +149,18 @@ for i in range(100):
         generation=0,
         meta_genome=MetaGenome()
     )
-    moirai.agents.append(agent)  # ⭐ 添加到moirai.agents
+    agents.append(agent)
 
-# Step 4: 创建EvolutionManager
+# Step 3: 创建MoiraiV7（先不传evolution_manager）⭐
+moirai = MoiraiV7(
+    bulletin_board=bb,
+    evolution_manager=None,  # ⭐ 先传None
+    initial_agents=agents    # ⭐ 传入初始agents
+)
+
+# Step 4: 创建EvolutionManagerV5（传入moirai）⭐
 evolution_mgr = EvolutionManagerV5(
-    moirai=moirai,  # ⭐ 传入已经包含agents的moirai
+    moirai=moirai,  # ⭐ 传入MoiraiV7实例
     elite_ratio=0.2,
     elimination_ratio=0.3,
     capital_pool=None,
@@ -148,8 +170,42 @@ evolution_mgr = EvolutionManagerV5(
     immigration_enabled=False
 )
 
+# Step 5: 将EvolutionManager注入MoiraiV7⭐
+moirai.evolution_manager = evolution_mgr
+
 # ✅ 现在可以正常使用了
+# 访问agents: moirai.agents
+# 访问agents: evolution_mgr.moirai.agents（同一个列表）
 ```
+
+### **v6.0兼容方式（使用临时wrapper）⚠️**
+
+如果无法使用`MoiraiV7`，可以创建临时wrapper（**不推荐**）：
+
+```python
+# Step 1: 创建Moirai包装器（仅用于测试）
+class TestMoirai:
+    def __init__(self):
+        self.agents = []  # ⭐ 必须有这个属性
+        self.next_agent_id = 0  # ⭐ v7.0新增：繁殖时需要
+        self.generation = 0
+        self.TARGET_RESERVE_RATIO = 0.3
+    
+    def retire_agent(self, agent, reason, current_price, awards=0):
+        if agent in self.agents:
+            self.agents.remove(agent)
+    
+    def terminate_agent(self, agent, current_price, reason=None):
+        if agent in self.agents:
+            self.agents.remove(agent)
+
+moirai = TestMoirai()
+
+# Step 2-4: 同上
+# ...
+```
+
+**⚠️ 警告：临时wrapper方案已废弃，v7.0必须使用MoiraiV7！**
 
 ---
 
@@ -334,6 +390,7 @@ def test_evolution():
 | 版本 | 日期 | 修改内容 |
 |------|------|---------|
 | v1.0 | 2025-12-10 | 初始创建，记录EvolutionManagerV5的核心设计和常见错误 |
+| v1.1 | 2025-12-11 | ⭐ v7.0重大更新：新增MoiraiV7接口要求，废弃临时wrapper方案，新增next_agent_id要求 |
 
 ---
 
