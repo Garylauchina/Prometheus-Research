@@ -91,7 +91,9 @@ class EvolutionManagerV5:
         # AlphaZero式：极简统计
         self.generation = 0
         self.total_births = 0
-        self.total_deaths = 0
+        self.total_deaths = 0  # 总死亡数（正常+非正常）
+        self.total_normal_eliminations = 0  # ⭐ v7.0新增：正常淘汰（fitness低）
+        self.total_abnormal_deaths = 0  # ⭐ v7.0新增：非正常死亡（破产等）
         self.total_retirements = 0  # ⭐ v7.0新增：累计退休数
         
         logger.info(f"🦠 EvolutionManagerV5已初始化 (v6.0 AlphaZero式)")
@@ -212,6 +214,7 @@ class EvolutionManagerV5:
                 current_price=current_price
             )
             self.total_deaths += 1
+            self.total_normal_eliminations += 1  # ⭐ v7.0新增：正常淘汰计数
         
         # 3. 🦠 病毒式复制（Viral Replication）
         logger.info(f"\n🦠 病毒式复制：精英自我克隆 + 随机变异...")
@@ -351,8 +354,10 @@ class EvolutionManagerV5:
             logger.info(f"   补充新生: {len(new_births)}个（补充离开者）")
         logger.info(f"   当前种群: {len(self.moirai.agents)}个")
         logger.info(f"   累计出生: {self.total_births}")
-        logger.info(f"   累计死亡: {self.total_deaths}")
-        logger.info(f"   累计退休: {self.total_retirements}")  # ⭐ v7.0新增
+        logger.info(f"   累计正常淘汰: {self.total_normal_eliminations}")  # ⭐ v7.0新增
+        logger.info(f"   累计非正常死亡: {self.total_abnormal_deaths}")  # ⭐ v7.0新增
+        logger.info(f"   累计退休: {self.total_retirements}")
+        logger.info(f"   (总死亡: {self.total_deaths} = 正常{self.total_normal_eliminations} + 非正常{self.total_abnormal_deaths})")
         logger.info(f"{'='*70}")
     
     def _calculate_fitness_v2(self, agent: AgentV5, total_cycles: int) -> float:
@@ -1444,5 +1449,7 @@ class EvolutionManagerV5:
             'max_generation': max(generations) if generations else 0,
             'total_births': self.total_births,
             'total_deaths': self.total_deaths,
-            'total_retirements': self.total_retirements,  # ⭐ v7.0新增
+            'total_normal_eliminations': self.total_normal_eliminations,  # ⭐ v7.0新增
+            'total_abnormal_deaths': self.total_abnormal_deaths,  # ⭐ v7.0新增
+            'total_retirements': self.total_retirements,
         }
