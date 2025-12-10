@@ -92,6 +92,7 @@ class EvolutionManagerV5:
         self.generation = 0
         self.total_births = 0
         self.total_deaths = 0
+        self.total_retirements = 0  # ⭐ v7.0新增：累计退休数
         
         logger.info(f"🦠 EvolutionManagerV5已初始化 (v6.0 AlphaZero式)")
         logger.info(f"   精英比例: {elite_ratio:.0%}")
@@ -351,6 +352,7 @@ class EvolutionManagerV5:
         logger.info(f"   当前种群: {len(self.moirai.agents)}个")
         logger.info(f"   累计出生: {self.total_births}")
         logger.info(f"   累计死亡: {self.total_deaths}")
+        logger.info(f"   累计退休: {self.total_retirements}")  # ⭐ v7.0新增
         logger.info(f"{'='*70}")
     
     def _calculate_fitness_v2(self, agent: AgentV5, total_cycles: int) -> float:
@@ -1351,6 +1353,7 @@ class EvolutionManagerV5:
                         awards=awards
                     )
                     retired_agents.append(agent)
+                    self.total_retirements += 1  # ⭐ v7.0新增：累计退休数
                 except Exception as e:
                     logger.error(f"   ❌ {agent.agent_id}退休失败: {e}")
         
@@ -1441,4 +1444,5 @@ class EvolutionManagerV5:
             'max_generation': max(generations) if generations else 0,
             'total_births': self.total_births,
             'total_deaths': self.total_deaths,
+            'total_retirements': self.total_retirements,  # ⭐ v7.0新增
         }
