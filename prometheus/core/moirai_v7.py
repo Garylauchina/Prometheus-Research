@@ -405,8 +405,8 @@ class MoiraiV7:
         """
         计算繁殖税（EvolutionManagerV5调用）⭐
         
-        v7.0简化版：固定税率或无税
-        未来可以根据系统状态动态调整
+        v7.0简化版：无税繁殖
+        v6.0机制：退休回收+死亡回收
         
         Args:
             elite_agent: 精英Agent
@@ -416,8 +416,69 @@ class MoiraiV7:
             税额（0表示无税，float('inf')表示禁止繁殖）
         """
         # v7.0简化版：无税繁殖
-        # 未来可以根据资金池、系统规模等动态调整
         return 0.0
+    
+    def _lachesis_force_close_all(self, agent, current_price: float, reason: str) -> float:
+        """
+        强制平仓Agent所有持仓（EvolutionManagerV5调用）⭐
+        
+        v7.0简化版：返回当前资本（不进行实际平仓）
+        
+        Args:
+            agent: 要平仓的Agent
+            current_price: 当前价格
+            reason: 平仓原因
+        
+        Returns:
+            平仓后的资本
+        """
+        # v7.0简化版：返回当前资本
+        # 真实版本应该通过account.close_all_positions()实现
+        if hasattr(agent, 'account') and agent.account:
+            return agent.account.private_ledger.get_balance()
+        return getattr(agent, 'current_capital', agent.initial_capital)
+    
+    def _clotho_create_single_agent(self):
+        """
+        Clotho创造新Agent（EvolutionManagerV5调用）⭐
+        
+        v7.0简化版：创建一个全新的genesis Agent
+        
+        Returns:
+            新创建的AgentV5
+        """
+        from prometheus.core.agent_v5 import AgentV5, LineageVector, GenomeVector
+        from prometheus.core.strategy_params import StrategyParams
+        from prometheus.core.meta_genome import MetaGenome
+        import numpy as np
+        
+        # 生成新Agent ID
+        agent_id = f"Agent_{self.next_agent_id}"
+        self.next_agent_id += 1
+        
+        # 创建genesis Agent（⭐ 使用与create_real_agent相同的方式）
+        agent = AgentV5(
+            agent_id=agent_id,
+            initial_capital=2000.0,  # 默认配资
+            lineage=LineageVector(np.random.rand(10)),  # ⭐ 直接传入随机向量
+            genome=GenomeVector(np.random.rand(50)),    # ⭐ 直接传入随机向量
+            strategy_params=StrategyParams.create_genesis(),  # ✅ 这个不需要参数
+            generation=0,
+            meta_genome=MetaGenome()
+        )
+        
+        # 初始化运行时属性
+        agent.total_roi = 0.0
+        agent.allocated_capital = 2000.0
+        agent.profit_factor = 1.0
+        agent.winning_trades = 0
+        agent.losing_trades = 0
+        agent.total_profit = 0.0
+        agent.total_loss = 0.01
+        agent.awards = 0
+        
+        logger.info(f"🆕 Clotho创造新Agent: {agent_id}")
+        return agent
 
 
 if __name__ == "__main__":

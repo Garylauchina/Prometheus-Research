@@ -526,7 +526,7 @@ if __name__ == "__main__":
     print("🚀 " + "="*58 + "\n")
     
     history, db_path = run_v7_test_with_real_agents(
-        total_cycles=50,
+        total_cycles=1000,  # ⭐ 长期测试：1000周期（约4天，假设1周期=5分钟）
         initial_agent_count=100,
         market_scenario="mixed"
     )
