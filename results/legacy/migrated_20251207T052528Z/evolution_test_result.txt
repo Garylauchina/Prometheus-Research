@@ -1,9 +1,0 @@
-FAILED: 种群数量偏差过大: 10 -> 7 (差-3)
-Traceback (most recent call last):
-  File "E:\Cursor_store\prometheus-v30\tests\test_evolution_v5.py", line 131, in <module>
-    test_evolution_cycle()
-    ~~~~~~~~~~~~~~~~~~~~^^
-  File "E:\Cursor_store\prometheus-v30\tests\test_evolution_v5.py", line 118, in test_evolution_cycle
-    assert abs(final_count - initial_count) <= 1, \
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 种群数量偏差过大: 10 -> 7 (差-3)

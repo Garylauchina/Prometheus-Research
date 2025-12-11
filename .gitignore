@@ -1,8 +1,43 @@
+# Prometheus Research - .gitignore
+
+# ============================================
+# CRITICAL: NEVER COMMIT THESE
+# ============================================
+
+# API Keys & Credentials
+*.env
+.env*
+config/api_keys.py
+config/credentials.json
+*_secret*
+*_private*
+
+# Production Code & Strategies
+src/production/
+strategies/profitable/
+agents/optimized/
+experience_db/*.db
+experience_db/*.sqlite
+
+# Real Trading Data
+data/real_trading/
+data/live/
+logs/real_trading/
+backups/production/
+
+# ============================================
 # Python
+# ============================================
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,54 +51,149 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual Environment
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Virtual environments
 venv/
-ENV/
+venv312/
 env/
-.venv
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Logs
-*.log
-logs/
-trading_logs/
-
-# API Keys and Secrets
-.env
-*.key
-*.pem
-config_prod.py
-secrets.py
-config/okx_config.py
-
-# Data
-*.csv
-*.json
-*.pkl
-*.h5
-data/
-backtest_results/
+ENV/
+env.bak/
+venv.bak/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 
-# pytest
-.pytest_cache/
-.coverage
-htmlcov/
+# IPython
+profile_default/
+ipython_config.py
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# ============================================
+# IDE & Editors
+# ============================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# OS
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ============================================
+# Project Specific
+# ============================================
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backups
+backup/
+backups/
+*.bak
+*.backup
+
+# Database files (keep structure, not data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache
+cache/
+.cache/
+
+# Test outputs
+test_results/
+test_outputs/
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# ============================================
+# Data (Research OK, Production NO)
+# ============================================
+
+# OK to commit (for research)
+# data/historical/mock_data.csv
+# data/test_scenarios/
+
+# NEVER commit (production)
+data/live/
+data/real/
+data/production/
+
+# ============================================
+# Configuration
+# ============================================
+
+# Local config (user-specific)
+config/local/
+config/*.local.*
