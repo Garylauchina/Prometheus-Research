@@ -5,7 +5,7 @@
 **智慧涌现之地**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/yourusername/Prometheus-Research?style=social)](https://github.com/yourusername/Prometheus-Research)
+[![GitHub Stars](https://img.shields.io/github/stars/Garylauchina/Prometheus-Research?style=social)](https://github.com/Garylauchina/Prometheus-Research)
 
 **[English](README.md)** · 中文文档 · **[文档](docs/)** · **[示例](examples/)**
 

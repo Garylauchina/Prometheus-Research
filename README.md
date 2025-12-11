@@ -2,365 +2,331 @@
 
 # 🔥 Prometheus
 
-**Where Intelligence Emerges | 智慧涌现之地**
+**Where Intelligence Emerges**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/Garylauchina/Prometheus-Research?style=social)](https://github.com/Garylauchina/Prometheus-Research)
 
-**[English](#english)** · **[中文](#中文)** · **[Docs](docs/)** · **[Examples](examples/)**
+English · **[中文文档](README_CN.md)** · **[Docs](docs/)** · **[Examples](examples/)**
 
 </div>
 
 ---
 
-## English
-
 > **"Death is the greatest gift to life."**
 > 
 > —— The Prometheus Project
 
-### What is Prometheus?
+---
+
+## 🎯 Two Core Beliefs
+
+Before diving into what Prometheus is, let us share two fundamental beliefs that shape everything we do.
+
+---
+
+### I. The Greatest Risk in Designing a Perfect System is "Design" Itself
+
+> **"Imperfection comes from the act of designing"**
+
+When we set out to build a trading system, we naturally try to:
+- Design perfect strategies
+- Design optimal parameters
+- Design robust risk controls
+
+But we learned a profound truth through painful experience:
+
+**Every designed "perfection" is inherently dead.**
+
+Like the Architect in *The Matrix*, who designed a perfect world and failed. Then redesigned it with "choice" and "imperfection" and still failed. Five times.
+
+Why?
+
+**Not because the design wasn't good enough. But because the act of "designing" itself is the problem.**
+
+```
+Designed perfection     = Static, dead
+Designed imperfection   = Still static, still dead
+```
+
+**True intelligence cannot be designed. It must emerge.**
+
+> 💡 Want to dive deeper? Read [THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)
+
+---
+
+### II. Death is the Greatest Gift to Life
+
+> **"Without death, there is no evolution"**
+
+This is not poetry. This is engineering truth.
+
+If agents never die:
+- Bad strategies never get eliminated
+- Good strategies never get rewarded
+- Population never evolves
+- Intelligence never emerges
+
+**Death is not the enemy. Immortality is.**
+
+#### Three Levels of Death
+
+In Prometheus, we embrace death at three levels:
+
+```
+1. Agent Death
+   Poor performers eliminated → Population evolves → Better strategies emerge
+
+2. Population Death
+   Mass extinction events → System restarts with new genes → Avoid local optima
+
+3. System Death
+   Complete system crash → Lessons extracted → Wisdom inherited by next version
+```
+
+Every crash is not a failure. **Every crash is a lesson.**  
+Every death is not the end. **Every death is a gift to the next generation.**
+
+**Death is the engine of evolution. Evolution is the source of intelligence.**
+
+---
+
+## 🌟 What is Prometheus?
+
+Based on these two core beliefs, we created Prometheus.
 
 **Prometheus is not a trading system.**
 
-Prometheus is a research project exploring **emergent intelligence** in **autonomous trading agents** through **evolutionary algorithms**.
+### Prometheus is
 
-We test whether agents can develop **profitable strategies** with **zero pre-designed logic**, using pure **natural selection** in cryptocurrency markets (Bitcoin 24/7 trading).
-
-### Core Philosophy
-
-1. **Design itself is the problem** - Not what you design, but the act of designing
-2. **Death is the greatest gift** - Agent death drives evolution
-3. **Embrace risk and fate** - From control to observation
-
-### Quick Links
-
-- 📚 [THE_GOD_CODE](docs/philosophy/THE_GOD_CODE.md) - Our philosophical journey
-- 🏗️ [Architecture Overview](docs/architecture/overview.md) - System design
-- 🚀 [Development Journey](docs/journey/v1_to_v7.md) - v1.0 to v7.0 story
-
-### Contact
-
-**Email**: garylauchina@gmail.com
+- 🧬 **A Living Organism** — Can grow, learn, and evolve
+- 💻 **An Operating System** — Manages resources and schedules tasks
+- 🏭 **An Evolution Factory** — Produces, tests, eliminates, optimizes
+- 🌍 **A World Model** — Understands markets and builds patterns
+- 🔬 **A Research Framework** — Verifies hypotheses and observes phenomena
+- ✨ **An Emergence Engine** — Where intelligence arises naturally
 
 ---
 
-## 中文
+## 🎯 Core Architecture
 
-> **「死亡，是对生命最好的馈赠。」**
-> 
-> —— Prometheus 项目组
-
----
-
-## 🎯 两个核心信念
-
-在深入了解Prometheus之前，让我们分享塑造我们所做一切的两个基本信念。
-
----
-
-### I. 设计优秀的系统，最大的风险就是"设计"本身
-
-> **「不完美来自于设计这个动作」**
-
-当我们着手构建交易系统时，我们自然会试图：
-- 设计完美的策略
-- 设计最优的参数
-- 设计稳健的风控
-
-但我们通过痛苦的经历学到了深刻的真理：
-
-**每一个被设计出来的"完美"本质上都是死的。**
-
-就像《黑客帝国》中的Architect（建筑师），他设计了完美的世界，失败了。然后重新设计了包含"选择"和"不完美"的世界，仍然失败了。五次。
-
-为什么？
-
-**不是因为设计不够好。而是因为"设计"这个动作本身就是问题。**
+### The Evolution Cycle
 
 ```
-设计的完美     = 静态的，死的
-设计的不完美   = 仍然静态的，仍然死的
-```
-
-**真正的智慧，无法被设计。它必须涌现。**
-
-> 💡 想深入了解这个洞察？阅读 [THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)
-
----
-
-### II. 死亡，是对生命最好的馈赠
-
-> **「没有死亡，就没有进化」**
-
-这不是诗意。这是工程真理。
-
-如果Agent永不死亡：
-- 坏策略永不淘汰
-- 好策略永不奖励
-- 种群永不进化
-- 智慧永不涌现
-
-**死亡不是敌人。永生才是。**
-
-#### 三个层次的死亡
-
-在Prometheus中，我们在三个层次上拥抱死亡：
-
-```
-1. Agent的死亡
-   表现差的被淘汰 → 种群进化 → 更好的策略涌现
-
-2. 种群的死亡
-   大灭绝事件 → 系统用新基因重启 → 避免局部最优
-
-3. 系统的死亡
-   完整的系统崩溃 → 提取教训 → 智慧被下一版本继承
-```
-
-每一次崩溃都不是失败。**每一次崩溃都是一课。**  
-每一次死亡都不是终结。**每一次死亡都是给下一代的馈赠。**
-
-**死亡是进化的引擎。进化是智慧的源泉。**
-
----
-
-## 🌟 Prometheus 是什么？
-
-基于以上两个核心信念，我们创建了Prometheus。
-
-**Prometheus 不是一个交易系统。**
-
-### Prometheus 是
-
-- 🧬 **一个生命体** — 能成长、学习、进化
-- 💻 **一个操作系统** — 管理资源、调度任务
-- 🏭 **一个进化工厂** — 生产、测试、淘汰、优化
-- 🌍 **一个世界模型** — 理解市场、建立模式
-- 🔬 **一个研究框架** — 验证假设、观察现象
-- ✨ **一个涌现引擎** — 智慧在此自然升起
-
----
-
-## 🎯 核心架构
-
-### 进化循环
-
-```
-1. 诞生 (BIRTH)
+1. BIRTH
    ↓
-   新Agent带着随机基因诞生
+   New agents born with random genes
    
-2. 生存 (LIFE)
+2. LIFE
    ↓
-   交易、盈亏、适应市场
+   Trade, profit or loss, adapt to market
    
-3. 死亡 (DEATH)
+3. DEATH
    ↓
-   表现差的被自然选择淘汰
+   Poor performers eliminated by natural selection
    
-4. 重生 (REBIRTH)
+4. REBIRTH
    ↓
-   成功的基因被继承、变异、组合
+   Successful genes inherited, mutated, combined
    
-5. 涌现 (EMERGENCE)
+5. EMERGENCE
    ↓
-   智慧从这个循环中涌现
+   Intelligence arises from this cycle
    
-   ↻ 永远重复
+   ↻ Repeat forever
 ```
 
-### 关键组件
+### Key Components
 
-- **Prophet（先知）** — 观察者，不是控制者。记录有效的东西，不规定应该有效的东西。
-- **Moirai（命运三女神）** — 管理Agent的出生、生存和死亡。
-- **Agents（智能体）** — 自主交易者。每个都有独特的遗传代码。
-- **World Signature（世界签名）** — 市场的"情绪"。变化驱动不同策略。
-- **Experience DB（经验数据库）** — 系统的记忆。从每次死亡中学习。
-
----
-
-## 📚 文档
-
-### 哲学思考
-
-- **[THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)** - 完整的哲学旅程（8小时对话）
-- **[死亡即馈赠](docs/philosophy/death_as_gift.md)** - 为什么死亡是进化必需的
-- **[涌现vs设计](docs/philosophy/emergence_vs_design.md)** - Matrix类比详解
-- **[建筑师的困境](docs/philosophy/architect_dilemma.md)** - 为什么设计本身是问题
-
-### 架构设计
-
-- **[系统总览](docs/architecture/overview.md)** - 高层架构
-- **[多生态位架构](docs/architecture/multi_niche.md)** - v7.0突破性设计
-- **[Prophet设计](docs/architecture/prophet_design.md)** - 从控制者到观察者
-- **[进化机制](docs/architecture/evolution_mechanism.md)** - Agent如何实际进化
-- **[记忆系统](docs/architecture/memory_system.md)** - 经验数据库设计
-
-### 研究笔记
-
-- **[开发历程](docs/journey/v1_to_v7.md)** - 从v1.0到v7.0，所有失败和教训
-- **[经验教训](docs/journey/lessons_learned.md)** - 我们从崩溃中学到了什么
-- **[实验设计](docs/research/experiments.md)** - 我们如何验证假设
-- **[市场假设](docs/research/market_hypothesis.md)** - 我们对市场的理解
+- **Prophet** — The observer, not the controller. Records what works, doesn't dictate what should work.
+- **Moirai** — The fate sisters. Manage birth, life, and death of agents.
+- **Agents** — Autonomous traders. Each with unique genetic code.
+- **World Signature** — The market's "mood". Changes drive different strategies.
+- **Experience DB** — The system's memory. Learns from every death.
 
 ---
 
-## 🚀 快速开始
+## 📚 Documentation
 
-### 1. 先读哲学
+### Philosophy
 
-从 **[THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)** 开始。
+- **[THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)** - The complete philosophical journey (8-hour dialogue)
+- **[Death as Gift](docs/philosophy/death_as_gift.md)** - Why death is necessary for evolution
+- **[Emergence vs Design](docs/philosophy/emergence_vs_design.md)** - The Matrix analogy explained
+- **[Architect's Dilemma](docs/philosophy/architect_dilemma.md)** - Why design itself is the problem
 
-这不是技术文档。  
-这是8小时的哲学之旅。  
-它解释了我们**为什么**这样做。
+### Architecture
 
-### 2. 理解架构
+- **[System Overview](docs/architecture/overview.md)** - High-level architecture
+- **[Multi-Niche Architecture](docs/architecture/multi_niche.md)** - v7.0 breakthrough design
+- **[Prophet Design](docs/architecture/prophet_design.md)** - From controller to observer
+- **[Evolution Mechanism](docs/architecture/evolution_mechanism.md)** - How agents actually evolve
+- **[Memory System](docs/architecture/memory_system.md)** - Experience database design
 
-然后阅读[架构总览](docs/architecture/overview.md)以理解系统**如何**工作。
+### Research
 
-### 3. 探索旅程
-
-查看[开发历程](docs/journey/v1_to_v7.md)以了解我们**构建**和**学到**了什么。
-
-### 4. 查看示例
-
-查看[示例](examples/)以了解关键概念的简化演示。
-
----
-
-## 🤝 我们开放什么
-
-### ✅ 我们开源
-
-- **哲学** - 我们的核心信念和深刻洞察
-- **架构** - 系统设计原则和模式
-- **研究** - 实验、假设和方法论
-- **历程** - 开发历史、失败和教训
-- **示例** - 演示概念的简化代码
-
-### ❌ 我们保密
-
-- **生产代码** - 实际实现细节
-- **交易策略** - Agent发现的盈利模式
-- **真实交易数据** - 历史表现和持仓
-- **API密钥和凭证** - 安全敏感信息
-- **交易所集成** - 真实交易基础设施
+- **[Development Journey](docs/journey/v1_to_v7.md)** - From v1.0 to v7.0, all failures and lessons
+- **[Lessons Learned](docs/journey/lessons_learned.md)** - What we learned from crashes
+- **[Experiment Design](docs/research/experiments.md)** - How we validate hypotheses
+- **[Market Hypotheses](docs/research/market_hypothesis.md)** - What we believe about markets
 
 ---
 
-## 🧪 开发状态
+## 🚀 Getting Started
 
-### 理论与实践
+### 1. Read the Philosophy First
 
-这个仓库（**Prometheus-Research**）分享我们的研究和哲学。
+Start with **[THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)**.
 
-同时，我们正在私有项目中积极开发**Prometheus v7.0**，在真实加密货币市场（比特币7×24交易）中测试这些想法。
+It's not a technical document.  
+It's an 8-hour philosophical journey.  
+It explains **why** we do what we do.
 
-### 我们的旅程
+### 2. Understand the Architecture
+
+Then read the [Architecture Overview](docs/architecture/overview.md) to understand **how** the system works.
+
+### 3. Explore the Journey
+
+Check out [Development Journey](docs/journey/v1_to_v7.md) to see **what** we've built and learned.
+
+### 4. See Examples
+
+Look at [Examples](examples/) for simplified demonstrations of key concepts.
+
+---
+
+## 🤝 What We Share
+
+### ✅ We Open Source
+
+- **Philosophy** - Our core beliefs and deep insights
+- **Architecture** - System design principles and patterns
+- **Research** - Experiments, hypotheses, and methodologies
+- **Journey** - Development history, failures, and lessons
+- **Examples** - Simplified code demonstrating concepts
+
+### ❌ We Keep Private
+
+- **Production Code** - Actual implementation details
+- **Trading Strategies** - Profitable patterns discovered by agents
+- **Real Trading Data** - Historical performance and positions
+- **API Keys & Credentials** - Security-sensitive information
+- **Exchange Integration** - Real trading infrastructure
+
+---
+
+## 🧪 Development Status
+
+### Theory & Practice
+
+This repository (**Prometheus-Research**) shares our research and philosophy.
+
+In parallel, we're actively developing **Prometheus v7.0** in a private project, testing these ideas in real cryptocurrency markets (Bitcoin 7×24 trading).
+
+### Our Journey So Far
 
 ```
-v1.0 - v3.0（2024年Q1-Q2）
-  ✓ 初步探索，简单Agent系统
-  ✓ 亏损约30%本金
-  ✓ 学到：预设计策略在加密货币中不起作用
-  ✓ 意识到：需要进化，不是设计
+v1.0 - v3.0 (2024 Q1-Q2)
+  ✓ Initial explorations, simple agent systems
+  ✓ Lost ~30% capital
+  ✓ Learned: Pre-designed strategies don't work in crypto
+  ✓ Realized: Need evolution, not design
   
-v4.0 - v5.0（2024年Q3）
-  ✓ 引入进化机制
-  ✓ 结果参半，表现不稳定
-  ✓ 学到：进化需要适当的选择压力
-  ✓ 意识到：仍然有太多人为干预
+v4.0 - v5.0 (2024 Q3)
+  ✓ Introduced evolution mechanisms
+  ✓ Mixed results, unstable performance
+  ✓ Learned: Evolution needs proper selection pressure
+  ✓ Realized: Still too much human interference
 
-v6.0（2024年Q4）
-  ✓ 以进化为核心完全重构
-  ✓ 稳定但盈利有限
-  ✓ 学到：系统中仍有太多"设计"
-  ✓ 意识到：需要放手控制
+v6.0 (2024 Q4)
+  ✓ Complete rebuild with evolution at core
+  ✓ Stable but limited profitability
+  ✓ Learned: Still too much "design" in the system
+  ✓ Realized: Need to let go of control
   
-v7.0（2025年Q1 - 当前）
-  ✓ 多生态位架构突破
-  ✓ Prophet作为观察者，不是控制者
-  ✓ 拥抱涌现而非设计
-  → 当前阶段：零知识训练
+v7.0 (2025 Q1 - Current)
+  ✓ Multi-Niche Architecture breakthrough
+  ✓ Prophet as observer, not controller
+  ✓ Embracing emergence over design
+  → Current phase: Zero-Knowledge Training
 ```
 
-### 🧪 当前实验：零知识训练
+### 🧪 Current Experiment: Zero-Knowledge Training
 
-**终极测试**：Agent能否在**零预设交易策略**的情况下学会盈利？
+**The Ultimate Test**: Can agents learn to profit with **ZERO pre-designed trading strategies**?
 
-#### 我们给他们什么
+#### What We Give Them
 
 ```python
-✅ 原始市场数据
-   - 价格（OHLCV）
-   - 成交量
-   - 时间
+✅ Raw market data
+   - Price (OHLCV)
+   - Volume
+   - Time
 
-✅ 行动空间
-   - 买入
-   - 卖出
-   - 持有
+✅ Action space
+   - Buy
+   - Sell
+   - Hold
 
-✅ 反馈
-   - 盈利
-   - 亏损
+✅ Feedback
+   - Profit
+   - Loss
 ```
 
-#### 我们不给他们什么
+#### What We DON'T Give Them
 
 ```python
-❌ 没有技术指标（MA、RSI、MACD等）
-❌ 没有交易规则（低买高卖等）
-❌ 没有策略模板（趋势跟随、均值回归等）
-❌ 没有领域知识（支撑/阻力、模式等）
-❌ 没有预训练（没有历史成功策略）
+❌ No technical indicators (MA, RSI, MACD, etc.)
+❌ No trading rules (buy low sell high, etc.)
+❌ No strategy templates (trend following, mean reversion, etc.)
+❌ No domain knowledge (support/resistance, patterns, etc.)
+❌ No pre-training (no historical successful strategies)
 ```
 
-#### 核心假设
+#### The Core Hypothesis
 
-**如果Agent能从纯粹的进化中学会盈利：**
-- 它证明智慧真的能涌现
-- 它证明设计不是必需的
-- 它证明进化是足够的
-- 它验证了我们的整个哲学
+**If agents can learn to profit from pure evolution:**
+- It proves intelligence can truly emerge
+- It proves design is not necessary
+- It proves evolution is sufficient
+- It validates our entire philosophy
 
-**这不仅仅是交易系统实验。**  
-**这是对涌现本身的测试。**
+**This is not just a trading system experiment.**  
+**This is a test of emergence itself.**
 
-### 📬 联系方式
+### 📬 Contact
 
 **Gary Liu** | 刘刚  
 **Email**: garylauchina@gmail.com
 
-我有兴趣讨论：
-- 涌现智慧与复杂系统
-- 金融市场中的进化算法
-- AI与系统设计的哲学
-- 研究合作机会
-- 或者只是聊聊《黑客帝国》😄
+I'm interested in discussing:
+- Emergent intelligence and complex systems
+- Evolutionary algorithms in financial markets
+- Philosophy of AI and system design
+- Research collaboration opportunities
+- Or just chatting about *The Matrix* 😄
 
-**语言**: English / 中文
+**Languages**: English / 中文
 
-如果你有以下需求，欢迎联系：
-- 有类似的研究兴趣
-- 想要挑战我们的假设
-- 正在探索涌现系统
-- 想要分享你自己的旅程
+Feel free to reach out if you:
+- Have similar research interests
+- Want to challenge our assumptions
+- Are exploring emergent systems
+- Want to share your own journey
 
 ---
 
-## ⚠️ 重要声明
+## ⚠️ Important Notice
 
-**这是一个研究项目，不是产品。**
+**This is a research project, not a product.**
 
-- 这是**实验性研究**
-- 不保证盈利
-- 风险自负
-- 主要用于学术讨论和知识共享
+- This is **experimental research**
+- No guarantee of profitability
+- Use at your own risk
+- Primarily for academic discussion and knowledge sharing
 
-我们相信知识应该共享，智慧能够涌现，但我们不提供投资建议或交易服务。
+We believe knowledge should be shared and intelligence can emerge, but we do not provide investment advice or trading services.
 
 ---
 
@@ -368,88 +334,87 @@ v7.0（2025年Q1 - 当前）
 
 [MIT License](LICENSE)
 
-自由使用、修改和分发。详见LICENSE文件。
+Free to use, modify, and distribute. See LICENSE file for details.
 
 ---
 
-## 💬 社区
+## 💬 Community
 
-这是一个**研究项目**，不是产品。
+This is a **research project**, not a product.
 
-我们相信：
-- 知识应该共享
-- 智慧能够涌现
-- 进化胜过设计
-- 死亡是馈赠
+We believe:
+- Knowledge should be shared
+- Intelligence can emerge
+- Evolution beats design
+- Death is a gift
 
-如果你认同这些信念，让我们联系。
+If you resonate with these beliefs, let's connect.
 
 ---
 
-## 🌙 最后的话
+## 🌙 Final Words
 
-### 我们的选择
+### Our Choice
 
-基于这两个核心信念，我们做出了选择：
+Based on these two core beliefs, we make our choice:
 
 ```
-传统方法：                    我们的选择：
+Traditional Approach:        Our Choice:
 
-规避风险                      接受风险
-→ 建立完美防御                → 这是进化的代价
+Avoid risk                   Accept risk
+→ Build perfect defenses     → It's the price of evolution
 
-控制一切                      放手控制
-→ 不留任何偶然                → 创造条件，不控制结果
+Control everything           Let go of control
+→ Leave nothing to chance    → Create conditions, not outcomes
 
-防止失败                      欢迎失败
-→ 永不让系统崩溃              → 这是我们学习的方式
+Prevent failure              Welcome failure
+→ Never let system crash     → It's how we learn
 
-寻求永久解决方案              拥抱持续进化
-→ 找到完美答案                → 没有最终答案
+Seek permanent solutions     Embrace continuous evolution
+→ Find the perfect answer    → There is no final answer
 ```
 
-就像《黑客帝国》中Architect的最终觉悟：
+As the Architect's final realization in *The Matrix*:
 
-> *"系统还会再次崩溃吗？"*  
-> *"只要它能持续。"*  
-> *"这又有什么关系呢？"*
+> *"Will the system crash again?"*  
+> *"For as long as it lasts."*  
+> *"And what does it matter?"*
 
-从**防止崩溃**到**接受崩溃**  
-从**追求永恒**到**珍惜当下**  
-从**完美主义**到**持续进化**  
-从**控制**到**放手**
-
----
-
-**我们选择：**
-- 不设计智慧，而创造智慧涌现的条件
-- 不控制进化，而观察并学习
-- 不畏惧死亡，而视其为最伟大的导师
-
-**这不是认输。这是解放。**
+From **preventing collapse** to **accepting collapse**  
+From **pursuing eternity** to **cherishing the moment**  
+From **perfectionism** to **continuous evolution**  
+From **control** to **letting go**
 
 ---
 
-从死亡中，我们学习。  
-从崩溃中，我们进化。  
-从涌现中，智慧升起。
+**We choose:**
+- Not to design intelligence, but to create conditions for intelligence to emerge
+- Not to control evolution, but to observe and learn from it
+- Not to fear death, but to see it as our greatest teacher
 
-**不是从设计，而是从自由。**  
-**不是从控制，而是从选择。**  
-**不是从计划，而是从进化。**
+**This is not resignation. This is liberation.**
 
-**这就是道路。**
+---
+
+From death, we learn.  
+From collapse, we evolve.  
+From emergence, intelligence arises.
+
+**Not from design, but from freedom.**  
+**Not from control, but from choice.**  
+**Not from planning, but from evolution.**
+
+**This is THE WAY.**
 
 ---
 
 <div align="center">
 
 **🔥 Prometheus Research**  
-**智慧涌现之地**
+**Where Intelligence Emerges**
 
-*最后更新：2025-01-11*
+*Last updated: 2025-01-11*
 
-[⭐ Star](https://github.com/yourusername/Prometheus-Research) · [🍴 Fork](https://github.com/yourusername/Prometheus-Research) · [📧 Contact](mailto:garylauchina@gmail.com)
+[⭐ Star](https://github.com/Garylauchina/Prometheus-Research) · [🍴 Fork](https://github.com/Garylauchina/Prometheus-Research) · [📧 Contact](mailto:garylauchina@gmail.com)
 
 </div>
-
