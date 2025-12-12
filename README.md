@@ -19,9 +19,9 @@ English · **[中文文档](README_CN.md)** · **[Docs](docs/)** · **[Examples]
 
 ---
 
-## 🎯 Two Core Beliefs
+## 🎯 Three Core Beliefs
 
-Before diving into what Prometheus is, let us share two fundamental beliefs that shape everything we do.
+Before diving into what Prometheus is, let us share three fundamental beliefs that shape everything we do.
 
 ---
 
@@ -37,8 +37,6 @@ When we set out to build a trading system, we naturally try to:
 But we learned a profound truth through painful experience:
 
 **Every designed "perfection" is inherently dead.**
-
-Like the Architect in *The Matrix*, who designed a perfect world and failed. Then redesigned it with "choice" and "imperfection" and still failed. Five times.
 
 Why?
 
@@ -91,9 +89,69 @@ Every death is not the end. **Every death is a gift to the next generation.**
 
 ---
 
+### III. The Architect vs The Oracle: Two Philosophies for Complex Worlds
+
+> **The Architect: "Everything is about control"**  
+> **The Oracle: "Death and rebirth is the way to face a complex world, maybe the only way"**
+
+These represent two fundamentally different worldviews.
+
+#### The Architect's Worldview
+
+```
+Face complexity    → Design better control
+Face uncertainty   → Build stricter rules
+Face failure       → Patch every hole
+Face change        → Predict and prevent everything
+
+Belief: With good enough design, we can control everything
+Result: Systems become more complex, more fragile, eventually collapse
+```
+
+#### The Oracle's Worldview
+
+```
+Face complexity    → Accept we cannot fully understand
+Face uncertainty   → Let the system adapt autonomously
+Face failure       → Let failures die, let lessons pass on
+Face change        → Evolve through death and rebirth
+
+Belief: Death and renewal is the way, maybe the only way
+Result: Systems become stronger through evolution, real intelligence emerges
+```
+
+#### Prometheus's Choice
+
+**We choose to be the Oracle, not the Architect.**
+
+```
+Traditional Quant Systems (Architect's Path):
+├─ Design perfect strategies
+├─ Optimize all parameters
+├─ Control every detail
+└─ Result: Fragile in the face of black swans
+
+Prometheus (Oracle's Path):
+├─ Don't design strategies, let them emerge
+├─ Don't optimize parameters, let evolution optimize
+├─ Don't control details, only observe and record
+└─ Result: Adapt to the unknown through death/rebirth
+```
+
+**This is not giving up. This is deeper wisdom.**
+
+We realize:
+- In complex systems, **control is an illusion**
+- In uncertainty, **prediction is hubris**
+- Facing the unknown, **death/rebirth is the only reliable weapon**
+
+> 💡 This is why Prophet (observer) is the core of Prometheus, not Controller
+
+---
+
 ## 🌟 What is Prometheus?
 
-Based on these two core beliefs, we created Prometheus.
+Based on these three core beliefs, we created Prometheus.
 
 **Prometheus is not a trading system.**
 
@@ -152,7 +210,7 @@ Based on these two core beliefs, we created Prometheus.
 
 - **[THE_GOD_CODE.md](docs/philosophy/THE_GOD_CODE.md)** - The complete philosophical journey (8-hour dialogue)
 - **[Death as Gift](docs/philosophy/death_as_gift.md)** - Why death is necessary for evolution
-- **[Emergence vs Design](docs/philosophy/emergence_vs_design.md)** - The Matrix analogy explained
+- **[Emergence vs Design](docs/philosophy/emergence_vs_design.md)** - Why emergence beats predetermined design
 - **[Architect's Dilemma](docs/philosophy/architect_dilemma.md)** - Why design itself is the problem
 
 ### Architecture
@@ -317,7 +375,6 @@ I'm interested in discussing:
 - Evolutionary algorithms in financial markets
 - Philosophy of AI and system design
 - Research collaboration opportunities
-- Or just chatting about *The Matrix* 😄
 
 **Languages**: English / 中文
 
@@ -385,12 +442,6 @@ Prevent failure              Welcome failure
 Seek permanent solutions     Embrace continuous evolution
 → Find the perfect answer    → There is no final answer
 ```
-
-As the Architect's final realization in *The Matrix*:
-
-> *"Will the system crash again?"*  
-> *"For as long as it lasts."*  
-> *"And what does it matter?"*
 
 From **preventing collapse** to **accepting collapse**  
 From **pursuing eternity** to **cherishing the moment**  
