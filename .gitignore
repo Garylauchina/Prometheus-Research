@@ -197,3 +197,15 @@ data/production/
 # Local config (user-specific)
 config/local/
 config/*.local.*
+
+# ============================================
+# Articles (Keep Local)
+# ============================================
+
+# Research articles - not ready for public yet
+ARTICLE.md
+ARTICLE_CN.md
+
+# Core documents - personal records
+CORE_BELIEFS.md
+QUOTES.md
