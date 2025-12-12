@@ -15,6 +15,8 @@ English · **[中文文档](README_CN.md)** · **[Docs](docs/)** · **[Examples]
 
 > **"Death is the greatest gift to life."**
 > 
+> **"The ultimate form of quantitative trading is letting go of risk control."**
+> 
 > —— The Prometheus Project
 
 ---
