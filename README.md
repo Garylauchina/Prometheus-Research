@@ -153,7 +153,9 @@ We realize:
 
 Based on these three core beliefs, we created Prometheus.
 
-**Prometheus is not a trading system.**
+**Prometheus is a quantitative trading system.**
+
+**But perhaps, it is more than that.**
 
 ### Prometheus is
 

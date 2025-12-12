@@ -153,7 +153,9 @@ Prometheus（先知路线）：
 
 基于以上三个核心信念，我们创建了Prometheus。
 
-**Prometheus 不是一个交易系统。**
+**Prometheus 是一个量化交易系统。**
+
+**但也许不止于此。**
 
 ### Prometheus 是
 
