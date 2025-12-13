@@ -49,6 +49,39 @@ This log chronicles the evolution of a zero-knowledge genesis trading system tha
 
 ---
 
+### 2025.12.13 14:30 - Major Discovery: Infinite Money Mechanism / 重大发现：无限资金机制
+
+**Milestone**: Discovered the "hidden money printer" - system's fundamental design flaw.
+
+**里程碑**：发现"隐形印钞机"——系统的根本性设计缺陷。
+
+**Key Discovery / 关键发现**:
+> "只要无限印钱，系统就不会崩溃"  
+> "As long as you print infinite money, the system never collapses"
+
+**Key Findings / 核心发现**:
+- Initial capital $1M → Cumulated $3.225B (3,225x)
+- System net assets: -$3.587B (insolvent)
+- Should collapse at cycle 1, actually ran 280 cycles
+- Perfectly replicated 2008 financial crisis bailout mechanism
+
+**数据**:
+- 初始资金$100万 → 累计分配$32.25亿（3,225倍）
+- 系统净资产：-$35.87亿（资不抵债）
+- 理论第1周期破产，实际运行280周期
+- 完美复现2008金融危机救助机制
+
+**Theoretical Contributions / 理论贡献**:
+1. Money Printing Guarantees Immortality Theorem / 印钞保证不死定理
+2. Multi-Layer Selection Theory / 分层选择理论
+3. Moral Hazard Evolution Hypothesis / 道德风险演化假说
+
+**Detailed Reports / 详细报告**:
+- 📄 [中文报告 / Chinese Report](RESEARCH_REPORT_INFINITE_MONEY_CN.md)
+- 📄 [English Report](RESEARCH_REPORT_INFINITE_MONEY_EN.md)
+
+---
+
 ## 🔬 Controlled Experiment / 对比实验
 
 ### Experiment A: With Design / 实验A：有设计
