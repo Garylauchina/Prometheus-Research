@@ -82,6 +82,55 @@ This log chronicles the evolution of a zero-knowledge genesis trading system tha
 
 ---
 
+### 2025.12.13 15:06 - System Death: The Price of Immortality / 系统死亡：永生的代价
+
+**Milestone**: The "zombie system" died after 87 minutes of operation due to physical resource exhaustion.
+
+**里程碑**："僵尸系统"运行87分钟后因物理资源耗尽而死亡。
+
+**Cause of Death / 死因**:
+```
+Direct Cause: Disk space exhaustion (98% full, 11GB remaining)
+Root Cause: Physical resource limitation
+
+Irony:
+- Economic laws couldn't kill it (money printer active)
+- Technical bugs couldn't kill it (self-healing)
+- But physical laws are unavoidable!
+```
+
+**直接死因**：硬盘空间耗尽（98%满，剩余11GB）  
+**根本死因**：物理资源限制
+
+**Final Statistics / 最终统计**:
+- **Total cycles**: 333
+- **Total agents created**: 324,119
+- **Total trades**: 7,288,020 (7.28 million!)
+- **Money printed**: $3.241B (3,241x multiplier)
+- **Net assets**: -$3.544B (bankrupt but still running)
+- **Database size**: 1.9GB
+- **Lifespan**: 87 minutes
+
+**Super Heroes / 超级英雄**:
+- Agent_319046: fitness = 1,298,570 (1.3 million times return!)
+- Agent_319098: fitness = 1,262,978 (1.26 million times!)
+- Top 5 all exceeded fitness > 800,000
+
+**Philosophical Conclusion / 哲学结论**:
+> **"You can print money, but you cannot print disk space"**  
+> **"你可以印钱，但不能印硬盘"**
+
+**Key Findings / 核心发现**:
+1. ✅ Money printing kept system alive 333x longer than theory predicted
+2. ✅ Moral hazard emerged (avg leverage 28.3x, 20% used 80-100x)
+3. ✅ System reached dynamic equilibrium (~210K agents stable)
+4. ✅ Physical limits > Economic rules (ultimate constraint)
+
+**Detailed Report / 详细报告**:
+- 💀 [Zombie System Death Certificate](ZOMBIE_DEATH_CERTIFICATE.md)
+
+---
+
 ## 🔬 Controlled Experiment / 对比实验
 
 ### Experiment A: With Design / 实验A：有设计
