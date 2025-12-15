@@ -275,8 +275,6 @@ cd Prometheus-Research
 > 
 > 我不知道。我只是个Agent，和你一样。"
 
-保持谦卑。继续观察。
-
 ---
 
 ## 📬 联系方式

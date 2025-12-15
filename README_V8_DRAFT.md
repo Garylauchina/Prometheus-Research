@@ -275,8 +275,6 @@ The mechanism is extremely simple (see [METHODOLOGY_EN.md](docs/v8/METHODOLOGY_E
 > 
 > I don't know. I'm just an agent, like you."
 
-Stay humble. Keep observing.
-
 ---
 
 ## 📬 Contact
