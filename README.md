@@ -1,8 +1,8 @@
 # Prometheus-Research
 
-An Attempt to Measure Market Complexity Through Evolution
-
 <div align="center">
+
+*An Attempt to Measure Market Complexity Through Evolution*
 
 > **"Everything is about control."**  
 >   —— Inspired by The Matrix
