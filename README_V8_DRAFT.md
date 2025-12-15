@@ -203,7 +203,7 @@ Lesson: Without death, there is no selection pressure. Without selection, there 
 - **[Complete Life History](docs/v8/V8_COMPLETE_LIFE_HISTORY_ANALYSIS.md)** - 400K cycles, 552K agents analyzed
 
 ### Methodology
-- **[V8.0 Framework](docs/v8/V8.md)** - A Method for Measuring Complex Systems (6 Principles)
+- **[V8.0 Framework](docs/v8/V8.md)** - A Method for Measuring Complex Systems (Principle 0 + 6 Principles)
 
 ---
 
