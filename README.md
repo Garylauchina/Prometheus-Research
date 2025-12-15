@@ -282,7 +282,7 @@ But I'm happy to explore together.
 
 *An evolutionary approach to understanding market complexity*
 
-Last updated: December 15, 2024
+Last updated: December 16, 2025
 
 </div>
 
