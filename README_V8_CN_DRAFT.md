@@ -14,7 +14,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/Garylauchina/Prometheus-Research?style=social)](https://github.com/Garylauchina/Prometheus-Research)
 
-**[English](README.md)** · **[完整报告](docs/v8/)** · **[如何复现](docs/reproduce.md)**
+**[English](README.md)** · **[完整报告](docs/v8/)**
 
 </div>
 
@@ -204,26 +204,6 @@
 
 ### 方法论
 - **[V8.0框架](docs/v8/V8.md)** - 一种测量复杂系统的方法（原则0 + 6大原则）
-
----
-
-## 🔄 如何复现
-
-### 环境要求
-```bash
-Python >= 3.8
-# [待补充：具体依赖]
-```
-
-### 快速开始
-```bash
-git clone https://github.com/Garylauchina/Prometheus-Research.git
-cd Prometheus-Research
-# [待补充：运行指令]
-```
-
-### 完整文档
-详见 [docs/reproduce.md](docs/reproduce.md)
 
 ---
 

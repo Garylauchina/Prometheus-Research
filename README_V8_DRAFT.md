@@ -14,7 +14,7 @@ An Attempt to Measure Market Complexity Through Evolution
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/Garylauchina/Prometheus-Research?style=social)](https://github.com/Garylauchina/Prometheus-Research)
 
-**[中文版](README_CN.md)** · **[Full Reports](docs/v8/)** · **[Reproduce](docs/reproduce.md)**
+**[中文版](README_CN.md)** · **[Full Reports](docs/v8/)**
 
 </div>
 
@@ -204,26 +204,6 @@ Lesson: Without death, there is no selection pressure. Without selection, there 
 
 ### Methodology
 - **[V8.0 Framework](docs/v8/V8.md)** - A Method for Measuring Complex Systems (Principle 0 + 6 Principles)
-
----
-
-## 🔄 Reproduce
-
-### Requirements
-```bash
-Python >= 3.8
-# [TODO: Add specific requirements]
-```
-
-### Quick Start
-```bash
-git clone https://github.com/Garylauchina/Prometheus-Research.git
-cd Prometheus-Research
-# [TODO: Add run instructions]
-```
-
-### Full Documentation
-See [docs/reproduce.md](docs/reproduce.md) for detailed setup.
 
 ---
 
