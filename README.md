@@ -198,9 +198,9 @@ Lesson: Without death, there is no selection pressure. Without selection, there 
 ## 📊 Data & Reports
 
 ### Full Reports
-- **[Three-Stage Comparison](docs/v8/V8_BLACK_SWAN_COMPARISON_REPORT.md)** - Complete analysis of 9 experiments
-- **[Optimal Balance Point](docs/v8/V8_OPTIMAL_BALANCE_POINT_ANALYSIS.md)** - Why gentle environment is optimal
-- **[Complete Life History](docs/v8/V8_COMPLETE_LIFE_HISTORY_ANALYSIS.md)** - 400K cycles, 552K agents analyzed
+- **[Three-Stage Comparison](docs/v8/V8_BLACK_SWAN_COMPARISON_REPORT.md)** (Chinese) - Complete analysis of 9 experiments
+- **[Optimal Balance Point](docs/v8/V8_OPTIMAL_BALANCE_POINT_ANALYSIS.md)** (Chinese) - Why gentle environment is optimal
+- **[Complete Life History](docs/v8/V8_COMPLETE_LIFE_HISTORY_ANALYSIS.md)** (Chinese) - 400K cycles, 552K agents analyzed
 
 ### Methodology
 - **[V8.0 Framework](docs/v8/V8.md)** - A Method for Measuring Complex Systems (Principle 0 + 6 Principles)
