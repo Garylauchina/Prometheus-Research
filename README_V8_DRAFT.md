@@ -22,6 +22,8 @@ An Attempt to Measure Market Complexity Through Evolution
 
 ## 🎯 TL;DR
 
+**I tried to build a quantitative trading system using evolutionary mechanisms.**
+
 I ran **9 independent evolutionary experiments** totaling **400,000+ cycles** under three market regimes (gentle, medium, brutal). 
 
 **Key findings:**
