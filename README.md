@@ -1,290 +1,170 @@
 # Prometheus-Research
 
-An Attempt to Measure Market Complexity Through Evolution
-
 <div align="center">
 
-> **"Everything is about control."**  
->   —— Inspired by The Matrix
-> 
-> **No.**  
-> **Death and Rebirth are the way to face a complex world,**  
-> **might be the only way.**
+*An evolutionary probe into market complexity*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/Garylauchina/Prometheus-Research?style=social)](https://github.com/Garylauchina/Prometheus-Research)
 
-**[中文版](README_CN.md)** · **[Full Reports](docs/v8/)**
+**[中文版](README_CN.md)** · **[Framework](docs/v8/V8.md)** · **[Methodology](docs/v8/METHODOLOGY_EN.md)**
 
 </div>
 
 ---
 
-## 🎯 TL;DR
+## 🎯 Research Question
 
-**I tried to build a quantitative trading system using evolutionary mechanisms.**
-
-I ran **9 independent evolutionary experiments** totaling **400,000+ cycles** under three market regimes (gentle, medium, brutal). 
-
-**Key findings:**
-- **The Longevity Paradox**: The longest-lived system (127,743 cycles) died completely. The shorter-lived system (98,809 cycles) remained stable.
-- **The Stability Boundary**: Markets have a critical threshold (~±10%). Beyond it, no stable strategy exists.
-- **The High-Dimension Trap**: Evolution selects strategies that work short-term but collapse long-term.
-- **The Gift of Death**: Without death, there is no evolution. Only chaos.
-
-**Experiments completed. Data open-sourced. Replication welcome.**
+**Can the unpredictability of markets be measured?**
 
 ---
 
-## 📖 The Story
+## 💡 Hypothesis
 
-### Act I: The Architect's Path (v6.0-v7.0)
+Markets may be a **Gödelian system**: no complete, self-provable prediction framework can exist from within the system itself.
 
-For months, I believed everything was about control.
-
-I tried to design the perfect trading system:
-- Complex algorithms
-- Sophisticated features
-- Hero gene libraries
-- Careful parameter tuning
-
-All failed.
-
-### Act II: The Awakening (v8.0)
-
-Then I had a realization—inspired by Neo's journey in The Matrix:
-
-**You can't control a complex system. You have to let it evolve.**
-
-I stripped everything down to:
-- **Death** (when money runs out)
-- **Rebirth** (pass genes forward)
-
-Two mechanisms. That's it.
-
-### Act III: The Emergence
-
-Over 400,000 evolutionary cycles, what emerged was far beyond anything I designed:
-
-- Dimension convergence patterns
-- The longevity paradox
-- Stability boundaries
-- Chaotic oscillations
-
-**But I don't claim to have found "the answer."**
-
-I just observed. Recorded. Shared.
+If this is true:
+- We cannot find a "perfect" prediction model
+- But can we measure the **boundary** of predictability?
+- Can we observe the **structure** of unpredictability?
 
 ---
 
-## 🔬 Core Mechanism
+## 🔬 Research Framework
 
-### Minimalist Design
+In order to test whether markets are a **Gödelian system** (where no complete, self-provable prediction framework exists), we construct a multi-agent system with:
 
-This system has **NO**:
-- ❌ No predefined trading strategies
-- ❌ No technical indicators (MA, RSI, MACD...)
-- ❌ No risk management rules (stop-loss, take-profit...)
-- ❌ No human-designed logic
+**Three Core Constraints:**
+1. **No prior strategy** - agents start with random weights, no human-designed logic
+2. **No objective function** - no explicit "goal" to optimize
+3. **No explicit optimization** - only natural selection through survival
 
-This system has **ONLY**:
-- ✅ **Features**: 31 dimensions (26 market + 5 agent state)
-- ✅ **Decision**: Linear weighting → Signal (-1 to +1)
-- ✅ **Death**: Bankruptcy (<10% capital) or Moirai's judgment (age≥50)
-- ✅ **Rebirth**: Gene inheritance + Random mutation
+Through **minimal, local, life-and-death trading rules**, we observe whether **stable, reproducible, comparable statistical structures** emerge spontaneously.
 
-**That's it.**
-
-From these 4 minimalist mechanisms, emerged:
-- The longevity paradox
-- The high-dimension trap
-- The stability boundary
-- 552,191 agents with different fates
-
-**Detailed technical docs:** [Complete methodology](docs/v8/METHODOLOGY_EN.md)
+**Thus verifying: whether the unpredictability of markets is itself measurable.**
 
 ---
 
-## 🔬 Experiments & Findings
+To achieve this goal, we developed a methodology to design a measurement system. The main principles are:
 
-### Experimental Environments
+### Principle 0: Measurability Criteria
 
-| Environment | Black Swan Strength | Probability | Avg Interval |
-|-------------|-------------------|-------------|--------------|
-| **Gentle** | ±5%-15% | 0.2% | 500 cycles |
-| **Medium** | ±10%-20% | 0.35% | 286 cycles |
-| **Brutal** | ±15%-30% | 0.5% | 200 cycles |
+Before applying this method, determine if the target system is measurable:
 
-### Results Summary
+**0.1 Disturbance is Measurable**
+- The observation system's interference with the target system is quantifiable or comparable
 
-| Environment | Experiments | Longest Run | Black Swans | Seeds | Status |
-|-------------|-------------|-------------|-------------|-------|--------|
-| Gentle | 3 | 98,809 | 210 | 446 (2D) | ✅ Stable |
-| Medium | 1 | 127,743 | 413 | 0 (13D) | ❌ Collapsed |
-| Brutal | 3 | 80,836 | 409 | 0 (14D) | ❌ Collapsed |
+**0.2 Emergent Patterns**
+- Observation results exhibit spontaneously emergent patterns
+- Not validation of presets, but discovery of the unexpected
 
-**Total:** 400,000+ cycles, 1,000+ black swans survived, 552,191 agents evolved
+### Six Core Principles
 
----
+**Principle 1**: Gene dimensions align with observable features (M = N)
 
-## 💡 Key Findings
+**Principle 2**: Allow redundant dimensions (evolution will reduce)
 
-### 1. The Longevity Paradox
+**Principle 3**: Features = measurable + measurement bias (evolution discovers truth)
 
-```
-Medium environment (±10%-20%):
-  ✓ Longest-lived: 127,743 cycles
-  ✓ Most black swans survived: 413
-  ✓ Highest population: 178,370 agents
-  ❌ But: Died completely (0 seeds)
-  ❌ High-dimension dominated (82.2%)
+**Principle 4**: Evolution follows natural selection (objective world as sole judge)
 
-Gentle environment (±5%-15%):
-  ⚠️ Shorter-lived: 98,809 cycles
-  ✓ Remained stable
-  ✓ 446 healthy seeds (all 2D)
-  ✓ Low-dimension strategy
-```
+**Principle 5**: System evolves, observer recognizes patterns
 
-**Insight:** Longevity ≠ Stability. The longest-lived system is not necessarily the most stable.
+**Principle 6**: Better solutions always exist (continuous exploration)
 
-### 2. The Stability Boundary
-
-```
-Observed pattern:
-
-Gentle (±5%-15%)  → Stable (2D strategy)     ✅
-Medium (±10%-20%) → Unstable (13D strategy)  ❌
-Brutal (±15%-30%) → Collapse (14D strategy)  ❌
-
-Hypothesis: ~±10% might be a critical threshold.
-Below: Stable strategies exist.
-Above: Systems forced into high-dimension → Short-term survival → Long-term collapse.
-```
-
-### 3. The High-Dimension Trap
-
-```
-Why does evolution select strategies that eventually collapse?
-
-High-dimension agents (13-14D):
-  ✓ Short-term: Strong resistance to shocks
-  ✓ Medium-term: Can survive many black swans
-  ❌ Long-term: Over-reliance on randomness → Decision chaos → Collapse
-
-Low-dimension agents (2-3D):
-  ⚠️ Short-term: Moderate resistance
-  ✓ Long-term: Stable and sustainable
-
-Evolution's blind spot: It optimizes for short-term survival, not long-term stability.
-```
-
-### 4. The Gift of Death
-
-> "Death is the greatest gift to life."
-
-This is not philosophy. This is experimental evidence.
-
-In an earlier experiment, I gave agents unlimited money (removed death).
-
-Result:
-- Agents with 12,986x returns
-- Reckless strategies everywhere
-- System went insane
-- Eventually crashed (ran out of disk space)
-
-Lesson: Without death, there is no selection pressure. Without selection, there is no evolution. Without evolution, only chaos.
+**→ [Complete Framework](docs/v8/V8.md)**
 
 ---
 
-## 📊 Data & Reports
+### Minimal Implementation
 
-### Full Reports
-- **[Three-Stage Comparison](docs/v8/V8_BLACK_SWAN_COMPARISON_REPORT.md)** (Chinese) - Complete analysis of 9 experiments
-- **[Optimal Balance Point](docs/v8/V8_OPTIMAL_BALANCE_POINT_ANALYSIS.md)** (Chinese) - Why gentle environment is optimal
-- **[Complete Life History](docs/v8/V8_COMPLETE_LIFE_HISTORY_ANALYSIS.md)** (Chinese) - 400K cycles, 552K agents analyzed
-
-### Methodology
-- **[V8.0 Framework](docs/v8/V8.md)** - A Method for Measuring Complex Systems (Principle 0 + 6 Principles)
+- **Features**: 31 aligned dimensions (market) + 0-32 mystery dimensions (unknown)
+- **Decision**: Linear weighting → trading signal
+- **Birth/Death**: Occur randomly
 
 ---
 
-## 🤔 Can Markets Be Predicted?
+## 🧪 Current Status
 
-I tried to find out.
+**Experiments in progress.**
 
-I ran 400,000+ evolutionary cycles.
-I observed patterns emerge.
-I watched systems collapse.
+System design has been refined through multiple iterations:
+- Fixed critical bugs in capital management
+- Improved reproduction mechanism (mystery dimensions regenerate each generation)
+- Implementing system-level survival pressure
 
-Did I find "the answer"?
-
-No.
-
-But I found that under certain conditions:
-- Evolution is observable
-- Patterns are comparable  
-- Systems have boundaries
-
-**Is this "proof" that markets are predictable?**
-
-No.
-
-**Is this "proof" that markets are unpredictable?**
-
-Also no.
-
-It's just... observations. Data. Attempts.
+**No results to report yet.** Waiting for reliable data before drawing conclusions.
 
 ---
 
-## 🔄 About Replication
+## 📖 Documentation
 
-The mechanism is extremely simple (see [METHODOLOGY_EN.md](docs/v8/METHODOLOGY_EN.md)).
+### Framework
+- **[V8.0 Principles](docs/v8/V8.md)** - Principle 0 + 6 core principles (Chinese)
+- **[Methodology](docs/v8/METHODOLOGY_EN.md)** - Technical details (English)
+- **[方法论](docs/v8/METHODOLOGY.md)** - 技术细节（中文）
 
-**Code is not open-sourced**, reasons:
-1. Code was AI-assisted (Cursor, no sponsorship here), **and it sucks**
-2. I'd rather you implement it your own way — different implementations are themselves a form of "evolution"
-3. You might discover patterns I didn't
-
-**If you replicate, please share your findings!**
+### Reports
+Experimental reports will be added as reliable data becomes available.
 
 ---
 
-## 💬 Epilogue
+## 🤔 Why This Matters
 
-> "Someone asked me: Can markets be predicted?
-> 
-> I don't know. I'm just an agent, like you."
+**Traditional approach:**
+- Design a strategy → test it → optimize it
+- Question: "Can I predict the market?"
+
+**This approach:**
+- Minimal rules → let evolution explore → observe what emerges
+- Question: "Is the market fundamentally predictable?"
+
+**If stable structures emerge:**
+- Markets may have measurable patterns (within certain boundaries)
+
+**If no stable structures emerge:**
+- Markets may be fundamentally unpredictable (supporting Gödelian hypothesis)
+
+**Either way, we learn something fundamental about market complexity.**
+
+---
+
+## 🔄 Replication
+
+The mechanism is extremely simple.
+
+Code is not open-sourced because:
+1. The mechanism is very simple
+2. The code is terrible (blame Cursor)
+
+**If you replicate, please share your findings.**
+
+---
+
+## 💬 Note
+
+This is an early-stage research project. Conclusions are not yet established.
+
+I'm observing, recording, and waiting for data to speak.
+
+> *"I don't know. I'm just an agent, like you."*
 
 ---
 
 ## 📬 Contact
 
-**Questions? Ideas? Want to collaborate?**
-
-- Open an [Issue](https://github.com/Garylauchina/Prometheus-Research/issues)
+- GitHub Issues: [Report bugs or discuss ideas](https://github.com/Garylauchina/Prometheus-Research/issues)
 - Email: garylauchina@gmail.com
-
-I don't have all the answers.  
-But I'm happy to explore together.
 
 ---
 
 ## 📜 License
 
-[MIT License](LICENSE) - Free to use, modify, and share.
+[MIT License](LICENSE)
 
 ---
 
 <div align="center">
 
-**🔥 Prometheus Research**  
-**Where Intelligence Emerges**
-
-*An evolutionary approach to understanding market complexity*
-
-Last updated: December 16, 2025
+**Last updated: December 16, 2025**
 
 </div>
-
