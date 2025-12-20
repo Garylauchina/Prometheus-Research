@@ -7,8 +7,8 @@
 
 ## 0) 需要从 Quant 回传的两条证据路径（必须填）
 
-- **A组（真实时间结构 + M消融）**：`<PASTE_PATH_TO_A_SUMMARY_JSON>`
-- **B2组（打乱log-return重建价格 + M消融）**：`<PASTE_PATH_TO_B2_SUMMARY_JSON>`
+- **A组（真实时间结构 + M消融）**：`/Users/liugang/Cursor_Store/Prometheus-Quant/prometheus/v10/experiments/results_A_real_30__ablation_M_zeroed__20251221_015927/multiple_experiments_summary.json`
+- **B2组（打乱log-return重建价格 + M消融）**：`/Users/liugang/Cursor_Store/Prometheus-Quant/prometheus/v10/experiments/results_B2_shuffle_returns_30__ablation_M_zeroed__20251221_020620/multiple_experiments_summary.json`
 
 同时回传（或在summary里能读到）：
 
@@ -20,10 +20,12 @@
 
 ## 1) Gate 0（只看“尺子是否干净”）
 
-- **G0.3 数值健康**：`PASS/FAIL`（NaN/Inf/爆炸即Fail）
-- **G0.5 对照物理合理**：`PASS/FAIL`（B2构造是否仍物理合理）
-- **G0.6 Prior leakage audit**：`PASS/FAIL`
-  - 证据：确认本轮唯一变化是 `M` 被置空/置零；核心逻辑未改；summary里声明了ablation。
+- **G0.3 数值健康**：**PASS**
+  - 证据：两组均 `has_nan=false, has_inf=false, has_explosion=false`
+- **G0.5 对照物理合理**：**PASS**
+  - 证据：B2 明确声明 `null_hypothesis=shuffle_log_returns_rebuild_price`（收益率打乱后重建价格），无非物理跳变爆炸
+- **G0.6 Prior leakage audit**：**PASS**
+  - 证据：`audit_declaration.ablation="M_zeroed"`，A为 `group_id="A_real"`，B2为 `group_id="B2_shuffle_returns"`；且本轮输出未出现爆炸迹象（有利于审计一致性）
 
 ---
 
@@ -33,29 +35,29 @@
 
 ### 2.1 Primary #1：system_roi（基于 current_total）
 
-- A：mean=<TBD> median=<TBD>（可补分位数）
-- B2：mean=<TBD> median=<TBD>
+- A：mean = **-9.781%**，median = **-8.262%**，IQR = [**-11.984%**, **-6.953%**]
+- B2：mean = **-12.650%**，median = **-12.339%**，IQR = [**-14.359%**, **-10.698%**]
 
 统计检验（建议）：Mann–Whitney U（双侧）
 
-- U=<TBD>
-- p=<TBD>
-- Cliff’s delta δ=<TBD>
+- U = **687.0**
+- p = **0.000471**
+- Cliff’s delta δ = **0.5267**（A总体优于B2，中等偏强效应）
 
-**裁决（Primary #1）：PASS/FAIL（判定“是否退化/是否仍A显著优于B2”）**
+**裁决（Primary #1）：PASS（A仍显著优于B2）**
 
 ### 2.2 Primary #2：extinction_rate
 
-- A：extinct=<TBD>/<TBD> rate=<TBD>
-- B2：extinct=<TBD>/<TBD> rate=<TBD>
+- A：extinct = **21/30**，rate = **70.0%**
+- B2：extinct = **23/30**，rate = **76.7%**
 
 统计检验（建议）：Fisher exact（双侧）
 
-- odds=<TBD>
-- p=<TBD>
-- risk_diff(A-B2)=<TBD>
+- odds = **0.7101**
+- p = **0.7710**
+- risk_diff(A-B2) = **-6.67pp**（A略低，但不显著）
 
-**裁决（Primary #2）：PASS/FAIL**
+**裁决（Primary #2）：FAIL（差异不显著）**
 
 ---
 
@@ -74,8 +76,8 @@
 
 ### 3.2 本轮裁决（TBD）
 
-- **结论**：通过 / 不通过 / 证据不足
-- **一句话解释（人话）**：<TBD>
+- **结论**：**通过（对“M通道存在 prior leakage”的担忧显著降低）**
+- **一句话解释（人话）**：把 M 维度拿掉后，A 依旧显著优于 B2，说明此前的“时间结构优势”**不是主要靠 M 通道的先验建模撑起来的**；下一步应继续做 **C消融**（以及必要时审计其它硬规则/默认值），把怀疑面进一步缩小。
 
 ---
 
@@ -87,8 +89,8 @@ import numpy as np
 from pathlib import Path
 from scipy.stats import mannwhitneyu, fisher_exact
 
-A_path = "<PASTE_PATH_TO_A_SUMMARY_JSON>"
-B2_path = "<PASTE_PATH_TO_B2_SUMMARY_JSON>"
+A_path = "/Users/liugang/Cursor_Store/Prometheus-Quant/prometheus/v10/experiments/results_A_real_30__ablation_M_zeroed__20251221_015927/multiple_experiments_summary.json"
+B2_path = "/Users/liugang/Cursor_Store/Prometheus-Quant/prometheus/v10/experiments/results_B2_shuffle_returns_30__ablation_M_zeroed__20251221_020620/multiple_experiments_summary.json"
 
 def load(p):
     return json.loads(Path(p).read_text())
