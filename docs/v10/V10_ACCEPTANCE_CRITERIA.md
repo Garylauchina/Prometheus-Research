@@ -5,7 +5,7 @@
 
 ---
 
-## 0. 总目标（裁决口径）
+## 0. 总目标（裁决口径：以量化交易为实例的工程审查）
 
 **方法有效** ≈ 在严格的可复现与可审计前提下：
 
@@ -14,7 +14,8 @@
 - 在**消融/扰动**（C组）下，该证据按预期退化；
 - 全流程不存在“口径错误/数值爆炸/账本不闭合”这类工程幻觉。
 
-> 说明：这里的“有效”不是“证明真理”，而是获得工程意义上的可信度增量。
+> 说明：我们用“量化交易”作为实例来检验演化方法论，因此裁判尺度必须来自交易世界的硬约束（净值、回撤、摩擦、强平、可持续性、可对账）。  
+> 这里的“有效”不是“证明真理”，而是获得工程意义上的可信度增量。
 
 ---
 
@@ -59,16 +60,24 @@
 
 > 若B组跑不通或数值爆炸：对照无效，Gate 1 不能裁决。
 
-### 2.2 主指标（Primary endpoints）
+### 2.2 主指标（Primary endpoints，已锁定）
 
-为避免“挑好看的指标”，必须**预先固定**主指标（建议选2个，最多3个）：
+为避免“挑好看的指标”，必须**预先固定**主指标（建议选2个，最多3个）。本项目现阶段锁定为2个：
 
-- 候选：
-  - **`system_roi`**（必须用 `current_total` 计算，而非不可变常量）
-  - **`extinction_rate`**（灭绝比例：`alive_agents==0` 的 run 占比）
-  - **`profitable_agents_all`**（全体盈利人数/比例）
+- **Primary #1：`system_roi`（基于`current_total`）**
+  - 定义：`system_roi = current_total / initial_total_capital - 1`
+  - 口径：`current_total = allocated_capital + system_reserve`
+- **Primary #2：`extinction_rate`（灭绝比例）**
+  - 定义：`alive_agents == 0` 的 run 占比
 
-> 待确认：主指标最终选哪两个（在本文件发布后应锁定）。
+> 说明：`profitable_agents_all` 对结构更敏感，但容易被“刷微利/阈值抖动”误导，因此降级为次指标（Secondary）。
+
+### 2.2.1 次指标（Secondary endpoints，建议保留但不作为通过/失败唯一依据）
+
+- **`profitable_agents_all`**：全体盈利人数/比例（含死亡）
+- **回撤类**：`max_drawdown`（至少给分位数或置信区间）
+- **换手/交易摩擦代理**：`total_trades`、（如可得）`avg_M7 / avg_M9`
+- **存活结构**：`avg_alive_agents`、`avg_total_agents`（总谱系规模）
 
 ### 2.3 统计判定（建议）
 
@@ -139,9 +148,8 @@
 
 ---
 
-## 7. 待确认项（发布后应锁定）
+## 7. 待确认项（剩余需锁定）
 
-- **Primary endpoints**：最终选哪两个（建议包含 `system_roi` 或 `extinction_rate` 至少其一）。
 - **对照组B的生成方式与参数**：默认采用“打乱log-return重建价格”的方案。
 - **最小效应量阈值**：例如system_roi差异≥2pp、盈利人数差异≥50%等。
 
