@@ -171,4 +171,38 @@ Minimum evidence for every entry:
   - Add a `command:` override in docker-compose to pass `--mode ${MODE}` into `run_v10_service.py`.
 - **Status**: open (requires Quant repo patch + rerun C0.5)
 
+### Entry: DIFF-20251221-C0.5-G4.5-okx-rest-evidence-closure
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Evidence-chain closure (runtime proof)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_150526_bf82b23`
+  - **mode**: `okx_demo_api`
+  - **status**: `completed`
+  - **api_calls**: `15` (must be >0 for `okx_demo_api`)
+- **Artifacts (present)**:
+  - ✅ `run_manifest.json`
+  - ✅ `execution_fingerprint.json`
+  - ✅ `multiple_experiments_summary.json`
+  - ✅ `okx_rest_alignment_report.json`
+  - ✅ `okx_rest_raw_samples.json`
+  - ❌ `ccxt_alignment_report.json` / `ccxt_raw_samples.json` (expected: not installed; explicitly marked as skipped)
+- **Manifest truth markers (facts)**:
+  - **execution_alignment_lib**: `okx_rest`
+  - **execution_alignment_ok**: `True`
+  - **execution_alignment_report_path**: set (points to `okx_rest_alignment_report.json`)
+  - **execution_raw_samples_path**: set (points to `okx_rest_raw_samples.json`)
+  - **ccxt_alignment_ok**: `None`
+  - **ccxt_alignment_report_path**: `None`
+  - **ccxt_raw_samples_path**: `None`
+  - **ccxt_alignment_skipped_reason**: `ccxt_not_installed_using_okx_rest_evidence`
+  - **positions_quality**: `unreliable` (demo expected)
+  - **positions_source**: `inferred` (fallback strategy)
+  - **impedance_fidelity**: `simulated` (demo expected)
+  - **error**: N/A (no error)
+- **Interpretation (strict)**:
+  - This run **closes C0.5/G4.5 evidence chain** under an **honest library label** (`okx_rest`) without pretending CCXT evidence exists.
+  - This run does **not** claim “CCXT ↔ OKX SDK alignment passed”; it only proves “execution interface evidence can be produced and referenced” for the chosen execution library.
+- **Status**: completed (evidence closure achieved)
+
 
