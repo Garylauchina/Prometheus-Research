@@ -87,4 +87,11 @@
 3) `...MECHANISM_ATTRIBUTION...`（B阶段闭环）
 4) `...GENE_ATTRIBUTION...` + `...B_STAGE_V2/V3...`（机制硬化）
 
+---
+
+## 6) 目录页（更像“研究项目”）
+
+- `docs/README.md`（全仓库 docs 索引）
+- `docs/v10/README.md`（V10 文档目录页）
+
 

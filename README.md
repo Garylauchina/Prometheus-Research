@@ -6,15 +6,45 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[中文版](README_CN.md)** · **[Framework](docs/v8/V8.md)** · **[Methodology](docs/v8/METHODOLOGY_EN.md)** · **[Theory](docs/theory/CONJECTURE_EN.md)**
+**[中文](README_CN.md)** · **[Docs Index](docs/README.md)** · **[V10 Evidence Chain](docs/v10/V10_RESEARCH_INDEX.md)**
 
 </div>
 
 ---
 
-## 🎯 Research Question
+## Abstract (English) / 摘要（中文）
 
-**Can the unpredictability of markets be measured?**
+**English (primary)**: This repository is the **research & evidence logbook** of the Prometheus project.  
+It stores **acceptance criteria**, **decision records**, and **auditable evidence chains** for experiments.
+
+**中文（辅助）**：本仓库用于“研究化落盘”：保存验收标准、裁决记录与可复核证据链，让结论可以被第三方复核，而不依赖口头叙述。
+
+---
+
+## Current Focus: V10 (What you should read first) / 当前重点：V10（先读什么）
+
+- **V10 Evidence Chain / 证据链入口**: `docs/v10/V10_RESEARCH_INDEX.md`
+- **V10 Acceptance Criteria / 验收标准**: `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
+- **Roadmap (A→B→C) / 路线图**: `docs/v10/V10_ROADMAP_A_ENGINEERING_B_RESEARCH_C_PRODUCT.md`
+
+---
+
+## Reproducibility / 可复核性（最重要）
+
+**English**: This repo intentionally keeps **documents and evidence pointers**.  
+Raw simulation outputs live in the **Prometheus-Quant** repository (separate workspace). Most V10 documents include the exact `results_...` paths for verification.
+
+**中文**：Research 仓库主要存“文档+证据指针”；原始实验产物在 `Prometheus-Quant`（另一个仓库）中。V10 裁决文档会写清楚 `results_...` 路径，便于复核。
+
+---
+
+## Repository Map / 仓库导航
+
+- **V10 (primary)**: `docs/v10/` (acceptance criteria, decision records, mechanism attribution)
+- **Research notes**: `docs/research/`
+- **Architecture**: `docs/architecture/`
+- **Theory**: `docs/theory/`
+- **Legacy (v8 and earlier)**: `docs/v8/`, `docs/v7/`, `docs/v6/`
 
 ---
 
@@ -29,7 +59,7 @@ If this is true:
 
 ---
 
-## 🎯 Core Conjecture: Adaptive Exploration Theory
+## Background (Legacy): Adaptive Exploration Theory / 背景（历史阶段）
 
 ### What Question Are We Trying to Answer?
 
@@ -112,7 +142,7 @@ I* is like "cognitive mutation rate" ✨
 
 ---
 
-### 🔬 How to Verify?
+### 🔬 How to Verify? (Legacy)
 
 #### Experiment 1: Same Market, Multiple Runs
 
