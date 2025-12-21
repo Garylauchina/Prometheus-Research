@@ -205,4 +205,30 @@ Minimum evidence for every entry:
   - This run does **not** claim “CCXT ↔ OKX SDK alignment passed”; it only proves “execution interface evidence can be produced and referenced” for the chosen execution library.
 - **Status**: completed (evidence closure achieved)
 
+### Entry: DIFF-20251221-C0.7-positions-fallback-reconstructed-from-fills
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Execution-interface I-fallback (runtime proof)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_155211_3126b54`
+  - **mode**: `okx_demo_api`
+  - **status**: `completed`
+  - **api_calls**: `9`
+- **Artifact**:
+  - ✅ `positions_snapshot.json` exists (key)
+  - manifest points to: `/var/lib/prometheus-quant/runs/run_20251221_155211_3126b54/positions_snapshot.json`
+- **Manifest truth markers (facts)**:
+  - `positions_fallback_ok = True`
+  - `positions_fallback_reason = None`
+  - `positions_quality = "reconstructed_from_fills"`
+  - `positions_source = "reconstructed_from_fills"`
+- **Snapshot content (fact)**:
+  - `has_position = False` (flat at snapshot time)
+  - `contracts = 0.0`
+  - `source = "reconstructed_from_fills"`
+- **Interpretation (strict)**:
+  - PASS means the **reconstruction evidence pipeline** is working and auditable.
+  - PASS does **not** require ending with a non-zero position.
+- **Status**: completed (I-fallback evidence chain achieved)
+
 
