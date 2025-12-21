@@ -215,6 +215,12 @@
   - **关键口径：两个世界不能混裁（强制）**
     - **B阶段（离线实验世界）**：I/M 等特征来自系统内部状态与内部摩擦模型，因此“可得”；消融与A/B2裁决只在该世界内成立。
     - **C阶段（执行接口世界）**：I（positions）与 M（fills/fees/latency）必须从交易所/库返回获取；若 demo 不提供/不可靠，必须 `null + reason` 或标记 `simulated`，并给出 fallback 证据链。**不得因为 demo 缺失而倒推 B 阶段消融结论无效。**
+  - **自成交（self-trade / self-cross）风险（强制：先记录，再扩展）**
+    - 风险：同一账户下多 Agent/多循环同时交易同一合约时，可能发生“我们自己的买单和卖单互相成交”，导致虚假成交量与手续费损耗，并污染学习/归因。
+    - 最低要求（必须落盘）：
+      - `run_manifest` 记录：是否支持/启用 STP（Self-Trade Prevention）、是否做执行净额/聚合、以及当前检测能力强弱。
+      - raw evidence（如 `m_execution_raw.json`）保留最小字段以支持事后检测（脱敏可）。
+    - 说明：此条是执行层“世界物理约束/风险”，属于审计与外壳执行策略，不得渗入 core 决策路径。
   - 强制规则：
     - 必须通过 **统一适配层（adapter）** 接入交易所；业务逻辑不得散落依赖 CCXT/SDK 的原始字段名。
     - 必须在 `run_manifest/summary.meta` 记录：`exchange_lib`（ccxt/okx_sdk）、`exchange_id`（okx）、`env`（demo/live）、`symbol_in_use`（实际使用的symbol）、以及 `connect_check_ok`。

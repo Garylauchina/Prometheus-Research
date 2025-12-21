@@ -120,6 +120,15 @@ Goal: read **snapshots** from stage-1 pool for cold start, and run batch verific
 - Every observed CCXT ↔ OKX SDK discrepancy must be recorded with evidence references (run_id + raw samples + impact).
 - Canonical log: `docs/v10/V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
 
+**Self-trade (cross with ourselves) risk (mandatory, auditing-only)**:
+
+- When multiple Agents (or multiple strategy loops) trade the same instrument under the same account, we may accidentally match our own orders (**self-trade / self-cross**).
+- Risk: fake volume + fee loss + learning the “internal microstructure” instead of market structure.
+- Requirement:
+  - Prefer exchange-level STP (Self-Trade Prevention) if available; otherwise enforce an outer-shell execution policy (netting/aggregation) before we scale multi-agent execution.
+  - Record the policy and capabilities in `run_manifest.json` (see fields below).
+  - Preserve minimal raw fields needed for detection in `m_execution_raw.json` (or equivalent).
+
 ---
 
 ## 5) Artifact contract / 产物契约（必须落盘）
@@ -145,6 +154,12 @@ Minimum fields in `run_manifest.json`:
 - `start_time`, `end_time`
 - `positions_quality` (e.g. "exchange_reported" | "reconstructed_from_fills" | "unreliable" | "unknown")
 - `impedance_fidelity` (e.g. "simulated" | "demo_proxy" | "live_calibrated" | "unknown")
+- `self_trade_prevention` (object, auditing-only):
+  - `stp_supported` (bool | null)
+  - `stp_enabled` (bool | null)
+  - `execution_netting_enabled` (bool)  # whether we aggregate/net orders before sending
+  - `self_trade_policy` ("forbid" | "allow" | "unknown")
+  - `self_trade_detection_capability` ("strong" | "weak" | "none")  # based on available exchange fields
 
 ---
 
