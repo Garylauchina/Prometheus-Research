@@ -20,6 +20,17 @@ It exists to prevent “self-deception”: the system must never silently learn 
 
 ---
 
+## 1.1 Two-world separation (critical) / “两个世界”口径（非常关键）
+
+**中文（主）**：B阶段（离线实验：A/B2 + 消融）与 C阶段（okx_demo_api/okx_live 执行对齐）属于**两个不同世界**，不能混在一起裁决：
+
+- **B阶段离线世界**：I/M 等特征来自系统内部状态与内部摩擦模型，因此在该世界里它们是“可得”的，消融结论也只在该世界内成立/比较。
+- **C阶段执行接口世界**：I（positions）与 M（fills/fees/latency）必须从交易所/库返回中获取；OKX demo 环境下可能“不提供/不可靠”，这不意味着 B 阶段结论失效，但意味着**迁移到执行世界时必须标记为 null+reason / simulated，并提供 fallback 证据链**。
+
+一句话：**“demo 不提供”是执行接口世界的观测限制，不是离线世界的特征无效。**
+
+---
+
 ## 2) Golden rule / 黄金规则
 
 **Record what you saw, not what you think.**
