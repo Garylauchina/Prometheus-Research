@@ -12,6 +12,12 @@ It is intentionally **engineering-first**: reproducibility, evidence integrity, 
 
 ## 1) Non-negotiable principles / 不可动摇的原则
 
+## Terminology / 术语对照（减少沟通成本）
+
+- **Stabilizers** (“ballast”) / **压舱石**：系统的稳定底盘。目标是降低尾部风险与灭绝概率（不要求一定赚钱，但不能靠“零交易”逃避压力）。
+- **Contributors** / **盈利贡献者**：提供可复核的正贡献（更接近“可重复现金流”，不要求极端峰值）。
+- **Champions** / **旗手**：极少数在特定窗口显著拉开差距的尖峰个体（必须可追责、可复盘，不能成为系统炸弹）。
+
 ### P1. Core invariance / Core不变
 
 - **Must not modify**: `prometheus/v10/core/` (world rules, capital model, features, decision logic, state machine).
