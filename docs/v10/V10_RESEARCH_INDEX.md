@@ -106,5 +106,6 @@
 - C0.7 里程碑（positions fallback 证据链通过）：`docs/v10/V10_MILESTONE_C0_7_POSITIONS_FALLBACK_PASSED_20251221.md`
 - C0.8 里程碑（positions 重建 raw 证据可追溯）：`docs/v10/V10_MILESTONE_C0_8_POSITIONS_RAW_EVIDENCE_PASSED_20251221.md`
 - C0.9 里程碑（M 执行 raw 证据落盘）：`docs/v10/V10_MILESTONE_C0_9_M_EXECUTION_RAW_EVIDENCE_PASSED_20251221.md`
+- C1.0 协议（1小时长跑证据链压力测试）：`docs/v10/V10_C_STAGE_C1_0_LONG_RUN_PROTOCOL_20251221.md`
 
 
