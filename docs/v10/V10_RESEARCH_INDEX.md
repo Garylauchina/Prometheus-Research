@@ -94,4 +94,10 @@
 - `docs/README.md`（全仓库 docs 索引）
 - `docs/v10/README.md`（V10 文档目录页）
 
+---
+
+## 7) VPS / 产品化开发指导（C阶段入口）
+
+- `docs/v10/V10_VPS_DEVELOPMENT_GUIDE.md`（英主中辅：安全基座、证据链、两级沙盒、火种库只增不改、快照规则）
+
 
