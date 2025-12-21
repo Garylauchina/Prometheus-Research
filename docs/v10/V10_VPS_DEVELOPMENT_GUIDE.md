@@ -217,5 +217,16 @@ Each run must record the following in `run_manifest.json` and/or `summary.meta`:
 
 - Acceptance criteria (Gate 4 included): `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 - V10 evidence chain index: `docs/v10/V10_RESEARCH_INDEX.md`
+- Execution interface diff log (OKX SDK vs CCXT): `docs/v10/V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
+
+---
+
+## 9) Known pitfalls / 已知坑（优先排雷）
+
+### 9.1 Mode configuration must be a CLI arg / mode 必须通过命令行参数传入
+
+`prometheus/v10/ops/run_v10_service.py` parses mode from `--mode ...` (CLI), not from `MODE` env var.
+
+中文：如果 Dockerfile/compose 把 `--mode` 写死或默认成不存在的值（例如 `okx_demo`），那么 `.env` 里的 `MODE=okx_demo_api` 也会被覆盖，导致 C0.5 无法启动。解决方案必须在 ops 外壳层完成：统一默认值，并确保 compose 用 `command:` 把 `--mode ${MODE}` 传进 CLI。
 
 

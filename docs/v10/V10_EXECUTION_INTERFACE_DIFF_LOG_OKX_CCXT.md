@@ -143,4 +143,21 @@ Minimum evidence for every entry:
   - **Next verification**:
     - produce a single `okx_demo_api` run with both: (a) CCXT raw samples and (b) OKX SDK/REST raw samples (sanitized), then record as a real diff entry.
 
+### Entry: DIFF-20251221-C0.5-mode-config-mismatch
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Configuration mismatch (fatal run entry issue)
+- **Observed issue (facts)**:
+  - `prometheus/v10/ops/run_v10_service.py` only accepts: `okx_demo_sim`, `okx_demo_api`, `offline`, `okx_live`.
+  - Quant repo `Dockerfile` default `CMD` hard-codes `--mode okx_demo` (invalid).
+  - Quant repo `docker-compose.yml` sets `MODE=${MODE:-okx_demo}` (invalid default), and **does not pass** `MODE` into the CLI args unless an explicit `command:` override is used.
+- **Impact**:
+  - C0.5 / G4.5 evidence-chain run cannot start reliably; `.env` values can be silently ignored/overridden.
+- **Severity**: S3 (Fatal)
+- **Mitigation (ops shell only, no core changes)**:
+  - Change Dockerfile default mode to `okx_demo_sim` (safe default).
+  - Change docker-compose default `MODE` to `okx_demo_sim`.
+  - Add a `command:` override in docker-compose to pass `--mode ${MODE}` into `run_v10_service.py`.
+- **Status**: open (requires Quant repo patch + rerun C0.5)
+
 
