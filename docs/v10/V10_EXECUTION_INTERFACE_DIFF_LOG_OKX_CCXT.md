@@ -260,4 +260,24 @@ Minimum evidence for every entry:
   - Demo fidelity must remain explicitly labeled (demo ≠ live).
 - **Status**: completed
 
+### Entry: DIFF-20251221-C1.0-long-run-1h-evidence-chain-pass
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Long-run evidence-chain stress test (runtime proof)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_170248_9026266`
+  - **mode**: `okx_demo_api`
+  - **status**: `completed`
+  - **duration_seconds**: `3601.85`
+  - **api_calls**: `63`
+- **Artifacts (facts)**:
+  - 8/8 evidence-chain JSON artifacts present
+  - raw evidence size growth observed:
+    - `m_execution_raw.json` ~31 KB
+    - `positions_reconstruction_raw.json` ~10 KB
+- **Interpretation (strict)**:
+  - PASS means the evidence chain is stable under 1-hour runtime.
+  - Next focus is **controlling raw evidence growth** without sacrificing auditability.
+- **Status**: completed
+
 
