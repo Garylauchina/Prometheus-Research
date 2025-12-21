@@ -204,6 +204,20 @@
     - 每次运行必须写入 `run_manifest`/`summary.meta`：当期生态围栏配置（rf来源/阈值/执行环境指纹版本/限流参数）。
     - 若发现决策路径依赖新增生态阈值：Gate 4 **Fail**，必须回退或将其降级为“审计标签/生命周期规则”。
 
+- **G4.5 执行接口对齐审计（CCXT/OKX SDK）（强制）**
+  - 目的：防止“基因学到的是接口差异/实现细节”，而非市场结构；保证 V10 的基因表达与特征口径在产品化执行层仍可复核。
+  - 强制规则：
+    - 必须通过 **统一适配层（adapter）** 接入交易所；业务逻辑不得散落依赖 CCXT/SDK 的原始字段名。
+    - 必须在 `run_manifest/summary.meta` 记录：`exchange_lib`（ccxt/okx_sdk）、`exchange_id`（okx）、`env`（demo/live）、`symbol_in_use`（实际使用的symbol）、以及 `connect_check_ok`。
+    - **切换执行库（ccxt ↔ okx_sdk）视为世界差异**：需做最小回归验证（至少 Gate 4 的执行指纹与“活着指标”仍可落盘且口径不漂移；必要时回归 Gate 1）。
+  - 落盘要求（必须提供“证据包”，脱敏可）：
+    - `ccxt_alignment_report.json`（或等价）：字段映射表、缺失字段的降级策略、已知风险点（posSide/tdMode/fee/partial fill等）
+    - `ccxt_raw_samples.json`（或等价）：至少包含 ticker/ohlcv/orderbook/positions/balance/order/trade 的原始响应样例（敏感字段置空）
+  - 通过条件（建议工程线）：
+    - `okx_demo_api` 模式下 `api_calls > 0` 且 `connect_check_ok=true`
+    - 对齐证据包存在并被 run_manifest 引用
+    - 关键字段缺失时必须 `null + reason`，不得伪装为真实可得
+
 ---
 
 ## 6. 最终裁决输出格式（强制）

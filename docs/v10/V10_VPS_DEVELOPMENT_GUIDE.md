@@ -113,6 +113,7 @@ Goal: read **snapshots** from stage-1 pool for cold start, and run batch verific
 - Append-only pools (no overwrite).
 - Batch evaluation (avoid streaming updates that blur experiment boundaries).
 - Config versioning: write config snapshot into `run_manifest.json`.
+- **Execution interface alignment (mandatory)**: record `exchange_lib/env/symbol_in_use` and ship a sanitized alignment evidence bundle (raw samples + mapping report). Switching CCXT ↔ SDK is treated as a “world difference”.
 
 ---
 
