@@ -143,6 +143,8 @@ Minimum fields in `run_manifest.json`:
 - `config_hash` and a dumped config section (or file reference)
 - `results_dir`
 - `start_time`, `end_time`
+- `positions_quality` (e.g. "exchange_reported" | "reconstructed_from_fills" | "unreliable" | "unknown")
+- `impedance_fidelity` (e.g. "simulated" | "demo_proxy" | "live_calibrated" | "unknown")
 
 ---
 

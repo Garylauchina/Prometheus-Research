@@ -110,6 +110,34 @@ Minimum evidence for every entry:
 
 ## 6) Current entries / 当前已记录条目
 
-暂无（从第一条实测差异开始追加）。
+### Entry: DIFF-20251221-G4.5-alignment-status-baseline
+
+- **Date (UTC)**: 2025-12-21
+- **Source**: Alignment mapping/audit summary (not yet a dual-run raw-sample diff entry)
+- **Observed alignment status (facts)**:
+  - **E (Environment)**: ✅ fully aligned (CCXT `fetch_ticker` / `fetch_ohlcv`)
+  - **I (Identity)**: ⚠️ partial (demo `fetch_positions()` unreliable/empty; needs fallback)
+  - **M (Market Interaction)**: ⚠️ partial (demo fidelity low; must be labeled as simulated)
+  - **C (Community)**: ✅ aligned (no CCXT dependency)
+- **Risks & mitigations (facts)**:
+  - **HIGH (I1/I2 positions state)**:
+    - risk: demo positions may be empty or inaccurate
+    - mitigation: must implement an **internal position tracker** (reconstruct positions from order fills / trade stream)
+  - **MEDIUM (M impedance fidelity)**:
+    - risk: demo slippage/latency != real market friction
+    - mitigation: demo runs must mark `impedance_fidelity: "simulated"`; production must recalibrate
+- **Evidence references (pointers)**:
+  - mapping report (Quant repo): `prometheus/v10/ops/CCXT_OKX_ALIGNMENT_AUDIT.md`
+  - runtime artifacts (expected per run): `ccxt_alignment_report.json`, `ccxt_raw_samples.json`, `run_manifest.json`
+- **Impact on V10 internal schema**:
+  - **E**: OK (expected to be stable)
+  - **I**: must not pretend “positions are obtainable” when they are not; use `null + reason` or internal tracker output
+  - **M**: must label fidelity; do not compare demo M-distributions to live as if same-world
+  - **C**: unaffected
+- **Severity**: S2 (High) for I; S1 (Medium) for M
+- **Decision**:
+  - **Status**: open
+  - **Next verification**:
+    - produce a single `okx_demo_api` run with both: (a) CCXT raw samples and (b) OKX SDK/REST raw samples (sanitized), then record as a real diff entry.
 
 
