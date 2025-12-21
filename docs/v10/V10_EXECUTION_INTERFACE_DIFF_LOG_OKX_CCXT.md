@@ -129,6 +129,9 @@ Minimum evidence for every entry:
 - **Evidence references (pointers)**:
   - mapping report (Quant repo): `prometheus/v10/ops/CCXT_OKX_ALIGNMENT_AUDIT.md`
   - runtime artifacts (expected per run): `ccxt_alignment_report.json`, `ccxt_raw_samples.json`, `run_manifest.json`
+- **Implementation note (from code read, not from runtime)**:
+  - Current `okx_demo_api` connector (`prometheus/v10/ops/okx_api_connector.py`) is a direct REST client and does **not** expose a CCXT `exchange` instance by default.
+  - Therefore, `run_v10_service.py`’s alignment self-check may be **skipped** (no exchange instance) unless an explicit CCXT exchange object is attached for audit calls.
 - **Impact on V10 internal schema**:
   - **E**: OK (expected to be stable)
   - **I**: must not pretend “positions are obtainable” when they are not; use `null + reason` or internal tracker output
