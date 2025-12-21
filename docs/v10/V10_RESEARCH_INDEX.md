@@ -111,5 +111,6 @@
 - C1.0 里程碑（1小时长跑通过，证据链稳定）：`docs/v10/V10_MILESTONE_C1_0_LONG_RUN_PASSED_20251221.md`
 - C1.1 协议（raw证据增长控制：分片+索引+hash）：`docs/v10/V10_C_STAGE_C1_1_RAW_GROWTH_CONTROL_PROTOCOL_20251221.md`
 - C1.1 里程碑（raw增长控制通过：分片+索引+hash+manifest引用）：`docs/v10/V10_MILESTONE_C1_1_RAW_GROWTH_CONTROL_PASSED_20251221.md`
+- C1.2 协议（过夜长跑 6–8h 压测证据链 + 分片索引）：`docs/v10/V10_C_STAGE_C1_2_OVERNIGHT_LONG_RUN_PROTOCOL_20251221.md`
 
 
