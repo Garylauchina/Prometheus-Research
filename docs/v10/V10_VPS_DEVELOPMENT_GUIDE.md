@@ -90,8 +90,9 @@ Goal: read **snapshots** from stage-1 pool for cold start, and run batch verific
 ### 4.1 Supply chain safety / 供应链
 
 - Pin Python version in Docker image tag.
+- **Single source of truth for runtime**: deployment must run inside Docker with **Python 3.12** (local Python version is not a deployment guarantee).
 - Lock dependencies (requirements pinned / uv.lock / poetry.lock).
-- Record `git_commit` + `image_tag/digest` in `run_manifest.json`.
+- Record `git_commit` + `image_tag/digest` + `python_version` in `run_manifest.json`.
 
 ### 4.2 Runtime safety / 运行时
 
@@ -123,6 +124,7 @@ Minimum fields in `run_manifest.json`:
 
 - `git_commit`
 - `docker_image` (tag or digest)
+- `python_version` (inside container)
 - `mode` (offline/okx_demo/okx_live)
 - `window` (name/start/len if applicable)
 - `ablation` (name/details if applicable)
