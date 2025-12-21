@@ -246,4 +246,18 @@ Minimum evidence for every entry:
   - This reduces “trust me” surface area before we touch live.
 - **Status**: completed
 
+### Entry: DIFF-20251221-C0.9-m-execution-raw-evidence
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: M raw evidence (runtime proof)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_162804_9e26841`
+  - **mode**: `okx_demo_api`
+- **Artifact (fact)**:
+  - ✅ `m_execution_raw.json` exists in run directory
+- **Interpretation (strict)**:
+  - PASS means M is no longer “summary-only”: we ship sanitized raw evidence records for execution interaction.
+  - Demo fidelity must remain explicitly labeled (demo ≠ live).
+- **Status**: completed
+
 
