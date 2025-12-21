@@ -31,15 +31,15 @@
 
 | window | len | A system_roi mean | B2 system_roi mean | p(system_roi) | δ | A extinct | B2 extinct | p(ext) | 结论 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| W1 | 8760 | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| W1b | 4380 | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| W2 | 4380 | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| W1 | 8760 | -5.902% | -9.349% | 2.235e-15 | 0.649 | 56/100 | 51/100 | 0.5708 | system_roi PASS；ext FAIL |
+| W1b | 4380 | -5.613% | -9.417% | 1.224e-17 | 0.700 | 0/100 | 7/100 | 0.0140 | system_roi PASS；ext PASS |
+| W2 | 4380 | +1.925% | -2.047% | 6.901e-10 | 0.505 | 1/100 | 0/100 | 1.0 | system_roi PASS；ext FAIL |
 
 ---
 
 ## 3) Gate 2.3 最终裁决（待回填）
 
-- **通过 / 不通过 / 证据不足**
-- 一句话解释：<TBD>
+- **通过（Primary #1 system_roi 跨窗口一致性成立）**
+- 一句话解释：在 W1（全年）、W1b（上半年）、W2（下半年）三个窗口中，`system_roi` 均稳定体现 A 显著优于 B2（且效应量均 > 0.3），因此“利用时间结构”的证据具备时间窗迁移一致性；灭绝率在不同窗口中不稳定/多为不显著（但未出现爆炸性翻转），建议将其作为稳定性代价指标持续跟踪。
 
 
