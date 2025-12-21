@@ -14,6 +14,7 @@
 - **Acceptance Criteria / 验收标准（项目宪法）**: `V10_ACCEPTANCE_CRITERIA.md`
 - **Roadmap (A→B→C) / 路线图**: `V10_ROADMAP_A_ENGINEERING_B_RESEARCH_C_PRODUCT.md`
 - **Ablation Execution Protocol / 消融执行协议（行为约束）**: `V10_ABLATION_EXECUTION_PROTOCOL.md`
+- **Execution interface diff log (OKX SDK vs CCXT) / 执行接口差异落盘**: `V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
 
 ---
 

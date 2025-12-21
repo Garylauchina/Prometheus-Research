@@ -115,6 +115,11 @@ Goal: read **snapshots** from stage-1 pool for cold start, and run batch verific
 - Config versioning: write config snapshot into `run_manifest.json`.
 - **Execution interface alignment (mandatory)**: record `exchange_lib/env/symbol_in_use` and ship a sanitized alignment evidence bundle (raw samples + mapping report). Switching CCXT ↔ SDK is treated as a “world difference”.
 
+**Execution interface difference log (mandatory, append-only)**:
+
+- Every observed CCXT ↔ OKX SDK discrepancy must be recorded with evidence references (run_id + raw samples + impact).
+- Canonical log: `docs/v10/V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
+
 ---
 
 ## 5) Artifact contract / 产物契约（必须落盘）
