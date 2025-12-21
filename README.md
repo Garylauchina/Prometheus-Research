@@ -1,262 +1,91 @@
-# Prometheus-Research
+## Prometheus-Research
 
 <div align="center">
 
-*An evolutionary probe into market complexity*
+*An auditable evolutionary research program for probing market structure.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[中文](README_CN.md)** · **[Docs Index](docs/README.md)** · **[V10 Evidence Chain](docs/v10/V10_RESEARCH_INDEX.md)**
+**[中文说明](README_CN.md)** · **[Docs Index](docs/README.md)** · **[V10 Evidence Chain](docs/v10/V10_RESEARCH_INDEX.md)** · **[V10 Folder](docs/v10/README.md)**
 
 </div>
 
 ---
 
-## Abstract (English) / 摘要（中文）
+## Why this repo exists (English) / 本仓库的定位（中文）
 
-**English (primary)**: This repository is the **research & evidence logbook** of the Prometheus project.  
-It stores **acceptance criteria**, **decision records**, and **auditable evidence chains** for experiments.
+**English (primary)**: This repository is the **research record** of the Prometheus project.  
+Its purpose is not to “sell an idea”, but to preserve a **reviewable evidence chain**:
 
-**中文（辅助）**：本仓库用于“研究化落盘”：保存验收标准、裁决记录与可复核证据链，让结论可以被第三方复核，而不依赖口头叙述。
+- **Acceptance criteria** (what counts as a valid result)
+- **Decision records** (what we concluded, and why)
+- **Auditability constraints** (what we forbid to keep evidence clean)
 
----
-
-## Current Focus: V10 (What you should read first) / 当前重点：V10（先读什么）
-
-- **V10 Evidence Chain / 证据链入口**: `docs/v10/V10_RESEARCH_INDEX.md`
-- **V10 Acceptance Criteria / 验收标准**: `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
-- **Roadmap (A→B→C) / 路线图**: `docs/v10/V10_ROADMAP_A_ENGINEERING_B_RESEARCH_C_PRODUCT.md`
+**中文（辅助）**：这是 Prometheus 的“研究仓库”，核心目标是**让结论可被复核**。  
+这里存的不是代码主仓，而是：验收标准、裁决记录、证据链入口与审计约束。
 
 ---
 
-## Reproducibility / 可复核性（最重要）
+## Current status: V10 is the mainline / 当前主线：V10
 
-**English**: This repo intentionally keeps **documents and evidence pointers**.  
-Raw simulation outputs live in the **Prometheus-Quant** repository (separate workspace). Most V10 documents include the exact `results_...` paths for verification.
+- **Start here / 从这里开始**: `docs/v10/V10_RESEARCH_INDEX.md`
+- **Acceptance criteria / 验收标准（项目宪法）**: `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
+- **Roadmap / 路线图（A→B→C）**: `docs/v10/V10_ROADMAP_A_ENGINEERING_B_RESEARCH_C_PRODUCT.md`
 
-**中文**：Research 仓库主要存“文档+证据指针”；原始实验产物在 `Prometheus-Quant`（另一个仓库）中。V10 裁决文档会写清楚 `results_...` 路径，便于复核。
+V10 is built to answer a very practical reviewer question:
 
----
-
-## Repository Map / 仓库导航
-
-- **V10 (primary)**: `docs/v10/` (acceptance criteria, decision records, mechanism attribution)
-- **Research notes**: `docs/research/`
-- **Architecture**: `docs/architecture/`
-- **Theory**: `docs/theory/`
-- **Legacy (v8 and earlier)**: `docs/v8/`, `docs/v7/`, `docs/v6/`
+- **English**: “Do you have evidence that the system exploits temporal structure, rather than artifacts or prior-coded strategy?”
+- **中文**：“你如何证明系统利用的是时间结构，而不是漏洞、先验指标、或者人为预设策略？”
 
 ---
 
-## 💡 Hypothesis
+## Reproducibility & Evidence (English) / 可复核性与证据（中文）
 
-Markets may be a **Gödelian system**: no complete, self-provable prediction framework can exist from within the system itself.
+**English (primary)**:
+This repo intentionally keeps **documents and evidence pointers**.  
+Raw simulation outputs and code live in the separate repository **Prometheus-Quant**.  
+Most V10 decision documents include exact `results_...` directories to verify:
 
-If this is true:
-- We cannot find a "perfect" prediction model
-- But can we measure the **strength** of unpredictability?
-- Can we observe the **structure** of unpredictability?
+- summary JSON (run aggregates + invariants)
+- agent-level behaviors (JSON)
+- aligned genomes matrix (NPY)
 
----
-
-## Background (Legacy): Adaptive Exploration Theory / 背景（历史阶段）
-
-### What Question Are We Trying to Answer?
-
-Imagine:
-
-**Scenario A: Simple Environment**
-- You're playing a highly structured game (like tic-tac-toe)
-- Best strategy: think carefully, follow patterns
-- No need for much "random exploration"
-
-**Scenario B: Complex Environment**
-- You're playing a game full of uncertainty (like poker)
-- Best strategy: sometimes follow logic, sometimes randomize (bluff)
-- Requires a certain degree of "unpredictability"
-
-**Core Question:**
-> Can an intelligent system, without knowing the environment's complexity, automatically find the optimal level of "randomness/exploration" through evolution?
-> 
-> If so, does this "optimal level" reflect the environment's complexity?
+**中文（辅助）**：Research 仓库存“文档+证据指针”，原始实验产物在 `Prometheus-Quant`。  
+V10 文档会写清楚 `results_...` 路径，复核时只需要按路径读取即可（不靠口头解释）。
 
 ---
 
-### 💡 The Core of Our Conjecture
+## What you can audit in V10 (English) / V10 可审计点（中文）
 
-**1. Convergence**:
-- Give agents a heritable "exploration parameter" \( I \) (value between 0-1)
-- Higher \( I \) = more random/contrarian behavior
-- Lower \( I \) = more deterministic/conformist behavior
-- After sufficient evolution time, \( I \) converges to a stable value \( I^* \)
+- **Null hypothesis**: A (real time) vs B2 (shuffle log-returns to destroy temporal structure)
+- **Prior leakage defense**: mandatory ablations (M/C/E-subset/I and subsets)
+- **Window migration**: non-overlapping windows (W1b/W2) for robustness
+- **Mechanism attribution**: from run clusters → agent clusters → gene-level channels
+- **Hardened audits**: winner definition (v2), IN/OUT sign consistency (v2), stratified stability (v3/v3.1)
 
-**2. Environment Dependence**:
-- Simple environment (high predictability) → Low \( I^* \) (~0.1)
-- Complex environment (low predictability) → High \( I^* \) (~0.6+)
-- **\( I^* \) quantifies the environment's "unpredictability"**
-
-**3. Reverse Inference**:
-- By observing how \( I^* \) converges (speed, path, stability)
-- We can infer hidden environmental properties (memory length, periodicity, chaos level, etc.)
-- Like: observing biological evolution traits → inferring environmental pressures
+入口都在：`docs/v10/V10_RESEARCH_INDEX.md`
 
 ---
 
-### 📊 Intuitive Analogies
+## Repository map / 仓库地图
 
-#### Analogy 1: Darwin's Finches 🦎
-
-```
-Galápagos Islands:
-
-Different islands → Different food environments
-Finch beaks → Evolved different shapes
-  - Hard-shelled seeds → Thick beaks
-  - Insects → Thin beaks
-
-Our Research:
-
-Different markets → Different complexity levels
-Agent's I* → Evolves to different values
-  - Simple markets → Low I* (deterministic strategies)
-  - Complex markets → High I* (exploratory strategies)
-
-Through I* value, infer market complexity ✨
-```
-
-#### Analogy 2: Mutation Rate 🧬
-
-```
-Biology:
-
-Stable environment → Low mutation rate (preserve effective genes)
-Volatile environment → High mutation rate (rapid adaptation)
-
-Our System:
-
-Simple market → Low I* (low exploration/randomness)
-Complex market → High I* (high exploration/randomness)
-
-I* is like "cognitive mutation rate" ✨
-```
+- **Primary (V10)**: `docs/v10/`
+- **Research audits & memos**: `docs/research/`
+- **Architecture notes**: `docs/architecture/`
+- **Theory (optional)**: `docs/theory/`
+- **Legacy**: `docs/v8/`, `docs/v7/`, `docs/v6/`
 
 ---
 
-### 🔬 How to Verify? (Legacy)
+## Citation / 引用方式（可选）
 
-#### Experiment 1: Same Market, Multiple Runs
-
-**If conjecture holds**:
-- Systems with different random seeds
-- Should converge to similar \( I^* \)
-- Proves \( I^* \) is environment-determined, not random
-
-#### Experiment 2: Different Markets, Same System
-
-**If conjecture holds**:
-- Gentle market → Low \( I^* \)
-- Medium market → Medium \( I^* \)
-- Brutal market → High \( I^* \)
-- Proves \( I^* \) reflects environmental complexity
-
-#### Experiment 3: Observe Convergence Process
-
-**If conjecture holds**:
-- Simple market: Fast, monotonic convergence
-- Complex market: Slow, oscillatory convergence
-- Chaotic market: Chaotic wandering, hard to converge
-- Convergence "fingerprint" reveals microstructure
+If you refer to this work, cite the **repository** and the specific **V10 decision record(s)** by file path under `docs/v10/`.
 
 ---
 
-### 🌟 Possible Discoveries (Hypothetical)
+## License
 
-**Discovery A: Market is "Markovian"**
-```
-Experimental results:
-  I* = 0.05 (very low)
-  Fast convergence (~3000 cycles)
-  Monotonic path
-
-Inference: Short memory, high predictability, suitable for modeling ✓
-```
-
-**Discovery B: Market is "Periodic"**
-```
-Experimental results:
-  I* = 0.25 (medium)
-  Slow convergence (~15000 cycles)
-  Oscillatory path
-
-Inference: Periodic structure, medium predictability ⚠️
-```
-
-**Discovery C: Market is "Chaotic"**
-```
-Experimental results:
-  I* = 0.65 (very high)
-  Very slow convergence (>50000 cycles)
-  Chaotic path
-
-Inference: Highly complex, low predictability ❌
-```
-
-**Discovery D: Market is "Non-stationary"**
-```
-Experimental results:
-  I*(t) continuously drifts
-  No convergence
-
-Inference: Evolving microstructure, requires continuous adaptation 🔄
-```
-
----
-
-### 💎 Philosophical Significance
-
-**"Evolution is the Only Solution to Incompleteness"**
-
-```
-Gödel tells us:
-  Within formal systems, some truths cannot be proven
-
-Markets might be like this:
-  Within the system, complete prediction is impossible
-
-But evolution tells us:
-  No need to "prove"
-  Only need "what works"
-  
-I* is evolution's "pragmatic solution":
-  - Cannot be formally derived
-  - But can be discovered through evolution
-  - It quantifies the "unprovable boundary" ✨
-```
-
----
-
-**📐 For complete mathematical formulation and rigorous proofs, see: [Theory Document](docs/theory/CONJECTURE_EN.md)**
-
----
-
-## 🔬 Research Framework
-
-Assuming markets are a **Gödelian system** (no complete, self-provable prediction framework exists), we construct a multi-agent system with:
-
-**Three Core Constraints:**
-1. **No prior strategy** - Agents start with random weights, no human-designed logic
-2. **No objective function** - No explicit "goal" to optimize
-3. **No explicit optimization** - Only natural selection through survival pressure
-
-Through **minimal, local, life-and-death trading rules**, we observe whether **stable, reproducible, comparable statistical structures** emerge spontaneously.
-
-**Thus verifying: whether the unpredictability of markets is itself measurable.**
-
----
-
-### Methodological Principles
-
-To achieve this goal, we developed a methodology to design a measurement system.
+MIT License. See `LICENSE`.
 
 **Principle 0: Measurability Criteria**
 - 0.1 Disturbance is Measurable - Observation system's interference is quantifiable or comparable
