@@ -170,6 +170,41 @@ Minimum fields in `run_manifest.json`:
 
 ---
 
+## 7.1 Survival-first KPI (“Stay alive”) / 第一指标：活着（必须落盘）
+
+**English (primary)**: For C-stage, the #1 KPI is **staying alive**. We do not expect “never crash”; we require that the system’s **internal-collapse interval** becomes measurable and improvable over time.
+
+**中文（辅助）**：C阶段第一指标就是**活着**。我们不追求永不崩溃，而是要把“内部崩溃间隔”变成可测、可拉长的曲线。
+
+### Definitions / 口径定义（审计层，不进决策路径）
+
+- **Internal-collapse event / 内部崩溃事件**（任一触发即记为一次事件）：
+  - **Extinction**: `alive_agents == 0`
+  - **Financial collapse**: `system_reserve <= 0`（或项目定义的等价条件）
+
+- **Time-to-first-internal-collapse / 首次内部崩溃时间**：
+  - 从 run 开始到第一次内部崩溃事件发生的墙钟时间（或 ticks）。
+
+- **Internal-collapse interval / 内部崩溃间隔**：
+  - 相邻两次内部崩溃事件之间的墙钟时间（或 ticks）。
+
+- **Restart time / 冷启动耗时**：
+  - 从检测到内部崩溃到系统恢复到“再次可产生有效产物/再次可下单”的时间。
+
+### Artifact requirements / 落盘要求（强制）
+
+Each run must record the following in `run_manifest.json` and/or `summary.meta`:
+
+- `internal_collapse_detected` (bool)
+- `internal_collapse_reason` ("extinction" | "financial" | "both" | null)
+- `internal_collapse_time` (UTC timestamp, if occurred)
+- `time_to_first_internal_collapse_seconds` (number or null)
+- `restart_time_seconds` (number or null, if restart mechanism exists)
+
+**Note**: This is an auditing metric only. It must not be used as a hard threshold inside the decision/state machine path (see “ecological fences ≠ decision logic”).
+
+---
+
 ## 8) References / 参考
 
 - Acceptance criteria (Gate 4 included): `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
