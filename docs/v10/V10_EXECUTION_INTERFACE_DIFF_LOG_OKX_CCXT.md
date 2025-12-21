@@ -231,4 +231,19 @@ Minimum evidence for every entry:
   - PASS does **not** require ending with a non-zero position.
 - **Status**: completed (I-fallback evidence chain achieved)
 
+### Entry: DIFF-20251221-C0.8-positions-raw-evidence-linked
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Evidence-link closure (snapshot ↔ raw)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_161052_96de55f`
+  - **mode**: `okx_demo_api`
+- **Artifacts (facts)**:
+  - ✅ `positions_snapshot.json`
+  - ✅ `positions_reconstruction_raw.json`
+- **Interpretation (strict)**:
+  - PASS means positions reconstruction is no longer a black box: **raw evidence is shipped alongside the snapshot** (sanitized).
+  - This reduces “trust me” surface area before we touch live.
+- **Status**: completed
+
 
