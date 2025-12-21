@@ -280,4 +280,20 @@ Minimum evidence for every entry:
   - Next focus is **controlling raw evidence growth** without sacrificing auditability.
 - **Status**: completed
 
+### Entry: DIFF-20251221-C1.1-raw-growth-control-shards-index
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Raw evidence growth control (runtime proof)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_182148_4974080`
+- **Policy (fact)**:
+  - `records_count` threshold = `200`
+- **Artifacts (facts)**:
+  - `m_execution_raw_part_0001.json` + `m_execution_raw_index.json`
+  - `positions_reconstruction_raw_part_0001.json` + `positions_reconstruction_raw_index.json`
+  - `run_manifest.json` references index paths + hashes (stable audit entry point)
+- **Interpretation (strict)**:
+  - PASS means raw evidence can scale to longer runs without single-file blow-up, while remaining tamper-evident (hash per shard).
+- **Status**: completed
+
 
