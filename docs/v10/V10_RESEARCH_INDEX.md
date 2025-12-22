@@ -20,6 +20,7 @@
   - Gate 1：A vs B2 的主指标裁决
   - Gate 2：窗口迁移与赢家口径固定（v2）
   - Gate 3：消融 + IN/OUT同向性（v2）+ 分层稳定性（v3）
+  - Hidden fences：围栏清单 + 触发率遥测（防异常收敛）
 
 ---
 
@@ -115,5 +116,6 @@
 - C1.2 里程碑（6小时长跑通过）：`docs/v10/V10_MILESTONE_C1_2_OVERNIGHT_LONG_RUN_PASSED_20251221.md`
 - C1.3 协议（24小时长跑压测证据链 + 分片索引）：`docs/v10/V10_C_STAGE_C1_3_24H_LONG_RUN_PROTOCOL_20251222.md`
 - C阶段总览（人话版，C0.1→C1.2）：`docs/v10/V10_C_STAGE_OVERVIEW_C0_TO_C1_20251222.md`
+- 隐含围栏审计协议（Fence Inventory + Gating Telemetry）：`docs/v10/V10_HIDDEN_FENCE_AUDIT_PROTOCOL_20251222.md`
 
 
