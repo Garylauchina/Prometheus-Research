@@ -118,5 +118,6 @@
 - C1.3 协议（24小时长跑压测证据链 + 分片索引）：`docs/v10/V10_C_STAGE_C1_3_24H_LONG_RUN_PROTOCOL_20251222.md`
 - C阶段总览（人话版，C0.1→C1.2）：`docs/v10/V10_C_STAGE_OVERVIEW_C0_TO_C1_20251222.md`
 - 隐含围栏审计协议（Fence Inventory + Gating Telemetry；**原则4：演化遵从自然选择**的硬核检验）：`docs/v10/V10_HIDDEN_FENCE_AUDIT_PROTOCOL_20251222.md`
+- 围栏审计核对表（逐条 Pass/Fail，防“围栏偷偷变策略”）：`docs/v10/V10_FENCE_AUDIT_CHECKLIST_PRINCIPLE4_20251222.md`
 
 
