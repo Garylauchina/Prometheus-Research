@@ -205,6 +205,9 @@
 - **G4.4 “生态围栏 ≠ 状态机”隔离原则（强制）**
   - 目的：防止系统在产品化阶段偷偷变成“人为策略”，破坏演化自由度与证据链可比性。
   - 一句话解释（产品化落地）：**阈值可以存在，但只作为“事后标签/审计口径/生死规则/外壳限流”；决策仍必须是 `Genome + Features -> Action`（不允许把阈值掺进决策路径来“指导”交易）。**
+  - Design note / 设计注记（不改变规则，只澄清原则）：
+    - **English (primary)**: Evolution needs genuine failure. Ecological fences exist to protect the system (capital, infra, audit), not to protect individual Agents from ever dying. Every prevented death by a hard-coded threshold is also a removed learning signal about where old strategies stop working.
+    - **中文（辅助）**：演化需要真实的失败。生态围栏的目标是保护系统整体（资金、基础设施、审计链），不是保护单个 Agent 永远不死。每一次被硬阈值挡掉的死亡，都是我们放弃了一次“旧策略在哪里失效”的学习机会。
   - 强制规则：
     - **生态围栏**（如无风险基准/季度淘汰与繁殖门槛/资金守恒与崩溃重启/执行摩擦与资源上限）只能进入：
       - 生命周期层（death/repro/collapse/reboot）
