@@ -296,4 +296,21 @@ Minimum evidence for every entry:
   - PASS means raw evidence can scale to longer runs without single-file blow-up, while remaining tamper-evident (hash per shard).
 - **Status**: completed
 
+### Entry: DIFF-20251221-C1.2-overnight-long-run-6h-pass
+
+- **Date (UTC)**: 2025-12-21
+- **Type**: Overnight long-run stress test (runtime proof)
+- **Run (host volumes)**:
+  - **run_id**: `run_20251221_184206_4974080`
+  - **mode**: `okx_demo_api`
+  - **status**: `completed`
+  - **duration_seconds**: `21603.59`
+  - **api_calls**: `359`
+- **Growth control (facts)**:
+  - M raw index: `total_shards=2`, `total_records=355`
+  - positions raw index: `total_shards=2`, `total_records=355`
+- **Interpretation (strict)**:
+  - PASS means multi-hour evidence continuity + shard/index stability.
+- **Status**: completed
+
 
