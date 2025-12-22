@@ -163,6 +163,102 @@ Minimum fields in `run_manifest.json`:
 
 ---
 
+## 5.1 Two-tier artifact contract (HF screening vs Promote) / 两级产物契约（高频筛选 vs 晋级复盘）
+
+**English (primary)**: High-frequency screening exists to **select genomes**, not to produce court-grade replay for every run.  
+Therefore we define a two-tier artifact contract:
+
+- **Tier-1: HF screening runs** → minimal accountability evidence (bounded disk)
+- **Tier-2: Promote / audit runs** → full evidence chain (replay-grade)
+
+中文（辅助）：高频筛选的目的只是筛选基因，因此不应“每个 run 全量留证据”把系统拖死；我们把全量证据留给少数晋级 run。
+
+### A) Tier-1: HF screening run (minimal but accountable) / 一级：高频筛选（最小可追责）
+
+**Run tagging / 口径标识（强制）**：
+
+- `run_id` prefix: `HF_...`
+- `run_manifest.meta.tier = "tier1_hf"`
+
+**Must write (per run)**:
+
+- `run_manifest.json` (full meta, but no requirement to store full raw streams)
+- `execution_fingerprint.json` (aggregates + api_calls + error counters)
+- `multiple_experiments_summary.json` (or HF summary)
+- `gating_telemetry.json` (Fence Inventory tie-in; required for Principle 4 claims)
+- `death_events.jsonl` (structured; one line per death; see below)
+- `pool.jsonl` append record (genome + minimal metrics + evidence refs)
+
+**Raw evidence policy (default)**:
+
+- **Event-driven sampling** (recommended):
+  - keep full records only for **errors / rejects / timeouts / forced liquidation / collapse / self-trade suspicion**
+  - keep a small fixed sample for baseline (e.g., 1 out of N orders)
+- Hard cap: define a per-run size budget (e.g., 50–200MB) and rotate/delete raw samples beyond the cap.
+
+**Death analysis is mandatory (lightweight)**:
+
+`death_events.jsonl` minimal fields:
+
+- `ts_utc`, `tick` (if available)
+- `agent_id` (or hashed), `death_reason`, `death_reason_source`
+- `capital_triplet` snapshot (allocated/reserve/current_total or equivalent)
+- `has_position`, `position_side` (or `null + reason`)
+- `last_signal`, `state_final` (if available)
+- `api_error_count_so_far` (from tracker/fingerprint)
+- `fence_block_rate_summary` (top fences by block_count during recent window)
+
+> Rule: Tier-1 cannot claim “natural selection structure” without fence telemetry and honest missing-field reasons.
+
+### B) Tier-2: Promote / audit run (full evidence) / 二级：晋级复盘（全量证据链）
+
+**Run tagging / 口径标识（强制）**：
+
+- `run_id` prefix: `PROMOTE_...` or `AUDIT_...`
+- `run_manifest.meta.tier = "tier2_full"`
+
+**Must write (full chain)**:
+
+- All artifacts in section 5, plus:
+  - `m_execution_raw_part_*.json` + `m_execution_raw_index.json` + hashes
+  - `positions_snapshot.json`
+  - `positions_reconstruction_raw_part_*.json` + `positions_reconstruction_raw_index.json` + hashes
+  - alignment evidence bundle (report + raw samples) for the actual execution library
+- Optional but recommended:
+  - Incident Evidence Bundle (IEB) if anomaly triggers (see C2.0 runbook)
+
+**Promotion triggers / 晋级触发条件（建议）**：
+
+- Top-K candidates by survival KPI or ROI (ballast / contributor / champion candidates)
+- Any “interesting death” pattern:
+  - mass death cluster
+  - “no trades but died”
+  - repeated order rejects / timeouts
+  - suspected self-trade
+  - three-dimensional resonance episodes (trend + friction spike + mass death)
+
+### C) Storage isolation / 存储隔离（强制）
+
+To avoid evidence pollution and disk blow-up:
+
+- Separate roots:
+  - Tier-1 HF runs: `/var/lib/prometheus-quant/runs_hf/`
+  - Tier-2 audit runs: `/var/lib/prometheus-quant/runs/`
+- Pools remain append-only:
+  - stage1 live pool: `/var/lib/prometheus-quant/pools/stage1/pool.jsonl`
+  - snapshots: `/var/lib/prometheus-quant/pools/stage1/snapshots/`
+
+### D) Retention policy / 保留策略（建议默认）
+
+- Tier-1 HF:
+  - keep manifests/fingerprints/telemetry/pool records indefinitely (small)
+  - keep raw samples for a limited window (e.g., 7–30 days) or until promoted
+- Tier-2:
+  - keep full evidence for promoted runs long-term
+  - treat as audit-grade evidence; deletion requires an explicit record
+
+---
+
 ## 6) Stage-1 gene pool (append-only) / 一级火种库（只增不改）
 
 ### Record schema (minimal) / 记录最小字段
