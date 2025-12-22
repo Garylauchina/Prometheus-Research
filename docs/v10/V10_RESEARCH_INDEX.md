@@ -92,6 +92,12 @@
 
 ---
 
+## 6.5) 研究假设备忘（副产品）
+
+- 市场第一类假设 + 演化作为测量（不是目标，只是记录）：`docs/v10/V10_HYPOTHESIS_MARKET_TYPE1_EVOLUTION_AS_MEASUREMENT_20251222.md`
+
+---
+
 ## 6) 目录页（更像“研究项目”）
 
 - `docs/README.md`（全仓库 docs 索引）
