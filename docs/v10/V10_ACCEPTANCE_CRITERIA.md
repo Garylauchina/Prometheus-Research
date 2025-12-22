@@ -237,6 +237,14 @@
     - 对齐证据包存在并被 run_manifest 引用
     - 关键字段缺失时必须 `null + reason`，不得伪装为真实可得
 
+- **G4.6 Incident Runbook + 证据包标准（C2.0）（强制）**
+  - 目的：当进入执行接口世界（demo/live）后，任何异常都能做到“先止血、先保全证据、再复盘”，避免临场改 core 造成证据污染与口径漂移。
+  - 强制规则：
+    - 事故处置阶段只允许 ops/infra 动作（限流、STOP、kill switch），**禁止**修改 `prometheus/v10/core/`
+    - 必须能形成最小“Incident Evidence Bundle（IEB）”，并能指回 run_id 与 artifacts
+    - 必须把“三维共振”类重大风险信号（趋势 + 摩擦激增 + 群体死亡）作为升级条件写入处置流程（不要求自动化，但要求可审计）
+  - 参考协议：`docs/v10/V10_INCIDENT_RUNBOOK_C2_0_20251222.md`
+
 ---
 
 ## 6. 最终裁决输出格式（强制）
