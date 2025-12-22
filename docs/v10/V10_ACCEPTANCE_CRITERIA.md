@@ -55,6 +55,7 @@
     - **隐含围栏审计（强制）**：防止“默认值/回退/硬分支/裁剪”悄悄改变行为空间，导致异常收敛。
       - 必须维护围栏清单（Fence Inventory）：列出所有会影响交易行为的 gate（含 ops 层）。
       - 必须落盘触发率遥测（Gating Telemetry）：每轮运行输出 `fence_id -> trigger_count/block_count`，并在高触发率时显式解释（生态 vs 人为）。
+      - **原则4绑定**：围栏审计被用作对“演化是否遵从自然选择”的硬核检验（避免人为 gate 先把行为空间剪成策略）。
       - 参考协议：`docs/v10/V10_HIDDEN_FENCE_AUDIT_PROTOCOL_20251222.md`
 
 - **G0.7 Core 变更触发“裁决失效”与回归门槛（强制）**

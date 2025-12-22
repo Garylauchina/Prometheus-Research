@@ -18,6 +18,41 @@ This protocol forces every hard gate / fallback / clip / default to be **listed*
 
 ---
 
+## Principle 4 Audit: “Evolution obeys natural selection” / 原则4审计：演化必须遵从自然选择
+
+### Operational definition / 可操作定义
+
+**English (primary)**: A system “obeys natural selection” if the dominant selection pressure comes from **world rules** (capital conservation, liquidation, fees/slippage, margin, time, resource limits, quarterly review, collapse/reboot), not from arbitrary designer gates that pre-filter actions.  
+
+**中文（辅助）**：当系统的淘汰与繁殖主要由“世界规则/物理规则”驱动，而不是被某些拍脑袋阈值先挡在门外时，我们才说它遵从自然选择。
+
+### Hard rule / 硬规则（Fail-fast）
+
+- If a fence **changes the action space** in a way that resembles strategy design (e.g., “only trade when signal strong enough”, “no entry unless abs(signal)>x”, “block add/exit by handcrafted thresholds”), it is a **strategy fence** → treat as **man_made** and must not live inside the decision path.
+- “Safety” is not a free pass. If a safety check gates trading behavior (enter/exit/size) and is not an exchange rule, it is still **man_made** and must be surfaced + measured + falsifiable.
+
+### What this audit must answer / 审计必须回答的问题
+
+- **Q4.1**: Are there any fences that prevent Agents from acting for reasons unrelated to exchange physics or lifecycle rules?
+- **Q4.2**: Do fences create a “default world” (silent fallback values) that collapses exploration into a narrow behavior attractor?
+- **Q4.3**: Are observed population outcomes (mass non-trading, abnormal convergence) explained by market pressure, or by frequent gate blocking?
+
+### Falsifiability requirement / 可否证要求（必须可做对照）
+
+For every `man_made` fence that touches trading behavior (`what_it_gates` includes enter/exit/size/order send):
+
+- It must have an explicit **disable/ablation path** (ops/runner only; not a runtime monkey patch of core).
+- It must have a documented **A/B check**:
+  - Baseline: fence enabled (current world)
+  - Counterfactual: fence disabled (same commit/config/seed/window)
+  - Compare at least: `system_roi`, `extinction_rate`, and the fence’s own `block_rate`
+
+**Interpretation rule (minimal)**:
+
+- If disabling a man-made fence causes a large increase in trading activity and changes outcomes, then previous outcomes were partly “designer-shaped” → must be explicitly reported as such (not allowed to claim “pure natural selection”).
+
+---
+
 ## 1) Fence Inventory / 围栏清单（必须维护）
 
 Create and maintain a list of all fences, including those in **ops layer**.
@@ -59,6 +94,13 @@ Minimum content:
 - High trigger rate is not automatically “bad”, but it must be:
   - explained (ecological vs man-made),
   - and if man-made: moved out of decision path or made evolvable/ablated.
+
+### Principle 4 tie-in / 与原则4的绑定口径
+
+- If `man_made` fences have high `block_count`, then the dominant selection pressure is likely “designer gatekeeping”, not market pressure.
+- Therefore, any run used to claim “natural selection behavior” must include:
+  - the `gating_telemetry.json` artifact,
+  - and a short statement on whether selection pressure appears ecological vs man-made (based on block rates).
 
 ---
 
