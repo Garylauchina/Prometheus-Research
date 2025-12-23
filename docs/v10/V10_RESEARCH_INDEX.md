@@ -110,6 +110,7 @@
 - `docs/v10/V10_VPS_DEVELOPMENT_GUIDE.md`（英主中辅：安全基座、证据链、两级沙盒、火种库只增不改、快照规则）
 - 执行接口差异落盘（CCXT vs OKX官方库）：`docs/v10/V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
 - C2.0 事故处置手册（Incident Runbook + 证据包标准）：`docs/v10/V10_INCIDENT_RUNBOOK_C2_0_20251222.md`
+- C2.1 演练记录（STOP语义：ops-only 故障注入 → interrupted + stop_* + IEB）：`docs/v10/incidents/INCIDENT-20251223-C2_1-STOP_DRILL_OKX_DEMO_API.md`
 - C阶段起点里程碑（C0.5/G4.5证据链闭环，OKX REST）：`docs/v10/V10_MILESTONE_C0_5_G4_5_OKX_REST_EVIDENCE_CHAIN_PASSED_20251221.md`
 - C0.7 里程碑（positions fallback 证据链通过）：`docs/v10/V10_MILESTONE_C0_7_POSITIONS_FALLBACK_PASSED_20251221.md`
 - C0.8 里程碑（positions 重建 raw 证据可追溯）：`docs/v10/V10_MILESTONE_C0_8_POSITIONS_RAW_EVIDENCE_PASSED_20251221.md`
