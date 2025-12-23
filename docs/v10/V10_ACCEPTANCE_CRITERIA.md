@@ -202,6 +202,12 @@
 - **G4.3 执行环境指纹测试（若上OKX demo/live）**
   - 以极小额订单测量：滑点分布、部分成交比例、延迟分布、fee一致性，并落盘。
 
+- **G4.3a 启动前置契约（Preflight + Bootstrap）（强制，demo/live）**
+  - 目的：避免“系统以为自己空仓/有多少钱，但交易所实际不是”，导致后续证据链污染。
+  - 强制顺序：connect check → BEFORE快照 → 撤单 → 平仓（flatten）→ AFTER快照 → 用 `balance_after` 作为启动资金
+  - 失败行为：preflight 任一硬门槛失败必须 `aborted/interrupted` 并形成 IEB；禁止进入主循环。
+  - 参考合同：`docs/v10/V10_STARTUP_PREFLIGHT_AND_BOOTSTRAP_CONTRACT_20251223.md`
+
 - **G4.4 “生态围栏 ≠ 状态机”隔离原则（强制）**
   - 目的：防止系统在产品化阶段偷偷变成“人为策略”，破坏演化自由度与证据链可比性。
   - 一句话解释（产品化落地）：**阈值可以存在，但只作为“事后标签/审计口径/生死规则/外壳限流”；决策仍必须是 `Genome + Features -> Action`（不允许把阈值掺进决策路径来“指导”交易）。**

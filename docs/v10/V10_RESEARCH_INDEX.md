@@ -110,6 +110,7 @@
 - `docs/v10/V10_VPS_DEVELOPMENT_GUIDE.md`（英主中辅：安全基座、证据链、两级沙盒、火种库只增不改、快照规则）
 - 执行接口差异落盘（CCXT vs OKX官方库）：`docs/v10/V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
 - C2.0 事故处置手册（Incident Runbook + 证据包标准）：`docs/v10/V10_INCIDENT_RUNBOOK_C2_0_20251222.md`
+- 启动前置契约（撤单/平仓/余额启动资金/按资金算Agent数量）：`docs/v10/V10_STARTUP_PREFLIGHT_AND_BOOTSTRAP_CONTRACT_20251223.md`
 - C2.1 演练记录（STOP语义：ops-only 故障注入 → interrupted + stop_* + IEB）：`docs/v10/incidents/INCIDENT-20251223-C2_1-STOP_DRILL_OKX_DEMO_API.md`
 - C2.2 演练记录（退化注入：网络降级/断连 fallback → IEB；本次退化遥测证据不足，记为 partial pass）：`docs/v10/incidents/INCIDENT-20251223-C2_2-DEGRADATION_NETWORK_DISCONNECT_OKX_DEMO_API.md`
 - C2.3 演练记录（退化遥测硬门槛：error_count>0 或 error_events非空；本次 FAILED）：`docs/v10/incidents/INCIDENT-20251223-C2_3-DEGRADATION_TELEMETRY_GATE_FAILED_OKX_DEMO_API.md`
