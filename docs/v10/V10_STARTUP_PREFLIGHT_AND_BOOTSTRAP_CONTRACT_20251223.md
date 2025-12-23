@@ -55,12 +55,33 @@ Rationale: entering the main loop with “dirty” exchange state pollutes all l
 
 - `bootstrap_capital_value = balance_after` (from preflight AFTER snapshot)
 
+### Allocation semantics (hard rule) / 启动资金拆分语义（硬规则）
+
+Given `bootstrap_capital_value` (in `bootstrap_capital_currency`, typically `USDT`):
+
+- `allocated_capital_target = bootstrap_capital_value * allocation_ratio` (default `allocation_ratio=0.8`)
+- `system_reserve_base = bootstrap_capital_value - allocated_capital_target` (default 20%)
+
+If `bootstrap_agent_count_enabled=true` and `capital_per_agent` is fixed (default `1000 USDT`):
+
+- `num_agents = floor(allocated_capital_target / capital_per_agent)`  ✅ (floor is mandatory for consistency)
+- `allocated_capital_actual = num_agents * capital_per_agent`
+- `system_reserve = system_reserve_base + (allocated_capital_target - allocated_capital_actual)`  
+  (i.e., the remainder/rounding dust must be carried into system reserve to keep accounting closed)
+
+This rule ensures:
+
+- fixed per-agent start capital (auditable)
+- deterministic agent count (auditable)
+- closed-form capital triplet at bootstrap (no hidden drift)
+
 ### Required manifest fields / 必须落盘字段
 
 - `bootstrap_capital_source` = `"exchange_balance_after_flatten"` (or `"preflight_balance"`, but must be stable)
 - `bootstrap_capital_currency` (e.g. `USDT`)
-- `bootstrap_capital_field` (which exchange field is used, e.g. `equity` / `availEq`; must be explicit)
+- `bootstrap_capital_field` (which exchange field is used; must be explicit and mapped via alignment evidence)
 - `bootstrap_capital_value` (number)
+- `allocation_ratio` (default `0.8`)
 
 ---
 
@@ -80,7 +101,7 @@ Let:
 
 Then:
 
-- `num_agents = floor(allocatable / capital_per_agent)`
+- `num_agents = floor(allocatable / capital_per_agent)`  ✅ (floor is mandatory)
 - clamp: `num_agents = min(max(num_agents, min_agents), max_agents)`
 
 ### Required fields if enabled / 启用时必须落盘
@@ -91,6 +112,16 @@ Then:
 - `min_agents`, `max_agents`
 - `num_agents` (final)
 - `agent_count_rule` (string identifier, e.g. `"floor(allocatable/capital_per_agent) with clamp"`)
+
+### Balance field mapping note (OKX REST vs CCXT) / 余额字段对齐说明
+
+The bootstrap balance field MUST be declared and mapped:
+
+- If using **OKX REST evidence**: explicitly record which OKX field is used (e.g., equity-like vs available).
+- If using **CCXT**: `fetch_balance()` typically returns:
+  - `total` / `free` / `used` (per currency), plus raw `info`.
+
+**Audit requirement**: `bootstrap_capital_field` must be one of a fixed set (project-defined), and the chosen mapping must be referenced by an alignment evidence bundle (report + raw samples).
 
 If disabled, must write:
 
