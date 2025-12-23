@@ -113,6 +113,7 @@
 - C2.1 演练记录（STOP语义：ops-only 故障注入 → interrupted + stop_* + IEB）：`docs/v10/incidents/INCIDENT-20251223-C2_1-STOP_DRILL_OKX_DEMO_API.md`
 - C2.2 演练记录（退化注入：网络降级/断连 fallback → IEB；本次退化遥测证据不足，记为 partial pass）：`docs/v10/incidents/INCIDENT-20251223-C2_2-DEGRADATION_NETWORK_DISCONNECT_OKX_DEMO_API.md`
 - C2.3 演练记录（退化遥测硬门槛：error_count>0 或 error_events非空；本次 FAILED）：`docs/v10/incidents/INCIDENT-20251223-C2_3-DEGRADATION_TELEMETRY_GATE_FAILED_OKX_DEMO_API.md`
+- C2.3 RERUN 记录（ops/证据层增强后：telemetry gate PASSED；本次事件以 api_error 为主）：`docs/v10/incidents/INCIDENT-20251223-C2_3-RERUN_TELEMETRY_GATE_PASSED_OKX_DEMO_API.md`
 - C阶段起点里程碑（C0.5/G4.5证据链闭环，OKX REST）：`docs/v10/V10_MILESTONE_C0_5_G4_5_OKX_REST_EVIDENCE_CHAIN_PASSED_20251221.md`
 - C0.7 里程碑（positions fallback 证据链通过）：`docs/v10/V10_MILESTONE_C0_7_POSITIONS_FALLBACK_PASSED_20251221.md`
 - C0.8 里程碑（positions 重建 raw 证据可追溯）：`docs/v10/V10_MILESTONE_C0_8_POSITIONS_RAW_EVIDENCE_PASSED_20251221.md`
