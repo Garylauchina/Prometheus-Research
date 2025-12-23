@@ -55,6 +55,34 @@ Rationale: entering the main loop with “dirty” exchange state pollutes all l
 
 - `bootstrap_capital_value = balance_after` (from preflight AFTER snapshot)
 
+### Exchange is the source of truth / 交易所余额为真值（核心审计规则）
+
+**Hard audit invariant (execution world)**:
+
+\[
+exchange\_balance\_{equity} \;\approx\; allocated\_capital + system\_reserve \;=\; current\_total
+\]
+
+Where:
+
+- `exchange_balance_equity` is the chosen exchange “account equity” field (see `bootstrap_capital_field` mapping below)
+- `allocated_capital` is the sum allocated to Agents (fixed by rule at bootstrap)
+- `system_reserve` is the system wallet (residual)
+- `current_total = allocated_capital + system_reserve`
+
+**If mismatch occurs** (beyond a small tolerance):
+
+- the system must **reconcile to the exchange value** (exchange wins)
+- the reconciliation action must be recorded as an auditable event (see “Capital reconciliation record”)
+
+Recommended handling (does not rewrite individual Agent ledgers):
+
+- keep `allocated_capital` unchanged (audit stability)
+- set `system_reserve = exchange_balance_equity - allocated_capital`
+- if `system_reserve < 0`, treat as **internal collapse** (reserve exhausted) and stop/mark severity accordingly (do not hide insolvency)
+
+Rationale: without this, the “system wallet” becomes a fictional number and all ROI/collapse claims become unauditable.
+
 ### Allocation semantics (hard rule) / 启动资金拆分语义（硬规则）
 
 Given `bootstrap_capital_value` (in `bootstrap_capital_currency`, typically `USDT`):
@@ -122,6 +150,29 @@ The bootstrap balance field MUST be declared and mapped:
   - `total` / `free` / `used` (per currency), plus raw `info`.
 
 **Audit requirement**: `bootstrap_capital_field` must be one of a fixed set (project-defined), and the chosen mapping must be referenced by an alignment evidence bundle (report + raw samples).
+
+Recommended default for “account balance” in audit sense:
+
+- Prefer **equity-like** fields (`total` in CCXT; `eq/totalEq`-like in OKX REST), not `free/availBal`.
+
+---
+
+## Capital reconciliation record / 资金对账记录（强制，execution world）
+
+Each run must write a lightweight reconciliation log (JSONL) at a fixed cadence (recommended: per tick or per lifecycle review):
+
+- `capital_reconciliation_events.jsonl`
+
+Each record must include (redacted-safe):
+
+- `ts_utc`, `tick`
+- `exchange_balance_equity` (value + field name + currency)
+- `allocated_capital`, `system_reserve`, `current_total`
+- `delta = exchange_balance_equity - current_total_before_reconcile`
+- `reconciled` (bool), `tolerance`
+- `action_taken`: `"set_reserve_to_match_exchange"` | `"collapse_reserve_negative"` | `"skipped"`
+- `error_events_window_summary` (counts by type, optional)
+
 
 If disabled, must write:
 
