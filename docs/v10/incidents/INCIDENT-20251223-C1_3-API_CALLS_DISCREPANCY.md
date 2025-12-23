@@ -38,6 +38,17 @@ This is a **Degradation** (audit consistency issue), not a trading failure.
 
 - `/Users/liugang/Cursor_Store/Prometheus-Quant/volumes/runs/run_20251222_012118_4974080/`
 
+**IEB archive delivered (Mac host, packaged by Programmer-AI / Prometheus-Quant)**:
+
+- Archive: `/Users/liugang/Cursor_Store/Prometheus-Quant/IEB_run_20251222_012118_4974080_20251223_094446.tar.gz` (≈ 51K)
+- `archive_sha256`: `e8dd07f60a59ceeccc08d2fe38110feb355cd037da62fbee35c2762ae9c79537`
+- Packaging report: `/Users/liugang/Cursor_Store/Prometheus-Quant/IEB_run_20251222_012118_4974080_20251223_094446.report.txt`
+- Summary (from report):
+  - `missing_required_files_count = 0`
+  - `m_execution_shards = 8`
+  - `positions_reconstruction_shards = 8`
+  - Included: `SHA256SUMS.txt` (per-file hashes)
+
 Mandatory artifacts (subset referenced):
 
 - `run_manifest.json`
