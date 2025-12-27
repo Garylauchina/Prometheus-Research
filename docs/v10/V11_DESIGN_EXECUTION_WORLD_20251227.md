@@ -1,0 +1,267 @@
+# V11 Design (execution_world) — Architecture Spec — 2025-12-27
+
+目的：把 V11 baseline 的“合同/协议/验收条款”汇总为一份**可实现、可审计、可锁版**的架构说明（Design），用于约束实现仓库（Prometheus-Quant）后续迭代。  
+
+关系声明（重要）：
+- **SSOT（变更口径）**：`docs/v10/V11_BASELINE_CHANGELOG_20251226.md`（只增不改）
+- **Contracts（模块契约）**：`docs/v10/` 下若干 `...CONTRACT_*.md`
+- **本文件（Design）**：解释“模块如何组合成执行世界”，并定义 V11 的**运行闭包（closure）与防旧代码污染策略**。
+
+本文件只允许追加（additive-only）；破坏性变更必须提升 major（V12…）并重跑最小 PROBE。
+
+相关附录：
+- **V11 execution_world 运行闭包白名单（closure allowlist）**：`docs/v10/V11_EXECUTION_WORLD_CLOSURE_ALLOWLIST_20251227.md`
+
+---
+
+## 0) V11 一句话
+
+V11 的 execution_world 是：**core 只产 intent；交易员（BrokerTrader）是唯一写入口；Ledger 只归档交易所真值；缺真值就降级为 unknown 或 STOP；所有结论必须能用交易所 JSON 复现。**
+
+---
+
+## 1) 设计约束（来自“骑士事故”的系统性防线）
+
+我们不把安全寄托在“某段 if/封锁代码不会被人剪掉”。V11 的防线必须落在更难被误改的结构上：
+
+- **运行闭包白名单（closure allowlist）**：execution_world 的可执行入口只允许依赖 v11 闭包模块；任何 `v10`/legacy 路径必须在闭包外（物理不可达）。
+- **能力隔离（write capability）**：只有 BrokerTrader 拥有交易所写能力；core/runner 不得直接接触 connector 的写接口。
+- **Fail closed**：证据链缺口宁可 STOP/冻结，也不允许“默认值继续跑”污染后续裁决与演化结论。
+- **版本化口径**：`contract_version` 进入 `run_manifest`；版本不匹配必须 STOP（拒绝“兼容猜测”）。
+
+> 解释：这不是“更复杂的封锁”，而是把风险从“可被 CTRL+X 的代码块”迁移到“依赖闭包与能力边界”。
+
+---
+
+## 2) 世界类型与语义边界（hard）
+
+V11 明确区分两种世界：
+
+- **`execution_world`**（OKX demo/live）：交易所是真值，所有资金/仓位/成交/费用必须来自可回查 JSON（或 unknown）。
+- **`offline_sim`**：允许内部模拟，但其结论不得冒充 execution_world 的真值链（只能用于研究对照）。
+
+核心规则（hard）：
+- execution_world 下，**Agent/DecisionEngine 不得内部模拟成交/仓位/资金变化为真值**。  
+- core 的职责：计算并输出 intent（open/close/hold），并把决策链证据化（append-only）。
+
+参考：
+- `docs/v10/V11_BASELINE_CHANGELOG_20251226.md`（§2.1）
+- `docs/v10/V10_MODULE_PROBE_AND_INTERFACE_FREEZE_PROTOCOL_20251225.md`（CoreWorldLock）
+
+---
+
+## 3) 模块分层（唯一正确的依赖方向）
+
+### 3.1 Core 层（无 IO，纯意图）
+
+包含：
+- `Genome` / `DecisionEngine` / `Agent` / `SystemManager`（只做调度，不做交易所 IO）
+
+输出：
+- `intent_action ∈ {open, close, hold}`
+- `intent_desired_state ∈ {IN_MARKET, OUT_MARKET}`（语义上是“想要的状态”，不是成交）
+- `decision_trace.jsonl`（append-only：tick_summary + agent_detail +（可选）order_execution记录）
+
+### 3.2 World 层（IO + 真值 + 入册）
+
+包含：
+- **BrokerTrader**（唯一交易入口，执行 + 入册）
+- **Ledger**（真值快照聚合，Tier-1 evidence）
+- **ProbeGating**（真值画像 + 探针激活/禁用 + STOP/continue）
+- ExecutionFreeze / Reconciliation / RunArtifacts（运行安全与证据包）
+- **ExchangeAuditor**（只读交叉核验，evidence-only）
+
+依赖方向（hard）：
+- Core →（intent）→ BrokerTrader  
+- BrokerTrader/Connector → Exchange（读写）  
+- Ledger/ProbeGating → Core（只提供探针向量与质量，不提供“伪真值”）  
+- ExchangeAuditor 只读，不得干预执行
+
+参考：
+- `docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
+- `docs/v10/V10_TRUTH_PROFILE_AND_PROBE_GATING_CONTRACT_20251226.md`
+- `docs/v10/V10_EXCHANGE_AUDITOR_MODULE_CONTRACT_20251226.md`
+
+---
+
+## 4) 真值画像（truth_profile）与 ProbeGating（hard）
+
+### 4.1 truth_profile 的意义
+
+`truth_profile` 是“结论有效性门槛”的契约级开关，不是普通 runtime flag。
+
+允许值（baseline）：
+- `degraded_truth`：demo 观察模式；缺 probe 必须标注 unknown；对真实 PnL/费用的结论通常 NOT_MEASURABLE
+- `full_truth_pnl`：live 结论模式；关键真值缺失必须 STOP + IEB
+
+### 4.2 ProbeGating 输出（必须固定维度）
+
+ProbeGating 必须输出：
+- 固定维度 probe 向量（Core 不得因 demo/live 改维度）
+- 每个 probe 的 `mask/quality` 与 `reason_code`
+- `gating_decision`: continue 或 stop
+
+hard rules：
+- **unknown 不得伪造为 0**；若用数值占位，必须同时提供 mask/quality/reason 且可审计。
+- 只允许最小“历史投影”类 derived probes（如 `capital_health_ratio`、`position_exposure_ratio`），禁止复杂二次推断。
+
+参考：`docs/v10/V10_TRUTH_PROFILE_AND_PROBE_GATING_CONTRACT_20251226.md`
+
+---
+
+## 5) BrokerTrader：唯一交易入口（hard）
+
+BrokerTrader 只做两件事：
+1) 执行：接收 intent，向交易所提交请求（place/cancel/confirm）
+2) 入册：把交易所返回 JSON 事实 append-only 落盘（可回查）
+
+关键点：
+- `clOrdId` 绑定 `agent_id`（归因锚点）；订单主键以 `ordId` 为准（可脱敏 hash）
+- 遵守 **订单确认协议 P0–P5**：ack≠成交；所有 ack 必须 P2 可回查终态；否则冻结/STOP
+- 执行异常必须做 L1 分类并写 `recommended_action`（runner 决定 STOP）
+
+参考：
+- `docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
+- `docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`
+
+---
+
+## 6) Ledger：真值聚合与最小注入（truth-backed）
+
+Ledger 的定位是“真值记录/归档 + 最小聚合”，不是“内部记账发明者”。  
+
+核心原则：
+- 真值来源仅为交易所 JSON（orders/fills/bills/positions/equity）
+- 对无法证明的字段输出 `null + truth_quality + reason_code`
+
+输出示例（概念层）：
+- `capital_health_ratio`（derived-only）
+- `position_exposure_ratio`（derived-only，且受 `positions_truth_quality` gating）
+
+与 Reconciliation 的关系：
+- “账不平”在 V11 中应表达为：`evidence_incomplete / join_broken / truth_degraded`，触发 freeze/STOP，而不是内部补账。
+
+参考：
+- `docs/v10/V10_POST_RUN_LEDGER_AUDIT_CONTRACT_20251226.md`
+- `docs/v10/V10_EXECUTION_FREEZE_ON_RECONCILIATION_FAILURE_CONTRACT_20251226.md`
+
+---
+
+## 7) LifecycleJudge：死亡/繁殖审判（不交易）
+
+职责：
+- 基于结算后的 metrics_snapshot（带 truth_quality）给出 `KEEP/DEATH/REPRODUCE`
+- 输出 append-only 的 `lifecycle_events.jsonl`
+- 不连接交易所写接口；需要强平时通过 BrokerTrader 的 lifecycle flatten 入口
+
+编排顺序（baseline）：
+1) 计算：生成 metrics_snapshot（truth-backed）
+2) 结算：system_flatten + absorb（证据化）
+3) 审判：LifecycleJudge 输出裁决清单（append-only）
+4) 执行：runner 执行死亡/繁殖（不直接交易）
+
+参考：`docs/v10/V10_LIFECYCLE_JUDGE_MODULE_CONTRACT_20251226.md`
+
+---
+
+## 8) ExchangeAuditor：只读交叉核验（evidence-only）
+
+职责：
+- 独立只读连接交易所，对 BrokerTrader 入册证据做交叉核验
+- 输出 `auditor_report.json` 与 `auditor_discrepancies.jsonl`
+- baseline：只落盘，不干预（未来若要干预需要单独契约与验收 gate）
+
+### 8.1 审计结论（verdict）与退出码（exit_code）冻结
+
+ExchangeAuditor 的结论分为三类：`PASS / NOT_MEASURABLE / FAIL`。为保证 CI/CD 与批量回放行为稳定，V11 baseline 冻结 verdict → exit_code 映射：
+
+- `PASS` → `exit_code=0`
+- `NOT_MEASURABLE` → `exit_code=0`（必须打印 WARNING；表示审计范围不完整，不阻塞 pipeline）
+- `FAIL` → `exit_code=2`（critical）
+
+注意：`NOT_MEASURABLE` 不是“通过”，而是“无法证明”。当存在必做检查项尚未实现（例如 orphan detection / 分页未闭合）时，必须降级为 NOT_MEASURABLE，并在 report 内自包含原因。
+
+### 8.2 contract_versions 字段拆分（写实、可追溯）
+
+`auditor_report.json` 必须把版本信息拆分为可追溯字段（避免 “evidence_schema_version” 语义混用）：
+
+- `auditor_contract_version`（模块契约版本）
+- `auditor_schema_version`（审计报告输出 schema）
+- `broker_trader_evidence_schema_version`（证据生产者：BrokerTrader）
+- `ledger_schema_version`（证据生产者：Ledger）
+- `probe_gating_schema_version`（证据生产者：ProbeGating）
+- `order_confirmation_protocol_version`（P0/P1/P2…协议版本）
+
+参考：`docs/v10/V10_EXCHANGE_AUDITOR_MODULE_CONTRACT_20251226.md`
+
+---
+
+## 9) C 维度（Collective）：群体现象（t-1 intent），作为“演化规则”消融点
+
+我们不把“从众性”做成不可观测基因；我们把它做成可开关的“规则/机制”，用消融验证是否产生可观测差异。
+
+### 9.1 定义（baseline）
+
+数据源：上一 tick（t-1）的 intent 分布（open/close/hold），来自 `decision_trace.jsonl` 的 `agent_detail.intent_action`。  
+
+最小 probe（单探针）：
+- `C_prev_net_intent = open_ratio(t-1) - close_ratio(t-1)`，范围 \([-1, +1]\)
+
+tick=1 规则（hard）：
+- 无 \(t-1\) → C 为 unknown（不得伪造 0）；若需要固定维度，可通过 `mask/reason_code` 表达不可用。
+
+### 9.2 消融协议（验证规则成立性）
+
+- A：`C_off`（C 探针禁用/置 unknown + mask=0）
+- B：`C_on`（启用 t-1 intent C probe）
+
+保持其他条件一致（seed/初始化分布/mutation_rate/truth_profile/市场输入），对比可复现差异：
+- 生存率、死亡原因分布
+- intent_entropy 的时间曲线（群体同步性）
+- 群体耦合度指标（agent intent 与 C 的相关性，仅用于分析，不进入交易真值链）
+
+该设计的价值是：无论差异正负，只要“可复现可观测”，实验即成功。
+
+> 该 C 定位为 social/internal signal：不得用成交/收益/ROI 作为 C 输入（避免隐性策略与 truth_profile 混用）。
+
+---
+
+## 10) 证据链与产物（run_dir 必备）
+
+最低证据集合（append-only 为主）：
+- `run_manifest.json`（包含 truth_profile、contract_version 等）
+- `decision_trace.jsonl`
+- `ledger_ticks.jsonl`
+- `order_attempts.jsonl`、`order_status_samples.jsonl`（若发生下单或 ack）
+- `errors.jsonl`（任何降级/冻结/STOP 原因）
+- `FILELIST.ls.txt`、`SHA256SUMS.txt`（证据包可验）
+
+参考：
+- `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
+- `docs/v10/V10_MODULE_PROBE_AND_INTERFACE_FREEZE_PROTOCOL_20251225.md`
+
+---
+
+## 11) V10 锁版与 V11 “零继承语义”的落地方式（建议）
+
+我们不做“全零继承重写”，而是做：
+- **零继承执行链路与语义**：V11 execution_world 入口只依赖 v11 闭包（allowlist），v10/legacy 物理不可达。
+- **允许复用纯组件**：纯函数/纯数学（例如网络前向、序列化、hash、统计）可复用，但必须在 v11 namespace 下重新冻结 contract_version。
+
+目标：把“误调用旧代码”的风险从“人为纪律”转为“结构不可达”。
+
+---
+
+## 12) Freeze 策略（接口冻结纪律）
+
+通过 Gate/PROBE 后冻结：
+- module public API（方法签名 + 语义）
+- evidence schema（json/jsonl 字段含义）
+- reason_code / taxonomy（additive-only）
+
+破坏性变更必须：
+- bump `contract_version`
+- 重跑最小 PROBE
+- 更新 SSOT（`V11_BASELINE_CHANGELOG`）与本 design 的追加条目
+
+

@@ -450,8 +450,10 @@ class Agent:
     def get_identity_features(self) -> dict:
         """提供I维度特征"""
         return {
-            'has_position': self.position is not None,
-            'position_direction': self.get_position_direction(),
+            # execution_world: must be Ledger truth, not internal simulation
+            'position_exposure_ratio': self.get_position_exposure_ratio_truth(),  # 0.0 means flat
+            'pos_side_sign': self.get_pos_side_sign_truth(),  # -1/0/+1
+            'positions_truth_quality': self.get_positions_truth_quality(),
             'current_state': self.current_state,
             'last_signal': self.last_signal
         }
@@ -473,6 +475,28 @@ class Agent:
         
         return signal
 ```
+
+**Execution-world 语义（hard）：Agent 只产出委托/意图，不“记账”、不“自认为成交”。**
+
+- **第一性原理（Broker+Ledger）**：交易员（Execution）+账簿（Ledger）不发明任何记账方法，只做两件事：
+  - **执行**：接收 Agent 委托（intent），向交易所提交请求
+  - **记录**：把交易所可回查的 JSON 事实按 append-only 落盘
+- **唯一允许新增字段**：`agent_id`（用于归因），以及我们生成的 `clOrdId`（用于绑定）
+- **禁止**：任何“内部成交模拟/内部资金扣加/内部仓位变化”被当作真值。执行世界的 I/M/C 维度若依赖交易真值，必须来自 Ledger（或 `null + reason`）。
+
+> 注：上面的伪代码用于解释“接口形态”。在 `execution_world` 下，`current_state/positions` 等应由 Ledger 真值回写（apply truth），而不是由 `Agent.decide()` 自行修改。
+
+**Execution-world 编排（推荐默认，hard boundary + evidence-first）：**
+
+- **唯一写入口（hard）**：只有 `BrokerTrader` 允许通过带签名的 Connector 对交易所发起“会改变账户状态”的请求（place/cancel/amend/close 等）。runner/测试程序禁止绕过。
+- **只读审计通道（evidence-only）**：`ExchangeAuditor` 允许独立连接交易所，但只读、只落盘、不干预。
+- **周期收尾（推荐默认）**：
+  - CycleEnd → ExchangeAuditor.run()（落盘 `auditor_report.json` + `auditor_discrepancies.jsonl`）→ 生成 `FILELIST.ls.txt` + `SHA256SUMS.txt` → STOP
+
+相关契约：
+- `docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
+- `docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`
+- `docs/v10/V10_EXCHANGE_AUDITOR_MODULE_CONTRACT_20251226.md`
 
 #### 3. DecisionEngine（决策引擎）
 
@@ -878,10 +902,18 @@ C (Community) - 群体感知：
 
 ```
 纯内部状态（与市场无关）：
+
+DEPRECATED (offline_sim legacy, not execution_world truth):
 [I1] has_position           # 是否持仓 (0/1)
 [I2] position_direction     # 持仓方向 (-1/0/+1)
-[I3] state_machine_state    # 状态机状态 (OUT/IN)
-[I4] last_signal            # 上次信号（可选）
+
+V10 execution_world (truth-driven, Ledger-backed):
+[I1] position_exposure_ratio    # 仓位敞口比例 [0,1], 0.0 means flat (truth)
+[I2] pos_side_sign              # -1/0/+1 (short/flat/long) (truth)
+[I3] positions_truth_quality    # ok/unreliable/unknown (gates truth usage)
+[I4] last_signal                # 上次信号（可选）
+
+Rule (hard): if `positions_truth_quality != ok`, then `position_exposure_ratio` MUST be null/unknown (not 0) to avoid fabricating "flat" under degraded truth.
 ```
 
 ### M - 交互阻抗（12维）⭐ 核心
@@ -987,11 +1019,27 @@ C (Community) - 群体感知：
 ### C - 群体感知（5维）
 
 ```
-[C1] group_position_ratio   # 群体持仓率
-[C2] group_long_short_bias  # 群体多空倾向
-[C3] group_avg_pnl_pct      # 群体平均盈亏
-[C4] group_death_rate       # 近期死亡率
-[C5] top_performers_signal  # 优秀者信号
+V11 baseline (execution_world, social/internal; recommended):
+
+# C is a "phenomenon probe" (群体现象), NOT exchange truth.
+# Source-of-evidence: previous tick (t-1) intent distribution from decision_trace.jsonl
+# - intent_action ∈ {open, close, hold}
+# - tick=1 has no prev tick → C must be unknown/null + reason_code="no_prev_tick" (do not fabricate 0)
+#
+# Minimal (single-probe) option:
+[C1] C_prev_net_intent      # = open_ratio(t-1) - close_ratio(t-1), [-1, +1]  (群体行为趋势)
+#
+# Optional (higher-dimensional) option:
+# [C1] C_prev_open_ratio     # open_ratio(t-1)
+# [C2] C_prev_close_ratio    # close_ratio(t-1)
+# [C3] C_prev_intent_entropy # intent distribution entropy(t-1)
+
+Legacy (pre-V11 idea, NOT recommended for execution_world baseline):
+[C1] group_position_ratio   # 群体持仓率（若依赖交易真值：execution_world 下必须来自 Ledger，否则应为 unknown）
+[C2] group_long_short_bias  # 群体多空倾向（同上）
+[C3] group_avg_pnl_pct      # 群体平均盈亏（结果信号，容易引入隐性策略；baseline 不建议喂入）
+[C4] group_death_rate       # 近期死亡率（可作为审计/分析，不一定进入决策向量）
+[C5] top_performers_signal  # 优秀者信号（结果导向，baseline 不建议喂入）
 ```
 
 **总维度：E(12-15) + I(3-4) + M(12) + C(5) = 32-36维**
@@ -1861,8 +1909,11 @@ SystemManager {
     allocatable_capital: float     # 可分配给Agent的资金
     system_reserve: float          # 系统风险准备金（缓冲池）
     
-    # 虚拟簿记（内部逻辑隔离）
-    capital_ledger: Dict[str, float]  # {agent_id: virtual_capital}
+    # 归因/分配视图（不是交易所真值账）
+    #
+    # hard: 执行世界里“真值资金/仓位/费用”只来自交易所可回查 JSON（orders/fills/bills/positions/equity）。
+    # 这里的 capital_ledger 只能作为“分配与生命周期归因视图”，不得脱离交易所事实独立演算成真值。
+    capital_ledger: Dict[str, float]  # {agent_id: allocated_capital_view}
     
     # 日志系统
     reproduction_log: List[ReproductionEvent]
@@ -1882,12 +1933,21 @@ SystemManager {
 
 工作原理：
   1. 对外：只有一个交易账户（主账户）
-  2. 对内：每个Agent有虚拟资金（ledger记账）
+  2. 对内：每个Agent有资金分配视图（ledger 归因/分配）
   3. Agent不知道system_reserve存在
   4. Agent完全自由交易
   5. 穿仓损失从system_reserve扣除
   6. reserve < 0 → 系统崩溃（允许）
 ```
+
+**订单/账单/成交的共同主键（execution_world，hard）：**
+
+- **订单主键**：`ordId`（交易所生成）
+- **本地绑定键**：`clOrdId`（我们生成，用于 `agent_id` 归因；并通过交易所返回/查询获得对应 `ordId`）
+- **成交主键**：`tradeId`（若可获取）
+- **账单行主键**：通常是账单行自己的 `billId`/`id`；若账单行包含 `ordId`/`tradeId`，它们是强外键，用于对账与归因
+
+> 结论：执行世界不存在“发明一套内部账再去对齐交易所”的必要性；真正要解决的是“通信/异步导致的证据缺失与关联断裂”，其处理方式应是订单确认协议（见 `V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`）。
 
 ### 资金流规则
 

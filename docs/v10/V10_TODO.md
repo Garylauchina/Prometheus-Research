@@ -270,7 +270,7 @@ C (Community) - 群体感知：
 
 ```
 纯内部状态（与市场无关）：
-[I1] has_position           # 是否持仓 (0/1)
+[I1] position_exposure_ratio    # 仓位敞口比例 [0,1], 0.0 means flat (truth)
 [I2] position_direction     # 持仓方向 (-1做空/0无/+1做多)
 [I3] state_machine_state    # 状态机状态（OUT_MARKET/IN_MARKET）
 [I4] last_signal            # 上次决策信号（可选，-1到+1）

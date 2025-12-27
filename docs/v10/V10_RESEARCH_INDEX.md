@@ -21,6 +21,11 @@
   - Gate 2：窗口迁移与赢家口径固定（v2）
   - Gate 3：消融 + IN/OUT同向性（v2）+ 分层稳定性（v3）
   - Hidden fences：围栏清单 + 触发率遥测（防异常收敛）
+  - **方法论（如何“测量”复杂系统）**：`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
+- **V11 基线变更记录（execution_world 大版本重构 SSOT）**：`docs/v10/V11_BASELINE_CHANGELOG_20251226.md`
+- **V11 设计文档（execution_world 架构说明，闭包白名单 + 模块编排）**：`docs/v10/V11_DESIGN_EXECUTION_WORLD_20251227.md`
+- **V11 运行闭包白名单（closure allowlist，防 legacy/v10 误接回执行链路）**：`docs/v10/V11_EXECUTION_WORLD_CLOSURE_ALLOWLIST_20251227.md`
+- **V11 程序员AI操作规则（简洁版，一页规程）**：`docs/v10/V11_PROGRAMMER_AI_OPERATING_RULES_20251227.md`
 
 ---
 
@@ -108,7 +113,22 @@
 ## 7) VPS / 产品化开发指导（C阶段入口）
 
 - `docs/v10/V10_VPS_DEVELOPMENT_GUIDE.md`（英主中辅：安全基座、证据链、两级沙盒、火种库只增不改、快照规则）
+- **模块封装→审计→锁版协议（PROBE + Interface Freeze）**：`docs/v10/V10_MODULE_PROBE_AND_INTERFACE_FREEZE_PROTOCOL_20251225.md`
+- **代理交易员（BrokerTrader：执行+入册唯一入口）契约**：`docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
+- **订单确认协议（P0–P5：以交易所 JSON 为真值）**：`docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`
+- **只读审计者（ExchangeAuditor：独立连接交易所审计交易员）契约**：`docs/v10/V10_EXCHANGE_AUDITOR_MODULE_CONTRACT_20251226.md`
+- **入册漏洞审计检查表（discrepancy taxonomy，append-only）**：`docs/v10/V10_BROKERTRADER_REGISTRY_AUDIT_CHECKLIST_20251226.md`
+- **死亡/繁殖审判（LifecycleJudge）模块契约**：`docs/v10/V10_LIFECYCLE_JUDGE_MODULE_CONTRACT_20251226.md`
+- **探针健康校验契约（启动完整校验 + 每tick轻量校验，可STOP）**：`docs/v10/V10_PROBE_HEALTHCHECK_CONTRACT_OKX_NATIVE_20251226.md`
+- **真值画像（live开关）+ 探针激活门控（ProbeGating）契约（v2草案）**：`docs/v10/V10_TRUTH_PROFILE_AND_PROBE_GATING_CONTRACT_20251226.md`
 - 执行接口差异落盘（CCXT vs OKX官方库）：`docs/v10/V10_EXECUTION_INTERFACE_DIFF_LOG_OKX_CCXT.md`
+- **OKX原生 E 探针对齐契约（不做交叉对照、只保证映射+落盘）**：`docs/v10/V10_OKX_NATIVE_E_PROBES_MAPPING_CONTRACT_20251226.md`
+- **事后账簿审计契约（实时可吸收、事后必须平账且可溯源）**：`docs/v10/V10_POST_RUN_LEDGER_AUDIT_CONTRACT_20251226.md`
+- **实时不平账→冻结交易契约（execution_frozen，不下单，防证据污染）**：`docs/v10/V10_EXECUTION_FREEZE_ON_RECONCILIATION_FAILURE_CONTRACT_20251226.md`
+- **Gate 4（VPS）：OKX Demo 演化内核（真实下单、无代理、无人工围栏）**：`docs/v10/V10_GATE4_OKX_DEMO_EVOLUTION_VPS.md`
+- Gate 4（Mac）文档已标记为 deprecated：`docs/v10/V10_GATE4_OKX_DEMO_EVOLUTION_MAC.md`
+- **交易执行模块合同（Execution Engine，OKX demo/live）**：`docs/v10/V10_EXECUTION_ENGINE_CONTRACT_OKX_DEMO_LIVE.md`
+- **对账模块合同（Reconciliation，OKX 执行世界）**：`docs/v10/V10_RECONCILIATION_MODULE_CONTRACT_OKX_EXECUTION_WORLD.md`
 - C2.0 事故处置手册（Incident Runbook + 证据包标准）：`docs/v10/V10_INCIDENT_RUNBOOK_C2_0_20251222.md`
 - 启动前置契约（撤单/平仓/余额启动资金/按资金算Agent数量）：`docs/v10/V10_STARTUP_PREFLIGHT_AND_BOOTSTRAP_CONTRACT_20251223.md`
 - 资金对账验证（交易所权益为真值：reconciliation events 落盘，PASSED）：`docs/v10/incidents/INCIDENT-20251223-C3_0-CAPITAL_RECONCILIATION_PASSED_OKX_DEMO_API.md`

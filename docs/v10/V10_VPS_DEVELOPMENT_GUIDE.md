@@ -203,7 +203,8 @@ Therefore we define a two-tier artifact contract:
 - `ts_utc`, `tick` (if available)
 - `agent_id` (or hashed), `death_reason`, `death_reason_source`
 - `capital_triplet` snapshot (allocated/reserve/current_total or equivalent)
-- `has_position`, `position_side` (or `null + reason`)
+- `position_exposure_ratio`, `pos_side_sign` (or `null + reason`)
+- `positions_truth_quality` (ok/unreliable/unknown)
 - `last_signal`, `state_final` (if available)
 - `api_error_count_so_far` (from tracker/fingerprint)
 - `fence_block_rate_summary` (top fences by block_count during recent window)

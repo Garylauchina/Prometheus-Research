@@ -106,7 +106,7 @@ Minimum evidence for every entry:
 
 - **Positions in demo may be unreliable/empty**
   - Watch: `fetch_positions` returns empty while orders/trades exist.
-  - Risk: I-features (has_position/direction) become untrustworthy.
+  - Risk: I-features (position truth: exposure/side) become untrustworthy.
 - **`tdMode` / `posSide` / `marginMode` semantics**
   - Watch: one library infers defaults incorrectly (net vs long/short mode).
   - Risk: position direction is flipped or collapsed.
@@ -223,7 +223,8 @@ Minimum evidence for every entry:
   - `positions_quality = "reconstructed_from_fills"`
   - `positions_source = "reconstructed_from_fills"`
 - **Snapshot content (fact)**:
-  - `has_position = False` (flat at snapshot time)
+  - Legacy naming note: older snapshots may contain `has_position` (boolean). Current contract prefers a single continuous truth field:
+    - `position_exposure_ratio = 0.0` (flat at snapshot time)
   - `contracts = 0.0`
   - `source = "reconstructed_from_fills"`
 - **Interpretation (strict)**:

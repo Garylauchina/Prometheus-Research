@@ -67,6 +67,21 @@
   - 审计要求（必须落盘）：
     - 每次运行必须在 `run_manifest/summary.meta` 写入：`git_commit`（世界版本）+ `config_hash` + `python_version` + `docker_image_digest`（若适用）。
 
+- **G0.8 强耦合外部系统介入 → 测量失效（强制，V8 Principle 0 对齐）**
+  - 目的：避免目标系统被其它复杂系统以强耦合方式持续介入（改变规则、边界条件、观测通道），从而使“测量”退化为不可裁决的混合过程。
+  - 定义（触发即失效）：
+    - **强耦合介入**：任一外部系统（含人工操作/其它机器人/外部风控或执行代理）在 run 期间反复或持续地改变以下任一类要素：
+      - 世界规则：账户模式/保证金参数/杠杆/交易权限等（导致“物理规则”漂移）
+      - 边界条件：资金进出、持仓被外力开平、挂单被外力撤改（导致“系统边界”漂移）
+      - 观测通道：数据源/字段语义/采样机制被替换或扰动（导致“观测口径”漂移）
+  - 强制裁决语义：
+    - 发生强耦合介入的 run 必须标记为 **Invalid / Not Measurable**（不得用于 Gate 1–3 的 A/B 裁决与机制归因）。
+    - 若仅发生一次性、可量化、可比较的介入（例如明确记录的资金注入/参数切换），可降级为 **Inconclusive**，但必须给出证据与影响范围。
+  - 最低证据要求（必须落盘）：
+    - `run_manifest` 必须声明：本次 run 的“边界条件承诺”（例如账户独占/是否允许人工干预/是否允许其它系统共用同账户）。
+    - 若检测或承认发生外部介入：必须追加落盘一条结构化事件（文件名可自定，但必须 append-only），包含 `ts_utc`、`type`、`what_changed`、`who/where`（可脱敏）、以及 `evidence_refs` 指向对应的交易所快照/日志。
+  - 参考（概念来源）：`docs/v8/V8.md`（Principle 0: Disturbance is Measurable）
+
 ---
 
 ## 2. Gate 1：非随机性（必须有对照）
@@ -202,6 +217,68 @@
 - **G4.3 执行环境指纹测试（若上OKX demo/live）**
   - 以极小额订单测量：滑点分布、部分成交比例、延迟分布、fee一致性，并落盘。
 
+- **G4.3b 交易执行模块合同（Execution Engine，强制，demo/live）**
+  - 目的：防止“执行逻辑散落主程序导致语义污染/审计断裂”，确保真实执行闭环可复核。
+  - 强制规则（任一失败即 Gate 4 Fail）：
+    - okx_demo_api / okx_live 下 **禁止伪造交易**：下单失败不得 simulated fill/假 ack/假 fill。
+    - `fill_observed` 只能来自交易所可回查证据（order_status/fills），不得用本地假设替代。
+    - public endpoint（instruments/ticker）必须用无鉴权方式调用，且失败也必须证据化（HTTP status + response 摘要）。
+    - 必须提供 ops-only 最小 PROBE 证据包：instruments→选instId(live)→下单→回查→撤单→回查→SHA256。
+    - **唯一交易入口（hard）**：execution_world 下，runner/测试程序 **禁止绕过代理交易员（BrokerTrader）** 直接调用 connector 下单/撤单/回查；所有订单生命周期必须经过 “执行 + 入册（append-only）” 的统一入口，否则视为审计黑洞 → Gate4 Fail。
+  - 参考合同：`docs/v10/V10_EXECUTION_ENGINE_CONTRACT_OKX_DEMO_LIVE.md`
+  - 入口契约：`docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
+
+- **G4.3e 订单确认协议（hard，demo/live）**
+  - 目的：解决通信/异步导致的不一致，保证“每一笔交易都能被交易所 JSON 回查复现”，避免内部伪账/伪成交。
+  - 协议：`docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`
+  - 最小 PASS（适用于 Step1/Probe）：
+    - 对所有 `ack_received=true` 的订单，必须完成 **P2 Order Status**：可回查到终态（filled/canceled 等），且查询证据 append-only 落盘。
+  - NOT_MEASURABLE（必须诚实标注，不得硬算）：
+    - 任何关于 `fillSz/avgPx/fee/pnl/balance change` 的结论，若未完成对应层级（P3 fills / P4 bills），则一律 NOT_MEASURABLE。
+    - 任一分页端点（orders-history/fills/bills）无法证明“已完整拉取”（例如 hasMore 未清空/游标未走完），相关结论一律 NOT_MEASURABLE。
+  - FAIL（任一触发即 Gate4 Fail）：
+    - 无交易所 JSON 证据却写入“成交/费用/仓位变化”等真值（内部伪造）。
+    - 出现 ack 后长期无法完成 P2（或需 P3/P4 的断言）但仍继续发单（未执行 execution_freeze）。
+
+- **G4.3f Run-end 只读审计（evidence-only，用于锁版前审查入册漏洞）**
+  - 目的：在不干预系统的前提下，用交易所只读查询对 BrokerTrader 的入册完整性做一次交叉核验，暴露“漏入册/分页不完整/关联断裂”等漏洞。
+  - 契约：
+    - `docs/v10/V10_EXCHANGE_AUDITOR_MODULE_CONTRACT_20251226.md`
+    - `docs/v10/V10_BROKERTRADER_REGISTRY_AUDIT_CHECKLIST_20251226.md`
+  - 最小要求：
+    - 每个 run 在结束时产出：`auditor_report.json` 与 `auditor_discrepancies.jsonl`
+    - 上述审计产物必须被纳入 `FILELIST.ls.txt` 与 `SHA256SUMS.txt`（避免形成新的证据盲区）
+
+> Note（本版本编排）：生命周期循环的默认收尾可以先不引入审计模块“参与编排”，但审计模块仍可作为独立工具在 run 结束后运行并落盘审计结果。若启用 G4.3f，则以上最小要求生效。
+
+- **G4.3c 执行世界关键参数“传递与关联”审计（强制，demo/live）**
+  - 目的：明确验收是否覆盖 **资金真值（exchange equity）**、**持仓/数量**、**订单ID关联** 三条证据链，避免“跑起来了但关键参数没落盘/不可回查”。
+  - 适用范围：`okx_demo_api`、`okx_live`（`offline/okx_demo_sim` 必须写 `null + reason`）。
+  - **资金参数（必须落盘且可复核）**：
+    - `bootstrap_capital_value/bootstrap_capital_currency/bootstrap_capital_field` 必须出现在 `run_manifest.json`
+    - preflight AFTER 快照为唯一启动资金来源（见 G4.3a 合同）
+    - `capital_reconciliation_events.jsonl` 必须存在，且每条包含：`exchange_equity`、`allocated_capital`、`system_reserve_before/after`、`delta`、`action_taken`
+  - **持仓参数（必须落盘“数量口径”）**：
+    - preflight 必须落盘：`open_orders_after_count == 0` 与 `positions_after_count == 0`（或 `skipped + reason`；demo 若跳过必须诚实标注）
+    - 若发生过任何真实订单 ack（`ack_received=true`），必须提供一种可审计的持仓证据路径：
+      - A) 交易所 positions 快照（推荐），或
+      - B) 基于 fills/order_status 的重建证据（见 G4.5 与 C0.7/C0.8/C0.9 类证据链）
+  - **订单ID与可回查关联（必须）**：
+    - 每个被认为 ack 的订单，必须至少具备：`clOrdId`（本地关联键）与 `ordId_hash`（脱敏关联键）
+    - 必须存在 `order_status_samples.json`（append-only）或等价文件，能用 `clOrdId/ordId_hash` 回指交易所 `state/fillSz`
+  - 证据引用：
+    - 交易执行模块合同：`docs/v10/V10_EXECUTION_ENGINE_CONTRACT_OKX_DEMO_LIVE.md`
+    - 启动前置契约：`docs/v10/V10_STARTUP_PREFLIGHT_AND_BOOTSTRAP_CONTRACT_20251223.md`
+    - 对账模块合同：`docs/v10/V10_RECONCILIATION_MODULE_CONTRACT_OKX_EXECUTION_WORLD.md`
+
+- **G4.3d 核心接口冻结（Execution + Reconciliation，强制，demo/live）**
+  - 目的：一旦交易与对账验收通过，接口/证据 schema 锁定，避免后续“悄悄改字段/改语义”导致审计链不可比。
+  - 强制规则（任一失败即 Gate 4 Fail）：
+    - Execution Engine 工件 schema 冻结（见执行合同 §8）
+    - Reconciliation 工件 schema 冻结（见对账合同 §5）
+    - 允许向后兼容扩展：只允许新增字段；不得删除字段/更改类型/更改语义
+    - 任何破坏性变更必须提升 version 并重做 Gate 4 的最小证据包回归
+
 - **G4.3a 启动前置契约（Preflight + Bootstrap）（强制，demo/live）**
   - 目的：避免“系统以为自己空仓/有多少钱，但交易所实际不是”，导致后续证据链污染。
   - 强制顺序：connect check → BEFORE快照 → 撤单 → 平仓（flatten）→ AFTER快照 → 用 `balance_after` 作为启动资金
@@ -254,6 +331,53 @@
     - 必须能形成最小“Incident Evidence Bundle（IEB）”，并能指回 run_id 与 artifacts
     - 必须把“三维共振”类重大风险信号（趋势 + 摩擦激增 + 群体死亡）作为升级条件写入处置流程（不要求自动化，但要求可审计）
   - 参考协议：`docs/v10/V10_INCIDENT_RUNBOOK_C2_0_20251222.md`
+
+- **G4.7 Gate 4（VPS）：OKX Demo 演化内核（真实下单、无代理、无人工围栏）（强制，demo）**
+  - 目的：在 **VPS（Docker）** 环境，用 OKX Demo **真实下单**驱动多 Agent 演化闭环，同时保持“证据优先 + 可审计 + 可复盘”。
+  - 背景（执行环境变更）：国内环境难以稳定直连 OKX；依赖代理访问存在被交易所风控与“观测通道漂移”的风险，因此 Gate 4 的执行世界以 VPS 为准。
+  - 强制口径（任一失败 → Gate 4 Fail）：
+    - **真实下单**：`okx_demo_api` 下任何 order intent 必须走交易所真实下单链路。
+    - **禁止伪造交易**：下单失败不得 simulated fill/假 ack/假 fill（与 G4.3b 一致）。
+    - **无人工围栏**：不得以“每 N tick 必须下单/必须成交”作为通过门槛，更不得将该类频次约束注入 Agent 决策路径。
+      - 允许：生态围栏（STOP/限流/资金守恒）与事后审计标签。
+    - **NO_TRADE 证据化**：若运行中无交易发生，必须将 run 明确标注为 `NO_TRADE`（基于落盘证据），该 run 对“成交/手续费闭环”结论视为 **证据不足（Inconclusive）**，但不因“未交易”本身判定失败。
+    - **决策链运行证据（强制，observe-only 语义闭环）**：
+      - 目的：区分“Agent 主动观望” vs “决策链未运行/观测链断裂”。
+      - 强制要求：必须提供 append-only 的 tick 级决策轨迹证据（文件名可不同，但语义等价，如 `decision_trace.jsonl`），至少包含：`ts_utc`、`tick`、`run_id`、`agent_id_hash`（或等价主体标识）、`action`（例如 hold/open/close/none）。
+      - 裁决语义：若缺失该证据，则任何 `NO_TRADE` 只能判为“观测到无交易”，但**无法断言**是 Agent 的自主决策（记为 Inconclusive/证据不完备）。
+    - **执行世界的模块封装 + 审计 + 锁版（强制）**：
+      - 要求：交易所通信模块（Connector）与交易执行模块（ExecutionEngine）必须独立封装，不得散落在测试主程序中。
+      - 要求：封装后必须通过 ops-only 的最小 PROBE 证据包验收，验收通过后 **接口/证据 schema 冻结**（只允许向后兼容扩展）。
+      - 参考协议：`docs/v10/V10_MODULE_PROBE_AND_INTERFACE_FREEZE_PROTOCOL_20251225.md`
+    - **禁止“内部持仓模拟”（强制）**：
+      - 在 `okx_demo_api` / `okx_live` 中，core/decision 只能产出 intent，不得直接改写 internal positions/state 来“模拟成交”。
+      - 任一 internal positions/state 变化必须能指回交易所可回查证据（order_status/fills/positions truth），否则该 run 判为 **Invalid / Not Measurable**。
+  - 参考协议：`docs/v10/V10_GATE4_OKX_DEMO_EVOLUTION_VPS.md`（主） / `docs/v10/V10_GATE4_OKX_DEMO_EVOLUTION_MAC.md`（deprecated）
+  - **无代理执行规则（硬门槛）**：
+    - 若 run 的 OKX 交互依赖不透明代理/VPN 路径，且该路径可能在 run 期间改变或触发风控，则该 run 必须标记为 **Not Measurable**（观测通道漂移，见 G0.8）。
+  - **人工筛选/聚类就绪（验收项，偏“证据完备”而非“结论正确”）**：
+    - 目的：允许在不破坏原始证据的前提下，对每个 96 ticks 审判窗口做**只读**的死亡/繁殖聚类分析。
+    - 强制口径：
+      - 必须输出 append-only 的生命周期证据文件（命名可不同，但语义必须等价）：`death_events.jsonl` 与 `birth_events.jsonl`（或等价物）。
+      - 每条事件至少包含：`ts_utc`、`tick`、`run_id`、以及可用于聚类的最小字段（例如 ROI/原因/寿命/资本分裂等）；并含可追溯的主体标识（如 `agent_id_hash` / `parent_id_hash` / `child_id_hash`）。
+      - 若某 run 在窗口内无死亡/无繁殖：允许 0 事件，但必须在报告中 **证据化为 0**（不得靠口头说明）。
+    - 分层裁决（避免“讲故事”）：
+      - **行为/生态层聚类（可立即做）**：满足以上 lifecycle 证据 + `decision_trace.jsonl`（或等价物）即可；可聚类的对象是“决策轨迹/死因/ROI窗口/寿命”等。
+      - **基因层聚类（必须额外证据）**：若要宣称“按基因簇解释死亡/繁殖差异”，必须在同一 `run_dir/` 提供 `genomes_snapshot.jsonl`（或等价物），并与 `run_id` 绑定、可校验（纳入 `FILELIST.ls.txt` + `SHA256SUMS.txt`）。
+        - 最小字段：`ts_utc`、`run_id`、`tick`（建议 1 或 96）、`agent_id_hash`、`genome_hash`。
+        - 若缺失：该 run 的“基因层聚类”一律判为 **Inconclusive（证据不完备）**，不得用推测替代。
+  - **模拟→API 市场数据切换的高风险缺口（不打断当前 24h，但必须纳入下一轮验收）**：
+    - 背景：从离线/模拟市场输入切到 OKX API 实时输入后，最容易出现“市场输入链路断裂/错对齐/静默降级”的隐蔽漏洞，导致出现“静默市场”而非策略真实观望。
+    - **D1 market→decision 输入闭环证据（必须补齐）**：
+      - 要求：在 `decision_trace.jsonl`（或等价物）里证据化“决策实际使用的市场输入”，至少包含：
+        - `inst_id_used`、`source_ts_used`、`mark_price_used`（或 `mid_used`）
+        - `market_context_hash`（或 `features_hash`）
+        - `policy_version` / `decision_contract_version`
+      - 并提供 tick 级市场锚点记录（可嵌入 tick_summary 或单独 `market_observations.jsonl`），用于交叉校验 hash/字段。
+    - **D2 静默降级检测（必须补齐）**：
+      - 要求：当 API 错误/超时导致使用默认值、缓存值、陈旧值时，必须在决策证据中显式标注：
+        - `reason_code` / `input_quality_flags`（例如 stale/default/degraded）
+      - 禁止“吞异常后静默用 0/上次值”却不留证据。
 
 ---
 
