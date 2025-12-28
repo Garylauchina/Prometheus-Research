@@ -236,6 +236,15 @@ tick=1 规则（hard）：
 - `errors.jsonl`（任何降级/冻结/STOP 原因）
 - `FILELIST.ls.txt`、`SHA256SUMS.txt`（证据包可验）
 
+### 10.1 世界参数变更协议（World Parameters Change Protocol）
+
+execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。
+
+硬规则（V11 baseline）：
+- **只允许在 run 边界变更**：同一个 run 内不得悄悄修改世界参数（避免不可复现）。
+- **必须写入 `run_manifest.json`**（additive-only）：记录参数值 + `change_reason_code`（若为变更 run）+ 证据引用（例如 VPS 网络画像/交易所规则摘要/历史对比报告）。
+- **环境变化允许参数变化**：例如 VPS 升级、网络路径变化、交易所规则变化；但每次变化都必须作为“环境变更”被记录并用于后续分析分组（避免误归因到策略差异）。
+
 参考：
 - `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 - `docs/v10/V10_MODULE_PROBE_AND_INTERFACE_FREEZE_PROTOCOL_20251225.md`
