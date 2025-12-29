@@ -336,6 +336,8 @@ Step 50（C_off vs C_on 最小对照实验模板：manifest.ablation_experiment 
 - `docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_20251230.md`
 Step 50（Quant 落地记录）：
 - `docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_IMPLEMENTED_IN_QUANT_20251230.md`
+Step 51（最小对照实验跑通 + ablation_summary.json 事实统计产物）：
+- `docs/v10/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

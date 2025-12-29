@@ -98,6 +98,8 @@
 - **V11 Step 50（最小对照实验模板：C_off vs C_on）**：
   - Spec：`docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_20251230.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_IMPLEMENTED_IN_QUANT_20251230.md`
+- **V11 Step 51（最小对照实验跑通 + ablation_summary.json）**：
+  - Spec：`docs/v10/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_20251230.md`
 
 ---
 
