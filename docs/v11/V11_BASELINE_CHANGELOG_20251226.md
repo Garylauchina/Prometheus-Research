@@ -215,7 +215,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 58：为 Step57 fixtures contract 提供机器可执行 verifier，并纳入 Quant CI gate（Step56 链路）作为必跑断言，防止 fixtures 漂移（规格见：`docs/v11/V11_STEP58_FIXTURES_CONTRACT_VERIFIER_20251230.md`）。
   - Step 58（落地）：Quant 已新增 fixtures contract verifier 并接入 CI gate（实现锚点见：`docs/v11/V11_STEP58_FIXTURES_CONTRACT_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 59：定义 compare_bundle.json（fact-only）作为跨 run 对照的“研究侧消费入口”，从 Step53 的 ablation_compare.json 中摘录/汇总事实字段并写入 evidence_refs（规格见：`docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`）。
-  - Step 60：把 Step59 compare_bundle.json 纳入 run-end evidence gate / CI gate（与 Step54 compare 同目录，生成后必须 verify，并纳入 FILELIST/SHA256SUMS/evidence_ref_index；工具/证据失败=exit 2），让研究消费入口也进入可复核闭环（规格见：`docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_20251230.md`）。
+  - Step 60：把 Step59 compare_bundle.json 纳入 run-end evidence gate / CI gate（与 Step54 compare 同目录，生成后必须 verify，并纳入 FILELIST/SHA256SUMS/evidence_ref_index；工具/证据失败=exit 2），让研究消费入口也进入可复核闭环（规格见：`docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

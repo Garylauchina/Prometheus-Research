@@ -123,6 +123,7 @@
 ### Compare Bundle Gate Integration (Step 60)
 
 - Step 60 (SSOT): `docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_20251230.md`
+- Step 60 (Quant record): `docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

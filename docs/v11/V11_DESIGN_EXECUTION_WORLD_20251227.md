@@ -371,6 +371,8 @@ Step 59（compare bundle：把 ablation_compare.json 摘录为研究侧可消费
 
 Step 60（compare bundle 纳入 run-end/CI gates：生成后必须 verify，并进入证据包闭环）：
 - `docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_20251230.md`
+- Step 60（Quant 落地记录）：
+  - `docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
