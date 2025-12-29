@@ -381,6 +381,8 @@ Step 61（compare bundle index：聚合 compare_bundle.json 为 fact-only 索引
 
 Step 62（CI gate：在 CI 中生成并验证 Step61 index，防止入口腐化）：
 - `docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_20251230.md`
+- Step 62（Quant 落地记录）：
+  - `docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

@@ -137,6 +137,7 @@
 ### CI Gate for Index (Step 62)
 
 - Step 62 (SSOT): `docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_20251230.md`
+- Step 62 (Quant record): `docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

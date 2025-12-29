@@ -18,7 +18,7 @@ Quant CI 必须新增一个 step/job（建议挂在现有 `v11_evidence_gate.yml
 1) 生成 index（基于 fixtures-root 扫描）
 
 ```text
-python3 tools/index_compare_bundles.py tests/fixtures --output ci_artifacts/compare_bundle_index.json
+python3 tools/index_compare_bundles.py <scan_root> --output ci_artifacts/compare_bundle_index.json
 ```
 
 2) 验证 index
@@ -31,7 +31,9 @@ python3 tools/verify_step61_compare_bundle_index.py ci_artifacts/compare_bundle_
 - 两条命令均 exit 0
 
 说明（写实）：
-- scan_root 以 `tests/fixtures` 为主，确保 CI 稳定、不依赖运行时生成 runs。
+- scan_root 推荐两种等价来源（任一即可，CI 需固定选择）：
+  - `tests/fixtures`（静态 fixtures-root）
+  - `runs_step54_test`（由 Step54 integration test 在 CI 中生成的测试 run_dir root，包含派生的 compare_bundle.json）
 - `ci_artifacts/` 可为临时目录；若 CI 不保存 artifact，也至少要在日志中打印 index 路径与 bundle_count。
 
 ---
