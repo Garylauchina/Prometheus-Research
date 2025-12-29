@@ -252,6 +252,8 @@ Step 26 的最小可复核清单（DecisionEngine inputs: E + MFStats + Comfort�
 - `docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
 Step 28（run-end 证据包打包 + Gate，fail-closed）：
 - `docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
+Step 29（CI Evidence Gate：fixture-based，fail-closed，防未来改动破坏 Step26 可复核性）：
+- `docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

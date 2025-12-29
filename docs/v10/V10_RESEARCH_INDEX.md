@@ -34,6 +34,8 @@
   - Verifier：`tools/verify_step26_evidence.py`
 - **V11 Step 28（run-end 证据包打包 + Gate，fail-closed）**：
   - Spec：`docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
+- **V11 Step 29（CI Evidence Gate：fixture-based，fail-closed）**：
+  - Spec：`docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
 
 ---
 
