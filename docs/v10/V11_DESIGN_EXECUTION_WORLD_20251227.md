@@ -256,6 +256,8 @@ Step 29（CI Evidence Gate：fixture-based，fail-closed，防未来改动破坏
 - `docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
 Step 30（Quant runner 已强制接入 run-end evidence gate：不可绕过，FAIL/ERROR=exit 2）：
 - `docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
+Step 31（扩展 verifier 到 Tier-1：Ledger + ProbeGating + Errors 的最小一致性）：
+- `docs/v10/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

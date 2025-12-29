@@ -163,6 +163,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 28：run-end 证据包打包 + Gate（生成 `FILELIST/SHA256SUMS` 后运行最小复核 verifier；FAIL 必须以 exit 2 失败退出，避免“证据不可复核但误判正常结束”）。
   - Step 29：CI Evidence Gate（fixture-based + verifier + workflow，FAIL=阻断合并），防止未来改动破坏 Step 26 证据链闭合与 contract/mask 纪律。
   - Step 30：Quant runner 已强制接入 Step 28 gate（run-end 必跑 + fail-closed），并写实 `run_manifest.evidence_gate` 与 `errors.jsonl`（实现锚点见：`docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`）。
+  - Step 31：扩展 evidence verifier 覆盖 Tier-1（`ledger_ticks.jsonl` + `probe_gating_ticks.jsonl` + `errors.jsonl`）的最小一致性，形成“输入链 + 真值链 + 失败链”的可复核闭环（规格见：`docs/v10/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
