@@ -104,6 +104,8 @@
 - **V11 Step 52（Feature dim ↔ DecisionEngine ↔ Genome schema 一致性冻结）**：
   - Spec：`docs/v10/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_20251230.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`
+- **V11 Step 53（ablation_compare.json 对照聚合报告）**：
+  - Spec：`docs/v10/V11_STEP53_ABLATION_COMPARE_REPORT_20251230.md`
 
 ---
 
