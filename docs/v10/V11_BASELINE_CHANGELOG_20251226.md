@@ -173,6 +173,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 34（落地）：Quant 已实现 `paging_traces.jsonl`（orders/fills/bills，append-only）作为分页闭合 proof，并推送至 `main`（实现锚点见：`docs/v10/V11_STEP34_PAGING_TRACES_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 35：gates 强制要求 `paging_traces.jsonl`（verifier/run-end/CI）——当 run 声称 P3/P4 可测（fills/bills）时，缺失 paging_traces 或无法证明闭合 → 相关结论必须 NOT_MEASURABLE（不得 PASS）（规格见：`docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`）。
   - Step 35（落地）：Quant 已把 `paging_traces.jsonl` 纳入 evidence verifier 与 CI fixture 的硬要求（实现锚点见：`docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IMPLEMENTED_IN_QUANT_20251229.md`）。
+  - Step 36：冻结 auditor_report 的分页闭合覆盖率字段（page_count/closure_proved/trace_line_range 等），把“闭合证明”变成可审计的量化口径（规格见：`docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

@@ -53,6 +53,8 @@
 - **V11 Step 35（gates 强制要求 paging_traces，不可绕过）**：
   - Spec：`docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 36（冻结 auditor_report 的 paging coverage 字段）**：
+  - Spec：`docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
 
 ---
 
