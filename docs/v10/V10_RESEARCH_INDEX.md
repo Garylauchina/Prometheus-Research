@@ -44,6 +44,8 @@
 - **V11 Step 32（Orphan Detection 最小可测：orders-level）**：
   - Spec：`docs/v10/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP32_ORPHAN_DETECTION_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 33（fills/bills join 最小可测：P3/P4）**：
+  - Spec：`docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
 
 ---
 

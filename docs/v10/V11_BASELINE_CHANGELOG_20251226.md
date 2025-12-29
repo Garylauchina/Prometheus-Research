@@ -167,6 +167,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 31（落地）：Quant 已实现并推送 Tier-1 verifier 扩展，并同步升级 CI gate（Step 29）与 run-end gate（Step 30）的覆盖范围（实现锚点见：`docs/v10/V11_STEP31_TIER1_VERIFIER_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 32：Orphan Detection 最小可测（orders-level）——以 `clOrdId` 命名空间界定 in-scope，要求分页闭合；闭合后发现 orphan → FAIL；前提不满足 → NOT_MEASURABLE（规格见：`docs/v10/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`）。
   - Step 32（落地）：Quant 已实现 orphan detection（orders-level，`clOrdId` 前缀 `v11_` + 分页闭合），并提升审计契约版本 `V11_EXCHANGE_AUDITOR_20251229`，推送至 `main`（实现锚点见：`docs/v10/V11_STEP32_ORPHAN_DETECTION_IMPLEMENTED_IN_QUANT_20251229.md`）。
+  - Step 33：fills/bills（P3/P4）最小可测（分页闭合 + join + 幂等），把成交/费用相关断言从 NOT_MEASURABLE 推进为可机械复核（规格见：`docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
