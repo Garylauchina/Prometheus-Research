@@ -312,6 +312,8 @@ Step 44（evidence_refs 可解引用校验：防止“形式正确但指向无�
 - `docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`
 Step 44（Quant 落地记录）：
 - `docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`
+Step 45（evidence_refs 语义 join 校验：防止同 run 内“指向无关行”）：
+- `docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
