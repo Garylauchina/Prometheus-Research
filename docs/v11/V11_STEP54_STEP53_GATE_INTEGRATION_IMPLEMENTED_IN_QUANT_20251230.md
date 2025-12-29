@@ -61,6 +61,10 @@ Exit code 口径（对齐 Step53）：
 新增测试脚本：
 - `tools/test_step54_integration.py`
 
+复核前置条件（写实）：
+- 需要存在可用的 Step51 两次 run_dir（C_off / C_on），以便作为 compare 输入（示例见 Step51 产物目录）。
+- 若本地环境未生成 Step51 runs，需要先运行 Step51 的最小对照实验生成对应 run_dir，再运行本测试脚本。
+
 测试覆盖点（最小）：
 - 基于 Step51 的两次 run_dir（C_off/C_on）生成 compare
 - `ablation_compare.json` 存在
