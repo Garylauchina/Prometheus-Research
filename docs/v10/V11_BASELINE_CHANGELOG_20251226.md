@@ -176,6 +176,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 36：冻结 auditor_report 的分页闭合覆盖率字段（page_count/closure_proved/trace_line_range 等），把“闭合证明”变成可审计的量化口径（规格见：`docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`）。
   - Step 36（落地）：Quant 已实现 `paging_coverage` 字段与 verifier 一致性校验，并完成审计契约/Schema 版本 bump（实现锚点见：`docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 37：paging_traces 增加 `scope_id/query_chain_id` 并与 paging_coverage 的 line_range 绑定，防止同一 run 内多次查询造成“混链歧义”；verifier 必须对混链 FAIL（规格见：`docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_20251229.md`）。
+  - Step 37（落地）：Quant 已实现 scope_id/query_chain_id 并在 verifier 中对混链 fail-closed（实现锚点见：`docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_IMPLEMENTED_IN_QUANT_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
