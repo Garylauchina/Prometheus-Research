@@ -294,6 +294,8 @@ Step 39（Quant 落地记录）：
 - `docs/v10/V11_STEP39_AUDIT_SCOPE_ID_GLOBAL_ANCHOR_IMPLEMENTED_IN_QUANT_20251229.md`
 Step 40（run_manifest.audit_scopes[]：多次审计 append-only，不覆盖）：
 - `docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_APPEND_ONLY_20251229.md`
+Step 40（Quant 落地记录）：
+- `docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
