@@ -310,6 +310,8 @@ Step 43（Quant 落地记录）：
 - `docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_IMPLEMENTED_IN_QUANT_20251229.md`
 Step 44（evidence_refs 可解引用校验：防止“形式正确但指向无关行”）：
 - `docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`
+Step 44（Quant 落地记录）：
+- `docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

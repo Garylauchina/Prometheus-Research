@@ -190,6 +190,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 43：新增 `evidence_ref_index.json`（hash+line_count 索引）由 run-end gate 生成，verifier gate-on 时优先用 index 校验 `sha256_16` 与 `.jsonl` 的行号上界，避免重复复算导致慢/漂移（规格见：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`）。
   - Step 43（落地）：Quant 已实现生成 `evidence_ref_index.json` 并在 verifier gate-on 校验中优先使用（实现锚点见：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 44：evidence_refs 可解引用校验（dereference validation）：verifier gate-on 时按 `file+line_range` 读取 `.jsonl` 行并 parse JSON，强制校验 `run_id` 与 `audit_scope_id` 语义自洽，防止“形式正确但指向无关行”的投机（规格见：`docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`）。
+  - Step 44（落地）：Quant 已在 verifier 中实现 dereference 校验，并增加 run_id 不匹配的投机负例 fixture（实现锚点见：`docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
