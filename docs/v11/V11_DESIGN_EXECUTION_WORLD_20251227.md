@@ -346,6 +346,8 @@ Step 52（Quant 落地记录）：
 - `docs/v11/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`
 Step 53（ablation_compare.json：跨 run 对照聚合报告，事实差异+可复核）：
 - `docs/v11/V11_STEP53_ABLATION_COMPARE_REPORT_20251230.md`
+- Step 53（Quant 落地记录）：
+  - `docs/v11/V11_STEP53_ABLATION_COMPARE_REPORT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
