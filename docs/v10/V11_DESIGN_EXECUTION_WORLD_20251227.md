@@ -284,6 +284,8 @@ Step 37（paging query_chain_id/scope_id：防 paging_traces 混链歧义）：
 - `docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_20251229.md`
 Step 37（Quant 落地记录）：
 - `docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_IMPLEMENTED_IN_QUANT_20251229.md`
+Step 38（run_manifest 冻结 audit scope anchors，防审计范围漂移）：
+- `docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
