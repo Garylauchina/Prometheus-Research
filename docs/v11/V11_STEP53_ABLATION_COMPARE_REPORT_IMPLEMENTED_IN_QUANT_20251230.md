@@ -13,6 +13,11 @@
 - **Commit (short)**: `5e3ae71`
 - **Commit (full)**: `5e3ae71f469b00f23718fab0be12f0e30bf343fc`
 
+口径对齐补丁（后续小修正，保持 schema 不变）：
+- **Commit message**: `v11: Step53 align exit codes and stabilize checked_fields`
+- **Commit (short)**: `61a453b`
+- **Commit (full)**: `61a453b9a85c339207f9a84b8b082e52ce05a6ff`
+
 新增文件（Quant）：
 - `tools/generate_ablation_compare.py`
 - `tools/verify_step53_ablation_compare.py`
@@ -77,11 +82,14 @@ Quant 产物包含（事实字段）：
 
 ---
 
-## 6) 已知对齐建议（记录，不改变 Step53 SSOT）
+## 6) 口径对齐状态（已完成）
 
-以下为“口径一致性建议”，用于后续 Quant 小修正，避免工具口径漂移：
+已在 `61a453b` 中完成对齐（保持 Step53 schema 不变）：
 
-- **Exit code 语义建议**：将 “不可比（comparability.passed=false）” 作为 `WARNING` 而非默认阻塞（更贴近 V11 baseline 的 NOT_MEASURABLE 风格：不阻塞 pipeline，但必须明确标记 reason）。
-- **checked_fields 输出建议**：去重并固定顺序，减少无意义 diff 噪声。
+- **Exit codes（收敛）**：
+  - PASS：产物生成成功 && `comparability.passed==true` → exit 0
+  - WARNING：产物生成成功 && `comparability.passed==false`（必须打印 WARNING + reason）→ exit 0（不阻塞 pipeline）
+  - FAIL：脚本自身失败（缺文件/解析失败/schema 缺失/hash 失败等）→ exit 2
+- **checked_fields（稳定输出）**：去重 + 固定顺序输出，减少无意义 diff 噪声；verifier 增加“去重检测”，且明确 `comparability.passed=false` 不是验收失败。
 
 
