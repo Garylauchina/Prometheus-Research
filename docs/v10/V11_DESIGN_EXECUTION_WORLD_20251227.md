@@ -330,6 +330,8 @@ Step 48（Quant 落地记录）：
 - `docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
 Step 49（C 消融开关：C_off vs C_on，manifest/contract 证据化）：
 - `docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
+Step 49（Quant 落地记录）：
+- `docs/v10/V11_STEP49_C_ABLATION_SWITCH_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
