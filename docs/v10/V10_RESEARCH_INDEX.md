@@ -64,6 +64,7 @@
   - Record（Quant 落地）：`docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IMPLEMENTED_IN_QUANT_20251229.md`
 - **V11 Step 39（audit_scope_id 全局主锚点：跨文件 join）**：
   - Spec：`docs/v10/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`
+  - Record（Quant 落地）：`docs/v10/V11_STEP39_AUDIT_SCOPE_ID_GLOBAL_ANCHOR_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ---
 

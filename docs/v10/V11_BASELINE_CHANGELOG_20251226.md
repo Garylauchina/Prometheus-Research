@@ -180,6 +180,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 38：run_manifest 写入审计 scope anchors（audit_scope_id/inst_id/time_window_ms/prefix），并与 auditor_report/paging_traces 对齐，防止“同名审计但范围漂移”（规格见：`docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`）。
   - Step 38（落地）：Quant 已实现 run_manifest.audit_scope anchors + 一致性校验，并推送至 `main`（实现锚点见：`docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 39：把 `audit_scope_id` 作为全链路全局主锚点（auditor_report/discrepancies/paging_traces/errors/manifest），并由 verifier 对缺失/不一致 fail-closed（规格见：`docs/v10/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`）。
+  - Step 39（落地）：Quant 已实现 `audit_scope_id` 全链路 join + verifier fail-closed，并推送至 `main`（实现锚点见：`docs/v10/V11_STEP39_AUDIT_SCOPE_ID_GLOBAL_ANCHOR_IMPLEMENTED_IN_QUANT_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
