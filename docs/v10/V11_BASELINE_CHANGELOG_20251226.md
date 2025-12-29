@@ -165,6 +165,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 30：Quant runner 已强制接入 Step 28 gate（run-end 必跑 + fail-closed），并写实 `run_manifest.evidence_gate` 与 `errors.jsonl`（实现锚点见：`docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`）。
   - Step 31：扩展 evidence verifier 覆盖 Tier-1（`ledger_ticks.jsonl` + `probe_gating_ticks.jsonl` + `errors.jsonl`）的最小一致性，形成“输入链 + 真值链 + 失败链”的可复核闭环（规格见：`docs/v10/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`）。
   - Step 31（落地）：Quant 已实现并推送 Tier-1 verifier 扩展，并同步升级 CI gate（Step 29）与 run-end gate（Step 30）的覆盖范围（实现锚点见：`docs/v10/V11_STEP31_TIER1_VERIFIER_IMPLEMENTED_IN_QUANT_20251229.md`）。
+  - Step 32：Orphan Detection 最小可测（orders-level）——以 `clOrdId` 命名空间界定 in-scope，要求分页闭合；闭合后发现 orphan → FAIL；前提不满足 → NOT_MEASURABLE（规格见：`docs/v10/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
