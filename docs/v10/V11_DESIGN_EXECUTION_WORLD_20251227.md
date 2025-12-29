@@ -332,6 +332,8 @@ Step 49（C 消融开关：C_off vs C_on，manifest/contract 证据化）：
 - `docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
 Step 49（Quant 落地记录）：
 - `docs/v10/V11_STEP49_C_ABLATION_SWITCH_IMPLEMENTED_IN_QUANT_20251230.md`
+Step 50（C_off vs C_on 最小对照实验模板：manifest.ablation_experiment 冻结）：
+- `docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

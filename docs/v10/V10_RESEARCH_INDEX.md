@@ -95,6 +95,8 @@
 - **V11 Step 49（C 消融开关）**：
   - Spec：`docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP49_C_ABLATION_SWITCH_IMPLEMENTED_IN_QUANT_20251230.md`
+- **V11 Step 50（最小对照实验模板：C_off vs C_on）**：
+  - Spec：`docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_20251230.md`
 
 ---
 

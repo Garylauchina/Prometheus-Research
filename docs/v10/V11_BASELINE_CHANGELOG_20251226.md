@@ -201,6 +201,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 48（落地）：Quant 已扩展 feature/probe contract，引入 I triad probes + `C_prev_net_intent`，并提供 Step48 验收脚本验证 null/mask 纪律（实现锚点见：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 49：C 消融开关（`C_off` vs `C_on`）：固定维度不变，通过 mask 控制 C 探针是否生效，并强制把开关状态写入 run_manifest + contract info（规格见：`docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`）。
   - Step 49（落地）：Quant 已实现 `c_feature_mode`（C_off/C_on）与 contract 证据化输出，并提供 Step49 验收脚本验证维度保持与 mask 策略（实现锚点见：`docs/v10/V11_STEP49_C_ABLATION_SWITCH_IMPLEMENTED_IN_QUANT_20251230.md`）。
+  - Step 50：C_off vs C_on 最小对照实验模板：要求 `run_manifest.ablation_experiment` 记录对照实验必含字段（seed/ticks/agents/truth_profile/mode/feature_contract/bundle_*），且对照实验除 variant 外必须一致（规格见：`docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
