@@ -349,6 +349,11 @@ Step 53（ablation_compare.json：跨 run 对照聚合报告，事实差异+可�
 - Step 53（Quant 落地记录）：
   - `docs/v11/V11_STEP53_ABLATION_COMPARE_REPORT_IMPLEMENTED_IN_QUANT_20251230.md`
 
+Step 54（把 Step 53 compare 纳入 run-end/CI gates，使 compare 进入证据包闭环）：
+- `docs/v11/V11_STEP54_STEP53_GATE_INTEGRATION_20251230.md`
+- Step 54（Quant 落地记录）：
+  - `docs/v11/V11_STEP54_STEP53_GATE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`
+
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
 execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。

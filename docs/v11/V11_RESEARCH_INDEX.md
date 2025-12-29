@@ -83,6 +83,7 @@
 ### Gate Integration (Step 54)
 
 - Step 54 (SSOT): `docs/v11/V11_STEP54_STEP53_GATE_INTEGRATION_20251230.md`
+- Step 54 (Quant record): `docs/v11/V11_STEP54_STEP53_GATE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 
