@@ -328,6 +328,8 @@ Step 48（I/C 注入 SSOT：Ledger triad → I probes；C_prev_net_intent(t-1)�
 - `docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
 Step 48（Quant 落地记录）：
 - `docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
+Step 49（C 消融开关：C_off vs C_on，manifest/contract 证据化）：
+- `docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

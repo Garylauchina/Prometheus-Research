@@ -92,6 +92,8 @@
 - **V11 Step 48（I/C 注入 SSOT）**：
   - Spec：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
+- **V11 Step 49（C 消融开关）**：
+  - Spec：`docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
 
 ---
 
