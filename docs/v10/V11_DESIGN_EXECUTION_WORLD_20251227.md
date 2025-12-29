@@ -296,6 +296,8 @@ Step 40（run_manifest.audit_scopes[]：多次审计 append-only，不覆盖）�
 - `docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_APPEND_ONLY_20251229.md`
 Step 40（Quant 落地记录）：
 - `docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_IMPLEMENTED_IN_QUANT_20251229.md`
+Step 41（审计链 evidence_refs 统一协议：可机器追踪 + SHA256 覆盖）：
+- `docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

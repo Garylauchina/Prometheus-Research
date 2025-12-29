@@ -183,6 +183,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 39（落地）：Quant 已实现 `audit_scope_id` 全链路 join + verifier fail-closed，并推送至 `main`（实现锚点见：`docs/v10/V11_STEP39_AUDIT_SCOPE_ID_GLOBAL_ANCHOR_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 40：run_manifest 增加 `audit_scopes[]`（append-only）记录多次审计 scope，禁止覆盖，避免证据丢失与不可复核（规格见：`docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_APPEND_ONLY_20251229.md`）。
   - Step 40（落地）：Quant 已实现 `audit_scopes[]`（append-only）+ 一致性校验，并推送至 `main`（实现锚点见：`docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_IMPLEMENTED_IN_QUANT_20251229.md`）。
+  - Step 41：审计链 evidence_refs 统一协议（file+line_range+sha256_16+audit_scope_id），并由 verifier/gates fail-closed 校验引用可回查且被 SHA256 覆盖（规格见：`docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
