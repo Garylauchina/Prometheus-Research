@@ -155,6 +155,12 @@
 
 ---
 
+### Research Bundle Output (Step 65)
+
+- Step 65 (SSOT): `docs/v11/V11_STEP65_RESEARCH_BUNDLE_OUTPUT_CONTRACT_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。
