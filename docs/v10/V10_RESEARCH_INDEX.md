@@ -26,6 +26,9 @@
 - **V11 设计文档（execution_world 架构说明，闭包白名单 + 模块编排）**：`docs/v10/V11_DESIGN_EXECUTION_WORLD_20251227.md`
 - **V11 运行闭包白名单（closure allowlist，防 legacy/v10 误接回执行链路）**：`docs/v10/V11_EXECUTION_WORLD_CLOSURE_ALLOWLIST_20251227.md`
 - **V11 程序员AI操作规则（简洁版，一页规程）**：`docs/v10/V11_PROGRAMMER_AI_OPERATING_RULES_20251227.md`
+- **V11 Step 26（DecisionEngine 输入接入 MFStats/Comfort，观测不执法，mask=0 不参与）**：
+  - SSOT：`docs/v10/V11_BASELINE_CHANGELOG_20251226.md`（§2.5 追加条目）
+  - Design：`docs/v10/V11_DESIGN_EXECUTION_WORLD_20251227.md`（§4.3）
 
 ---
 

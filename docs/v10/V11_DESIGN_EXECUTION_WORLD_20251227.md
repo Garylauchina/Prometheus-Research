@@ -107,6 +107,18 @@ hard rules：
 
 参考：`docs/v10/V10_TRUTH_PROFILE_AND_PROBE_GATING_CONTRACT_20251226.md`
 
+### 4.3 World-level “执行摩擦”探针作为输入（观测不执法）
+
+在 V11 baseline 中，除市场外显（E probes）外，允许把 world-level 的执行摩擦事实统计/投影作为 DecisionEngine 输入维度，以支持演化与消融对照：
+
+- **MFStats（事实统计）**：来自 BrokerTrader 的 tick 级 order samples，经 `MFStatsWindow` 形成固定维度统计（例如 P2 闭合率、L1 拒绝率、ack→P2 延迟 p95）。
+- **Comfort（投影）**：由 MFStats 投影得到的单值 `comfort_value ∈ [-1, +1]`，定位为“世界舒适度传感器”，不是 gate。
+
+硬边界（hard）：
+- **不改变 hard gate**：交易冻结/STOP 仍由证据链失败（P2 逾期、账号受限、真值缺失等）与 ProbeGating 的 `gating_decision` 决定；不得把 comfort/MFStats 写成阈值电闸。
+- **fixed-dim per run**：一旦在某个 run 的输入向量中引入 MFStats/Comfort，必须在 `run_manifest.json` 里冻结 `feature_contract_version` 与 `PROBE_ORDER`（同 run 内不得改顺序/维度）。
+- **mask 纪律**：MFStats/Comfort 不可测时必须 `mask=0 + reason_code`；DecisionEngine 必须尊重 mask（mask=0 维度不参与）。
+
 ---
 
 ## 5) BrokerTrader：唯一交易入口（hard）

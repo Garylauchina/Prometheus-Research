@@ -64,6 +64,15 @@ V11 将 execution_world 统一为：**意图产生（core）与真实执行/入�
   - **Unknown must not be fabricated as 0**：只有同时给出 mask/quality/reason 才允许数值占位
   - 参考：`docs/v10/V10_TRUTH_PROFILE_AND_PROBE_GATING_CONTRACT_20251226.md`
 
+- **Step 26：DecisionEngine 输入接入 world-level 执行摩擦（MFStats / Comfort），仅作为观测特征（不执法）**
+  - 背景：在 execution_world 中，“执行摩擦”是可观测的世界现象（事实统计/投影），应进入决策输入以支持演化与对照，而不是被写成阈值电闸（硬门仍由证据链失败与 ProbeGating 决定）。
+  - feature contract 版本提升（示例实现仓库口径）：`V11_FEATURE_PROBE_CONTRACT_20251228.1`
+  - 维度扩展：在既有市场 E probes 基础上 **additive-only** 新增：
+    - `MF_stats`：3 维（事实统计，例如 P2 闭合率、L1 拒绝率、ack→P2 延迟 p95）
+    - `comfort_value`：1 维（由 MF_stats 投影而来，范围 \([-1, +1]\)）
+  - mask 纪律（hard）：当 `MF_stats/comfort` 不可测时必须 `mask=0 + reason_code`；DecisionEngine 必须尊重 mask（mask=0 维度不参与）。
+  - hard boundary：**禁止**在 DecisionEngine 内引入 `comfort`/`MF_stats` 的阈值执法（不得替代 ProbeGating/证据链硬门）。
+
 - **最小“历史投影”特征（避免维度爆炸）**
   - 允许 derived-only 的最小投影指标：
     - `capital_health_ratio = equity / bootstrap_equity`
