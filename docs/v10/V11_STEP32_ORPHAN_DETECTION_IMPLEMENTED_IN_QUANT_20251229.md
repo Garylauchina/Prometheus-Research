@@ -12,6 +12,7 @@ SSOT 规格：
 Prometheus-Quant 已完成并推送：
 - Quant commit：`ed580cb`
 - message：`v11: make orphan detection measurable (orders-level, clOrdId namespace + paging closure)`
+- SSOT 契约版本（Quant）：`V11_EXCHANGE_AUDITOR_20251229`（已 bump）
 - files changed（概览）：
   - `prometheus/v11/auditor/exchange_auditor.py`：重写 orphan detection（含 orders-history 查询 + 分页闭合）
   - `prometheus/v11/ops/broker_trader.py`：`clOrdId` 增加 `v11_` 前缀（命名空间）
