@@ -258,6 +258,8 @@ Step 30（Quant runner 已强制接入 run-end evidence gate：不可绕过，FA
 - `docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
 Step 31（扩展 verifier 到 Tier-1：Ledger + ProbeGating + Errors 的最小一致性）：
 - `docs/v10/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`
+Step 31（Quant 落地记录：CI gate 与 run-end gate 自动升级覆盖 Tier-1）：
+- `docs/v10/V11_STEP31_TIER1_VERIFIER_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

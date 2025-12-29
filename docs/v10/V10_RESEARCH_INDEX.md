@@ -40,6 +40,7 @@
   - Record：`docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
 - **V11 Step 31（扩展 verifier 到 Tier-1：Ledger + ProbeGating + Errors 一致性）**：
   - Spec：`docs/v10/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`
+  - Record（Quant 落地）：`docs/v10/V11_STEP31_TIER1_VERIFIER_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ---
 
