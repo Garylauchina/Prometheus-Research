@@ -198,6 +198,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 47：基因/特征/账簿 SSOT 总审计：execution_world 下退役 `has_position`，以 `position_exposure_ratio + pos_side_sign + positions_truth_quality` 作为持仓真值三元组；冻结 E/I/M/C 口径与 C 最小探针（规格见：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`）。
   - Step 47（落地）：Quant 已在 LedgerModuleV11 中引入持仓真值三元组与强制规则，并升级 ledger contract/schema 版本（实现锚点见：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 48：I/C 注入 SSOT：execution_world 下 I 维度必须由 Ledger triad 注入（mask/unknown 纪律），C 维度基线采用 `C_prev_net_intent(t-1)`，tick=1 必须 null/unknown（规格见：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`）。
+  - Step 48（落地）：Quant 已扩展 feature/probe contract，引入 I triad probes + `C_prev_net_intent`，并提供 Step48 验收脚本验证 null/mask 纪律（实现锚点见：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
