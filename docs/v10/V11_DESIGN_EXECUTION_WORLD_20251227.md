@@ -288,6 +288,8 @@ Step 38（run_manifest 冻结 audit scope anchors，防审计范围漂移）：
 - `docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
 Step 38（Quant 落地记录）：
 - `docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IMPLEMENTED_IN_QUANT_20251229.md`
+Step 39（audit_scope_id 作为全局主锚点：跨文件 join 与 verifier fail-closed）：
+- `docs/v10/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
