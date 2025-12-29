@@ -134,6 +134,12 @@
 
 ---
 
+### CI Gate for Index (Step 62)
+
+- Step 62 (SSOT): `docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。
