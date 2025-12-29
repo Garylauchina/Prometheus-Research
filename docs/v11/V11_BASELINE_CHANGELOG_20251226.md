@@ -224,6 +224,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 64（Quant 落地记录）：`docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：11305b2）。
   - Step 65：research_bundle 输出规范（run-end 研究消费入口目录布局与命名，单 run 与多 run 聚合物理隔离，纳入 evidence package + manifest 写实）（规格见：`docs/v11/V11_STEP65_RESEARCH_BUNDLE_OUTPUT_CONTRACT_20251230.md`）。
   - Step 65（Quant 落地记录）：`docs/v11/V11_STEP65_RESEARCH_BUNDLE_OUTPUT_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`（commit：8dab067）。
+  - Step 66：CI 必跑 Step65 集成测试（`tools/test_step65_research_bundle.py`），任何偏离 Step65 契约即阻断合并（规格见：`docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
