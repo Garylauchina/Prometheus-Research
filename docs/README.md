@@ -14,12 +14,14 @@ If you are here to **audit V10** or **reproduce conclusions**, start with the V1
 - **V10 Evidence Chain / V10证据链**: `docs/v10/V10_RESEARCH_INDEX.md`
 - **V10 Folder README / v10目录页**: `docs/v10/README.md`
 - **Acceptance Criteria / 验收标准**: `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
+- **V11 Index / V11入口**: `docs/v11/V11_RESEARCH_INDEX.md`
 
 ---
 
 ## Structure / 目录结构
 
 - **`docs/v10/` (Primary)**: acceptance criteria, decision records, mechanism attribution (mostly Chinese)
+- **`docs/v11/`**: V11 execution_world refactor track (SSOT index + new docs)
 - **`docs/research/`**: research memos & audits (e.g. money-printer / zombie death certificate)
 - **`docs/architecture/`**: system architecture notes (high-level)
 - **`docs/theory/`**: conjectures and theoretical framing
