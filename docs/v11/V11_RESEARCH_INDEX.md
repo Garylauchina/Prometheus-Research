@@ -165,6 +165,7 @@
 ### CI Gate for Step65 Acceptance (Step 66)
 
 - Step 66 (SSOT): `docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_20251230.md`
+- Step 66 (Quant record): `docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

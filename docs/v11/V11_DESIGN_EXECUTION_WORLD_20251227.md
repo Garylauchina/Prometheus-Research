@@ -401,6 +401,8 @@ Step 65（research_bundle：研究侧消费入口目录布局与归档边界）�
 
 Step 66（CI gate：必跑 Step65 集成测试，防回退）：
 - `docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_20251230.md`
+- Step 66（Quant 落地记录）：
+  - `docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
