@@ -278,6 +278,8 @@ Step 35（Quant 落地记录）：
 - `docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IMPLEMENTED_IN_QUANT_20251229.md`
 Step 36（冻结 auditor_report 的 paging coverage 字段：page_count/closure_proved/trace_range）：
 - `docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
+Step 36（Quant 落地记录）：
+- `docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
