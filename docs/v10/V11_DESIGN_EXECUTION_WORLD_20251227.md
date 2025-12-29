@@ -342,6 +342,8 @@ Step 51（Quant 落地记录）：
 - `docs/v10/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_IMPLEMENTED_IN_QUANT_20251230.md`
 Step 52（Feature dim ↔ DecisionEngine ↔ Genome schema 一致性冻结，fail-closed）：
 - `docs/v10/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_20251230.md`
+Step 52（Quant 落地记录）：
+- `docs/v10/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
