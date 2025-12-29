@@ -205,6 +205,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 50（落地）：Quant 已在 runner 写入 `run_manifest.ablation_experiment`（含 C_off/C_on variant 与控制变量字段），并提供 Step50 验收脚本验证一致性（实现锚点见：`docs/v10/V11_STEP50_MIN_ABLATION_EXPERIMENT_TEMPLATE_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 51：最小对照实验跑通：要求在 C_off/C_on 两次 run 中生成 `ablation_summary.json`（事实统计、无解释）并通过 evidence_refs 可复核（规格见：`docs/v10/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_20251230.md`）。
   - Step 51（落地）：Quant 已实现 `ablation_summary.json` 生成、对照 run 脚本与验收脚本，并提供 C_off/C_on 两次 run 的完整输出（实现锚点见：`docs/v10/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_IMPLEMENTED_IN_QUANT_20251230.md`）。
+  - Step 52：冻结 feature contract 维度 ↔ DecisionEngine 输入维度 ↔ Genome schema 权重布局一致性，并在 runner preflight fail-closed 校验与 manifest 证据化记录（规格见：`docs/v10/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
