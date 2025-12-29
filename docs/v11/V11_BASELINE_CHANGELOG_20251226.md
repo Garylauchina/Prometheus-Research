@@ -213,6 +213,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 56：把 Step55 验收升级为 CI 必跑 gate（Quant CI 必须运行 `tools/test_step54_integration.py` 并 PASS），防止后续回归破坏 Step53/54 的证据闭环（规格见：`docs/v11/V11_STEP56_CI_GATE_STEP55_ACCEPTANCE_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP56_CI_GATE_STEP55_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 57：冻结 Step56 CI gate 所依赖的 Step51 最小 fixtures 口径（目录结构 + 最小字段集合 + 可比性硬规则 + 变更纪律），避免 fixture 漂移导致 gate 失真（规格见：`docs/v11/V11_STEP57_STEP51_MIN_FIXTURES_CONTRACT_20251230.md`）。
   - Step 58：为 Step57 fixtures contract 提供机器可执行 verifier，并纳入 Quant CI gate（Step56 链路）作为必跑断言，防止 fixtures 漂移（规格见：`docs/v11/V11_STEP58_FIXTURES_CONTRACT_VERIFIER_20251230.md`）。
+  - Step 58（落地）：Quant 已新增 fixtures contract verifier 并接入 CI gate（实现锚点见：`docs/v11/V11_STEP58_FIXTURES_CONTRACT_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
