@@ -192,6 +192,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 44：evidence_refs 可解引用校验（dereference validation）：verifier gate-on 时按 `file+line_range` 读取 `.jsonl` 行并 parse JSON，强制校验 `run_id` 与 `audit_scope_id` 语义自洽，防止“形式正确但指向无关行”的投机（规格见：`docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`）。
   - Step 44（落地）：Quant 已在 verifier 中实现 dereference 校验，并增加 run_id 不匹配的投机负例 fixture（实现锚点见：`docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 45：evidence_refs 语义 join 校验：在 Step 44 的基础上，要求引用到 `paging_traces.jsonl` 的行范围内 `scope_id/query_chain_id/endpoint_family` 不混且与 audit_scope 锚点一致，防止同 run 内“指向无关行”（规格见：`docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_20251229.md`）。
+  - Step 45（落地）：Quant 已实现语义 join 校验与两类投机负例 fixtures（mixed query_chain / mixed endpoint），并在 CI 中验证 fail-closed（实现锚点见：`docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
