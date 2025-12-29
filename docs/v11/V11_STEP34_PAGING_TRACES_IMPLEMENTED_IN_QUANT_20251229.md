@@ -3,7 +3,7 @@
 目的：记录 **Step 34（分页闭合证据：paging_traces.jsonl）** 已在实现仓库（Prometheus-Quant）落地，并冻结其“对外可审计口径”（实现锚点 + 覆盖范围 + 关键字段约束）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
 
 ---
 

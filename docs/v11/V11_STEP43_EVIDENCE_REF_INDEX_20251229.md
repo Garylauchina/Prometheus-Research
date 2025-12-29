@@ -3,8 +3,8 @@
 目的：把 Step 42 引入的“hash/行号强校验”的**复算成本**从 verifier 挪到 run-end gate，避免 verifier 反复读取大文件计算行数/哈希导致慢、且重复逻辑容易漂移。
 
 前置 SSOT：
-- Step 41：`docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
-- Step 42：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
+- Step 41：`docs/v11/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
+- Step 42：`docs/v11/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
 
 ---
 

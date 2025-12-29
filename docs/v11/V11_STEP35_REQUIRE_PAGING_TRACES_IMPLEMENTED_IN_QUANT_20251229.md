@@ -3,7 +3,7 @@
 目的：记录 Step 35（把 `paging_traces.jsonl` 纳入 verifier / run-end gate / CI gate 的硬要求）已在实现仓库（Prometheus-Quant）落地，并冻结其“对外可审计口径”。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
 
 ---
 

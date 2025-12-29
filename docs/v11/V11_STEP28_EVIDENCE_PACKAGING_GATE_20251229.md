@@ -64,7 +64,7 @@
 ## 4) verifier 的 SSOT
 
 Step 26 的最小复核清单与参考实现（stdlib-only）在 Prometheus-Research（SSOT）：
-- `docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
+- `docs/v11/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
 - `tools/verify_step26_evidence.py`
 
 实现仓库（Prometheus-Quant）必须：

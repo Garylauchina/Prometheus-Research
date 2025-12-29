@@ -3,7 +3,7 @@
 目的：记录 Step 42（gate-on 时 evidence_refs 的 hash/行号强约束）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点与 hard 口径。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
 
 ---
 

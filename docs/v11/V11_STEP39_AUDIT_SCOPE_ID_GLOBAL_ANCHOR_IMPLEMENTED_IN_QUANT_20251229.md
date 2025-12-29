@@ -3,7 +3,7 @@
 目的：记录 Step 39（将 `audit_scope_id` 作为审计链路全局主锚点，并由 verifier/gates fail-closed 校验）已在实现仓库（Prometheus-Quant）落地，并冻结其审计锚点（commit、关键口径）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`
 
 ---
 

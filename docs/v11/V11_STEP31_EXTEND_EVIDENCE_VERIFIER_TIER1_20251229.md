@@ -11,10 +11,10 @@
 - **不引入策略执法**：这里验证的是“证据链可复核”，不是“交易正确/收益正确”。
 
 SSOT 关联：
-- Step 27（Step26 最小复核清单）：`docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
-- Step 28（run-end packaging + gate 规格）：`docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
-- Step 29（CI gate）：`docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
-- Step 30（Quant 已强制接入 run-end gate）：`docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
+- Step 27（Step26 最小复核清单）：`docs/v11/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
+- Step 28（run-end packaging + gate 规格）：`docs/v11/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
+- Step 29（CI gate）：`docs/v11/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
+- Step 30（Quant 已强制接入 run-end gate）：`docs/v11/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
 
 ---
 

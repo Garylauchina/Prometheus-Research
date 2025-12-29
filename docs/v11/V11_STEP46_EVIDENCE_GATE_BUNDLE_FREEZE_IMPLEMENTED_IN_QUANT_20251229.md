@@ -3,7 +3,7 @@
 目的：记录 Step 46（Evidence Gate Bundle 冻结：bundle 版本化 + fixtures 套件冻结 + exit code 语义冻结 + 必需产物清单）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点与验收事实（含 SHA）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_20251229.md`
 
 ---
 

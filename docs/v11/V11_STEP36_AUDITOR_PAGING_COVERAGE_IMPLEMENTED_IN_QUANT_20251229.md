@@ -3,7 +3,7 @@
 目的：记录 Step 36（冻结 `auditor_report.json.paging_coverage` 字段 + verifier 一致性校验）已在实现仓库（Prometheus-Quant）落地，并冻结其审计锚点（commit、版本 bump、关键硬规则）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
 
 ---
 

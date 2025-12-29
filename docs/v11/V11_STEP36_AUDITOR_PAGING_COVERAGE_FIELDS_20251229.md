@@ -10,8 +10,8 @@
 如果不冻结覆盖率字段，理论上可能出现“写了几条 paging_traces 但未覆盖全链”而仍宣称闭合的漏洞。
 
 SSOT 关联：
-- Step 34 Spec：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
-- Step 35 Spec：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
+- Step 34 Spec：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
+- Step 35 Spec：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
 
 ---
 

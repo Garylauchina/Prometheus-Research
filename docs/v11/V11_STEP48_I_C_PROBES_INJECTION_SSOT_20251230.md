@@ -5,8 +5,8 @@
 - **C 维度**：最小探针 `C_prev_net_intent` 来自 `decision_trace.jsonl` 的 **上一 tick** 意图统计，避免同 tick 顺序偏置
 
 前置：
-- Step 47 Spec：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
-- Step 47 Quant 落地（Ledger triad）：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
+- Step 47 Spec：`docs/v11/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
+- Step 47 Quant 落地（Ledger triad）：`docs/v11/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

@@ -3,7 +3,7 @@
 目的：记录 Step 49（`C_off` vs `C_on` 消融开关 + 证据化写入 contract/manifest）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点（含 SHA）与最小验收事实。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP49_C_ABLATION_SWITCH_20251230.md`
 
 ---
 

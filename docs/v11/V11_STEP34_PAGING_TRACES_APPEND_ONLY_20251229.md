@@ -11,7 +11,7 @@
 
 SSOT 关联：
 - `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`（分页/完整性 hard rules）
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
 
 ---
 

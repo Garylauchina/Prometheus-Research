@@ -3,7 +3,7 @@
 目的：记录 Step 45（evidence_refs 语义 join 校验：scope_id/query_chain_id/endpoint_family + audit_scope 元数据一致性）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点与最小验收（含投机负例）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_20251229.md`
 
 ---
 

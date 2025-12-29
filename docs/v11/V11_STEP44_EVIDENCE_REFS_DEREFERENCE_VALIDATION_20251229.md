@@ -4,9 +4,9 @@
 让 verifier 在 gate-on 时能 **按 evidence_refs 解引用到具体 JSON 行**，并校验 run_id / audit_scope_id 等关键 join 锚点一致，防止“形式正确但指向无关行”的投机。
 
 前置 SSOT：
-- Step 41：`docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
-- Step 42：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
-- Step 43：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
+- Step 41：`docs/v11/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
+- Step 42：`docs/v11/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
+- Step 43：`docs/v11/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
 
 ---
 

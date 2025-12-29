@@ -8,8 +8,8 @@
 当同一 run 出现多次审计（例如周期末 + 额外补审、或多 inst），单对象会被覆盖，证据链不再可线性追踪。
 
 SSOT 关联：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP39_AUDIT_SCOPE_ID_AS_GLOBAL_ANCHOR_20251229.md`
 
 ---
 

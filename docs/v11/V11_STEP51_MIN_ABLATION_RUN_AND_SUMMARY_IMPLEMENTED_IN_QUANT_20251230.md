@@ -3,7 +3,7 @@
 目的：记录 Step 51（最小对照实验跑通 + 生成 `ablation_summary.json`）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点（含 SHA）与验收事实（含两次 run 产物）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_20251230.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP51_MIN_ABLATION_RUN_AND_SUMMARY_20251230.md`
 
 ---
 

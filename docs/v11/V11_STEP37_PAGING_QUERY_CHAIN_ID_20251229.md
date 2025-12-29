@@ -6,9 +6,9 @@
 本 Step 37 通过新增 **查询链唯一键** 来做到“每个 closure proof 可唯一归属到一次查询链”，并被 verifier 强制校验。
 
 SSOT 关联：
-- Step 34 paging_traces：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
-- Step 35 gates require paging_traces：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
-- Step 36 paging_coverage：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
+- Step 34 paging_traces：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
+- Step 35 gates require paging_traces：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
+- Step 36 paging_coverage：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
 
 ---
 

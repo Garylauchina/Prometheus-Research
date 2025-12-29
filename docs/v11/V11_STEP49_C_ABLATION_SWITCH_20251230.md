@@ -5,8 +5,8 @@
 - 开关状态必须写入 `run_manifest.json` + feature/probe contract info（机器可读）
 
 前置：
-- Step 48 Spec：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
-- Step 48 Quant 落地：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
+- Step 48 Spec：`docs/v11/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
+- Step 48 Quant 落地：`docs/v11/V11_STEP48_I_C_PROBES_INJECTION_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

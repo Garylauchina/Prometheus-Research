@@ -3,7 +3,7 @@
 目的：记录 Step 52（feature contract dim ↔ DecisionEngine input_dim ↔ Genome schema 对齐，fail-closed）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点（含 SHA）与最小验收事实。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_20251230.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_20251230.md`
 
 ---
 

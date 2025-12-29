@@ -4,8 +4,8 @@
 凡是声称 P3/P4（fills/bills）分页闭合与 join 可测（Step 33），就必须提供 paging_traces 作为 closure proof，并被 gates 强制验证，避免“实现写了 trace 但 gate 不看 → 仍可绕过”。
 
 SSOT 关联：
-- Step 33（P3/P4 可测）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
-- Step 34（paging traces 规范）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
+- Step 33（P3/P4 可测）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
+- Step 34（paging traces 规范）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
 
 ---
 

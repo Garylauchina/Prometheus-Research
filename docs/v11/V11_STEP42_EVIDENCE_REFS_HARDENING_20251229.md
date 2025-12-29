@@ -5,7 +5,7 @@
 - 对 `*.jsonl` 引用必须给出行号范围（line_start/line_end），保证“一键定位”可机器复核
 
 SSOT 依赖：
-- Step 41 Spec：`docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
+- Step 41 Spec：`docs/v11/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
 
 ---
 

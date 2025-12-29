@@ -3,7 +3,7 @@
 目的：记录 **Step 33（fills/bills join 最小可测：P3/P4）** 已在实现仓库（Prometheus-Quant）落地，并冻结其“对外可审计口径”（实现锚点 + 关键硬约束 + verdict 规则）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
 
 ---
 

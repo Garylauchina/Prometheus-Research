@@ -3,7 +3,7 @@
 目的：记录 Step 44（evidence_refs 可解引用校验：run_id/audit_scope_id 语义自洽）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点与最小验收口径（含投机负例）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`
 
 ---
 

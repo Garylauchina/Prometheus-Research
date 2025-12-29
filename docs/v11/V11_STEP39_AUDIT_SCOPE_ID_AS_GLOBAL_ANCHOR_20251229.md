@@ -8,7 +8,7 @@ Step 34–38 已解决分页闭合 proof、覆盖率、混链、防范围漂移�
 - 同一 run 多次审计的证据混在一起（比较困难）
 
 SSOT 关联：
-- Step 38（manifest audit_scope anchors）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
+- Step 38（manifest audit_scope anchors）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
 - Step 34–37（paging traces + coverage + query_chain）：相关 Step 文档
 
 ---

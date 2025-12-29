@@ -3,7 +3,7 @@
 目的：记录 **Step 32（Orphan Detection 最小可测）** 已在实现仓库（Prometheus-Quant）落地，并冻结其“对外可审计口径”（实现锚点 + 关键假设 + verdict 规则）。
 
 SSOT 规格：
-- `docs/v10/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`
+- `docs/v11/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`
 
 ---
 

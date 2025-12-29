@@ -54,10 +54,10 @@ FAIL 策略：
 ## 2) SSOT 关联（Research 侧）
 
 Step 26 最小复核清单（逻辑口径）：
-- `docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
+- `docs/v11/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
 
 run-end evidence packaging gate（运行时 gate）：
-- `docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
+- `docs/v11/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
 
 本 Step 29（CI gate）与 Step 28（run-end gate）关系：
 - Step 28：运行时保证“该次 run 的证据包可复核”（fail-closed）

@@ -3,7 +3,7 @@
 目的：记录 Step 47（execution_world 下退役 `has_position`，以持仓真值三元组替代）的 **Quant 落地实现锚点**（含 SHA）与最小实现事实。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
 
 ---
 

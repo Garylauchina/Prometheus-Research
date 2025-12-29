@@ -3,7 +3,7 @@
 目的：记录 Step 41（审计链 `evidence_refs` 统一协议 + verifier hash/line 覆盖校验）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点与 hard 口径。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
 
 ---
 

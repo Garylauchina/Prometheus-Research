@@ -3,7 +3,7 @@
 目的：记录 Step 38（run_manifest 写入审计 scope anchors，并做一致性校验）已在实现仓库（Prometheus-Quant）落地，并冻结其审计锚点（commit、关键字段、fail-closed 口径）。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
 
 ---
 

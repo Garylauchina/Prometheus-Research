@@ -3,11 +3,11 @@
 目的：记录 Step 31（扩展 evidence verifier 覆盖 Tier-1：`ledger_ticks`/`probe_gating_ticks`/`errors` 的最小一致性）已在实现仓库（Prometheus-Quant）落地，并冻结其“对外可审计口径”。
 
 SSOT 规格：
-- Step 31 Spec：`docs/v10/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`
+- Step 31 Spec：`docs/v11/V11_STEP31_EXTEND_EVIDENCE_VERIFIER_TIER1_20251229.md`
 
 关联（此前已落地）：
-- Step 29（CI evidence gate）：`docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
-- Step 30（run-end gate 强制执行）：`docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
+- Step 29（CI evidence gate）：`docs/v11/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
+- Step 30（run-end gate 强制执行）：`docs/v11/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
 
 ---
 

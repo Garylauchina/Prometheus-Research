@@ -7,9 +7,9 @@
 - 针对 Step 26（DecisionEngine inputs: E + MFStats + Comfort）的最小可复核 gate
 
 SSOT 关联：
-- Step 27（最小复核清单）：`docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
-- Step 28（run-end gate 规格）：`docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
-- Step 29（CI gate）：`docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
+- Step 27（最小复核清单）：`docs/v11/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
+- Step 28（run-end gate 规格）：`docs/v11/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
+- Step 29（CI gate）：`docs/v11/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
 
 ---
 

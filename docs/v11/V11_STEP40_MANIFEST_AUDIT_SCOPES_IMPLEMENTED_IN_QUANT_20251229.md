@@ -3,7 +3,7 @@
 目的：记录 Step 40（`run_manifest.audit_scopes[]` append-only，多次审计不覆盖 + verifier fail-closed 校验）已在实现仓库（Prometheus-Quant）落地，并冻结其审计锚点。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP40_MANIFEST_AUDIT_SCOPES_APPEND_ONLY_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP40_MANIFEST_AUDIT_SCOPES_APPEND_ONLY_20251229.md`
 
 ---
 

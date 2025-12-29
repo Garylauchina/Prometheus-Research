@@ -3,7 +3,7 @@
 目的：记录 Step 48（I 维度来自 Ledger triad 注入 + C_prev_net_intent(t-1)）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点（含 SHA）与最小验收事实。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
 
 ---
 

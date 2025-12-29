@@ -14,7 +14,7 @@
 SSOT 关联：
 - Order confirmation protocol（P0–P5）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`
 - Registry audit taxonomy：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V10_BROKERTRADER_REGISTRY_AUDIT_CHECKLIST_20251226.md`
-- Step 32 Spec（orders-level）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`
+- Step 32 Spec（orders-level）：`/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`
 
 ---
 

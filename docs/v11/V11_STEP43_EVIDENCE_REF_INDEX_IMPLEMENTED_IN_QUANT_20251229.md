@@ -3,7 +3,7 @@
 目的：记录 Step 43（新增 `evidence_ref_index.json`，把 hash/行号复算成本从 verifier 挪到 run-end gate）已在实现仓库（Prometheus-Quant）落地，并冻结实现锚点与 hard 口径。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
 
 ---
 

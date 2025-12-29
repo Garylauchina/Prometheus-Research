@@ -3,7 +3,7 @@
 目的：记录 Step 37（为 paging_traces 增加 `scope_id/query_chain_id` 并在 verifier 中对“混链” fail-closed）已在实现仓库（Prometheus-Quant）落地，并冻结其审计锚点。
 
 SSOT 规格：
-- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_20251229.md`
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v11/V11_STEP37_PAGING_QUERY_CHAIN_ID_20251229.md`
 
 ---
 
