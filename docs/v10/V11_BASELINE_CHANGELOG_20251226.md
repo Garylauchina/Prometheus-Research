@@ -169,6 +169,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 32（落地）：Quant 已实现 orphan detection（orders-level，`clOrdId` 前缀 `v11_` + 分页闭合），并提升审计契约版本 `V11_EXCHANGE_AUDITOR_20251229`，推送至 `main`（实现锚点见：`docs/v10/V11_STEP32_ORPHAN_DETECTION_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 33：fills/bills（P3/P4）最小可测（分页闭合 + join + 幂等），把成交/费用相关断言从 NOT_MEASURABLE 推进为可机械复核（规格见：`docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`）。
   - Step 33（落地）：Quant 已实现 P3/P4 fills/bills join（分页闭合 + ordId join + tradeId/billId 幂等），并推送至 `main`（实现锚点见：`docs/v10/V11_STEP33_FILLS_BILLS_JOIN_IMPLEMENTED_IN_QUANT_20251229.md`）。
+  - Step 34：分页闭合证据落盘（`paging_traces.jsonl`，append-only）——把“分页闭合”升级为可复核 proof；缺失或未闭合则相关结论必须 NOT_MEASURABLE（规格见：`docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

@@ -268,6 +268,8 @@ Step 33（P3/P4 最小可测：fills/bills 分页闭合 + join + 幂等）：
 - `docs/v10/V11_STEP33_FILLS_BILLS_JOIN_MIN_MEASURABLE_20251229.md`
 Step 33（Quant 落地记录）：
 - `docs/v10/V11_STEP33_FILLS_BILLS_JOIN_IMPLEMENTED_IN_QUANT_20251229.md`
+Step 34（分页闭合证据：paging_traces.jsonl append-only，作为 closure proof）：
+- `docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
