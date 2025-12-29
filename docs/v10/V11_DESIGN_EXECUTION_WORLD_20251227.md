@@ -272,6 +272,8 @@ Step 34（分页闭合证据：paging_traces.jsonl append-only，作为 closure 
 - `docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
 Step 34（Quant 落地记录）：
 - `docs/v10/V11_STEP34_PAGING_TRACES_IMPLEMENTED_IN_QUANT_20251229.md`
+Step 35（gates 强制要求 paging_traces：verifier/run-end/CI，不可绕过）：
+- `docs/v10/V11_STEP35_REQUIRE_PAGING_TRACES_IN_GATES_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
