@@ -29,6 +29,9 @@
 - **V11 Step 26（DecisionEngine 输入接入 MFStats/Comfort，观测不执法，mask=0 不参与）**：
   - SSOT：`docs/v10/V11_BASELINE_CHANGELOG_20251226.md`（§2.5 追加条目）
   - Design：`docs/v10/V11_DESIGN_EXECUTION_WORLD_20251227.md`（§4.3）
+- **V11 Step 27（Step26 证据包最小复核清单 + 一键校验脚本）**：
+  - Checklist：`docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
+  - Verifier：`tools/verify_step26_evidence.py`
 
 ---
 
