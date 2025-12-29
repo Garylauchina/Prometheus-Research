@@ -17,6 +17,8 @@
 
 新增一个可选开关（Quant runner 或 run-end gate CLI）：
 - `--enable-step63-index`
+并允许提供一个 scan_root 参数（实现细节，但必须证据化记录）：
+- `--step63-scan-root <path>`（当 enabled=true 时，建议作为必填参数）
 
 启用时，在 run-end gate 阶段追加以下步骤（顺序冻结）：
 

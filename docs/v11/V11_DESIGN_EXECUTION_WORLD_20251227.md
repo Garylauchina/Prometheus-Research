@@ -386,6 +386,8 @@ Step 62（CI gate：在 CI 中生成并验证 Step61 index，防止入口腐化�
 
 Step 63（run-end gate：可选生成/验证 Step61 index 并纳入 evidence package）：
 - `docs/v11/V11_STEP63_RUN_END_GATE_COMPARE_BUNDLE_INDEX_OPTIONAL_20251230.md`
+- Step 63（Quant 落地记录）：
+  - `docs/v11/V11_STEP63_RUN_END_GATE_COMPARE_BUNDLE_INDEX_OPTIONAL_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
