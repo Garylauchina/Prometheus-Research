@@ -324,6 +324,8 @@ Step 47（基因/特征/账簿 SSOT 总审计：has_position 退役，I/C 口径
 - `docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
 Step 47（Quant 落地记录）：
 - `docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
+Step 48（I/C 注入 SSOT：Ledger triad → I probes；C_prev_net_intent(t-1)）：
+- `docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

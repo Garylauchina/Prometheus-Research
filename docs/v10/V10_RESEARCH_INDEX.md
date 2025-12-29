@@ -89,6 +89,8 @@
 - **V11 Step 47（基因/特征/账簿 SSOT 总审计）**：
   - Spec：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`
+- **V11 Step 48（I/C 注入 SSOT）**：
+  - Spec：`docs/v10/V11_STEP48_I_C_PROBES_INJECTION_SSOT_20251230.md`
 
 ---
 
