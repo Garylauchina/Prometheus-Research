@@ -77,6 +77,8 @@
 - **V11 Step 43（evidence_ref_index：hash+line_count 索引）**：
   - Spec：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 44（evidence_refs 可解引用校验）**：
+  - Spec：`docs/v10/V11_STEP44_EVIDENCE_REFS_DEREFERENCE_VALIDATION_20251229.md`
 
 ---
 
