@@ -2,240 +2,59 @@
 
 <div align="center">
 
-*An auditable evolutionary research program for probing market structure.*
+*Truth-driven, auditable research for evolving agents in an execution_world.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[中文说明](README_CN.md)** · **[Docs Index](docs/README.md)** · **[V10 Evidence Chain](docs/v10/V10_RESEARCH_INDEX.md)** · **[V10 Folder](docs/v10/README.md)**
+**[中文说明](README_CN.md)** · **[Docs Index](docs/README.md)** · **[V11 Index](docs/v11/V11_RESEARCH_INDEX.md)** · **[V10 Index](docs/v10/V10_RESEARCH_INDEX.md)**
 
 </div>
 
 ---
 
-## Why this repo exists (English) / 本仓库的定位（中文）
+## 本仓库是什么（项目目标，而非技术说明）
 
-**English (primary)**: This repository is the **research record** of the Prometheus project.  
-Its purpose is not to “sell an idea”, but to preserve a **reviewable evidence chain**:
+这是 Prometheus 项目的 **研究仓库（Research Record）**。我们在这里沉淀“可以被第三方复核”的研究结论，而不是堆叠想法或口头解释。
 
-- **Acceptance criteria** (what counts as a valid result)
-- **Decision records** (what we concluded, and why)
-- **Auditability constraints** (what we forbid to keep evidence clean)
-
-**中文（辅助）**：这是 Prometheus 的“研究仓库”，核心目标是**让结论可被复核**。  
-这里存的不是代码主仓，而是：验收标准、裁决记录、证据链入口与审计约束。
+V11 的核心定位是：在 **execution_world**（真实交易所真值链）里，建立一套**可审计、可消融、可复现**的演化实验体系，让系统的每个“结论”都能指回证据链。
 
 ---
 
-## Current status: V10 is the mainline / 当前主线：V10
+## V11 的目标（我们要交付什么）
 
-- **Start here / 从这里开始**: `docs/v10/V10_RESEARCH_INDEX.md`
-- **Acceptance criteria / 验收标准（项目宪法）**: `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
-- **Roadmap / 路线图（A→B→C）**: `docs/v10/V10_ROADMAP_A_ENGINEERING_B_RESEARCH_C_PRODUCT.md`
-
-V10 is built to answer a very practical reviewer question:
-
-- **English**: “Do you have evidence that the system exploits temporal structure, rather than artifacts or prior-coded strategy?”
-- **中文**：“你如何证明系统利用的是时间结构，而不是漏洞、先验指标、或者人为预设策略？”
+- **可复核的真值链**：任何关于仓位/资金/成交/费用的结论，都必须能回指到“交易所可回查 JSON”（或明确标注 unknown / NOT_MEASURABLE）。
+- **证据优先、失败即停**：当关键证据缺失或链路断裂时，结论必须降级（NOT_MEASURABLE）或直接终止（fail-closed），而不是用默认值继续跑。
+- **消融可比性**：每个新机制（例如 C 维度 social probe）必须能通过对照/消融在相同条件下产出可观测差异；差异的好坏不提前叙事。
+- **防旧语义污染**：V11 的 execution_world 需要“物理不可达”的闭包边界，避免任何 legacy/v10 执行语义被误接回主链路。
+- **研究记录可持续**：所有关键口径以文档 SSOT 冻结，保持 additive-only；破坏性变更必须升 major 并重跑最小 PROBE。
 
 ---
 
-## Reproducibility & Evidence (English) / 可复核性与证据（中文）
+## V11 当前关注点（what we measure）
 
-**English (primary)**:
-This repo intentionally keeps **documents and evidence pointers**.  
-Raw simulation outputs and code live in the separate repository **Prometheus-Quant**.  
-Most V10 decision documents include exact `results_...` directories to verify:
-
-- summary JSON (run aggregates + invariants)
-- agent-level behaviors (JSON)
-- aligned genomes matrix (NPY)
-
-**中文（辅助）**：Research 仓库存“文档+证据指针”，原始实验产物在 `Prometheus-Quant`。  
-V10 文档会写清楚 `results_...` 路径，复核时只需要按路径读取即可（不靠口头解释）。
+- **证据闭环与审计一致性**：run_manifest / evidence_refs / paging closure / orphan detection 等，确保“可查、可证、可对齐”。
+- **execution_world 下的最小可用探针体系**：固定维度输入 + mask 纪律，unknown 不伪造为 0。
+- **消融实验模板**：例如 `C_off vs C_on`，强调可比性与事实统计产物（而不是解释）。
 
 ---
 
-## What you can audit in V10 (English) / V10 可审计点（中文）
+## 入口（你应该从哪里开始）
 
-- **Null hypothesis**: A (real time) vs B2 (shuffle log-returns to destroy temporal structure)
-- **Prior leakage defense**: mandatory ablations (M/C/E-subset/I and subsets)
-- **Window migration**: non-overlapping windows (W1b/W2) for robustness
-- **Mechanism attribution**: from run clusters → agent clusters → gene-level channels
-- **Hardened audits**: winner definition (v2), IN/OUT sign consistency (v2), stratified stability (v3/v3.1)
+- **V11 统一入口（推荐）**：`docs/v11/V11_RESEARCH_INDEX.md`
+- **V10 研究主线入口（历史主线）**：`docs/v10/V10_RESEARCH_INDEX.md`
+- **Docs 总入口**：`docs/README.md`
 
-入口都在：`docs/v10/V10_RESEARCH_INDEX.md`
+> 备注：V11 文档已从 `docs/v10/` 物理分区到 `docs/v11/`；`docs/v10/` 中保留的 V11 文件为 stub 指针，用于兼容旧链接。
 
 ---
 
-## Repository map / 仓库地图
+## Research vs Quant（职责边界）
 
-- **Primary (V10)**: `docs/v10/`
-- **Research audits & memos**: `docs/research/`
-- **Architecture notes**: `docs/architecture/`
-- **Theory (optional)**: `docs/theory/`
-- **Legacy**: `docs/v8/`, `docs/v7/`, `docs/v6/`
-
----
-
-## Citation / 引用方式（可选）
-
-If you refer to this work, cite the **repository** and the specific **V10 decision record(s)** by file path under `docs/v10/`.
+- **Prometheus-Research**：保存“项目目标、验收口径、裁决记录、SSOT 文档、证据链入口”。
+- **Prometheus-Quant**：实现与运行产物（代码、日志、run_dir 证据包、审计工具输出）。
 
 ---
 
 ## License
 
 MIT License. See `LICENSE`.
-
-**Principle 0: Measurability Criteria**
-- 0.1 Disturbance is Measurable - Observation system's interference is quantifiable or comparable
-- 0.2 Emergent Patterns - Results exhibit spontaneously emergent patterns
-
-**Six Core Principles:**
-1. Gene dimensions align with observable features
-2. Allow redundant dimensions (evolution will reduce)
-3. Features = measurable + measurement bias (evolution discovers truth)
-4. Evolution follows natural selection (objective world as sole judge)
-5. System evolves, observer recognizes patterns
-6. Better solutions always exist (continuous exploration)
-
-**→ [Complete Framework](docs/v8/V8.md)**
-
----
-
-### Minimal Implementation
-
-- **Features**: 31 aligned dimensions (market) + 1 intuition parameter (exploration)
-- **Decision**: Linear weighting × contrarian coefficient → trading signal
-- **Birth/Death**: Occur randomly, survival of the fittest
-
----
-
-## 🧪 Current Status
-
-**Experiment design in progress.**
-
-System design has been refined through multiple iterations:
-- Fixed critical bugs in capital management
-- Simplified gene structure (removed mystery dimensions, kept intuition parameter)
-- Implemented system-level survival pressure
-
-**No results to report yet.** Waiting for reliable data before drawing conclusions.
-
----
-
-## 📖 Documentation
-
-### Theory & Framework
-- **[Adaptive Exploration Conjecture](docs/theory/CONJECTURE_EN.md)** - Mathematical formulation (English)
-- **[适应性探索猜想](docs/theory/CONJECTURE.md)** - 数学严格表述（中文）
-- **[V8.0 Principles](docs/v8/V8.md)** - Principle 0 + 6 core principles (Chinese)
-
-### Technical Implementation
-- **[Methodology](docs/v8/METHODOLOGY_EN.md)** - Technical details (English)
-- **[方法论](docs/v8/METHODOLOGY.md)** - 技术细节（中文）
-
-### Reports
-Experimental reports will be added as reliable data becomes available.
-
----
-
-## 🤔 Why This Matters
-
-### The Dilemma of Traditional Approaches
-
-```
-Question: "Are markets predictable?"
-
-Traditional answer:
-  - Design strategy → backtest → optimize → live trade
-  - Success = "predictable"
-  - Failure = "try another strategy"
-  
-Dilemma:
-  ❌ Never know if it's "market unpredictable" or "strategy inadequate"
-  ❌ Trapped in infinite loop
-```
-
-### Our Approach
-
-```
-New question: "How strong is market unpredictability?"
-
-Our answer:
-  - Design evolutionary system → observe I* convergence
-  - Low I* → "High predictability, worth modeling"
-  - High I* → "Strong unpredictability, proceed with caution"
-  
-Advantages:
-  ✓ Directly quantifies unpredictability
-  ✓ Independent of specific strategies
-  ✓ Provides "can we predict?" signal
-```
-
----
-
-## 🔄 Replication
-
-The mechanism is extremely simple.
-
-Code is not open-sourced because:
-1. The mechanism is very simple
-2. The code is terrible (blame Cursor)
-
-**If you replicate, please share your findings.**
-
----
-
-## 💬 Note
-
-This is an early-stage research project. Conclusions are not yet established.
-
-I'm observing, recording, and waiting for data to speak.
-
----
-
-## 🌌 Epilogue
-
-> **The unknown is infinite, but it won't stop us from exploring.**
-
-Are markets predictable? We don't know.  
-Where is the boundary of predictability? We cannot measure.  
-But unpredictability itself, perhaps, is measurable.
-
-This is not a solution.  
-This is an exploration.
-
-**Not to "beat the market"**  
-But to **"understand the boundary of market comprehensibility"**
-
-**Not to "find the perfect strategy"**  
-But to **"measure the possibility space of strategies"**
-
-**Not to "conquer uncertainty"**  
-But to **"quantify uncertainty itself"**
-
----
-
-> *"I don't know. I'm just an agent, like you."*
-
----
-
-## 📬 Contact
-
-- GitHub Issues: [Report bugs or discuss ideas](https://github.com/Garylauchina/Prometheus-Research/issues)
-- Email: garylauchina@gmail.com
-
----
-
-## 📜 License
-
-[MIT License](LICENSE)
-
----
-
-<div align="center">
-
-**Last updated: December 16, 2025**
-
-</div>
