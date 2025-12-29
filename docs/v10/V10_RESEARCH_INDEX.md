@@ -61,6 +61,7 @@
   - Record（Quant 落地）：`docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_IMPLEMENTED_IN_QUANT_20251229.md`
 - **V11 Step 38（run_manifest 冻结 audit scope anchors）**：
   - Spec：`docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IN_MANIFEST_20251229.md`
+  - Record（Quant 落地）：`docs/v10/V11_STEP38_AUDIT_SCOPE_ANCHORS_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ---
 
