@@ -262,6 +262,8 @@ Step 31（Quant 落地记录：CI gate 与 run-end gate 自动升级覆盖 Tier-
 - `docs/v10/V11_STEP31_TIER1_VERIFIER_IMPLEMENTED_IN_QUANT_20251229.md`
 Step 32（Orphan Detection 最小可测：orders-level，分页闭合 + clOrdId 命名空间）：
 - `docs/v10/V11_STEP32_ORPHAN_DETECTION_MIN_MEASURABLE_20251229.md`
+Step 32（Quant 落地记录）：
+- `docs/v10/V11_STEP32_ORPHAN_DETECTION_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
