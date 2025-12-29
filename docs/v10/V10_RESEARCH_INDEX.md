@@ -36,6 +36,8 @@
   - Spec：`docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
 - **V11 Step 29（CI Evidence Gate：fixture-based，fail-closed）**：
   - Spec：`docs/v10/V11_STEP29_CI_EVIDENCE_GATE_STEP26_20251229.md`
+- **V11 Step 30（Quant runner 强制 run-end evidence gate，fail-closed）**：
+  - Record：`docs/v10/V11_STEP30_RUN_END_EVIDENCE_GATE_IMPLEMENTED_20251229.md`
 
 ---
 
