@@ -56,6 +56,8 @@
 - **V11 Step 36（冻结 auditor_report 的 paging coverage 字段）**：
   - Spec：`docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_FIELDS_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP36_AUDITOR_PAGING_COVERAGE_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 37（paging query_chain_id/scope_id：防混链）**：
+  - Spec：`docs/v10/V11_STEP37_PAGING_QUERY_CHAIN_ID_20251229.md`
 
 ---
 
