@@ -74,6 +74,8 @@
 - **V11 Step 42（审计链 evidence_refs 强约束升级）**：
   - Spec：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 43（evidence_ref_index：hash+line_count 索引）**：
+  - Spec：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
 
 ---
 
