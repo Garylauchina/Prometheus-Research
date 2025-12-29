@@ -366,6 +366,8 @@ Step 58（fixtures contract verifier：把 Step57 约束变成可执行 gate，�
 
 Step 59（compare bundle：把 ablation_compare.json 摘录为研究侧可消费的 fact-only 入口产物）：
 - `docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_20251230.md`
+- Step 59（Quant 落地记录）：
+  - `docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

@@ -116,6 +116,7 @@
 ### Compare Bundle (Step 59)
 
 - Step 59 (SSOT): `docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_20251230.md`
+- Step 59 (Quant record): `docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

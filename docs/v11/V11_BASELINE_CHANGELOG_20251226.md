@@ -214,7 +214,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 57：冻结 Step56 CI gate 所依赖的 Step51 最小 fixtures 口径（目录结构 + 最小字段集合 + 可比性硬规则 + 变更纪律），避免 fixture 漂移导致 gate 失真（规格见：`docs/v11/V11_STEP57_STEP51_MIN_FIXTURES_CONTRACT_20251230.md`）。
   - Step 58：为 Step57 fixtures contract 提供机器可执行 verifier，并纳入 Quant CI gate（Step56 链路）作为必跑断言，防止 fixtures 漂移（规格见：`docs/v11/V11_STEP58_FIXTURES_CONTRACT_VERIFIER_20251230.md`）。
   - Step 58（落地）：Quant 已新增 fixtures contract verifier 并接入 CI gate（实现锚点见：`docs/v11/V11_STEP58_FIXTURES_CONTRACT_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`）。
-  - Step 59：定义 compare_bundle.json（fact-only）作为跨 run 对照的“研究侧消费入口”，从 Step53 的 ablation_compare.json 中摘录/汇总事实字段并写入 evidence_refs（规格见：`docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_20251230.md`）。
+  - Step 59：定义 compare_bundle.json（fact-only）作为跨 run 对照的“研究侧消费入口”，从 Step53 的 ablation_compare.json 中摘录/汇总事实字段并写入 evidence_refs（规格见：`docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP59_COMPARE_BUNDLE_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
