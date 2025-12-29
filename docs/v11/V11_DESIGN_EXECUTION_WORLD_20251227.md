@@ -376,6 +376,8 @@ Step 60（compare bundle 纳入 run-end/CI gates：生成后必须 verify，并�
 
 Step 61（compare bundle index：聚合 compare_bundle.json 为 fact-only 索引，供研究侧检索/归档）：
 - `docs/v11/V11_STEP61_COMPARE_BUNDLE_INDEX_CONTRACT_20251230.md`
+- Step 61（Quant 落地记录）：
+  - `docs/v11/V11_STEP61_COMPARE_BUNDLE_INDEX_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
