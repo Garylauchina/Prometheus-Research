@@ -218,6 +218,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 60：把 Step59 compare_bundle.json 纳入 run-end evidence gate / CI gate（与 Step54 compare 同目录，生成后必须 verify，并纳入 FILELIST/SHA256SUMS/evidence_ref_index；工具/证据失败=exit 2），让研究消费入口也进入可复核闭环（规格见：`docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP60_GATE_COMPARE_BUNDLE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 61：生成 compare_bundle_index.json（fact-only 聚合索引），批量聚合 compare_bundle.json 以支持检索/归档（不解释、不新增指标），并保持 evidence_refs 可复核（规格见：`docs/v11/V11_STEP61_COMPARE_BUNDLE_INDEX_CONTRACT_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP61_COMPARE_BUNDLE_INDEX_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 62：CI 必跑生成并验证 compare_bundle_index.json（scan_root 固定为 fixtures-root 或 Step54 测试产物 runs_root），防止索引入口长期不跑而漂移/腐化（规格见：`docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP62_CI_GATE_STEP61_INDEX_IMPLEMENTED_IN_QUANT_20251230.md`）。
+  - Step 63：run-end evidence gate 可选生成并验证 compare_bundle_index.json，并纳入 evidence package + manifest 记录（启用时 fail-closed，防空跑 bundle_count>=1）（规格见：`docs/v11/V11_STEP63_RUN_END_GATE_COMPARE_BUNDLE_INDEX_OPTIONAL_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
