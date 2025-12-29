@@ -100,6 +100,12 @@
 
 ---
 
+### CI Fixtures Contract (Step 57)
+
+- Step 57 (SSOT): `docs/v11/V11_STEP57_STEP51_MIN_FIXTURES_CONTRACT_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。
