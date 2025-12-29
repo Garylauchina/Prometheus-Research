@@ -196,6 +196,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 46：Evidence Gate Bundle 冻结：把 Step41–45 收口为可版本化 bundle（bundle_version 写入产物与 manifest），并冻结必需 fixtures 套件与 exit code 语义（规格见：`docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_20251229.md`）。
   - Step 46（落地）：Quant 已实现 bundle 常量/输出、manifest.evidence_gate 写入 bundle 信息、以及冻结 fixtures 的 CI 套件（实现锚点见：`docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 47：基因/特征/账簿 SSOT 总审计：execution_world 下退役 `has_position`，以 `position_exposure_ratio + pos_side_sign + positions_truth_quality` 作为持仓真值三元组；冻结 E/I/M/C 口径与 C 最小探针（规格见：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`）。
+  - Step 47（落地）：Quant 已在 LedgerModuleV11 中引入持仓真值三元组与强制规则，并升级 ledger contract/schema 版本（实现锚点见：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_IMPLEMENTED_IN_QUANT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
