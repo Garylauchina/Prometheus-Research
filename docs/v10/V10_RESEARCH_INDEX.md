@@ -49,6 +49,7 @@
   - Record（Quant 落地）：`docs/v10/V11_STEP33_FILLS_BILLS_JOIN_IMPLEMENTED_IN_QUANT_20251229.md`
 - **V11 Step 34（分页闭合证据落盘：paging_traces.jsonl）**：
   - Spec：`docs/v10/V11_STEP34_PAGING_TRACES_APPEND_ONLY_20251229.md`
+  - Record（Quant 落地）：`docs/v10/V11_STEP34_PAGING_TRACES_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ---
 
