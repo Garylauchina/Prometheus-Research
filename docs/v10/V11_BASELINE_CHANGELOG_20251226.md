@@ -188,6 +188,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 42：审计链 evidence_refs 强约束升级：gate-on 时 `sha256_16` 强制非空且可复算匹配；对 `.jsonl` 引用强制 `line_start/line_end` 非空并校验范围合法；并强制 FILELIST 覆盖与 audit_scope_id join（规格见：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`）。
   - Step 42（落地）：Quant 已实现 gate-on 下 evidence_refs 的 hash/行号/FILELIST/audit_scope_id 强约束，并由 verifier fail-closed 执行（实现锚点见：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 43：新增 `evidence_ref_index.json`（hash+line_count 索引）由 run-end gate 生成，verifier gate-on 时优先用 index 校验 `sha256_16` 与 `.jsonl` 的行号上界，避免重复复算导致慢/漂移（规格见：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`）。
+  - Step 43（落地）：Quant 已实现生成 `evidence_ref_index.json` 并在 verifier gate-on 校验中优先使用（实现锚点见：`docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_IMPLEMENTED_IN_QUANT_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

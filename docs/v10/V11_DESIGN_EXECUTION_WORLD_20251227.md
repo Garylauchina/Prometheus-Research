@@ -306,6 +306,8 @@ Step 42（Quant 落地记录）：
 - `docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_IMPLEMENTED_IN_QUANT_20251229.md`
 Step 43（evidence_ref_index：把 hash/行号复算成本从 verifier 挪到 run-end gate）：
 - `docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_20251229.md`
+Step 43（Quant 落地记录）：
+- `docs/v10/V11_STEP43_EVIDENCE_REF_INDEX_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
