@@ -71,6 +71,8 @@
 - **V11 Step 41（审计链 evidence_refs 统一协议）**：
   - Spec：`docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP41_EVIDENCE_REFS_STANDARD_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 42（审计链 evidence_refs 强约束升级）**：
+  - Spec：`docs/v10/V11_STEP42_EVIDENCE_REFS_HARDENING_20251229.md`
 
 ---
 
