@@ -86,6 +86,8 @@
 - **V11 Step 46（Evidence Gate Bundle 冻结）**：
   - Spec：`docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_20251229.md`
   - Record（Quant 落地）：`docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_IMPLEMENTED_IN_QUANT_20251229.md`
+- **V11 Step 47（基因/特征/账簿 SSOT 总审计）**：
+  - Spec：`docs/v10/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
 
 ---
 
