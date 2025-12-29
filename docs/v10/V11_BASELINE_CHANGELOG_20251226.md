@@ -194,6 +194,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 45：evidence_refs 语义 join 校验：在 Step 44 的基础上，要求引用到 `paging_traces.jsonl` 的行范围内 `scope_id/query_chain_id/endpoint_family` 不混且与 audit_scope 锚点一致，防止同 run 内“指向无关行”（规格见：`docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_20251229.md`）。
   - Step 45（落地）：Quant 已实现语义 join 校验与两类投机负例 fixtures（mixed query_chain / mixed endpoint），并在 CI 中验证 fail-closed（实现锚点见：`docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`）。
   - Step 46：Evidence Gate Bundle 冻结：把 Step41–45 收口为可版本化 bundle（bundle_version 写入产物与 manifest），并冻结必需 fixtures 套件与 exit code 语义（规格见：`docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_20251229.md`）。
+  - Step 46（落地）：Quant 已实现 bundle 常量/输出、manifest.evidence_gate 写入 bundle 信息、以及冻结 fixtures 的 CI 套件（实现锚点见：`docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_IMPLEMENTED_IN_QUANT_20251229.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

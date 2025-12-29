@@ -318,6 +318,8 @@ Step 45（Quant 落地记录）：
 - `docs/v10/V11_STEP45_EVIDENCE_REFS_SEMANTIC_JOIN_VALIDATION_IMPLEMENTED_IN_QUANT_20251229.md`
 Step 46（Evidence Gate Bundle 冻结：contract_version/fixtures/exit codes/artifacts）：
 - `docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_20251229.md`
+Step 46（Quant 落地记录）：
+- `docs/v10/V11_STEP46_EVIDENCE_GATE_BUNDLE_FREEZE_IMPLEMENTED_IN_QUANT_20251229.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
