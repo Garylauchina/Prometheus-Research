@@ -160,6 +160,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - 订单确认协议（G4.3e）
   - run-end 只读审计条款（G4.3f，作为锁版前审查工具；本版本可不纳入主编排控制）
   - 唯一交易入口（禁止绕过 BrokerTrader）已作为 hard rule 写入。
+  - Step 28：run-end 证据包打包 + Gate（生成 `FILELIST/SHA256SUMS` 后运行最小复核 verifier；FAIL 必须以 exit 2 失败退出，避免“证据不可复核但误判正常结束”）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

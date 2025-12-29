@@ -32,6 +32,8 @@
 - **V11 Step 27（Step26 证据包最小复核清单 + 一键校验脚本）**：
   - Checklist：`docs/v10/V11_STEP27_STEP26_EVIDENCE_MIN_REVIEW_CHECKLIST_20251229.md`
   - Verifier：`tools/verify_step26_evidence.py`
+- **V11 Step 28（run-end 证据包打包 + Gate，fail-closed）**：
+  - Spec：`docs/v10/V11_STEP28_EVIDENCE_PACKAGING_GATE_20251229.md`
 
 ---
 
