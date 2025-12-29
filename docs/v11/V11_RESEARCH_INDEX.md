@@ -87,6 +87,12 @@
 
 ---
 
+### Acceptance Protocol (Step 55)
+
+- Step 55 (SSOT): `docs/v11/V11_STEP55_STEP54_ACCEPTANCE_PROTOCOL_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。

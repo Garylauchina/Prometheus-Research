@@ -209,6 +209,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 52（落地）：Quant 已新增 alignment_check 模块并在 runner preflight 执行 fail-closed 校验，manifest 记录对齐结果（实现锚点见：`docs/v11/V11_STEP52_FEATURE_DIM_DECISION_ENGINE_GENOME_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 53：跨 run 对照聚合报告：生成 `ablation_compare.json`（读取两份 `ablation_summary.json`，做可比性检查 + 事实差异统计 + evidence_refs 可复核）（规格见：`docs/v11/V11_STEP53_ABLATION_COMPARE_REPORT_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP53_ABLATION_COMPARE_REPORT_IMPLEMENTED_IN_QUANT_20251230.md`）。
   - Step 54：把 Step 53 的 `ablation_compare.json` 纳入 run-end evidence gate/CI gate（可选开关，但必须 manifest 写实；不可比=WARNING 不阻塞；工具失败=exit 2），让“跨 run 对照报告”也进入可复核闭环（规格见：`docs/v11/V11_STEP54_STEP53_GATE_INTEGRATION_20251230.md`；Quant 落地记录：`docs/v11/V11_STEP54_STEP53_GATE_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`）。
+  - Step 55：冻结 Step54 的验收协议（命令/产物/manifest/exit code/CI 必跑项），把 Step54 的“可复核状态”从口头复述升级为机械可执行清单（规格见：`docs/v11/V11_STEP55_STEP54_ACCEPTANCE_PROTOCOL_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
