@@ -1,5 +1,8 @@
 # V10 Documentation (English) / V10 文档目录（中文）
 
+> **V11 文档入口**：V11（execution_world 重构主线）已从 `docs/v10/` 物理分区到 `docs/v11/`。  
+> 请从 `docs/v11/V11_RESEARCH_INDEX.md` 进入；`docs/v10/` 内的 V11 文件仅保留 stub 指针以避免历史链接断裂。
+
 ## What is V10? / V10 是什么？
 
 **English (primary)**: V10 is the current production-grade research track: a **measurable, auditable evolutionary system** for probing market temporal structure and survivability under friction.  
