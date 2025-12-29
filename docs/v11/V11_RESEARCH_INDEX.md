@@ -151,6 +151,7 @@
 ### CI Gate for Step63 Acceptance (Step 64)
 
 - Step 64 (SSOT): `docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_20251230.md`
+- Step 64 (Quant record): `docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

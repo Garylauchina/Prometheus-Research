@@ -221,6 +221,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 63：run-end evidence gate 可选生成并验证 compare_bundle_index.json，并纳入 evidence package + manifest 记录（启用时 fail-closed，防空跑 bundle_count>=1）（规格见：`docs/v11/V11_STEP63_RUN_END_GATE_COMPARE_BUNDLE_INDEX_OPTIONAL_20251230.md`）。
   - Step 63（Quant 落地记录）：`docs/v11/V11_STEP63_RUN_END_GATE_COMPARE_BUNDLE_INDEX_OPTIONAL_IMPLEMENTED_IN_QUANT_20251230.md`（commit：07c620c）。
   - Step 64：CI 必跑 Step63 集成测试（`tools/test_step63_integration.py`），任何偏离契约即阻断合并（规格见：`docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_20251230.md`）。
+  - Step 64（Quant 落地记录）：`docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：11305b2）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

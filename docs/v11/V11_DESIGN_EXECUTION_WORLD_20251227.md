@@ -391,6 +391,8 @@ Step 63（run-end gate：可选生成/验证 Step61 index 并纳入 evidence pac
 
 Step 64（CI gate：必跑 Step63 集成测试，防回退）：
 - `docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_20251230.md`
+- Step 64（Quant 落地记录）：
+  - `docs/v11/V11_STEP64_CI_GATE_STEP63_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
