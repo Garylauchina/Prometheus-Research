@@ -282,6 +282,12 @@
 
 ---
 
+### Freeze EvidenceRefs SHA256 Alignment (Step 83)
+
+- Step 83 (SSOT): `docs/v11/V11_STEP83_FREEZE_EVIDENCE_REFS_SHA256_ALIGNMENT_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
