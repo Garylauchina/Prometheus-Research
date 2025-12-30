@@ -310,6 +310,12 @@
 
 ---
 
+### Generic EvidenceRefs Backfill View Bundle (Step 87)
+
+- Step 87 (SSOT): `docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
