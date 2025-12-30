@@ -427,6 +427,8 @@ Step 71（CI gate：必跑 Step70 cross-run index，防入口腐化）：
 
 Step 72（agent metabolism：个体代谢观测，fact-only，非基因/非 probe）：
 - `docs/v11/V11_STEP72_AGENT_METABOLISM_OBSERVABILITY_CONTRACT_20251230.md`
+ - Step 72（Quant 落地记录）：
+  - `docs/v11/V11_STEP72_AGENT_METABOLISM_OBSERVABILITY_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 Step 72.1（agent metabolism filter：候选指标与“必要且可行”筛选结论）：
 - `docs/v11/V11_STEP72_1_AGENT_METABOLISM_CANDIDATES_AND_FILTER_20251230.md`

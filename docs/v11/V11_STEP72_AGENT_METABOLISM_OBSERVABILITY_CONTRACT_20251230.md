@@ -59,6 +59,19 @@
   - fact-only 汇总：对每个 agent 输出窗口统计（counts/ratios/fees 等）
   - 必须包含 `measurement_status`（见下一节）
 
+summary 合约版本（冻结）：
+- `contract_version = "V11_STEP72_AGENT_METABOLISM_SUMMARY_20251230.1"`
+
+summary 最小字段集合（冻结，可 additive 扩展）：
+- `contract_version`（字符串，必须匹配）
+- `run_id`（字符串）
+- `ts_utc`（ISO8601 Z）
+- `agent_count`（int）
+- `m_intent`（对象：key=agent_id_hash，value=counts + measurement_status）
+- `m_resource_cpu_time`（对象：必须包含 measurement_status；不可测则 reason_codes[]）
+- `m_resource_api`（对象：必须包含 measurement_status；world_level/agent_level 可为 null）
+- `evidence_refs`（数组，允许为空；若提供应指向 decision_trace 等来源）
+
 并纳入：
 - `FILELIST.ls.txt`
 - `SHA256SUMS.txt`

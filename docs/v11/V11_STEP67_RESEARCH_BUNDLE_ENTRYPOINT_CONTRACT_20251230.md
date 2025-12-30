@@ -60,6 +60,9 @@
 - `compare_bundle_json`（Step59）
 - `compare_bundle_index_json`（Step61/63，可选）
 
+additive 扩展（允许）：
+- `agent_metabolism_summary_json`（Step72）
+
 ---
 
 ## 3) Evidence packaging 覆盖（冻结）
