@@ -228,6 +228,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 66（Quant 落地记录）：`docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：fc8d267）。
   - Step 67：research_bundle 单入口文件 entry.json（fact-only）：冻结 schema、sha256_16/byte_size 与 evidence_ref_index 复核规则，并写入 run_manifest 以便研究侧程序一键加载（规格见：`docs/v11/V11_STEP67_RESEARCH_BUNDLE_ENTRYPOINT_CONTRACT_20251230.md`）。
   - Step 68：run-end gate 集成并校验 Step67 entry.json（启用时 fail-closed=exit2），并确保 entry.json 被 evidence package 覆盖且 manifest 写实（规格见：`docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_20251230.md`）。
+  - Step 68（Quant 落地记录）：`docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`（commit：150da05）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

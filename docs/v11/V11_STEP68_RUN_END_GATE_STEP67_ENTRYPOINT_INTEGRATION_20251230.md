@@ -15,6 +15,8 @@
 
 Quant runner/run-end gate 新增开关（名称冻结）：
 - `--enable-step68-entrypoint`（默认建议 true；若默认 false 必须写实记录）
+实现细节（允许，非冻结）：
+- 允许提供等价的显式禁用别名，例如 `--disable-step68-entrypoint`，但不得改变 enabled=true 时的 fail-closed 语义。
 
 说明：
 - Step68 控制“是否把 entrypoint 作为 gate 产物并校验、失败则 fail-closed”。

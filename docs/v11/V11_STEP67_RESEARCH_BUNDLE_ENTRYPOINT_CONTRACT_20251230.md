@@ -94,6 +94,9 @@
 - `fail`
 - `skipped`
 
+实现细节（允许，非冻结）：
+- 允许在不破坏 `pass|fail|skipped` 语义的前提下扩展中间状态（例如 `pending_validation`），但最终 run-end gate 结束时必须落到 `pass|fail|skipped` 之一，且写实一致。
+
 规则：
 - 若生成失败且启用 gate（由实现决定是否默认启用），必须写实记录 `status="fail"` 并遵循 fail-closed 约束（见下一节）。
 

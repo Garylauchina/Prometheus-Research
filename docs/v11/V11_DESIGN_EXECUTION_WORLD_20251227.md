@@ -409,6 +409,8 @@ Step 67（research_bundle 单入口 entry.json：研究侧一键加载/校验入
 
 Step 68（run-end gate：集成并校验 Step67 entry.json，启用时 fail-closed）：
 - `docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_20251230.md`
+- Step 68（Quant 落地记录）：
+  - `docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
