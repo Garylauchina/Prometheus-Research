@@ -270,7 +270,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 87：通用 EvidenceRefs Backfill View Bundle：将 freeze 证据链的 backfill view/range/sha256 机制推广到审计关键证据（paging_traces/auditor_report/discrepancies），并冻结其 range 同质性规则（scope_id/query_chain_id/endpoint_family 等），fail-closed（规格见：`docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_20251230.md`）。
   - Step 87（Quant 落地记录）：`docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：b4f407c）。
   - Step 88：订单确认链（P0–P5）EvidenceRefs bundle：将 order_attempts/ack/P2 状态/fills/bills/paging_traces/auditor_report 纳入通用证据链（refs/backfill/sha256/range），冻结 ordId/tradeId/billId join 与 paging closure proof，并提供 PASS/FAIL fixtures 与 verifier（规格见：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_20251230.md`）。
-  - Step 88（Quant 落地记录）：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（code commit：2a98bda；doc commit：待补充）。
+  - Step 88（Quant 落地记录）：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（code commit：2a98bda；doc commit：a11b73d）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

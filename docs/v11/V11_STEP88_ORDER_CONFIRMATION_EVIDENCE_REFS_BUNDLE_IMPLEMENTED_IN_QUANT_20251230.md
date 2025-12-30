@@ -13,7 +13,8 @@ SSOT（规格）：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_
 - Commit message: `v11: Step88 order confirmation evidence refs bundle (P0-P5 chain, CI gate)`
 
 Quant 文档提交：
-- Doc commit SHA：**待补充**（用户已在 Quant 执行 `git commit -m "v11: Step88 documentation (order confirmation evidence bundle)"`，但尚未提供 SHA）
+- Doc commit SHA (short): `a11b73d`
+- Doc commit message: `v11: Step88 documentation (order confirmation evidence bundle)`
 
 ---
 
