@@ -239,6 +239,12 @@
 
 ---
 
+### CI Gate for Step76 Freeze E2E (Step 77)
+
+- Step 77 (SSOT): `docs/v11/V11_STEP77_CI_GATE_STEP76_FREEZE_E2E_ACCEPTANCE_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
