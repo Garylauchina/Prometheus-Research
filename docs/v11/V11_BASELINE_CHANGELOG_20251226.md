@@ -230,6 +230,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 68：run-end gate 集成并校验 Step67 entry.json（启用时 fail-closed=exit2），并确保 entry.json 被 evidence package 覆盖且 manifest 写实（规格见：`docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_20251230.md`）。
   - Step 68（Quant 落地记录）：`docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`（commit：150da05）。
   - Step 69：CI 必跑 Step68 集成测试（`tools/test_step68_entrypoint.py`），任何偏离 Step67+68 契约即阻断合并（规格见：`docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_20251230.md`）。
+  - Step 69（Quant 落地记录）：`docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：f2a1b41）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

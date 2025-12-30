@@ -414,6 +414,8 @@ Step 68（run-end gate：集成并校验 Step67 entry.json，启用时 fail-clos
 
 Step 69（CI gate：必跑 Step68 集成测试，锁定 entrypoint 合约语义）：
 - `docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_20251230.md`
+- Step 69（Quant 落地记录）：
+  - `docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

@@ -185,6 +185,7 @@
 ### CI Gate for Step68 Acceptance (Step 69)
 
 - Step 69 (SSOT): `docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_20251230.md`
+- Step 69 (Quant record): `docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 
