@@ -38,6 +38,17 @@ Step79 不规定其参数细节，但要求：
 - 该调用 **在控制流上支配**（dominates）任何 connector 写调用
 - 若 pre-check 抛错/返回不允许，则不得继续触达 connector
 
+### 2.1 冻结命名（Quant 已确认）
+
+冻结 pre-check 的唯一函数名与位置如下（用于静态门禁的唯一匹配目标）：
+- 文件：`prometheus/v11/core/execution_freeze.py`
+- 类：`ExecutionFreezeManager`
+- 函数：`check_order_write_allowed(self, operation: str = "order_write") -> bool`
+
+说明：
+- BrokerTrader 写入口在触达 connector 写方法前，必须调用：
+  - `if not self.freeze_manager.check_order_write_allowed("place_order"): ...`
+
 ---
 
 ## 3) 静态门禁规则（Dominance）
