@@ -218,6 +218,12 @@
 
 ---
 
+### Real-time Reconciliation Freeze (Step 74)
+
+- Step 74 (SSOT): `docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
