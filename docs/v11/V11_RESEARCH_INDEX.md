@@ -327,6 +327,7 @@
 ### Real Run Acceptance (Step 89)
 
 - Step 89 (SSOT): `docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_MAC_PREFLIGHT_VPS_CONTAINER_20251230.md`
+- Step 89 (Quant prereq fix): 修复 non-stub 模式下 runner 未注入 `freeze_manager` 导致的 fail-closed（code commit: `88a1be07c1b16a8af1f794eaedd97c7cd2653232`；repo: `https://github.com/Garylauchina/Prometheus-Quant.git`）
 
 ---
 

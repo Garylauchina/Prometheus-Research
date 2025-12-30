@@ -72,4 +72,15 @@ Quant 必须新增一份不可变记录：
 - auditor verdict（含 evidence_refs）
 - evidence package 核心文件清单与 sha256_16 摘要
 
+---
+
+## 4) 已知前置修复（Quant）
+
+如果在 non-stub（例如 `okx_demo_api` / `okx_live_api`）模式下运行出现 fail-closed：
+`ValueError: freeze_manager is REQUIRED for production (non-stub) mode...`
+
+则必须先合入以下 Quant 修复提交（否则 Phase B 无法继续）：
+- code commit: `88a1be07c1b16a8af1f794eaedd97c7cd2653232`
+- commit msg: `v11: Fix freeze_manager injection in run_v11_service for non-stub mode`
+
 

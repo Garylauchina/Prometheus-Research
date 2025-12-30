@@ -272,6 +272,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 88：订单确认链（P0–P5）EvidenceRefs bundle：将 order_attempts/ack/P2 状态/fills/bills/paging_traces/auditor_report 纳入通用证据链（refs/backfill/sha256/range），冻结 ordId/tradeId/billId join 与 paging closure proof，并提供 PASS/FAIL fixtures 与 verifier（规格见：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_20251230.md`）。
   - Step 88（Quant 落地记录）：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（code commit：2a98bda；doc commit：a11b73d）。
   - Step 89：真实运行验收（Mac preflight → VPS container）：≥10 ticks，≥1 订单 P2 终态可证；Step88 verifier 与 auditor 结论一致；证据包（FILELIST/SHA256SUMS/evidence_ref_index/research_bundle）完整，fail-closed（规格见：`docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_MAC_PREFLIGHT_VPS_CONTAINER_20251230.md`）。
+  - Step 89（Quant 前置修复记录）：修复 non-stub 模式下 `run_v11_service.py` 未注入 `freeze_manager` 导致的 fail-closed（code commit：88a1be07c1b16a8af1f794eaedd97c7cd2653232；commit msg：`v11: Fix freeze_manager injection in run_v11_service for non-stub mode`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
