@@ -246,6 +246,12 @@
 
 ---
 
+### Freeze Gate Non-Bypass Guard (Step 78)
+
+- Step 78 (SSOT): `docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
