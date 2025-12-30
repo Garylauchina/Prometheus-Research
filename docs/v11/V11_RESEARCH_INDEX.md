@@ -232,6 +232,12 @@
 
 ---
 
+### Freeze E2E Wiring (Step 76)
+
+- Step 76 (SSOT): `docs/v11/V11_STEP76_FREEZE_E2E_WIRING_AND_DEMO_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
