@@ -253,6 +253,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 79：BrokerTrader 内部 freeze pre-check 必经（dominance）静态门禁：connector 写调用必须被冻结前置检查支配，防止重构删除/移动 pre-check 造成内部旁路（规格见：`docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_20251230.md`）。
   - Step 79（Quant 落地记录）：`docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`（commit：5600e76，amended）。
   - Step 79（Quant 落地记录，wiring 集成完成）：`docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_INTEGRATED_IN_QUANT_20251230.md`（commit：c0c9f7f，CI=PASS，0 violations）。
+  - Step 80：冻结证据语义冻结（Freeze Trigger/Reject 双落盘）：冻结触发写入 `reconciliation_freeze_events.jsonl`，冻结拒绝写入 `order_attempts.jsonl`（L1_EXECUTION_FROZEN），`errors.jsonl` 仅作补充；并定义 verifier/CI 的机器可验证约束（规格见：`docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
