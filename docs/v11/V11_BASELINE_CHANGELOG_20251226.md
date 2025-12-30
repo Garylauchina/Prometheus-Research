@@ -226,6 +226,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 65（Quant 落地记录）：`docs/v11/V11_STEP65_RESEARCH_BUNDLE_OUTPUT_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`（commit：8dab067）。
   - Step 66：CI 必跑 Step65 集成测试（`tools/test_step65_research_bundle.py`），任何偏离 Step65 契约即阻断合并（规格见：`docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_20251230.md`）。
   - Step 66（Quant 落地记录）：`docs/v11/V11_STEP66_CI_GATE_STEP65_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：fc8d267）。
+  - Step 67：research_bundle 单入口文件 entry.json（fact-only）：冻结 schema、sha256_16/byte_size 与 evidence_ref_index 复核规则，并写入 run_manifest 以便研究侧程序一键加载（规格见：`docs/v11/V11_STEP67_RESEARCH_BUNDLE_ENTRYPOINT_CONTRACT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
