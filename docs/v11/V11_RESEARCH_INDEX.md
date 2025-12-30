@@ -317,6 +317,12 @@
 
 ---
 
+### Order Confirmation EvidenceRefs Bundle (Step 88)
+
+- Step 88 (SSOT): `docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`

@@ -513,6 +513,9 @@ Step 87（generic evidence refs bundle：把 backfill view/range/sha256 机制�
 - Step 87（Quant 落地记录）：
   - `docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`
 
+Step 88（order confirmation evidence refs bundle：P0–P5 订单确认链的证据闭环与 verifier）：
+- `docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_20251230.md`
+
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
 execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。
