@@ -438,6 +438,8 @@ Step 72.2（agent metabolism checklist：实施前 checklist + 寿命三视角�
 
 Step 73（CI gate：必跑 Step72 代谢产物验收，防回退）：
 - `docs/v11/V11_STEP73_CI_GATE_STEP72_METABOLISM_ACCEPTANCE_20251230.md`
+- Step 73（Quant 落地记录）：
+  - `docs/v11/V11_STEP73_CI_GATE_STEP72_METABOLISM_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
