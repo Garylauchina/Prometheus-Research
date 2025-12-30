@@ -234,6 +234,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 70：跨 run 研究入口索引 research_entry_index.json（fact-only）：聚合 runs_root 下每个 run 的 research_bundle/entry.json，用于批量检索/归档，并提供 sha256_16 可复核字段与混扫防护规则（规格见：`docs/v11/V11_STEP70_CROSS_RUN_RESEARCH_ENTRY_INDEX_CONTRACT_20251230.md`）。
   - Step 71：CI 必跑 Step70 跨 run 聚合索引（scan_root 固定为 runs_step54_test），生成并校验 research_entry_index.json，空跑=FAIL 且禁止跳过（规格见：`docs/v11/V11_STEP71_CI_GATE_STEP70_CROSS_RUN_INDEX_20251230.md`）。
   - Step 71（Quant 落地记录）：`docs/v11/V11_STEP71_CI_GATE_STEP70_CROSS_RUN_INDEX_IMPLEMENTED_IN_QUANT_20251230.md`（commit：a313aa6）。
+  - Step 72：个体代谢观测（fact-only，非基因/非 probe）：从 decision_trace 聚合 M_intent，并在可测时从 orders/fills/bills 聚合 M_exec；输出 agent_metabolism_summary（必需）并纳入 research_bundle/entry.json（规格见：`docs/v11/V11_STEP72_AGENT_METABOLISM_OBSERVABILITY_CONTRACT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

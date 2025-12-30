@@ -202,6 +202,12 @@
 
 ---
 
+### Agent Metabolism Observability (Step 72)
+
+- Step 72 (SSOT): `docs/v11/V11_STEP72_AGENT_METABOLISM_OBSERVABILITY_CONTRACT_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。
