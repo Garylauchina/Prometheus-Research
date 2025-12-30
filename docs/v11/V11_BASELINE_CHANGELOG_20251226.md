@@ -242,6 +242,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 73（Quant 落地记录）：`docs/v11/V11_STEP73_CI_GATE_STEP72_METABOLISM_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：e51390d）。
   - Step 74：实时对账冻结（execution_frozen）：证据链/真值链断裂时立即冻结，禁止继续下单污染证据链，并写实落盘 errors/manifest（规格见：`docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_20251230.md`）。
   - Step 74（Quant 落地记录）：`docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：121095a）。
+  - Step 75：CI 必跑 Step74 冻结机制验收（`tools/test_step74_execution_freeze.py`），禁止跳过，失败阻断合并（规格见：`docs/v11/V11_STEP75_CI_GATE_STEP74_EXECUTION_FREEZE_ACCEPTANCE_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

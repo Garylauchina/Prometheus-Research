@@ -225,6 +225,12 @@
 
 ---
 
+### CI Gate for Step74 Acceptance (Step 75)
+
+- Step 75 (SSOT): `docs/v11/V11_STEP75_CI_GATE_STEP74_EXECUTION_FREEZE_ACCEPTANCE_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
