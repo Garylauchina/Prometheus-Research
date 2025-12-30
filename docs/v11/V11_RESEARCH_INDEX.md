@@ -306,6 +306,7 @@
 ### Backfill View Verifier (Step 86)
 
 - Step 86 (SSOT): `docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_20251230.md`
+- Step 86 (Quant record): `docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

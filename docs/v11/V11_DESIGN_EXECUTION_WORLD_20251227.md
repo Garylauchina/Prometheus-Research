@@ -505,6 +505,8 @@ Step 85（runtime evidence_refs autogen：运行时生成 line_range 占位 refs
 
 Step 86（backfill view verifier：自动应用 evidence_refs_backfill.jsonl + backfill 自身完整性规则，fail-closed）：
 - `docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_20251230.md`
+- Step 86（Quant 落地记录）：
+  - `docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

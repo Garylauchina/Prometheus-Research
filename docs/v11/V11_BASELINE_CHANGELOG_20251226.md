@@ -266,6 +266,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 85：运行时 evidence_refs 自动生成 + run-end sha256_16 回填：运行时生成 file/line_range 占位引用，run-end gate 基于 `evidence_ref_index.json` 回填并严格对齐 sha256_16，使真实运行产物自动满足 Step82/83/84（规格见：`docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_20251230.md`）。
   - Step 85（Quant 落地记录）：`docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_IMPLEMENTED_IN_QUANT_20251230.md`（commits：134b5b7 + 5d7673b）。
   - Step 86：Backfill view verifier：verifier 必须自动应用 `evidence_refs_backfill.jsonl` 形成审计视图，并对 backfill 文件自身执行完整性/一致性规则（指向有效行、与 evidence_ref_index 的 sha256_16 对齐、幂等/禁止冲突），fail-closed（规格见：`docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_20251230.md`）。
+  - Step 86（Quant 落地记录）：`docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`（commits：537197f + 9e20b46）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
