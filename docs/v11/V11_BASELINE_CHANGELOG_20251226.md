@@ -271,6 +271,16 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 87（Quant 落地记录）：`docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：b4f407c）。
   - Step 88：订单确认链（P0–P5）EvidenceRefs bundle：将 order_attempts/ack/P2 状态/fills/bills/paging_traces/auditor_report 纳入通用证据链（refs/backfill/sha256/range），冻结 ordId/tradeId/billId join 与 paging closure proof，并提供 PASS/FAIL fixtures 与 verifier（规格见：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_20251230.md`）。
   - Step 88（Quant 落地记录）：`docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（code commit：2a98bda；doc commit：a11b73d）。
+    - Step 88（Quant 修复补丁，closure + verifier 诚实性 + P2 join 锚点补齐）：
+      - `prometheus/__init__.py` 移除默认 eager import legacy（防止 v11 auditor 被动拉入 numpy 等依赖链），并提供 `PROMETHEUS_ENABLE_LEGACY_EXPORTS=1` 显式 opt-in（commit：0a4d6bb）。
+      - `tools/run_v11_auditor.py`：dotenv 可选化（commit：0a4d6bb）。
+      - `order_status_samples.jsonl` evidence schema additive：新增 `ordId`（用于 P2→P3/P4 join；保留 `order_id_hash`），并修复 `verify_step88` 的 NOT_MEASURABLE 判决/summary 诚实性（commit：ad8014c）。
+      - ExchangeAuditor（Step88/审计链一致性修复，P3/P4 join key + snapshots 物化 + P5 路径）：
+        - P3/P4 join 从错误的 `exchange_order_id_hash`↔`ordId` 对比，改为以 `clOrdId`（即 `client_order_id`）作为 join 主键，避免必然误报 `fills_missing_local_record`/`bills_missing_local_record`（commit：c51f94d）。
+        - 物化审计端读取到的交易所快照：落盘 `fills.jsonl`/`bills.jsonl`（含审计元数据锚点），使 Step88 verifier 的 P3/P4 可测（commit：c51f94d）。
+        - Step88 verifier（P5）允许定位 `auditor_report.json` 的两种路径：`run_dir/research_bundle/`（优先）与 `run_dir/` 根目录（commit：c51f94d）。
+        - P2 truth source 补齐（无需重跑 trading）：ExchangeAuditor 在 orphan detection 查询 orders-history 后，物化落盘 `orders_history.jsonl`（含 `ordId`/`clOrdId` 与审计锚点），使 Step88 verifier 可通过 `orders_history.jsonl` 证明 P2 终态（commit：541cd8c）。
+        - Step88 verifier（P2）回退逻辑修复：当 `order_status_samples.jsonl` 存在但缺 `ordId` 时，不再 early-return NOT_MEASURABLE；改为回退检查 `orders_history.jsonl`，仅当两者都缺 `ordId` 才判 NOT_MEASURABLE，使旧 run_dir 在审计物化后可达到 Step88 PASS（commit：724f53b）。
   - Step 89：真实运行验收（Mac preflight → VPS container）：≥10 ticks，≥1 订单 P2 终态可证；Step88 verifier 与 auditor 结论一致；证据包（FILELIST/SHA256SUMS/evidence_ref_index/research_bundle）完整，fail-closed（规格见：`docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_MAC_PREFLIGHT_VPS_CONTAINER_20251230.md`）。
   - Step 89（Quant 前置修复记录）：修复 non-stub 模式下 `run_v11_service.py` 未注入 `freeze_manager` 导致的 fail-closed（code commit：88a1be07c1b16a8af1f794eaedd97c7cd2653232；commit msg：`v11: Fix freeze_manager injection in run_v11_service for non-stub mode`）。
 
