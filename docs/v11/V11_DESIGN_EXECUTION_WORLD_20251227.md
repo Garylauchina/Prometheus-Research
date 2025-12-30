@@ -500,6 +500,8 @@ Step 84（evidence_refs multi-line range：jsonl range 解引用 + 同质性校�
 
 Step 85（runtime evidence_refs autogen：运行时生成 line_range 占位 refs，run-end gate 回填 sha256_16，真实运行产物自动满足 Step82/83/84）：
 - `docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_20251230.md`
+- Step 85（Quant 落地记录）：
+  - `docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
