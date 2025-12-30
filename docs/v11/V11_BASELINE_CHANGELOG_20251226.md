@@ -268,6 +268,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 86：Backfill view verifier：verifier 必须自动应用 `evidence_refs_backfill.jsonl` 形成审计视图，并对 backfill 文件自身执行完整性/一致性规则（指向有效行、与 evidence_ref_index 的 sha256_16 对齐、幂等/禁止冲突），fail-closed（规格见：`docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_20251230.md`）。
   - Step 86（Quant 落地记录）：`docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_IMPLEMENTED_IN_QUANT_20251230.md`（commits：537197f + 9e20b46）。
   - Step 87：通用 EvidenceRefs Backfill View Bundle：将 freeze 证据链的 backfill view/range/sha256 机制推广到审计关键证据（paging_traces/auditor_report/discrepancies），并冻结其 range 同质性规则（scope_id/query_chain_id/endpoint_family 等），fail-closed（规格见：`docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_20251230.md`）。
+  - Step 87（Quant 落地记录）：`docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：b4f407c）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

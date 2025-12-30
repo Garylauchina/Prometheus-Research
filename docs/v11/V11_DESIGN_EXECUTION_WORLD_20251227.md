@@ -510,6 +510,8 @@ Step 86（backfill view verifier：自动应用 evidence_refs_backfill.jsonl + b
 
 Step 87（generic evidence refs bundle：把 backfill view/range/sha256 机制推广到审计关键证据）：
 - `docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_20251230.md`
+- Step 87（Quant 落地记录）：
+  - `docs/v11/V11_STEP87_GENERIC_EVIDENCE_REFS_BACKFILL_VIEW_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
