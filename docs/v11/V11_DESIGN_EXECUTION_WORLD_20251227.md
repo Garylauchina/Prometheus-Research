@@ -503,6 +503,9 @@ Step 85（runtime evidence_refs autogen：运行时生成 line_range 占位 refs
 - Step 85（Quant 落地记录）：
   - `docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_IMPLEMENTED_IN_QUANT_20251230.md`
 
+Step 86（backfill view verifier：自动应用 evidence_refs_backfill.jsonl + backfill 自身完整性规则，fail-closed）：
+- `docs/v11/V11_STEP86_BACKFILL_VIEW_VERIFIER_20251230.md`
+
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
 execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。
