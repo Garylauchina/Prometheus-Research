@@ -495,6 +495,8 @@ Step 83（freeze evidence_refs sha256_16 alignment：sha256_16 ↔ evidence_ref_
 
 Step 84（evidence_refs multi-line range：jsonl range 解引用 + 同质性校验，防止混入无关行）：
 - `docs/v11/V11_STEP84_EVIDENCE_REFS_MULTI_LINE_RANGE_VALIDATION_20251230.md`
+- Step 84（Quant 落地记录）：
+  - `docs/v11/V11_STEP84_EVIDENCE_REFS_MULTI_LINE_RANGE_VALIDATION_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
