@@ -36,6 +36,10 @@
 - 所有交易写动作必须走 **BrokerTrader**；ack 后必须按协议完成 **P2 终态可回查**（否则 freeze/STOP）。
 - 所有关键 evidence **append-only**，且 run_dir 必须可校验（filelist+sha256）。
 - `run_manifest.json` 必须记录：`truth_profile` + 本次实现相关的 `contract_version`（或等价版本字段）。
+- **运行记录锚点（必须，防证据“跑过但找不到/对不齐”）**：
+  - 每次真实运行必须在输出 banner + `run_manifest.json` 写入可校验的构建指纹（至少：`build_git_sha`；不得为 `unknown`）。
+  - 必须明确产物位置：`runs_root`（host 路径或 docker volume 名）+ `run_id`（run_dir 目录名），以便第三方定位并复核 `okx_api_calls.jsonl/order_attempts.jsonl/...`。
+  - 若使用容器运行：必须记录 `image_digest`（或等价不可变标识），避免“Mac 与 VPS 跑的不是同一镜像”而无法机器判定。
 - ExchangeAuditor：`NOT_MEASURABLE` 必须打印 WARNING 且 `exit_code=0`；`FAIL` 必须 `exit_code=2`；报告内必须写入 `exit_code` 与拆分后的 `contract_versions`（审计器/证据生产者/协议版本）。
 - **保持英文现状**：代码/注释/日志中的英文口径不做“翻译式重写”，除非为契约一致性所必需。
 

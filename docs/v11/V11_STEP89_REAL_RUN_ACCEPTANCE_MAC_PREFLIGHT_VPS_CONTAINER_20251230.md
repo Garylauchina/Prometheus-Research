@@ -83,4 +83,21 @@ Quant 必须新增一份不可变记录：
 - code commit: `88a1be07c1b16a8af1f794eaedd97c7cd2653232`
 - commit msg: `v11: Fix freeze_manager injection in run_v11_service for non-stub mode`
 
+---
+
+## 5) 运行记录锚点（防“跑过但找不到证据/无法对齐镜像”）
+
+问题：仅冻结“规则/门禁”不足以保证可复验；还必须冻结“每次执行的可追溯上下文”，否则会出现：
+- Mac 本地说“跑通/看到交易”，但 run_dir 位置不明、无法回溯 okx_api_calls/order_attempts 等证据
+- VPS 容器运行与 Mac 本地镜像不一致，但因 `Git commit: unknown` 无法机器判定
+
+要求（Phase A / Phase B 均适用，additive-only）：
+- **必须可定位 run_dir**：明确 `runs_root`（host 绝对路径或明确的 docker volume 名称）+ `run_id`（目录名）
+- **必须可对齐镜像指纹**：在输出 banner 与 `run_manifest.json` 写入：
+  - `build_git_sha`（不得为 `unknown`）
+  - `image_digest`（如 `sha256:...`，或等价可校验标识）
+- **必须可复跑命令**：在 Step89 Quant 落地记录中写入用于生成该 run_dir 的最小 `docker run ...` 命令（可脱敏 env，但保留 mode/ticks/inst/results_root）
+
+说明：这些字段不要求上传证据包到 GitHub；它们用于让“本地证据包”可被第三方在同环境中复现/复核。
+
 
