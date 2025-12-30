@@ -443,6 +443,8 @@ Step 73（CI gate：必跑 Step72 代谢产物验收，防回退）：
 
 Step 74（execution freeze：实时对账冻结，禁止继续交易污染证据链）：
 - `docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_20251230.md`
+- Step 74（Quant 落地记录）：
+  - `docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

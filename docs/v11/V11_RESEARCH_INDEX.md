@@ -221,6 +221,7 @@
 ### Real-time Reconciliation Freeze (Step 74)
 
 - Step 74 (SSOT): `docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_20251230.md`
+- Step 74 (Quant record): `docs/v11/V11_STEP74_REAL_TIME_RECONCILIATION_FREEZE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 
