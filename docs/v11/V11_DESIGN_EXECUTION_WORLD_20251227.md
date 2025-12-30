@@ -498,6 +498,9 @@ Step 84（evidence_refs multi-line range：jsonl range 解引用 + 同质性校�
 - Step 84（Quant 落地记录）：
   - `docs/v11/V11_STEP84_EVIDENCE_REFS_MULTI_LINE_RANGE_VALIDATION_IMPLEMENTED_IN_QUANT_20251230.md`
 
+Step 85（runtime evidence_refs autogen：运行时生成 line_range 占位 refs，run-end gate 回填 sha256_16，真实运行产物自动满足 Step82/83/84）：
+- `docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_20251230.md`
+
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
 execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。

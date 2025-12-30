@@ -263,6 +263,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 83（Quant 落地记录）：`docs/v11/V11_STEP83_FREEZE_EVIDENCE_REFS_SHA256_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`（commits：ed8f569 + 67072ac）。
   - Step 84：evidence_refs 多行范围引用语义冻结：对 `.jsonl` range `[line_start, line_end]` 做范围解引用与同质性校验（freeze reject/trigger 优先），防止引用范围混入无关行，fail-closed（规格见：`docs/v11/V11_STEP84_EVIDENCE_REFS_MULTI_LINE_RANGE_VALIDATION_20251230.md`）。
   - Step 84（Quant 落地记录）：`docs/v11/V11_STEP84_EVIDENCE_REFS_MULTI_LINE_RANGE_VALIDATION_IMPLEMENTED_IN_QUANT_20251230.md`（commits：7f352f1 + 9084fa9）。
+  - Step 85：运行时 evidence_refs 自动生成 + run-end sha256_16 回填：运行时生成 file/line_range 占位引用，run-end gate 基于 `evidence_ref_index.json` 回填并严格对齐 sha256_16，使真实运行产物自动满足 Step82/83/84（规格见：`docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

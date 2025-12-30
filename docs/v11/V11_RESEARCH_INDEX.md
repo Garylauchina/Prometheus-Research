@@ -296,6 +296,12 @@
 
 ---
 
+### Runtime EvidenceRefs Auto-Generation (Step 85)
+
+- Step 85 (SSOT): `docs/v11/V11_STEP85_RUNTIME_EVIDENCE_REFS_AUTOGEN_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
