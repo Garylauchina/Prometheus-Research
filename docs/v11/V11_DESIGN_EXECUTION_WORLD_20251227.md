@@ -453,6 +453,8 @@ Step 75（CI gate：必跑 Step74 集成测试，锁定 freeze 语义）：
 
 Step 76（freeze E2E：冻结 pre-check 强制接入所有写路径，证明冻结后不触达 connector）：
 - `docs/v11/V11_STEP76_FREEZE_E2E_WIRING_AND_DEMO_20251230.md`
+- Step 76（Quant 落地记录）：
+  - `docs/v11/V11_STEP76_FREEZE_E2E_WIRING_AND_DEMO_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
