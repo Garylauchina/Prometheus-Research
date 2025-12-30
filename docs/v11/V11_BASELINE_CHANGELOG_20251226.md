@@ -231,6 +231,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 68（Quant 落地记录）：`docs/v11/V11_STEP68_RUN_END_GATE_STEP67_ENTRYPOINT_INTEGRATION_IMPLEMENTED_IN_QUANT_20251230.md`（commit：150da05）。
   - Step 69：CI 必跑 Step68 集成测试（`tools/test_step68_entrypoint.py`），任何偏离 Step67+68 契约即阻断合并（规格见：`docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_20251230.md`）。
   - Step 69（Quant 落地记录）：`docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：f2a1b41）。
+  - Step 70：跨 run 研究入口索引 research_entry_index.json（fact-only）：聚合 runs_root 下每个 run 的 research_bundle/entry.json，用于批量检索/归档，并提供 sha256_16 可复核字段与混扫防护规则（规格见：`docs/v11/V11_STEP70_CROSS_RUN_RESEARCH_ENTRY_INDEX_CONTRACT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

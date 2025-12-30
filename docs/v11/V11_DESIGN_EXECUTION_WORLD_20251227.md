@@ -417,6 +417,9 @@ Step 69（CI gate：必跑 Step68 集成测试，锁定 entrypoint 合约语义�
 - Step 69（Quant 落地记录）：
   - `docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
+Step 70（cross-run：聚合多个 run 的 research_bundle/entry.json 为 research_entry_index.json）：
+- `docs/v11/V11_STEP70_CROSS_RUN_RESEARCH_ENTRY_INDEX_CONTRACT_20251230.md`
+
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
 execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。

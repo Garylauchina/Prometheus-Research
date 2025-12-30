@@ -189,6 +189,12 @@
 
 ---
 
+### Cross-Run Research Entry Index (Step 70)
+
+- Step 70 (SSOT): `docs/v11/V11_STEP70_CROSS_RUN_RESEARCH_ENTRY_INDEX_CONTRACT_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。
