@@ -268,6 +268,12 @@
 
 ---
 
+### Freeze Evidence ↔ EvidenceRefs Alignment (Step 81)
+
+- Step 81 (SSOT): `docs/v11/V11_STEP81_FREEZE_EVIDENCE_EVIDENCE_REFS_ALIGNMENT_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`

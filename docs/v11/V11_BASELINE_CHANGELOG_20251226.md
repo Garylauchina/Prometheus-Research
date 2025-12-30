@@ -255,6 +255,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 79（Quant 落地记录，wiring 集成完成）：`docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_INTEGRATED_IN_QUANT_20251230.md`（commit：c0c9f7f，CI=PASS，0 violations）。
   - Step 80：冻结证据语义冻结（Freeze Trigger/Reject 双落盘）：冻结触发写入 `reconciliation_freeze_events.jsonl`，冻结拒绝写入 `order_attempts.jsonl`（L1_EXECUTION_FROZEN），`errors.jsonl` 仅作补充；并定义 verifier/CI 的机器可验证约束（规格见：`docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_20251230.md`）。
   - Step 80（Quant 落地记录）：`docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_IMPLEMENTED_IN_QUANT_20251230.md`（commits：2177a93 + 3571df1）。
+  - Step 81：冻结证据与 Evidence Gate Bundle 对齐：引入 `freeze_id` 作为 trigger/reject 的最小 join 主键；在 evidence gate enabled 时强制 `evidence_refs`/`evidence_ref_index` 覆盖，并新增 verifier 的跨文件一致性规则（规格见：`docs/v11/V11_STEP81_FREEZE_EVIDENCE_EVIDENCE_REFS_ALIGNMENT_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
