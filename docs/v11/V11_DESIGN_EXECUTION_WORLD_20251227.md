@@ -480,6 +480,8 @@ Step 80（freeze evidence semantics：冻结触发/冻结拒绝的证据语义�
 
 Step 81（freeze evidence ↔ evidence gate bundle：freeze_id join + evidence_refs 对齐 + 跨文件 verifier 规则）：
 - `docs/v11/V11_STEP81_FREEZE_EVIDENCE_EVIDENCE_REFS_ALIGNMENT_20251230.md`
+- Step 81（Quant 落地记录）：
+  - `docs/v11/V11_STEP81_FREEZE_EVIDENCE_EVIDENCE_REFS_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
