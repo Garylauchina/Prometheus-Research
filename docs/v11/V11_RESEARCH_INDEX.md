@@ -221,6 +221,7 @@
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
+- Tickless / Event-Driven World (2025-12-30): `docs/v11/V11_NOTE_TICKLESS_EVENT_DRIVEN_WORLD_20251230.md`
 
 ---
 
