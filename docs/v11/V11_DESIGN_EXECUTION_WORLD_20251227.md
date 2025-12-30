@@ -463,6 +463,8 @@ Step 77（CI gate：必跑 Step76 freeze E2E 测试，锁定“冻结后 connect
 
 Step 78（freeze non-bypass：结构性门禁阻断生产旁路 connector 写调用）：
 - `docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_20251230.md`
+- Step 78（Quant 落地记录）：
+  - `docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

@@ -249,6 +249,7 @@
 ### Freeze Gate Non-Bypass Guard (Step 78)
 
 - Step 78 (SSOT): `docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_20251230.md`
+- Step 78 (Quant record): `docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

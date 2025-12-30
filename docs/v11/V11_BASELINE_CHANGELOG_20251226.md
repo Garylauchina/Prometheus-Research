@@ -249,6 +249,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 77：CI 必跑 Step76 freeze E2E 测试（`tools/test_step76_freeze_e2e.py`），禁止跳过，失败阻断合并（规格见：`docs/v11/V11_STEP77_CI_GATE_STEP76_FREEZE_E2E_ACCEPTANCE_20251230.md`）。
   - Step 77（Quant 落地记录）：`docs/v11/V11_STEP77_CI_GATE_STEP76_FREEZE_E2E_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（commit：063ce67）。
   - Step 78：生产写路径不可绕过 freeze gate 的结构性门禁（静态扫描/allowlist/CI fail-closed），阻断任何旁路 connector 写调用（规格见：`docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_20251230.md`）。
+  - Step 78（Quant 落地记录）：`docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`（commit：73849d1）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
