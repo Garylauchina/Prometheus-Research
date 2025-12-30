@@ -264,6 +264,7 @@
 ### Freeze Evidence Semantics Freeze (Step 80)
 
 - Step 80 (SSOT): `docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_20251230.md`
+- Step 80 (Quant record): `docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

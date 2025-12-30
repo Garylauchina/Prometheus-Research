@@ -475,6 +475,8 @@ Step 79（freeze pre-check dominance：BrokerTrader 内部写调用必须被冻�
 
 Step 80（freeze evidence semantics：冻结触发/冻结拒绝的证据语义冻结，双落盘 + verifier 约束）：
 - `docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_20251230.md`
+- Step 80（Quant 落地记录）：
+  - `docs/v11/V11_STEP80_FREEZE_EVIDENCE_SEMANTICS_FREEZE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
