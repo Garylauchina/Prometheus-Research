@@ -468,6 +468,8 @@ Step 78（freeze non-bypass：结构性门禁阻断生产旁路 connector 写调
 
 Step 79（freeze pre-check dominance：BrokerTrader 内部写调用必须被冻结前置检查支配）：
 - `docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_20251230.md`
+- Step 79（Quant 落地记录）：
+  - `docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

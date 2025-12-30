@@ -251,6 +251,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 78：生产写路径不可绕过 freeze gate 的结构性门禁（静态扫描/allowlist/CI fail-closed），阻断任何旁路 connector 写调用（规格见：`docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_20251230.md`）。
   - Step 78（Quant 落地记录）：`docs/v11/V11_STEP78_FREEZE_GATE_NON_BYPASS_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`（commit：73849d1）。
   - Step 79：BrokerTrader 内部 freeze pre-check 必经（dominance）静态门禁：connector 写调用必须被冻结前置检查支配，防止重构删除/移动 pre-check 造成内部旁路（规格见：`docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_20251230.md`）。
+  - Step 79（Quant 落地记录）：`docs/v11/V11_STEP79_FREEZE_PRECHECK_DOMINANCE_GUARD_IMPLEMENTED_IN_QUANT_20251230.md`（commit：5600e76，amended）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
