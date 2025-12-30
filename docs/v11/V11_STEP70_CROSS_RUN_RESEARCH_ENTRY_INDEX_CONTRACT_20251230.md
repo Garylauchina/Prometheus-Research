@@ -75,6 +75,9 @@
 `run_dir_rel` 语义（冻结）：
 - `run_dir_rel` 是相对于 `scan_root` 的路径（用于稳定定位，不依赖绝对路径）。
 
+实现细节（允许，非冻结）：
+- verifier 若要读取 `entry_rel_path` 指向的文件，必须以 `scan_root` 作为基准拼接实际路径（例如 `join(scan_root, entry_rel_path)`）；否则在 CI 中可能出现 “file not found” 导致该项校验 NOT_MEASURABLE。
+
 ---
 
 ## 4) 混扫防护（硬规则）

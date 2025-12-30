@@ -64,6 +64,9 @@ CI 必须至少证明：
 （可选增强）若 verifier 支持读取 run_dir 的 `evidence_ref_index.json`：
 - 校验 `entry_sha256_16` 与 `research_bundle/entry.json` 的 sha256_16 一致
 
+可测性说明（写实，非冻结）：
+- 若 verifier 未将 `entry_rel_path` 与 `scan_root` 拼接为实际路径，可能导致 “file not found”，从而该项一致性校验 NOT_MEASURABLE（应输出 WARNING，但不应把 schema 校验变成误报 FAIL）。
+
 ---
 
 ## 5) Research 侧交付物

@@ -198,6 +198,7 @@
 ### CI Gate for Step70 Cross-Run Index (Step 71)
 
 - Step 71 (SSOT): `docs/v11/V11_STEP71_CI_GATE_STEP70_CROSS_RUN_INDEX_20251230.md`
+- Step 71 (Quant record): `docs/v11/V11_STEP71_CI_GATE_STEP70_CROSS_RUN_INDEX_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 

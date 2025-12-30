@@ -422,6 +422,8 @@ Step 70（cross-run：聚合多个 run 的 research_bundle/entry.json 为 resear
 
 Step 71（CI gate：必跑 Step70 cross-run index，防入口腐化）：
 - `docs/v11/V11_STEP71_CI_GATE_STEP70_CROSS_RUN_INDEX_20251230.md`
+- Step 71（Quant 落地记录）：
+  - `docs/v11/V11_STEP71_CI_GATE_STEP70_CROSS_RUN_INDEX_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
