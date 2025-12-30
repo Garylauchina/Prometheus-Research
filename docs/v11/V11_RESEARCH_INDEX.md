@@ -182,6 +182,12 @@
 
 ---
 
+### CI Gate for Step68 Acceptance (Step 69)
+
+- Step 69 (SSOT): `docs/v11/V11_STEP69_CI_GATE_STEP68_ACCEPTANCE_20251230.md`
+
+---
+
 ## Migration Status
 
 - Phase A（已执行）：新增 `docs/v11/` 并建立入口；更新全局 README 与 V10 index 的提示（零破坏）。
