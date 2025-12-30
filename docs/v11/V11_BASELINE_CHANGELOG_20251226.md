@@ -238,6 +238,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 72.1：代谢候选指标与筛选门槛（必要且可行）：冻结最小集合（决策耗时 + API 占用），明确暂缓项与观察污染控制（规格见：`docs/v11/V11_STEP72_1_AGENT_METABOLISM_CANDIDATES_AND_FILTER_20251230.md`）。
   - Step 72.2：代谢实施前 checklist + “寿命三视角”去围栏化定义（L_time/L_exec/L_budget），并给出“高 ROI 可能被高代谢吃掉”的 fact-only 表述边界（规格见：`docs/v11/V11_STEP72_2_AGENT_METABOLISM_PREIMPLEMENTATION_CHECKLIST_AND_LIFESPAN_VIEWS_20251230.md`）。
   - Step 72（Quant 落地记录）：`docs/v11/V11_STEP72_AGENT_METABOLISM_OBSERVABILITY_CONTRACT_IMPLEMENTED_IN_QUANT_20251230.md`（commit：3881893）。
+  - Step 73：CI 必跑 Step72 代谢产物验收：确保 agent_metabolism_summary.json 存在、schema 满足、entry.json 索引存在且与 evidence_ref_index 一致；禁止跳过，失败阻断合并（规格见：`docs/v11/V11_STEP73_CI_GATE_STEP72_METABOLISM_ACCEPTANCE_20251230.md`）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
