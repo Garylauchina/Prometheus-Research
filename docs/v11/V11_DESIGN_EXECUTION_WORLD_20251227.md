@@ -431,6 +431,9 @@ Step 72（agent metabolism：个体代谢观测，fact-only，非基因/非 prob
 Step 72.1（agent metabolism filter：候选指标与“必要且可行”筛选结论）：
 - `docs/v11/V11_STEP72_1_AGENT_METABOLISM_CANDIDATES_AND_FILTER_20251230.md`
 
+Step 72.2（agent metabolism checklist：实施前 checklist + 寿命三视角去围栏化）：
+- `docs/v11/V11_STEP72_2_AGENT_METABOLISM_PREIMPLEMENTATION_CHECKLIST_AND_LIFESPAN_VIEWS_20251230.md`
+
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
 execution_world 的“世界参数”（例如 `tick_seconds`、API 请求预算、舒适度/摩擦的 `half_life_seconds` 等）属于 **外部世界条件**，不是策略围栏；但它们一旦变动，就会改变观测与执行条件，因此必须证据化与可追溯。
