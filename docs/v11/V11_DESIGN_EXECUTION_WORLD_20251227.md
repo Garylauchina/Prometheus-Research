@@ -485,6 +485,8 @@ Step 81（freeze evidence ↔ evidence gate bundle：freeze_id join + evidence_r
 
 Step 82（freeze evidence_refs hardening：freeze trigger/reject 的 evidence_refs 结构化与 dereference 校验，fail-closed）：
 - `docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_20251230.md`
+- Step 82（Quant 落地记录）：
+  - `docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 

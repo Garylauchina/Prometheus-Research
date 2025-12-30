@@ -258,6 +258,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 81：冻结证据与 Evidence Gate Bundle 对齐：引入 `freeze_id` 作为 trigger/reject 的最小 join 主键；在 evidence gate enabled 时强制 `evidence_refs`/`evidence_ref_index` 覆盖，并新增 verifier 的跨文件一致性规则（规格见：`docs/v11/V11_STEP81_FREEZE_EVIDENCE_EVIDENCE_REFS_ALIGNMENT_20251230.md`）。
   - Step 81（Quant 落地记录）：`docs/v11/V11_STEP81_FREEZE_EVIDENCE_EVIDENCE_REFS_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`（commits：0c5fe10 + ed2befa）。
   - Step 82：冻结 EvidenceRefs hardening（trigger/reject）：当 evidence gate enabled 时，冻结相关记录必须带结构化 `evidence_refs`（含 sha256_16 与 line_range），并进行 dereference 校验（run_id/freeze_id/freeze_reason_code 语义一致），fail-closed（规格见：`docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_20251230.md`）。
+  - Step 82（Quant 落地记录）：`docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_IMPLEMENTED_IN_QUANT_20251230.md`（commits：61eade9 + 997aad8）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

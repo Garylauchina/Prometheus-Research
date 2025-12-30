@@ -278,6 +278,7 @@
 ### Freeze EvidenceRefs Hardening (Step 82)
 
 - Step 82 (SSOT): `docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_20251230.md`
+- Step 82 (Quant record): `docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ---
 
