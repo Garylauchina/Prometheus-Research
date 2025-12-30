@@ -515,6 +515,8 @@ Step 87（generic evidence refs bundle：把 backfill view/range/sha256 机制�
 
 Step 88（order confirmation evidence refs bundle：P0–P5 订单确认链的证据闭环与 verifier）：
 - `docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_20251230.md`
+- Step 88（Quant 落地记录）：
+  - `docs/v11/V11_STEP88_ORDER_CONFIRMATION_EVIDENCE_REFS_BUNDLE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
