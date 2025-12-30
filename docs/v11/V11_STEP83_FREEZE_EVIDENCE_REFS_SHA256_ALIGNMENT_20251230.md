@@ -34,6 +34,14 @@
 - `evidence_refs[].sha256_16` **必填**
 - `evidence_refs[].file` 必须在 `evidence_ref_index.json` 的 `rel_path` 集合中存在
 
+### 2.1 单向引用最小策略（为避免循环依赖）
+
+允许采用最小的 **单向引用** 策略来避免循环依赖：
+- trigger 记录的 `evidence_refs` **可为空/缺失**（最小版）
+- reject 记录必须包含至少 1 条 `evidence_refs` 指向 trigger 文件（例如 `reconciliation_freeze_events.jsonl`），并携带 `sha256_16`
+
+一旦某条记录包含 `evidence_refs`，则其中的 `sha256_16` 必须满足本 Step83 的严格对齐规则（fail-closed）。
+
 ---
 
 ## 3) sha256_16 对齐规则（严格）

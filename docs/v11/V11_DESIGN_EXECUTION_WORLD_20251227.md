@@ -490,6 +490,8 @@ Step 82（freeze evidence_refs hardening：freeze trigger/reject 的 evidence_re
 
 Step 83（freeze evidence_refs sha256_16 alignment：sha256_16 ↔ evidence_ref_index 严格匹配，fail-closed）：
 - `docs/v11/V11_STEP83_FREEZE_EVIDENCE_REFS_SHA256_ALIGNMENT_20251230.md`
+- Step 83（Quant 落地记录）：
+  - `docs/v11/V11_STEP83_FREEZE_EVIDENCE_REFS_SHA256_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
