@@ -104,6 +104,9 @@
 - `not_frozen`
 - `frozen`
 
+实现细节（允许，非冻结）：
+- 允许在 `enabled=false` 时写实记录 `status="disabled"`，但不得改变 `enabled=true` 时的 fail-closed 语义。
+
 ---
 
 ## 7) 验收（最小）

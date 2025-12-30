@@ -448,6 +448,8 @@ Step 74（execution freeze：实时对账冻结，禁止继续交易污染证据
 
 Step 75（CI gate：必跑 Step74 集成测试，锁定 freeze 语义）：
 - `docs/v11/V11_STEP75_CI_GATE_STEP74_EXECUTION_FREEZE_ACCEPTANCE_20251230.md`
+- Step 75（Quant 落地记录）：
+  - `docs/v11/V11_STEP75_CI_GATE_STEP74_EXECUTION_FREEZE_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`
 
 ### 10.1 世界参数变更协议（World Parameters Change Protocol）
 
