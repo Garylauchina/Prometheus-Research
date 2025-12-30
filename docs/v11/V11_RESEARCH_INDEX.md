@@ -289,6 +289,12 @@
 
 ---
 
+### EvidenceRefs Multi-line Range Validation (Step 84)
+
+- Step 84 (SSOT): `docs/v11/V11_STEP84_EVIDENCE_REFS_MULTI_LINE_RANGE_VALIDATION_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
