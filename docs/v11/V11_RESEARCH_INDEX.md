@@ -275,6 +275,12 @@
 
 ---
 
+### Freeze EvidenceRefs Hardening (Step 82)
+
+- Step 82 (SSOT): `docs/v11/V11_STEP82_FREEZE_EVIDENCE_REFS_HARDENING_20251230.md`
+
+---
+
 ## Notes / Concepts
 
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
