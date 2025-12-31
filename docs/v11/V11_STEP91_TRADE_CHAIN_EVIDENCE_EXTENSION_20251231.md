@@ -48,6 +48,26 @@ Step91 扩展覆盖：
 - `rejected`（bool）
 - `l1_classification`（例如 `L1_EXECUTION_FROZEN`）
 
+归因锚点（hard，冻结）：
+- attempt 必须能归因到 **agent** 或 **system** 二者之一（不得都为空）：
+  - `agent_id_hash`（agent scope；系统级动作必须为 null）
+  - `lifecycle_scope`（system scope，例如 `system_flatten`/`startup_flatten`；agent 行为必须为 null）
+- `intent_source`（推荐）：例如 `decision_cycle` / `lifecycle` / `preflight`（用于避免自检单冒充 agent 行为）
+
+写路径参数透传（hard，冻结：Trader input 必须包含 Decision 输出参数）
+- 当 attempt 对应“下单/改单”等会触达交易所写路径的 intent（尤其 operation=place/replace）时，`order_attempts.jsonl` 必须包含至少以下字段（字段名允许实现差异，但语义必须等价）：
+  - `inst_id`
+  - `td_mode`（cross/isolated）
+  - `pos_side`（long/short/net；与持仓模式一致）
+  - `order_type`（market/limit）
+  - `requested_sz`（合约张数；与 ctVal/合约面值换算关系必须可追溯）
+  - `limit_px`（仅当 order_type=limit 时必填；market 时必须为 null）
+  - `leverage_target`（必填；不得沉默）
+  - `leverage_applied`（bool|null；未知必须为 null+reason_code，见 Step leverage truth binding）
+
+说明：
+- 交易员（BrokerTrader）职责是“如实记录 + 可审计可回溯”，不要求成功成交；但写路径参数缺失会直接导致交易所使用默认值（不可审计），因此必须冻结为必含字段。
+
 新增字段（Step91）：
 - `gate`：
   - `gate_name`（e.g. `execution_freeze`, `risk_limits`, `connector_write`）
