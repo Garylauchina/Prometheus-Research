@@ -49,6 +49,12 @@
   - **停止使用 `run_v11_service.py` 作为 flight 验收入口**：允许保留兼容/历史复跑，但后续验收命令不得依赖它（标记 deprecated，不强删以免断链）。
   - 验收必须提供：固定 `runs_root` + `run_id` + 复跑命令 + Step88/相关 verifier 的 PASS/FAIL 输出（不可口头描述代替）。
 
+- **Leverage truth binding（First Flight 起强制）**：
+  - 若 V11 的 Genome/Decision 声称存在“杠杆偏好/杠杆上限”，则：
+    - Decision evidence（`decision_trace.jsonl`）必须写入 `leverage_target`（以及 source/reason_code）
+    - Trader input（`order_attempts.jsonl` / api_calls）必须包含 `leverage_target`，并能被交易所真值核验已生效或明确 NOT_MEASURABLE
+  - 禁止“基因里有 leverage 但执行链完全沉默”的情况（这是不可审计缺口）。
+
 ---
 
 ## 3) 交付物（每次改动至少给出）

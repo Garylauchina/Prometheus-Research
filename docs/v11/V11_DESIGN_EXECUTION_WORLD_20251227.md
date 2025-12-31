@@ -132,6 +132,13 @@ BrokerTrader 只做两件事：
 - 遵守 **订单确认协议 P0–P5**：ack≠成交；所有 ack 必须 P2 可回查终态；否则冻结/STOP
 - 执行异常必须做 L1 分类并写 `recommended_action`（runner 决定 STOP）
 
+补充（First Flight 起冻结，truth-first）：
+- **Leverage truth binding**：如果 Genome/Decision 声称存在“杠杆偏好/杠杆上限”，BrokerTrader 作为唯一交易入口必须把 leverage 变成可审计事实：
+  - Decision evidence（decision_trace）必须写入 `leverage_target`
+  - Trader input（order_attempts / api_calls）必须携带 `leverage_target`（以及是否已应用的声明）
+  - Exchange truth 必须可核验 leverage 已应用，或明确 NOT_MEASURABLE（并写入错误篓子）
+  - 参考：`docs/v11/V11_NOTE_LEVERAGE_PREFERENCE_TRUTH_BINDING_20251231.md`
+
 参考：
 - `docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
 - `docs/v10/V10_ORDER_CONFIRMATION_PROTOCOL_20251226.md`

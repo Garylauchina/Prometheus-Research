@@ -33,6 +33,9 @@
 - **Real Flight**（真首飞/真实飞行）：在 First Flight 各模块 truth-backed 测试通过后，执行一次“干净的真实运行入口”，做最小闭环样本与后续稳定窗口运行。
 - 明确排除：任何 `run_manifest.broker_trader_test.client_order_ids` 中的启动自检单，不计入 First/Real Flight（避免“自检单冒充 agent 行为”）。
 
+First Flight 核心事实（冻结补充）：
+- 杠杆（leverage）必须做 **truth binding**：Agent 基因存在“杠杆偏好”不等于交易所实际使用了该杠杆；First Flight 阶段必须把 leverage 写入决策输出与交易链入册，并能用交易所真值核验。见：`docs/v11/V11_NOTE_LEVERAGE_PREFERENCE_TRUTH_BINDING_20251231.md`。
+
 快速定位（按主题）：
 - **证据链 / 审计链**：Step27–46、Step85–89
 - **I/C 探针与消融**：Step47–54
@@ -71,6 +74,7 @@
     - **Mask discipline**：decision_trace 必须能证明 MFStats/Comfort 等不可测时 `mask=0 + reason_code`，且 DecisionEngine 尊重 mask（Step27/Design）。
     - **I truth**：禁止把 unknown 写成 0；I 维度必须来自 Ledger truth，使用 `position_exposure_ratio + pos_side_sign + positions_truth_quality`（Step47）。
     - **Decision observability**：decision_trace 必须能统计 intent 分布（open/close/hold）与关键输入摘要（effective_features_count 等），避免“看不见决策，只看见交易”（Step27/Design）。
+    - **Leverage present (truth-binding)**：对任何会触达写路径的 intent，decision_trace 必须包含 `leverage_target`，且 order_attempts/api_calls 必须包含 `leverage_target`（不得沉默）。
   - 最小验收命令（truth-backed run_dir 证据读法）：
     - 给定 `RUN_DIR`：检查 `run_manifest.json` 的 alignment_check 是否 passed，且 feature_dim==decision_input_dim。
     - 给定 `RUN_DIR`：从 `decision_trace.jsonl` 统计各类 intent 的数量（open/close/hold），并输出 masked/unknown 的比例摘要。

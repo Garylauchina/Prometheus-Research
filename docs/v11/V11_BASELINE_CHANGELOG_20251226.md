@@ -298,6 +298,19 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
 
 入口纪律（冻结）：
 - `run_v11_service.py` 允许保留兼容/历史复跑，但**不再作为 flight 验收入口**（deprecated，避免继续扩大单文件入口与混合职责）。
+
+---
+
+## 6) Leverage Preference Truth Binding（execution_world hard requirement, additive-only）
+
+追加冻结：当 Agent/Decision/Trader 链路涉及“杠杆偏好/杠杆上限”时，必须把 leverage 变成可机核验的执行链证据（否则演化归因无效）。
+
+最低要求（First Flight 起适用）：
+- Decision evidence：`decision_trace.jsonl` 对触达写路径的 intent 必须写入 `leverage_target`（并给出 source/reason_code）。
+- Trader input：`order_attempts.jsonl`（或等价入册）必须包含 `leverage_target`，并声明 `leverage_applied`（true/false/null+reason）。
+- Exchange truth：必须能用交易所真值核验 leverage 已应用，或明确 NOT_MEASURABLE（并写入 Step96 error basket）。
+
+参考：`docs/v11/V11_NOTE_LEVERAGE_PREFERENCE_TRUTH_BINDING_20251231.md`
   - Step 91：交易链证据扩展（intent→gate→api_call→exchange_truth→reconcile_summary），新增 Step91 SSOT：`docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`（additive-only，强调 join keys 与 fail-closed verifier）。
   - Step 92：Metabolism ↔ TradeChain 对齐（仅通过 Step91 的 `reconciliation_summary.json` 增加 `metabolism_alignment` 引用字段，不修改 Step72/73 合同），新增 Step92 SSOT：`docs/v11/V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_20251231.md`。
   - Step 91/92（Quant 落地）：trade chain evidence + metabolism alignment gates 已合入 Quant main（code commit：`9e4294c04751817de5737bf1d4ae1050f7a728da`；CI truth run：`https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20614483995` = success）。
