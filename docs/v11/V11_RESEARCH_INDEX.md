@@ -335,6 +335,7 @@
 
 ## Notes / Concepts
 
+- CI Truth Rule (V11): Treat **only the latest successful workflow run on `main` HEAD** as the current truth. Do **NOT** infer system status from historical red runs or reruns on old SHAs (rerun does not include later fixes). For verification, always re-run on latest `main` (new commit / workflow dispatch).
 - Time as Event Metrics (2025-12-30): `docs/v11/V11_NOTE_TIME_AS_EVENT_METRICS_20251230.md`
 - Tickless / Event-Driven World (2025-12-30): `docs/v11/V11_NOTE_TICKLESS_EVENT_DRIVEN_WORLD_20251230.md`
 - Incident (2025-12-30): Old runner left running (observation pollution): `docs/v11/V11_INCIDENT_OLD_RUNNER_LEFT_RUNNING_20251230.md`
