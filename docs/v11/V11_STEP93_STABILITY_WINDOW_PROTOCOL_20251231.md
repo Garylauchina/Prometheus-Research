@@ -45,6 +45,48 @@ CI 真值口径：
 
 ---
 
+## 3.1) Daily Observability Minimum (Agent-first, stability window)（冻结）
+
+稳定窗口的核心观测对象是 **Agent**。因此每日 run（尤其是 VPS demo 96 ticks）必须能在证据层回答：
+- 哪些 Agent 行动（by `agent_id_hash`）
+- 它们对应的基因参数锚点是什么（可用于聚类/谱系/回溯）
+
+### 必须产物（run_dir，append-only / additive-only）
+
+- `agent_roster.json`（新增，必须落盘）
+  - 目的：提供 `agent_id_hash` → `gene_id`/`genome_schema_version`/`feature_contract_version`/`weights_sha256` 的可机读锚点，使“行为归因”可回扣到“基因特征”。
+  - 最小字段（顶层）：
+    - `run_id`
+    - `build_git_sha`
+    - `image_digest`
+    - `feature_contract_version`
+    - `feature_dimension`
+    - `genome_schema_version`
+    - `agents`（list）
+  - `agents[]` 最小字段：
+    - `agent_id`（可脱敏）
+    - `agent_id_hash`（必需，join key）
+    - `gene_id`（GenomeV11.gene_id，16 hex）
+    - `weights_sha256`（对 genome 参数 JSON 的 sha256_16 或 full sha256；必须明确口径）
+    - `weights_count`（应 == feature_dimension）
+    - `metadata`（可选：seed/generation/parent_id 等；允许为空）
+
+### 最小一致性校验（Verifier，冻结）
+
+新增一个 read-only verifier（CI/runner gate 均可用）：
+- 输入：run_dir
+- 规则：
+  - `agent_roster.json` 必须存在，且 JSON 可解析
+  - 对 `order_attempts.jsonl` 中每一条 **agent-level** 记录（`agent_id_hash` 非 null）：
+    - `agent_id_hash` 必须能在 `agent_roster.json.agents[].agent_id_hash` 找到
+  - 对 `agent_roster.json.agents[]`：
+    - `weights_count == feature_dimension`（fail-closed）
+    - `gene_id` 必须为 16 hex
+- Verdict：
+  - 缺文件/缺字段/无法 join：FAIL（这是“演化观测缺口”，稳定窗口内视为 incident）
+
+---
+
 ## 4) Incident Handling（冻结）
 
 触发条件（任一满足即为 incident）：
@@ -52,6 +94,7 @@ CI 真值口径：
 - 运行记录锚点缺失导致 run 不可定位或不可复跑
 - 证据文件缺失/不可解引用/sha256 对不上
 - 发现疑似“观测污染”（例如僵尸进程、非本 run 的交易活动）
+- Agent-first 观测缺口：run_dir 无法把 agent-level 行为（`agent_id_hash`）回扣到基因锚点（`agent_roster.json` 缺失/不可用/无法 join）
 
 处理流程（最小闭环）：
 - 1) 创建 incident 文档（additive-only，记录时间、环境、run_id、headSha、复现命令、最小日志）
@@ -71,5 +114,6 @@ CI 真值口径：
 ## 6) Change Log（追加区）
 
 - 2025-12-31: 创建 Step93 稳定期运行协议（冻结真值口径/变更边界/周检/incident 流程）。
+- 2025-12-31: 追加 Agent-first daily minimum：run_dir 必须落盘 `agent_roster.json`（agent→genome anchors），并新增 startup `system_flatten` 作为稳定窗口的 fail-closed preflight（Quant main commit: `10bdcfb`）。
 
 

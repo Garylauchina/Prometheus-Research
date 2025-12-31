@@ -43,6 +43,12 @@
 - ExchangeAuditor：`NOT_MEASURABLE` 必须打印 WARNING 且 `exit_code=0`；`FAIL` 必须 `exit_code=2`；报告内必须写入 `exit_code` 与拆分后的 `contract_versions`（审计器/证据生产者/协议版本）。
 - **保持英文现状**：代码/注释/日志中的英文口径不做“翻译式重写”，除非为契约一致性所必需。
 
+- **First Flight / Real Flight 入口纪律（truth-first）**：
+  - **First Flight**：从 first_flight 开始的模块测试必须真实对接交易所（OKX demo），并在 run_dir 内落盘交易所真值（至少 `orders_history.jsonl`；若 filled 则 `fills.jsonl`/`bills.jsonl` 必须存在且可 join）。**没有真值落盘 → 一概不采信**。
+  - **Real Flight**：独立的干净运行入口（只做真实运行与落盘，不加载 tools 编排），用于后续稳定期运行。
+  - **停止使用 `run_v11_service.py` 作为 flight 验收入口**：允许保留兼容/历史复跑，但后续验收命令不得依赖它（标记 deprecated，不强删以免断链）。
+  - 验收必须提供：固定 `runs_root` + `run_id` + 复跑命令 + Step88/相关 verifier 的 PASS/FAIL 输出（不可口头描述代替）。
+
 ---
 
 ## 3) 交付物（每次改动至少给出）
