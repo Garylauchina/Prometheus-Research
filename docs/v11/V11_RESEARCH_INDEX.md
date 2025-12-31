@@ -35,6 +35,11 @@
 
 First Flight 核心事实（冻结补充）：
 - 杠杆（leverage）必须做 **truth binding**：Agent 基因存在“杠杆偏好”不等于交易所实际使用了该杠杆；First Flight 阶段必须把 leverage 写入决策输出与交易链入册，并能用交易所真值核验。见：`docs/v11/V11_NOTE_LEVERAGE_PREFERENCE_TRUTH_BINDING_20251231.md`。
+- 执行反馈（fill_ratio）进入 **M（friction feedback）**：v0 窗口固定为上一 tick（t-1），无事件/不可测 → mask=0；同时区分 **个体** 与 **群体** 两条通道，并提供两条正交基因权重用于单项消融（只开 self / 只开 group / 都开 / 都关）。来源：
+  - baseline：`docs/v11/V11_BASELINE_CHANGELOG_20251226.md`
+  - E/I/M/C 口径与封存 C 意图默认不入决策：`docs/v11/V11_STEP47_GENE_FEATURE_LEDGER_SSOT_20251230.md`
+  - 交易员错误篓子与 Agent-facing 投影（fill_ratio + 权重基因）：`docs/v11/V11_STEP96_EXCHANGE_ERROR_BASKET_20251231.md`
+  - 执行质量（fill_ratio 属于 Step95 的可审计标量）：`docs/v11/V11_STEP95_EXECUTION_QUALITY_AND_SLIPPAGE_EVIDENCE_20251231.md`
 
 快速定位（按主题）：
 - **证据链 / 审计链**：Step27–46、Step85–89

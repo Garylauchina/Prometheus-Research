@@ -73,6 +73,17 @@ V11 将 execution_world 统一为：**意图产生（core）与真实执行/入�
   - mask 纪律（hard）：当 `MF_stats/comfort` 不可测时必须 `mask=0 + reason_code`；DecisionEngine 必须尊重 mask（mask=0 维度不参与）。
   - hard boundary：**禁止**在 DecisionEngine 内引入 `comfort`/`MF_stats` 的阈值执法（不得替代 ProbeGating/证据链硬门）。
 
+- **M 维度新增：执行反馈（fill_ratio），用于演化/观测（不执法）**
+  - 定位：fill_ratio 反映执行世界与生态围栏强弱（成交/部分成交/未成交），是强环境反馈信号；但它不等价于原因分解，原因必须进入 Step96（错误篓子）。
+  - 口径（v0，冻结）：窗口硬编码为上一 tick（t-1），无事件/不可测 → `mask=0`（不得伪造为 0）。
+  - 两条通道（signal，非基因）：
+    - `self_fill_ratio_prev_tick`：该 Agent 上一 tick 的 `fill_ratio ∈ [0,1]`
+    - `group_fill_ratio_prev_tick`：群体上一 tick 的聚合成功率，口径冻结为 **均值**：`mean(self_fill_ratio_prev_tick over population)`
+  - 两个正交基因权重（终身不变；Uniform 初始化；繁殖时小扰动）：
+    - `self_fill_feedback_weight ∈ [0,1]`
+    - `group_fill_feedback_weight ∈ [0,1]`
+  - 消融（可解释）：只开 self / 只开 group / 都开 / 都关（其余控制变量一致）。
+
 - **最小“历史投影”特征（避免维度爆炸）**
   - 允许 derived-only 的最小投影指标：
     - `capital_health_ratio = equity / bootstrap_equity`
@@ -91,6 +102,7 @@ V11 将 execution_world 统一为：**意图产生（core）与真实执行/入�
     - `C_prev_intent_entropy`（衡量一致性/分裂度；用于观察“同步性”收敛）
   - tick=1 规则（hard）：无 \(t-1\) 记录时，C 必须为 `unknown/null + reason_code="no_prev_tick"`（不得伪造为 0）；当且仅当上一 tick 的统计真实为 0 时，才允许写入数值 0。
   - 实验协议（验证“规则是否成立”，而非引入隐性基因）：做 `C_off vs C_on` 消融，保持 seed/初始化分布/mutation_rate/truth_profile/市场输入一致，对比可复现的可观测差异（生存率、intent_entropy 曲线、群体耦合度等）。
+  - 稳定窗口建议（冻结）：C 作为“群体意图”可保留用于观测/消融，但默认不进入核心决策输入（避免主观引导从众）；如启用必须有明确实验记录与对照组。
 
 ### 2.6 E 维度（市场输入）口径变化：CCXT-OHLC → OKX native probes + provenance
 

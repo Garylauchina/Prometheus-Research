@@ -13,6 +13,7 @@
 - **A. Terminal outcome**：filled / partial / cancelled / rejected / live（P2 终态）
 - **B. Reasonability**：未成交/拒单原因（本地 gate / 交易所返回）
 - **C. Partial fills**：多笔成交/部分成交的 join 与闭包
+- **C.1 Fill ratio**：\(fill\_ratio \in [0, 1]\)（请求数量 vs 成交数量的可审计标量）
 - **D. Slippage**：成交均价 vs 参考价（ref price）口径冻结
 - **E. Orderbook thickness risk**：下单前订单簿快照用于解释滑点/无法成交
 - **F. Latency**：submit→ack→first_fill→terminal 的延迟证据
@@ -30,6 +31,10 @@
 - **Honest verdict**：不可测必须 NOT_MEASURABLE，并给出 reason_codes；不得靠推理宣称 PASS。
 - **Additive-only**：只增文件/字段/verifier；不改旧证据语义。
 - **Join keys first**：所有质量指标必须能按 `run_id` + `client_order_id/clOrdId` + `ordId` join（hash 只能辅助）。
+
+补充（fill_ratio 的解释纪律，冻结）：
+- `fill_ratio` 是一个强信号（可能反映市场流动性/撮合限制/网络与时效/风控与限速等），可作为“环境混乱/黑天鹅 proxy”进入观测与决策。
+- 但 `fill_ratio` **不等价于原因**：原因仍必须在 Step96（错误篓子）中以可审计方式记录；Step95 只负责把该标量与真值证据绑定。
 
 ---
 
@@ -84,6 +89,16 @@ ref price / orderbook snapshot 的采样点必须声明：
 证据引用：
 - `execution_quality_summary.json` 内必须包含对上述 artifacts 的 evidence_refs（可解引用）。
 
+`execution_quality_summary.json` 最小建议字段（additive-only，v0）：
+- `per_order`：[{...}]
+  - `client_order_id`（clOrdId）
+  - `ordId`（可为 null）
+  - `requested_sz`（来自 order_attempts）
+  - `filled_sz`（来自 fills 汇总；不可测则为 null）
+  - `fill_ratio`（0..1 或 null；定义：clamp(filled_sz/requested_sz)）
+  - `terminal_state`（来自 orders_history 或等价终态）
+  - `not_measurable_reason_codes`（若 fill_ratio/slippage/latency 不可测）
+
 ---
 
 ## 5) Scenario Matrix（development helper; truth-first acceptance, additive-only note）
@@ -118,6 +133,12 @@ ref price / orderbook snapshot 的采样点必须声明：
 - rejected/未成交必须能定位到 reason：
   - exchange_rejected：必须有 s_code/s_msg/http_status（来自 api_calls snapshot 或 orders_history state）
   - local_rejected：必须有明确 local reason_code，并不得标记为 exchange_rejected
+
+### 6.2.2 Fill ratio checks（冻结）
+- 若某笔订单存在可测的 `requested_sz` 且能从 fills 真值汇总得到 `filled_sz`：
+  - 必须能计算 `fill_ratio`（0..1），并落盘到 `execution_quality_summary.json`
+- 若 fills 真值缺失或 paging 不闭合：
+  - `fill_ratio` 必须为 null，并给出 reason_codes（建议：`missing_fills` / `paging_incomplete`）
 
 ### 6.2.1 Exchange auto-split fill/bill coverage (must)（冻结）
 
