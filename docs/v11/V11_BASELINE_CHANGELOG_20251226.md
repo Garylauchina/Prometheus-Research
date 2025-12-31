@@ -284,6 +284,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 89：真实运行验收（Mac preflight → VPS container）：≥10 ticks，≥1 订单 P2 终态可证；Step88 verifier 与 auditor 结论一致；证据包（FILELIST/SHA256SUMS/evidence_ref_index/research_bundle）完整，fail-closed（规格见：`docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_MAC_PREFLIGHT_VPS_CONTAINER_20251230.md`）。
   - Step 89（Quant 前置修复记录）：修复 non-stub 模式下 `run_v11_service.py` 未注入 `freeze_manager` 导致的 fail-closed（code commit：88a1be07c1b16a8af1f794eaedd97c7cd2653232；commit msg：`v11: Fix freeze_manager injection in run_v11_service for non-stub mode`）。
   - Step 89（Quant 运行记录锚点修复 + GHCR 镜像）：为 Phase B 容器运行补齐 `image_digest` 与 `runs_root` 的可审计锚点（code commit：1f3e0a71031a6eba9215f9f15e17493a5363e336；image digest：`sha256:42d8fc4cdd85736410d824d0ca8e80450db4baceb2a1e4d3e88cfb47a6757a38`）。注：若镜像未包含 Step88 Commit E（P2 fallback），verifier 可在 VPS host 使用 commit E 的工具版本（read-only）完成验收。
+  - Step 91：交易链证据扩展（intent→gate→api_call→exchange_truth→reconcile_summary），新增 Step91 SSOT：`docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`（additive-only，强调 join keys 与 fail-closed verifier）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
