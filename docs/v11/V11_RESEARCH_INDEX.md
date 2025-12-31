@@ -345,6 +345,12 @@
 
 - Step 91 (SSOT): `docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`
 
+---
+
+### Metabolism ↔ TradeChain Alignment (Step 92)
+
+- Step 92 (SSOT): `docs/v11/V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_20251231.md`
+
 ## Notes / Concepts
 
 - CI Truth Rule (V11): Treat **only the latest successful workflow run on `main` HEAD** as the current truth. Do **NOT** infer system status from historical red runs or reruns on old SHAs (rerun does not include later fixes). For verification, always re-run on latest `main` (new commit / workflow dispatch).
