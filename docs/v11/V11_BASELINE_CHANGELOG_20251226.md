@@ -287,6 +287,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 91：交易链证据扩展（intent→gate→api_call→exchange_truth→reconcile_summary），新增 Step91 SSOT：`docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`（additive-only，强调 join keys 与 fail-closed verifier）。
   - Step 92：Metabolism ↔ TradeChain 对齐（仅通过 Step91 的 `reconciliation_summary.json` 增加 `metabolism_alignment` 引用字段，不修改 Step72/73 合同），新增 Step92 SSOT：`docs/v11/V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_20251231.md`。
   - Step 91/92（Quant 落地）：trade chain evidence + metabolism alignment gates 已合入 Quant main（code commit：`9e4294c04751817de5737bf1d4ae1050f7a728da`；CI truth run：`https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20614483995` = success）。
+  - Step 93：稳定期运行协议（1–2 个月）：冻结 CI 真值口径、变更边界、周检与 incident 流程，SSOT：`docs/v11/V11_STEP93_STABILITY_WINDOW_PROTOCOL_20251231.md`。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 

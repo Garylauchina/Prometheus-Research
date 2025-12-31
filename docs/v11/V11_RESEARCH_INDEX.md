@@ -353,6 +353,12 @@
 - Step 92 (SSOT): `docs/v11/V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_20251231.md`
 - Step 92 (Quant record): `V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251231.md`（repo: `https://github.com/Garylauchina/Prometheus-Quant.git`；code commit: `9e4294c04751817de5737bf1d4ae1050f7a728da`；CI truth: `https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20614483995` = success）
 
+---
+
+### Stability Window Protocol (Step 93)
+
+- Step 93 (SSOT): `docs/v11/V11_STEP93_STABILITY_WINDOW_PROTOCOL_20251231.md`
+
 ## Notes / Concepts
 
 - CI Truth Rule (V11): Treat **only the latest successful workflow run on `main` HEAD** as the current truth. Do **NOT** infer system status from historical red runs or reruns on old SHAs (rerun does not include later fixes). For verification, always re-run on latest `main` (new commit / workflow dispatch).
