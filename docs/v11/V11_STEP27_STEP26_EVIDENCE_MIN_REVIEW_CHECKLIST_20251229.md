@@ -66,6 +66,21 @@
 边界声明（观测不执法）：
 - 文档审计中不得出现 “comfort 阈值触发强制 HOLD/STOP” 的决策口径；硬门只来自 ProbeGating/证据链失败。
 
+### 3.1 写路径参数对齐（Decision 输出契约，First Flight 起冻结）
+
+当 `decision_trace.jsonl` 中出现 agent-level 的“写路径 intent”（例如 intent_action 为 open/close，或显式标记 will_trade=true），必须能从同一条 agent_detail（或可 join 的同 tick 记录）中读到“交易员可执行”的最小订单参数集合（字段名允许实现差异，但语义必须等价）：
+- `inst_id`
+- `td_mode`（cross/isolated）
+- `pos_side`（long/short/net）
+- `order_type`（market/limit）
+- `requested_sz`（合约张数）
+- `limit_px`（仅当 order_type=limit 时必填；market 时必须为 null）
+- `leverage_target`（必填；不得沉默）
+
+硬规则：
+- 缺任一必填字段 → 该 tick 的写路径 intent 证据应判为 NOT_MEASURABLE（或 FAIL，取决于 gate 级别），并给出 `reason_code`；不得用默认值伪造（例如 leverage 缺失导致交易所用默认杠杆）。
+- 若该 tick 无写路径 intent（hold），允许上述字段为 null/unknown，但不得伪造为 0。
+
 ---
 
 ## 4) evidence_refs 行号可回查（闭合性）

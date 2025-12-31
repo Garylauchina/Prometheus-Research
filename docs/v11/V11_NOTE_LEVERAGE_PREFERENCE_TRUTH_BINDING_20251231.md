@@ -32,6 +32,21 @@ First Flight 阶段必须把“杠杆”变成 **可机核验的执行链证据*
 
 最低要求：即使当前实现暂时不支持 set-leverage，也必须把 `leverage_target` 写出来（否则无法审计“杠杆偏好是否被使用/被忽略”）。
 
+### 2.1.1 Decision 输出的“订单参数对齐”最小集合（冻结）
+
+我们不要求 Decision 直接产出 OKX 原始 payload，但要求 Decision 输出必须**可映射**为交易所可接受的下单参数集合（否则会出现“缺字段→交易所默认值→不可审计”的问题）。
+
+当 intent 会触达写路径（open/close/modify）时，决策证据（`decision_trace.jsonl` 的 agent_detail 或等价可 join 记录）必须包含至少：
+- `inst_id`（例如 `BTC-USDT-SWAP`）
+- `td_mode`（cross/isolated；与账户模式一致）
+- `pos_side`（long/short/net；与持仓模式一致）
+- `order_type`（market/limit）
+- `requested_sz`（合约张数；非 BTC 数量）
+- `limit_px`（仅当 order_type=limit 时必填；market 时必须为 null）
+- `leverage_target` + `leverage_source` + `leverage_reason_code`
+
+若某字段在该 intent 下不适用（例如 market 无 px）：必须写 null；不得伪造为 0。
+
 ### 2.2 Trader 输入必须包含 leverage（必做）
 
 当 BrokerTrader 生成任何写请求（place/cancel/replace/flatten）时，必须在交易链入册中写入：

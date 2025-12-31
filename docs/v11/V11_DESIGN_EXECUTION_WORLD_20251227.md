@@ -62,6 +62,18 @@ V11 明确区分两种世界：
 - `intent_desired_state ∈ {IN_MARKET, OUT_MARKET}`（语义上是“想要的状态”，不是成交）
 - `decision_trace.jsonl`（append-only：tick_summary + agent_detail +（可选）order_execution记录）
 
+补充（First Flight 起冻结）：当 intent 会触达写路径时，Decision 输出必须是“交易员可执行”的参数集合（仍然是 intent，不是真值）：
+- 目的：确保神经网络输出 **可对齐** 到交易员/交易所可接受的订单参数，避免缺字段导致交易所使用默认值（例如杠杆）。
+- 最小字段集合（建议写入 `decision_trace.jsonl` 的 agent_detail 记录；字段名允许实现差异，但语义必须等价）：
+  - `inst_id`（例如 `BTC-USDT-SWAP`）
+  - `td_mode`（`cross` / `isolated`）
+  - `pos_side`（`long` / `short` / `net`；必须与账户持仓模式一致）
+  - `order_type`（`market` / `limit`；或等价枚举）
+  - `requested_sz`（合约张数；与 ctVal 换算关系必须可追溯）
+  - `limit_px`（仅当 order_type=limit 时必填；否则应为 null）
+  - `leverage_target`（必填；以及 source/reason_code，见 leverage SSOT）
+- 无交易/hold 时：上述字段可为 null，但必须保持可审计（例如 mask=0 或 reason_code），不得伪造为 0。
+
 ### 3.2 World 层（IO + 真值 + 入册）
 
 包含：
