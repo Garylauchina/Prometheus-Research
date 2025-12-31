@@ -329,7 +329,7 @@
 - Step 89 (SSOT): `docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_MAC_PREFLIGHT_VPS_CONTAINER_20251230.md`
 - Step 89 (Quant prereq fix): 修复 non-stub 模式下 runner 未注入 `freeze_manager` 导致的 fail-closed（code commit: `88a1be07c1b16a8af1f794eaedd97c7cd2653232`；repo: `https://github.com/Garylauchina/Prometheus-Quant.git`）
 - Step 89 (SSOT addendum): 追加“运行记录锚点”要求（runs_root/run_id + build_git_sha + image_digest + 可复跑命令），防止“跑过但找不到证据/无法对齐镜像”
-- Step 89 (Quant acceptance record): `V11_STEP89_REAL_RUN_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（repo: `https://github.com/Garylauchina/Prometheus-Quant.git`；doc commit: `2a8e25f39876940b99205e1781ce1da1ca4df167`；Errata commit: `4797952cd14db6e58860b71ef5a47bbe44f1cb00`；anchors: run_id=`run_step89_phase_b_20251230T210849Z`, image_digest=`sha256:42d8fc4c...`, build_git_sha=`1f3e0a7...`）
+- Step 89 (Quant acceptance record): `docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（Quant: [doc commit](https://github.com/Garylauchina/Prometheus-Quant/commit/2a8e25f39876940b99205e1781ce1da1ca4df167) / [view file @ doc commit](https://github.com/Garylauchina/Prometheus-Quant/blob/2a8e25f39876940b99205e1781ce1da1ca4df167/docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md)；[Errata commit](https://github.com/Garylauchina/Prometheus-Quant/commit/4797952cd14db6e58860b71ef5a47bbe44f1cb00)；anchors: run_id=`run_step89_phase_b_20251230T210849Z`, image_digest=`sha256:42d8fc4c...`, build_git_sha=`1f3e0a7...`）
 
 ---
 
