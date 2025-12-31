@@ -344,12 +344,14 @@
 ### Trade Chain Evidence Extension (Step 91)
 
 - Step 91 (SSOT): `docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`
+- Step 91 (Quant record): `V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_IMPLEMENTED_IN_QUANT_20251231.md`（repo: `https://github.com/Garylauchina/Prometheus-Quant.git`；code commit: `9e4294c04751817de5737bf1d4ae1050f7a728da`；CI truth: `https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20614483995` = success）
 
 ---
 
 ### Metabolism ↔ TradeChain Alignment (Step 92)
 
 - Step 92 (SSOT): `docs/v11/V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_20251231.md`
+- Step 92 (Quant record): `V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_IMPLEMENTED_IN_QUANT_20251231.md`（repo: `https://github.com/Garylauchina/Prometheus-Quant.git`；code commit: `9e4294c04751817de5737bf1d4ae1050f7a728da`；CI truth: `https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20614483995` = success）
 
 ## Notes / Concepts
 

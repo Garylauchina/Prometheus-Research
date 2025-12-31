@@ -286,6 +286,7 @@ E 维度在 execution_world 里不仅“数据源”变化，也牵涉到 **哪�
   - Step 89（Quant 运行记录锚点修复 + GHCR 镜像）：为 Phase B 容器运行补齐 `image_digest` 与 `runs_root` 的可审计锚点（code commit：1f3e0a71031a6eba9215f9f15e17493a5363e336；image digest：`sha256:42d8fc4cdd85736410d824d0ca8e80450db4baceb2a1e4d3e88cfb47a6757a38`）。注：若镜像未包含 Step88 Commit E（P2 fallback），verifier 可在 VPS host 使用 commit E 的工具版本（read-only）完成验收。
   - Step 91：交易链证据扩展（intent→gate→api_call→exchange_truth→reconcile_summary），新增 Step91 SSOT：`docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`（additive-only，强调 join keys 与 fail-closed verifier）。
   - Step 92：Metabolism ↔ TradeChain 对齐（仅通过 Step91 的 `reconciliation_summary.json` 增加 `metabolism_alignment` 引用字段，不修改 Step72/73 合同），新增 Step92 SSOT：`docs/v11/V11_STEP92_METABOLISM_TRADECHAIN_ALIGNMENT_20251231.md`。
+  - Step 91/92（Quant 落地）：trade chain evidence + metabolism alignment gates 已合入 Quant main（code commit：`9e4294c04751817de5737bf1d4ae1050f7a728da`；CI truth run：`https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20614483995` = success）。
 
 参考：`docs/v10/V10_ACCEPTANCE_CRITERIA.md`
 
