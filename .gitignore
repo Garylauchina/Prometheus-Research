@@ -153,6 +153,7 @@ logs/
 tmp/
 temp/
 *.tmp
+.tmp_quant_ro/
 
 # Backups
 backup/
