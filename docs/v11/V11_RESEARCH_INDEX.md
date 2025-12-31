@@ -331,6 +331,7 @@
 - Step 89 (SSOT addendum): 追加“运行记录锚点”要求（runs_root/run_id + build_git_sha + image_digest + 可复跑命令），防止“跑过但找不到证据/无法对齐镜像”
 - Step 89 (Quant acceptance record): `docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md`（Quant: [doc commit](https://github.com/Garylauchina/Prometheus-Quant/commit/2a8e25f39876940b99205e1781ce1da1ca4df167) / [view file @ doc commit](https://github.com/Garylauchina/Prometheus-Quant/blob/2a8e25f39876940b99205e1781ce1da1ca4df167/docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_IMPLEMENTED_IN_QUANT_20251230.md)；[Errata commit](https://github.com/Garylauchina/Prometheus-Quant/commit/4797952cd14db6e58860b71ef5a47bbe44f1cb00)；anchors: run_id=`run_step89_phase_b_20251230T210849Z`, image_digest=`sha256:42d8fc4c...`, build_git_sha=`1f3e0a7...`）
 - Step 89 (Quant CI truth anchor): main HEAD=`34124298055225b150f4944016070cafc995f999`（[V11 Evidence Gate run 20613243466](https://github.com/Garylauchina/Prometheus-Quant/actions/runs/20613243466) = success）
+- Step 89 (Research closure): `docs/v11/V11_STEP89_REAL_RUN_ACCEPTANCE_CLOSURE_20251231.md` (PASS)
 
 ---
 
