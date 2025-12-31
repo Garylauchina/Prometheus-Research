@@ -52,6 +52,12 @@
 - **Truth-first**：从 first_flight 起所有测试必须对接交易所 demo 并落盘真值；fixtures 只能作为补充（不得作为采信依据）。
 - **入口拆分**：first_flight 使用专门 run 入口；real_flight 使用另一个干净入口；停止使用 `run_v11_service.py` 作为 flight 入口（标记 deprecated，不作为验收命令）。
 
+四阶段推进顺序（frozen，避免节奏分散）：
+- **Stage 1 — Mac First Flight**：在 Mac 本地先把 First Flight 的各模块 truth-backed 测试跑通（每个 case 都必须有交易所真值落盘）。
+- **Stage 2 — VPS First Flight**：在 VPS 复现同一套 First Flight（同一 Quant main HEAD，anchors 对齐），确认容器/权限/时钟/限流等真实环境仍可闭环。
+- **Stage 3 — Mac Real Flight**：回到 Mac 实现/验证 `real_flight` 干净入口（不编排 tools，只负责真实运行与落盘）。
+- **Stage 4 — VPS Real Flight**：部署 `real_flight` 到 VPS 作为正式运行入口，并纳入 Step93 稳定窗口周检/日检纪律。
+
 里程碑（按顺序；任一未完成则不进入下一步）：
 - **M0 — Decision Sanity Gate (Quant + evidence-level)**：先证明“决策链本身可信”，否则 First/Real Flight 没意义。
   - 触及链路：**输入合同（feature/probe）→ Ledger/I 真值 → DecisionEngine → decision_trace → intent 统计**

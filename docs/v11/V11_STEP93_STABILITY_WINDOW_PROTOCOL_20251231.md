@@ -45,6 +45,19 @@ CI 真值口径：
 
 ---
 
+## 3.2) Rollout Cadence (First Flight → Real Flight, frozen)
+
+为避免“入口混用/环境差异导致的反复排查”，稳定窗口内新增冻结的四阶段推进顺序（truth-first）：
+
+- Stage 1 — **Mac First Flight**：在 Mac 本地把 First Flight 的各模块 truth-backed 测试跑通（每个 case 必须有交易所真值落盘）。
+- Stage 2 — **VPS First Flight**：在 VPS 复现同一套 First Flight（同一 Quant main HEAD + anchors 对齐），确认真实环境仍可闭环。
+- Stage 3 — **Mac Real Flight**：回到 Mac 实现/验证 `real_flight` 干净入口（不编排 tools；只做真实运行与落盘）。
+- Stage 4 — **VPS Real Flight**：部署 `real_flight` 到 VPS 作为正式运行入口，并纳入本文件的周检/日检。
+
+硬规则：
+- 任一 Stage 的验收 run 必须具备运行记录锚点（`run_id/runs_root/build_git_sha/image_digest`），且能复跑定位。
+- First Flight 阶段对“无交易所真值落盘”的 run 一概不采信（至少 `orders_history.jsonl`；filled 则 `fills/bills` 必须可 join）。
+
 ## 3.1) Daily Observability Minimum (Agent-first, stability window)（冻结）
 
 稳定窗口的核心观测对象是 **Agent**。因此每日 run（尤其是 VPS demo 96 ticks）必须能在证据层回答：

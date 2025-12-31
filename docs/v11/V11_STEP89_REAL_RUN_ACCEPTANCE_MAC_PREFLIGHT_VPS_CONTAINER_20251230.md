@@ -21,6 +21,10 @@
   - runner preflight gates 全部通过
   - Step88 verifier 能在本地产物上运行并给出可解释结论（PASS 或 NOT_MEASURABLE）
 
+补充说明（additive-only，避免与 First Flight 口径冲突）：
+- Step89 的 Phase A 允许“不真实下单”是为了排除低级问题；但在后续新增的 **First Flight（truth-first）** 口径下，模块测试从第一天开始就要求交易所真值落盘（不采信 fixtures）。
+- 因此：当团队进入 first_flight 体系后，Phase A 可视为“历史 preflight 路径”，不再作为 First Flight 的采信依据。
+
 产物：
 - 本地 run_dir（可不上传），但必须保存日志片段作为 Step89 记录材料。
 
