@@ -68,6 +68,13 @@ Step91 扩展覆盖：
 说明：
 - 交易员（BrokerTrader）职责是“如实记录 + 可审计可回溯”，不要求成功成交；但写路径参数缺失会直接导致交易所使用默认值（不可审计），因此必须冻结为必含字段。
 
+补充：写路径“正确性”判断（资金/保证金/限制）由 gate 负责（冻结）
+- DecisionEngine/神经网络不负责判断订单是否“可执行”（例如是否超出可用资金/保证金）；它只负责输出可执行参数集合。
+- BrokerTrader 必须在写请求前执行 `risk_limits`（或等价）gate：
+  - 允许（allow）：才允许写 connector_call，并向交易所发请求
+  - 拒绝（reject）：不得发请求；必须落盘 attempt（status=rejected）并给出 `gate_reason_code`（例如 `insufficient_equity`/`margin_insufficient`/`risk_cap_exceeded` 等 vocabulary）
+- 若 Ledger/equity/positions 真值缺失导致无法判断：必须按 truth_profile 进入 NOT_MEASURABLE 或拒绝，并写 Step96（classification=LOCAL_GATE_REJECTED 或 TRUTH_*，按实际原因）
+
 新增字段（Step91）：
 - `gate`：
   - `gate_name`（e.g. `execution_freeze`, `risk_limits`, `connector_write`）

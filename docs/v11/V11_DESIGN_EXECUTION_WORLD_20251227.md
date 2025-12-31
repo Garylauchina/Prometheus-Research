@@ -89,6 +89,12 @@ V11 明确区分两种世界：
 - Ledger/ProbeGating → Core（只提供探针向量与质量，不提供“伪真值”）  
 - ExchangeAuditor 只读，不得干预执行
 
+补充（写路径正确性：由 Trader gate 保证，冻结）：
+- DecisionEngine/神经网络不负责证明“订单一定正确”（例如是否超出可用资金/保证金/风控约束）；它只输出可执行参数集合（intent 级）。
+- **正确性必须由 BrokerTrader 的 gate（例如 risk_limits / execution_freeze）fail-closed 保证**：
+  - 若超出资金/保证金或违反限制：必须 `gate_decision=reject`，并把 `gate_reason_code` 落盘（见 Step91）。
+  - 若 truth 不可得导致无法判断：必须 NOT_MEASURABLE 或拒绝（取决于 truth_profile），且写入 Step96（错误篓子），不得“默认放行”。
+
 参考：
 - `docs/v10/V10_BROKER_TRADER_MODULE_CONTRACT_20251226.md`
 - `docs/v10/V10_TRUTH_PROFILE_AND_PROBE_GATING_CONTRACT_20251226.md`
