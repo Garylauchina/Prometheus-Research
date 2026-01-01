@@ -82,6 +82,15 @@ V12 的定位：
 - **聚类（clustering）**：不同 run/不同窗口下，Agent 行为/状态能形成稳定可复现的簇（不是一次性画图）。
 - **维度坍缩（dimension collapse）**：有效自由度随时间缩小（例如 effective rank / PCA 方差集中），并且有明确对照以排除“因为缺测(mask=0)/门槛/默认值导致的假坍缩”。
 
+方法论说明（英文原句 + 中文释义）：
+
+In a high-dimensional genotype space, even millions of agents over millions of generations cover only a negligible fragment of the evolutionary landscape.
+Prometheus does not aim to exhaust this space, but to detect whether selection introduces statistically detectable bias in observed evolutionary trajectories.
+
+中文释义：
+在高维基因型空间里，即使让数百万 Agent 演化数百万代，覆盖的也只是演化景观中极小的一块碎片。
+Prometheus 不追求穷举整个空间，而是希望在可观测的演化轨迹里检测到：自然选择是否引入了统计上可检出的偏置。
+
 ---
 
 ## Start here（从这里开始）

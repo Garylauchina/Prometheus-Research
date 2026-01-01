@@ -87,6 +87,11 @@ We aim to observe **repeatable structure** under an auditable world contract:
 - **Clustering**: agents/behaviors form stable clusters across runs/windows (not one-off plots).
 - **Dimension collapse**: effective degrees of freedom shrink over time (e.g., effective rank / PCA variance concentration), with clear controls to rule out “collapse by missing data / gates / defaults”.
 
+Methodology note:
+
+In a high-dimensional genotype space, even millions of agents over millions of generations cover only a negligible fragment of the evolutionary landscape.
+Prometheus does not aim to exhaust this space, but to detect whether selection introduces statistically detectable bias in observed evolutionary trajectories.
+
 ---
 
 ## Start here
