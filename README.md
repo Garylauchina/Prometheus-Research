@@ -76,6 +76,7 @@ V12’s positioning is:
 
 - **WS evidence discipline**: if market data becomes WebSocket-driven, we must persist subscription + message streams as evidence (otherwise decisions cannot be replayed/audited).
 - **Dual resource gates in Proxy Trader**: enforce both (a) per-agent resource limits and (b) system trading resources (exchange rate limits / endpoint availability / degraded modes) fail-closed, with reason codes.
+- **Modeling acceptance**: the scanner must output a machine-readable “genome alignment table” (field→dimension mapping + mask/NOT_MEASURABLE rules), otherwise genome refactors will drift into subjective design.
 
 ---
 
