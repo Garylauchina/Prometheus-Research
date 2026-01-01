@@ -44,6 +44,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 - **SSOT**:
   - Scanner v0/v0.5 schema: `docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md`
   - Downlink subscription manager (DSM): `docs/v12/V12_SSOT_DOWNLINK_SUBSCRIPTION_MANAGER_20260101.md`
+  - Uplink/Downlink pipes + evidence + join keys: `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`
 - **Acceptance**:
   - WS sessions/requests/messages evidence exists (append-only)
   - `market_snapshot.jsonl` can be produced from WS without breaking schema_verification rules
