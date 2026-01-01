@@ -11,6 +11,7 @@ If you are here to **audit V10** or **reproduce conclusions**, start with the V1
 
 ## Quick Start / 快速入口
 
+- **Foundation / 方法论基石（SSOT）**: `docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
 - **V10 Evidence Chain / V10证据链**: `docs/v10/V10_RESEARCH_INDEX.md`
 - **V10 Folder README / v10目录页**: `docs/v10/README.md`
 - **Acceptance Criteria / 验收标准**: `docs/v10/V10_ACCEPTANCE_CRITERIA.md`
