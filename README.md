@@ -30,6 +30,7 @@ where every conclusion must point back to evidence.
 This repository is built on a single, shared measurement method:
 
 - **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**: `docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
+- **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**: [`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`](docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md)
 
 This document defines **how we measure** (measurability gate, NOT_MEASURABLE discipline, measurement-bias dimensions),
 and is treated as a foundational reference for V11/V12 research contracts.
@@ -107,12 +108,12 @@ Prometheus does not aim to exhaust this space, but to detect whether selection i
 
 ## Start here
 
-- **V11 entry (recommended)**: `docs/v11/V11_RESEARCH_INDEX.md`
-- **V10 entry (legacy mainline)**: `docs/v10/V10_RESEARCH_INDEX.md`
-- **Docs index**: `docs/README.md`
+- **V11 entry (recommended)**: [`docs/v11/V11_RESEARCH_INDEX.md`](docs/v11/V11_RESEARCH_INDEX.md)
+- **V10 entry (legacy mainline)**: [`docs/v10/V10_RESEARCH_INDEX.md`](docs/v10/V10_RESEARCH_INDEX.md)
+- **Docs index**: [`docs/README.md`](docs/README.md)
 
-> Note: V11 documents have been physically separated into `docs/v11/`.
-> Any V11 files under `docs/v10/` are kept as stub pointers to avoid breaking historical links.
+> Note: V11 documents have been physically separated into [`docs/v11/`](docs/v11/).
+> Any V11 files under [`docs/v10/`](docs/v10/) are kept as stub pointers to avoid breaking historical links.
 
 ---
 

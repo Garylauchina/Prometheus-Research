@@ -25,7 +25,7 @@ V11 的核心定位是：在 **execution_world（交易所真值链）** 中，�
 
 本仓库建立在一份统一的“复杂系统测量方法论”之上：
 
-- **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**：`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
+- **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**：[`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`](docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md)
 
 该文档定义的是**我们如何测量**（可测性 Gate、NOT_MEASURABLE 纪律、measurement-bias 维度等），
 并被视为 V11/V12 各类研究合同的上位基石引用。
@@ -106,9 +106,9 @@ Prometheus 不追求穷举整个空间，而是希望在可观测的演化轨迹
 
 ## Start here（从这里开始）
 
-- **V11 入口（推荐）**：`docs/v11/V11_RESEARCH_INDEX.md`
-- **V10 入口（legacy mainline）**：`docs/v10/V10_RESEARCH_INDEX.md`
-- **Docs index**：`docs/README.md`
+- **V11 入口（推荐）**：[`docs/v11/V11_RESEARCH_INDEX.md`](docs/v11/V11_RESEARCH_INDEX.md)
+- **V10 入口（legacy mainline）**：[`docs/v10/V10_RESEARCH_INDEX.md`](docs/v10/V10_RESEARCH_INDEX.md)
+- **Docs index**：[`docs/README.md`](docs/README.md)
 
 > 注：V11 文档已物理隔离到 `docs/v11/`。  
 > 任何位于 `docs/v10/` 下的 V11 文件仅作为 stub 指针，以避免历史链接断裂。
