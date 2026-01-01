@@ -55,8 +55,8 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 验收：建模文档（E dims contract + API parameter spaces）通过验收；`genome_alignment_table.json` 可从证据推导且自洽
   - 硬门槛：基因维度设计/重构仍后置（见 Start Here 的硬 gate）
 
-- **V12.4.1 — Candidate dim experiment v0 (“Cloud intensity”, ablation-first, auditable)**
-  - 对应：M1→M2 之间的“演化观测实验层”（不改 genome schema）
+- **V12.1.1 — Candidate dim experiment v0 (“Cloud intensity”, ablation-first, auditable)**
+  - 对应：M0→M1 之间的“演化观测实验层”（不改 genome schema）
   - 目标：以 E 维度为基础输入，引入一个“语义未知但强度可测”的候选维度 `cloud_intensity`，先跑可消融的演化/观测实验，验证是否出现可复现的聚类/维度坍缩信号
   - 验收（fail-closed）：
     - `decision_trace.jsonl` 必须落盘：`cloud_intensity`（有界）、`cloud_mask`、`cloud_reason_codes`
