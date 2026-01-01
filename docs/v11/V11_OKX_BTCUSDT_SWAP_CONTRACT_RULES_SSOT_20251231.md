@@ -419,9 +419,58 @@ instFamily 和 uly 参数说明（以 BTC 合约为例）：
   - 若已有 PnL 计算：定位对应模块（通常在 ledger/metabolism/report）
   - 若暂未实现：至少在 SSOT 层冻结“PnL 不得来自内部模拟”的纪律（与 V11 baseline 一致）
 
+---
+
+## 12) REST Private — POST /api/v5/trade/order（下单接口参数全集，SSOT 对齐参照）
+
+目的：把 OKX “下单接口参数空间”完整保存为 SSOT，作为：
+- Agent 基因维度/决策输出的 **对齐参照**（能表达的维度必须能映射到该接口参数）
+- Proxy Trader 的 gate/默认值边界（哪些字段由 Agent 决定，哪些由系统决定/门禁决定）
+
+接口：
+- Method: `POST`
+- Path: `/api/v5/trade/order`
+- Demo 头（硬要求）：`x-simulated-trading: 1`（见 §9.2）
+
+### 12.1 Request JSON fields（字段表）
+
+说明：
+- 下表为“参数表冻结入口”，后续若你继续粘贴 OKX 官方字段说明，我们只做 additive 追加/校正（不删不改历史）。
+- 字段名以 OKX API v5 为准；类型使用 JSON 语义（string/bool/object/array）。
+- “是否 Agent 表达”用于基因/决策对齐：Agent 只负责表达意图；最终是否允许由 gate 决定。
+
+| Field | Type | Required | Typical values / notes | Agent expresses? |
+|---|---:|---:|---|---:|
+| `instId` | string | yes | instrument id，例如 `BTC-USDT-SWAP` | yes |
+| `tdMode` | string | yes | `cross` / `isolated`（合约常用） | yes |
+| `side` | string | yes | `buy` / `sell` | yes |
+| `posSide` | string | conditional | `long` / `short` / `net`（取决于账户持仓模式） | yes |
+| `ordType` | string | yes | `market` / `limit` / `post_only` / `fok` / `ioc` / `optimal_limit_ioc`（以 OKX 文档枚举为准） | yes |
+| `sz` | string | yes | 下单数量（通常为合约张数；需与 ctVal=0.01BTC 换算可追溯） | yes |
+| `px` | string | conditional | limit 单必填；market 单必须为空（或不传） | yes |
+| `clOrdId` | string | no | 客户自定义订单 ID（强烈建议：由系统生成并落盘，作为 join key） | system |
+| `tag` | string | no | 订单标签（用于归因/统计；建议由系统写入 run_id/agent_id_hash 的短标识） | system |
+| `reduceOnly` | bool/string | no | 是否只减仓（衍生品常见） | yes |
+| `tgtCcy` | string | no | 现货市价单计价方式（base/quote）；合约通常不使用 | no |
+| `expTime` | string | no | 请求有效截止时间（Unix ms）；见 §9.2 | system |
+| `attachAlgoOrds` | array | no | 附带 TP/SL 等参数集合（具体结构以 OKX 文档为准） | yes |
+
+### 12.2 Alignment rule（对齐规则，冻结）
+
+- Gene/Decision 输出不得发明交易所不存在的“下单参数”。任何新增维度必须能映射到 §12.1 的字段（或明确归入 gate/系统默认）。
+- Proxy Trader 必须明确并落盘：
+  - **Agent 提案字段**（原样保存）
+  - **系统默认/推导字段**（例如 clOrdId/tag/expTime）
+  - **gate 修改/拒绝原因**（Step91 的 `gate_reason_code`）
+
+### 12.3 Open questions（待你继续粘贴官方表格后冻结）
+
+- OKX `POST /trade/order` 的完整字段枚举（例如更多 ordType、附带止盈止损字段结构等）以你提供的官方粘贴为准；我们在此处做 additive 扩展并补齐“Required/conditional”规则。
+
 ## Change Log（追加区）
 
 - 2025-12-31: 创建文件，用于逐段粘贴 OKX BTC/USDT 永续合约官方规则并对照 Quant 实现。
 - 2025-12-31: 追加用户粘贴段落：合约面值/价格精度/杠杆范围/资金费率结算/PnL 公式，并生成对应代码核对点。
+- 2026-01-01: 追加 OKX `POST /api/v5/trade/order` 下单接口参数全集（作为 Agent 基因/决策输出对齐参照；后续按用户粘贴做 additive 扩展与冻结）。
 
 
