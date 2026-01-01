@@ -18,16 +18,28 @@
 
 ---
 
+## 1.1 Account-local “interaction impedance” (不可共享真值，冻结)
+
+现实约束（冻结）：
+- “交互阻抗/执行摩擦”在很大程度上是 **账号/子账户/连接局部** 的：限速桶、风控级别、历史行为、网络路径、队列位置等都可能导致不同账号观察到不同的拒单/延迟/成交体验。
+- 这些差异并非交易所会对外提供的“全局状态”，因此不能被当作公共世界真值；它只能作为 **account-local truth** 记录与建模。
+
+因此，证据必须显式携带“账号身份锚点”（脱敏可，但必须可 join）：
+- `account_id_hash`（或等价字段：subaccount_id_hash / user_id_hash）
+
+---
+
 ## 2) Evidence files（冻结）
 
 ### 2.1 Downlink (WS) evidence（必须）
 
 - `okx_ws_sessions.jsonl`
   - connect/disconnect/reconnect events, ws_url, mode, conn_id (if available), reason_code
+  - `account_id_hash`（必填，脱敏可）
 - `okx_ws_requests.jsonl`
-  - subscribe/unsubscribe raw JSON (`id/op/args`)
+  - subscribe/unsubscribe raw JSON (`id/op/args`) + `account_id_hash`
 - `okx_ws_messages.jsonl`
-  - every received message (raw JSON) + receive_ts
+  - every received message (raw JSON) + receive_ts + `account_id_hash`
 
 Canonical outputs（必须）：
 - `market_snapshot.jsonl`（canonical schema, mask discipline）
@@ -43,8 +55,10 @@ Internal pub/sub evidence（必须）：
   - 必须能引用下行锚点（见 §3）
 - `order_attempts.jsonl`
   - 每一次写操作 attempt（含 gate allow/reject + reason_code）
+  - 必须包含 `account_id_hash`（或等价字段），否则无法解释“账号局部阻抗”
 - `okx_api_calls.jsonl`（或统一 `exchange_api_calls.jsonl`）
   - 每一次 HTTP request/response（含 http_status、code/msg、sCode/sMsg）
+  - 必须包含 `account_id_hash`（或等价字段）
 
 Exchange truth（First Flight / truth-first 时必须）：
 - `orders_history.jsonl`
