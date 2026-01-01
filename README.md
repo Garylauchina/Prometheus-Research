@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **[Chinese](README_CN.md)** · **[Docs Index](docs/README.md)** · **[V11 Index](docs/v11/V11_RESEARCH_INDEX.md)** · **[V10 Index](docs/v10/V10_RESEARCH_INDEX.md)**
+ · **[V12 Index](docs/v12/V12_RESEARCH_INDEX.md)**
 
 </div>
 
