@@ -33,6 +33,10 @@ V12 的建模链路分三层产物：
 - `scanner_report.json`
 - `errors.jsonl`
 
+前置门槛（冻结）：
+- 只有当 Scanner 在对应 run 中产出 **schema verification passed**（见 `docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md` 的 §6），该 run 的 `market_snapshot.jsonl` 才允许被采信进入建模层（Modeling SSOT）与基因对齐表生成。
+- 若 verification 未通过：必须将该 run 视为 NOT_MEASURABLE（schema_not_verified），不得继续生成“可采信的建模结论”。
+
 ### 2.2 Modeling SSOT outputs (docs)
 
 V12 必须产生至少两类 SSOT 文档（additive-only）：
