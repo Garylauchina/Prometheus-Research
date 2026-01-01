@@ -154,7 +154,83 @@ Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：
 
 ---
 
-## 7) OKX WebSocket public channel (spread trading / business WS) — extracted notes（只读参考，additive-only）
+## 7) OKX WebSocket public data (public WS) — extracted notes（只读参考，additive-only）
+
+来源：用户提供页面 `https://www.okx.com/docs-v5/zh/#public-data-websocket`（OKX docs-v5 zh）。  
+定位：这是 OKX **公共数据 WebSocket**（public WS），用于“普通产品”的公共数据推送/订阅，更符合我们 `BTC-USDT-SWAP` 的 E（外显）市场信息事件驱动路径。
+
+连接地址（文档示例）：
+- 模拟盘：`wss://wspap.okx.com:8443/ws/v5/public`
+-（实盘地址在该文档站点的其它位置通常也会给出；本段只记录我们从页面片段中抽取到的明确字符串）
+
+URL Path（文档原文示例）：
+- `/ws/v5/public`
+
+订阅请求通用结构（文档示例）：
+- `id`：可选，1–32 位字母数字组合（回显用于关联请求）
+- `op`：`subscribe` / `unsubscribe`
+- `args`：数组，每项至少包含：
+  - `channel`
+  - `instId` 或 `instType`（取决于频道）
+
+通用返回结构（从文档示例抽取）：
+- 成功：`event=subscribe`，回显 `arg`，包含 `connId`
+- 失败：`event=error`，包含 `code=60012` 与 `msg=Invalid request...`（示例）
+
+### 7.1 Instruments channel（产品频道）
+
+用途（文档原文）：当有产品状态变化时推送增量数据（不再推送全量）。
+
+订阅示例（文档原文）：
+- `channel`: `instruments`
+- `instType`: `SWAP`（永续合约；我们锁定的产品类型）
+
+### 7.2 Mark price channel（标记价格频道）
+
+订阅示例（文档原文）：
+- `channel`: `mark-price`
+- `instId`: 示例中为 `BTC-USDT`（注意：这不是 `BTC-USDT-SWAP`；具体 instId 取值需以实际验证为准）
+
+推送频率（文档原文）：
+- 标记价格有变化时：每 200ms 推送一次
+- 标记价格没变化时：每 10s 推送一次
+
+### 7.3 Index tickers channel（指数行情频道）
+
+订阅示例（文档原文）：
+- `channel`: `index-tickers`
+- `instId`: `BTC-USDT`（文档解释：指数，以 USD/USDT/BTC/USDC 为计价货币的指数；与 `uly` 含义相同）
+
+推送频率（文档原文）：
+- 每 100ms 有变化就推送一次
+- 否则一分钟推一次
+
+### 7.4 Funding rate channel（资金费率频道）
+
+订阅示例（文档原文）：
+- `channel`: `funding-rate`
+- `instId`: 示例为 `BTC-USD-SWAP`（我们目标是 `BTC-USDT-SWAP`，需用 scanner/tools 做真实验证）
+
+推送频率（文档原文）：
+- 30 秒到 90 秒内推送一次数据
+
+### 7.5 Other public-data channels (observed in doc page ids)（只记录存在性）
+
+该页面还包含（从章节 id 列表提取）：
+- `mark-price-candlesticks`（标记价格 K 线）
+- `index-candlesticks`（指数 K 线）
+- `open-interest`（持仓量）
+- `price-limit`（涨跌停价格）
+- 以及其它公共数据频道（adl-warning / economic-calendar / liquidation-orders / option-summary 等）
+
+对 V12 的影响（冻结）：
+- v0 仍用 REST 快照；此处是 v1 事件驱动的 **public WS 参考锚点**。
+- 基因/维度对齐仍以 canonical schema（`market_snapshot.jsonl`）为准；WS 只是更高频的采样机制。
+- 对于 `instId` 取值（`BTC-USDT` vs `BTC-USDT-SWAP`）的差异：必须通过 scanner + tools 验证后才允许写入“可采信建模结论”。
+
+---
+
+## 8) OKX WebSocket public channel (spread trading / business WS) — extracted notes（只读参考，additive-only）
 
 来源：用户提供页面 `https://www.okx.com/docs-v5/zh/#spread-trading-websocket-public-channel`（OKX docs-v5 zh）。  
 注意：此处描述的是 **spread trading** 的公共频道，走 **business WebSocket**，使用 `sprdId`（如 `BTC-USDT_BTC-USDT-SWAP`）。它不等价于“普通产品 `BTC-USDT-SWAP` 的 public WS 行情频道”。我们把它作为 v1 事件驱动的可选参考锚点，避免概念混淆。
@@ -170,7 +246,7 @@ Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：
   - `channel`
   - `sprdId`（例如 `BTC-USDT_BTC-USDT-SWAP`）
 
-### 7.1 Order book / depth channels（深度频道）
+### 8.1 Order book / depth channels（深度频道）
 
 可用频道（文档原文）：
 - `sprd-bbo-tbt`：首次推 1 档快照；之后定量推送（每 10ms，当 1 档变化推送一次）
@@ -180,14 +256,14 @@ Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：
 推送顺序（文档原文，单连接/交易产品维度固定）：
 - `sprd-bbo-tbt` → `sprd-books-l2-tbt` → `sprd-books5`
 
-### 7.2 Public trades channel（公共成交数据频道）
+### 8.2 Public trades channel（公共成交数据频道）
 
 - `channel`: `sprd-public-trades`
 - 推送语义（文档原文）：有成交就推送；每次推送仅包含一条成交数据
 - 推送示例字段（节选）：`sprdId`, `tradeId`, `px`, `sz`, `side`, `ts`
 - 错误示例（文档原文）：`event=error`, `code=60012`, `msg=Invalid request ...`
 
-### 7.3 Tickers channel（行情频道）
+### 8.3 Tickers channel（行情频道）
 
 - `channel`: `sprd-tickers`
 - 推送频率（文档原文）：
@@ -196,7 +272,7 @@ Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：
   - 触发事件：成交、买一卖一发生变动
 - 推送字段（示例节选）：`last`, `lastSz`, `askPx`, `askSz`, `bidPx`, `bidSz`，以及 24h 统计字段（open/high/low/vol 等）
 
-### 7.4 Candlesticks channel（K线频道）
+### 8.4 Candlesticks channel（K线频道）
 
 - channel 枚举（文档原文节选）：`sprd-candle1m`, `sprd-candle5m`, `sprd-candle1H`, `sprd-candle1D`, ... 以及对应 `utc` 版本
 - 推送频率（文档原文）：最快间隔 1 秒推送一次
@@ -208,7 +284,7 @@ Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：
 
 ---
 
-## 8) Cross-links（只读）
+## 9) Cross-links（只读）
 
 - V12 index: `docs/v12/V12_RESEARCH_INDEX.md`
 - Scanner SSOT (V11 anchor): `docs/v11/V11_SSOT_WORLD_FEATURE_SCANNER_20260101.md`
