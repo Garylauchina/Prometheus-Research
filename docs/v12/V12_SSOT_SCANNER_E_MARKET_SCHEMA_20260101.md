@@ -228,6 +228,60 @@ URL Path（文档原文示例）：
 - 基因/维度对齐仍以 canonical schema（`market_snapshot.jsonl`）为准；WS 只是更高频的采样机制。
 - 对于 `instId` 取值（`BTC-USDT` vs `BTC-USDT-SWAP`）的差异：必须通过 scanner + tools 验证后才允许写入“可采信建模结论”。
 
+### 7.6 v1 verification cases for `BTC-USDT-SWAP` (read-only, fail-closed)
+
+目的：把 “public WS 的参数到底该怎么填” 从猜测变成可复现事实。  
+这些用例是 **read-only**，用于 v1 WS 扩展或 tools 验证阶段；v0（REST 快照）不强制实现 WS。
+
+证据落盘（v1 入口冻结，additive-only）：
+- `okx_ws_sessions.jsonl`：连接建立/断开、ws_url、mode、conn_id（若可得）
+- `okx_ws_requests.jsonl`：subscribe/unsubscribe 原始 JSON（含 id/op/args）
+- `okx_ws_messages.jsonl`：每条推送/回执原始 JSON（含接收时间）
+
+用例 VC1 — Instruments: 确认 `BTC-USDT-SWAP` 的存在与字段
+- Subscribe:
+  - `channel=instruments`
+  - `instType=SWAP`
+- Verify (PASS 条件)：
+  - 在推送 `data[]` 中能找到 `instId=BTC-USDT-SWAP`
+  - 记录该条目中与 E 维度有关的字段存在性（例如 tickSz/lotSz/ctVal/settleCcy 等，字段名以返回为准）
+- FAIL 条件：
+  - 订阅成功但在可接受时间窗内从未出现该 instId（必须 NOT_MEASURABLE: inst_not_observed）
+
+用例 VC2 — Mark price: `mark-price` 的 instId 取值验证
+- Try Subscribe A:
+  - `channel=mark-price`, `instId=BTC-USDT-SWAP`
+- If A returns `event=error` / no data, Try Subscribe B (fallback probe):
+  - `channel=mark-price`, `instId=BTC-USDT`
+- Verify：
+  - 任一订阅路径能稳定收到推送（且推送结构可解析出 mark price 值字段，字段名以返回为准）
+  - 在 `market_snapshot.jsonl` 中落 `mark_px`，并注明 `source_endpoints=["ws:mark-price"]`
+- 规则：
+  - fallback 的存在必须显式落盘（不能静默替换 instId）
+
+用例 VC3 — Index tickers: `index-tickers` 的 instId 语义验证
+- Subscribe:
+  - `channel=index-tickers`, `instId=BTC-USDT`（文档说明其语义等价于指数/uly）
+- Verify：
+  - 能稳定收到推送并抽取 `index_px`（字段名以返回为准）
+
+用例 VC4 — Funding rate: `funding-rate` 的 instId 取值验证
+- Subscribe:
+  - `channel=funding-rate`, `instId=BTC-USDT-SWAP`
+- Verify：
+  - 能收到推送并抽取 `funding_rate`、`next_funding_ts_ms`（字段名以返回为准；缺失必须 `null+reason_code`）
+
+用例 VC5 — Candles (index/mark): 证明 WS candle 频道可用性（可选）
+- Subscribe one of:
+  - `channel=index-candlesticks`, `instId=BTC-USDT`（若该频道要求 bar/粒度，以返回/文档为准）
+  - `channel=mark-price-candlesticks`, `instId=BTC-USDT-SWAP`（或 fallback，按 VC2 逻辑）
+- Verify：
+  - 能收到至少 1 条 candle 推送，并能映射到 `market_snapshot` 的时间戳锚点（若 v1 需要）
+
+通用 FAIL-CLOSED 规则（适用于 VC1–VC5）：
+- 任何 `event=error` 必须落盘（含 code/msg），并进入 `scanner_report.json` 的 NOT_MEASURABLE reasons（例如 ws_channel_unavailable / ws_instid_invalid）。
+- “订阅成功但无推送”必须按时间窗判定为 NOT_MEASURABLE（ws_no_data_within_window），不得无限等待。
+
 ---
 
 ## 8) OKX WebSocket public channel (spread trading / business WS) — extracted notes（只读参考，additive-only）
