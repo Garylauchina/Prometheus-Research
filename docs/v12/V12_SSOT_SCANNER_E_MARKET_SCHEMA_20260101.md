@@ -121,6 +121,10 @@ Scanner v0 只做 **E（外显）市场信息查询**，锁定单一产品 `BTC-
 - `market_snapshot.jsonl` 的 schema 在 v0 阶段属于 **candidate canonical schema**（候选合同）。
 - 只有当 Scanner 的真实运行证据证明该 schema 可稳定产出、缺失可解释、类型/单位一致时，才能升级为 **verified canonical schema**，作为“建模工具合同”被采信。
 
+验证执行者（冻结）：
+- 由独立 **tools/verifier** 执行验证（read-only，fail-closed），输入为 `run_dir`。
+- v0 只做 **读验证**；v1/v2 可追加 **交易验证**（通过可控写探针）作为更强的约束验证来源。
+
 ### 6.1 必须新增的 manifest/report 字段（冻结）
 
 Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：

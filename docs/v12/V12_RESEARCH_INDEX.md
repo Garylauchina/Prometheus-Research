@@ -30,6 +30,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - Scanner produces a run_dir with `run_manifest.json`, `okx_api_calls.jsonl`, `errors.jsonl`, `scanner_report.json`
   - Must produce non-empty `market_snapshot.jsonl`
   - Any endpoint failure must be NOT_MEASURABLE (with reason_code), never silent
+  - Tools verification must pass for canonical schema (candidate→verified) before modeling can consume it
 
 ### M1 — Modeling docs from scanner (SSOT, additive-only)
 

@@ -1,6 +1,6 @@
 # V12 SSOT — Modeling Docs Pipeline + Genome Alignment Table — 2026-01-01
 
-目标：把 “scanner 结果 → 建模文档（SSOT）→ 基因维度重构” 的链路冻结为可验收、可复核的产物结构，避免基因设计变成主观叙事。
+目标：把 “scanner 结果 → tools 验证（含可选交易验证）→ 确认可作为对齐维度 → 写入建模文档（SSOT）→ 基因维度重构” 的链路冻结为可验收、可复核的产物结构，避免基因设计变成主观叙事。
 
 本文件 additive-only。
 
@@ -8,11 +8,16 @@
 
 ## 1) Pipeline definition（冻结）
 
-V12 的建模链路分三层产物：
+V12 的建模链路按顺序冻结为四段：
 
 1) **事实层（Scanner evidence）**：run_dir 内的可回放证据  
-2) **建模层（Modeling SSOT）**：把事实转写为“参数空间/枚举/限制/NOT_MEASURABLE 规则”的冻结文档  
-3) **对齐层（Genome Alignment Table）**：把“接口参数空间”切分为：Agent 可表达、系统默认、gate 决策三类，并形成可机读表
+2) **验证层（Tools verification）**：对事实层证据做 fail-closed 验证（含可选交易验证）  
+3) **对齐层（Genome Alignment Table）**：确认“哪些字段/维度可作为对齐维度”，并形成可机读表  
+4) **建模层（Modeling SSOT）**：把通过验证且可对齐的内容转写为“参数空间/枚举/限制/NOT_MEASURABLE 规则”的冻结文档  
+
+说明（冻结）：
+- **没有通过 tools 验证的 schema/字段，不得进入建模文档**（只能记录为候选/NOT_MEASURABLE）。
+- “交易验证”不是 v0 的硬要求，但必须预留为 v1/v2 的验证方式（例如通过最小 one-shot 写探针验证某些字段的真实可用性/约束）。
 
 补充：REST vs WebSocket 的“对齐语义”（冻结）
 - **基因维度/建模维度不直接对齐传输层（REST/WS）**，而是对齐我们冻结的 **canonical schema**（例如 `market_snapshot.jsonl` 的字段与 mask 纪律）。
