@@ -79,6 +79,14 @@ V12’s positioning is:
 - **Dual resource gates in Proxy Trader**: enforce both (a) per-agent resource limits and (b) system trading resources (exchange rate limits / endpoint availability / degraded modes) fail-closed, with reason codes.
 - **Modeling acceptance**: the scanner must output a machine-readable “genome alignment table” (field→dimension mapping + mask/NOT_MEASURABLE rules), otherwise genome refactors will drift into subjective design.
 
+### V12 observation goal (what we want to see, under limited resources)
+
+Under limited compute, we do not aim to “cover the evolutionary space”.
+We aim to observe **repeatable structure** under an auditable world contract:
+
+- **Clustering**: agents/behaviors form stable clusters across runs/windows (not one-off plots).
+- **Dimension collapse**: effective degrees of freedom shrink over time (e.g., effective rank / PCA variance concentration), with clear controls to rule out “collapse by missing data / gates / defaults”.
+
 ---
 
 ## Start here
