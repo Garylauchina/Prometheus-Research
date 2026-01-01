@@ -42,6 +42,43 @@ where every conclusion must point back to evidence.
 
 ---
 
+## V12 direction (world modeling + life system)
+
+V12’s positioning is:
+
+- **V10 = evidence chain is born**
+- **V11 = evidence chain is industrialized**
+- **V12 = world modeling + life system comes online**
+
+### V12 primary deliverables (research-side, ordered)
+
+1) **Modeling tool: World Feature Scanner**
+   - Scan “world facts” (starting from **E/exogenous market information**) under `execution_world`
+   - Output machine-verifiable evidence bundles and a modeling report
+
+2) **Modeling documents from scanner results**
+   - Turn scanner facts into SSOT: parameter spaces, enums, limits, availability, NOT_MEASURABLE conditions
+
+3) **Refactor Agent genome dimensions**
+   - Align expressible dimensions to exchange interface parameter spaces (no invented knobs)
+
+4) **Event-driven execution (initial)**
+   - Market data: WebSocket (push/event-driven)
+   - Trade execution: REST (request/response)
+
+5) **Individual metabolism (replace “death judgment”)**
+   - Agents adapt internal states/constraints based on truth-backed feedback, instead of binary kill switches
+
+6) **Split reproduction by capital doubling (replace “reproduction judgment”)**
+   - Reproduction becomes a consequence of auditable capital growth, rather than a subjective committee decision
+
+### Two hard additions (must be frozen early)
+
+- **WS evidence discipline**: if market data becomes WebSocket-driven, we must persist subscription + message streams as evidence (otherwise decisions cannot be replayed/audited).
+- **Dual resource gates in Proxy Trader**: enforce both (a) per-agent resource limits and (b) system trading resources (exchange rate limits / endpoint availability / degraded modes) fail-closed, with reason codes.
+
+---
+
 ## Start here
 
 - **V11 entry (recommended)**: `docs/v11/V11_RESEARCH_INDEX.md`
