@@ -154,7 +154,61 @@ Scanner v0 必须在 `run_manifest.json`（或 `scanner_report.json`）写入：
 
 ---
 
-## 6) Cross-links（只读）
+## 7) OKX WebSocket public channel (spread trading / business WS) — extracted notes（只读参考，additive-only）
+
+来源：用户提供页面 `https://www.okx.com/docs-v5/zh/#spread-trading-websocket-public-channel`（OKX docs-v5 zh）。  
+注意：此处描述的是 **spread trading** 的公共频道，走 **business WebSocket**，使用 `sprdId`（如 `BTC-USDT_BTC-USDT-SWAP`）。它不等价于“普通产品 `BTC-USDT-SWAP` 的 public WS 行情频道”。我们把它作为 v1 事件驱动的可选参考锚点，避免概念混淆。
+
+连接地址（文档原文）：
+- 实盘：`wss://ws.okx.com:8443/ws/v5/business`
+- 模拟盘：`wss://wspap.okx.com:8443/ws/v5/business`
+
+订阅请求通用结构（文档示例）：
+- `id`：可选，1–32 位字母数字组合（回显用于关联请求）
+- `op`：`subscribe` / `unsubscribe`
+- `args`：数组，每项至少包含：
+  - `channel`
+  - `sprdId`（例如 `BTC-USDT_BTC-USDT-SWAP`）
+
+### 7.1 Order book / depth channels（深度频道）
+
+可用频道（文档原文）：
+- `sprd-bbo-tbt`：首次推 1 档快照；之后定量推送（每 10ms，当 1 档变化推送一次）
+- `sprd-books5`：首次推 5 档快照；之后定量推送（每 100ms，当 5 档变化推送一次）
+- `sprd-books-l2-tbt`：首次推 400 档快照；之后增量推送（每 10ms 推送一次变化数据）
+
+推送顺序（文档原文，单连接/交易产品维度固定）：
+- `sprd-bbo-tbt` → `sprd-books-l2-tbt` → `sprd-books5`
+
+### 7.2 Public trades channel（公共成交数据频道）
+
+- `channel`: `sprd-public-trades`
+- 推送语义（文档原文）：有成交就推送；每次推送仅包含一条成交数据
+- 推送示例字段（节选）：`sprdId`, `tradeId`, `px`, `sz`, `side`, `ts`
+- 错误示例（文档原文）：`event=error`, `code=60012`, `msg=Invalid request ...`
+
+### 7.3 Tickers channel（行情频道）
+
+- `channel`: `sprd-tickers`
+- 推送频率（文档原文）：
+  - 最快 100ms 推送一次
+  - 无触发事件时最慢 1s 推送一次
+  - 触发事件：成交、买一卖一发生变动
+- 推送字段（示例节选）：`last`, `lastSz`, `askPx`, `askSz`, `bidPx`, `bidSz`，以及 24h 统计字段（open/high/low/vol 等）
+
+### 7.4 Candlesticks channel（K线频道）
+
+- channel 枚举（文档原文节选）：`sprd-candle1m`, `sprd-candle5m`, `sprd-candle1H`, `sprd-candle1D`, ... 以及对应 `utc` 版本
+- 推送频率（文档原文）：最快间隔 1 秒推送一次
+- 备注（文档原文）：使用 business WebSocket，不需鉴权
+
+对 V12 的落盘要求（与本仓库证据纪律对齐）：
+- 若我们在 v1 引入 WS：必须把 `subscribe/unsubscribe` 请求与每条推送消息落盘（append-only），并能关联到 `market_snapshot.snapshot_id`（或未来的 `market_event_ref`）。
+- 基因/维度仍对齐 canonical schema（`market_snapshot.jsonl`）；WS 独有字段只能 additive 追加到 schema，否则必须作为 `null + reason_code` 处理。
+
+---
+
+## 8) Cross-links（只读）
 
 - V12 index: `docs/v12/V12_RESEARCH_INDEX.md`
 - Scanner SSOT (V11 anchor): `docs/v11/V11_SSOT_WORLD_FEATURE_SCANNER_20260101.md`
