@@ -66,6 +66,52 @@ Scanner 每次运行必须产生独立 `run_dir`，至少包含：
   - 限速错误码（例如 50011/50061）
   - 挂单上限/单产品挂单上限（若能从接口获得则记录；否则标记为 NOT_MEASURABLE 并引用 SSOT 的人工来源段落）
 
+### 3.1.1 v0 优先级：E（外显）— 市场信息查询（read-only, frozen）
+
+动机：先从外显特征（E）开始——“查询市场信息”是最稳定、最可迁移、最容易做真值落盘的入口；也最适合作为后续基因维度/决策输入的公共基座。
+
+范围（v0 最小集合，按 inst_id）：
+- **标记价格/指数价格/资金费相关（perp 关键外显）**
+- **盘口/最新成交/行情快照（微观结构外显）**
+- **K 线（时间尺度外显）**
+
+OKX public（候选）接口清单（字段以“事实落盘”为先，后续可按用户粘贴的官方文档做 additive 扩充/纠正）：
+- Instruments（产品信息，public）
+- Ticker / Mark price / Index price（行情/标记/指数）
+- Funding rate（资金费率/下一次结算时间等）
+- Order book（深度）
+- Trades（最新成交）
+- Candles（K 线：多粒度）
+
+落盘要求（冻结）：
+- 每个 endpoint 的 request/response 必须记录在 `okx_api_calls.jsonl`（含 query params，例如 instId/bar）。
+- Scanner 必须额外生成：
+  - `market_snapshot.jsonl`：按时间追加的“结构化抽取结果”（以 `inst_id` 为主键）
+  - `market_feature_vector.jsonl`：可选，将 snapshot 映射为固定维度的 E 向量（含 mask/quality/reason_code）
+
+`market_snapshot.jsonl` 最小字段建议（语义冻结，字段名允许实现差异）：
+- `ts_utc`
+- `inst_id`
+- `last_px`（若可得）
+- `bid_px_1` / `ask_px_1`（若可得）
+- `bid_sz_1` / `ask_sz_1`（若可得）
+- `mark_px`（perp）
+- `index_px`（perp）
+- `funding_rate`（perp，若可得）
+- `next_funding_ts_ms`（perp，若可得）
+- `source_endpoints`（本条 snapshot 由哪些 endpoint 构成）
+- `quality`（per field 或 per record；至少要有整体 quality）
+- `not_measurable_reasons`（若缺失）
+
+基因/维度对齐原则（冻结）：
+- E 维度来自 **scanner 可复现的 market_snapshot**；DecisionEngine 不得把 unknown 写成 0，必须 mask=0。
+- E 维度不等于策略：E 只是“世界外显”，不做主观意图注入。
+
+验收（v0，冻结）：
+- 在 OKX demo/live 任一环境中，Scanner 能在单次运行中产出 >=1 条 `market_snapshot.jsonl`（非空）
+- 对每个调用过的 endpoint，`okx_api_calls.jsonl` 中必须可回放 request/response
+- 若某 endpoint 不可用：必须 NOT_MEASURABLE（含 reason_code），不得静默跳过
+
 ### 3.2 测试交互功能（write probes，默认关闭）
 
 原则：写探针只用于“验证接口链路/能力开关/真值可落盘”，不是为了成交质量。
