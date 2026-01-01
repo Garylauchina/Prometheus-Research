@@ -14,6 +14,13 @@ V12 的建模链路分三层产物：
 2) **建模层（Modeling SSOT）**：把事实转写为“参数空间/枚举/限制/NOT_MEASURABLE 规则”的冻结文档  
 3) **对齐层（Genome Alignment Table）**：把“接口参数空间”切分为：Agent 可表达、系统默认、gate 决策三类，并形成可机读表
 
+补充：REST vs WebSocket 的“对齐语义”（冻结）
+- **基因维度/建模维度不直接对齐传输层（REST/WS）**，而是对齐我们冻结的 **canonical schema**（例如 `market_snapshot.jsonl` 的字段与 mask 纪律）。
+- REST 与 WS 允许返回不同字段/不同更新频率，但必须映射到同一个 canonical schema：
+  - 可得 → 写值
+  - 不可得/缺失 → `null + reason_code`（mask=0），不得伪造 0
+- 事件驱动（WS）是“采样机制”的升级，不是“维度语义”的升级；维度语义升级必须通过 SSOT additive-only 冻结。
+
 ---
 
 ## 2) Required outputs（冻结）
