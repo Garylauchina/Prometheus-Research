@@ -10,6 +10,24 @@
 
 ---
 
+## 0) Evidence path convention (runs_root/run_id)（冻结）
+
+目的：硬化 V12 的证据保存路径，避免“跑过但找不到证据/不同人不同目录”的混乱。
+
+默认约定（冻结，Quant repo 内相对路径）：
+- **runs_root（默认）**：`./runs_v12/`
+- **run_dir 命名**：`$runs_root/$run_id/`
+- **run_id 命名规则（推荐）**：
+  - `run_{component}_{truth_profile}_{YYYYMMDDTHHMMSSZ}`
+  - 例：`run_scanner_v0_replay_20260101T091611Z`
+
+兼容（冻结入口）：
+- 若历史实现已使用 `./runs_v12_scanner/`（例如 v12-scanner-m0 的早期 run），允许继续读取，但从本冻结开始**新 run 统一写入 `./runs_v12/`**。
+
+可复用定位方式（冻结）：
+- `RUN_DIR="$(ls -td "$RUNS_ROOT"/run_* | head -1)"`
+- 必须始终打印：`runs_root + run_id + 可复跑命令`
+
 ## 1) Roles（冻结）
 
 - **DSM（Downlink Subscription Manager）**：连接/订阅/重连、原始消息落盘、canonicalization、内部二级订阅（internal pub/sub）

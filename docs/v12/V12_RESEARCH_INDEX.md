@@ -21,6 +21,9 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 - 因此，V12 的优先级始终是：先把世界输入/证据落盘/NOT_MEASURABLE 边界冻结成合同，再谈机制（新陈代谢/分裂繁殖）与基因维度。
 - 任何新维度进入决策前必须先通过 **可审计+可测+可消融** 的验证；否则一律视为 NOT_READY（见：`docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`）。
 
+证据路径约定（冻结）：
+- V12 统一 `runs_root/run_id`：见 `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md` 的 “Evidence path convention”。
+
 ---
 
 ## V12 Work Plan (ordered, fail-closed)

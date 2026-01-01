@@ -12,6 +12,7 @@ Scanner v0 只做 **E（外显）市场信息查询**，锁定单一产品 `BTC-
 - **inst_id（frozen）**：`BTC-USDT-SWAP`
 - **mode**：okx_demo_api / okx_live_api（都必须支持；demo 与 live 的 base URL/headers 作为事实落盘）
 - **read-only**：本阶段不启用任何写探针（不下单、不撤单、不设杠杆）
+ - **runs_root（frozen, Quant repo default）**：`./runs_v12/`（详见：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`）
 
 传输层选择（冻结）：
 - **v0 实现优先使用 REST 拉取快照**（request/response 证据最稳定，最易复现与审计）。
