@@ -48,7 +48,7 @@ Proxy Trader 必须做且只做三件事：
 
 ---
 
-## 3) Proxy Trader Gate：两层门禁（冻结）
+## 3) Proxy Trader Resource Gate：两层门禁（冻结）
 
 ### 3.1 Agent Resource Gate（必须存在，fail-closed）
 
@@ -64,12 +64,17 @@ Proxy Trader 必须做且只做三件事：
 
 ### 3.2 System Ecology Gate（必须存在，防系统自毁）
 
-定义：保护系统与交易所生态的硬限制（即使 Agent 资源足够也可能被系统拒绝）。
+定义：保护系统与交易所生态/接口可用性的硬限制（即使 Agent 资源足够也可能被系统拒绝）。
 
 示例（冻结为“必须有对应 reason_code”，具体阈值可后续追加版本化）：
 - 交易所限速/风控压力：`exchange_rate_limited` / `too_many_requests`
 - 未成交挂单上限/产品维度挂单上限：`exchange_order_limit_reached`
 - 运行期冻结（Step74–84/Step96）：`execution_frozen`
+ - 交易接口不可用/交易所服务异常：`exchange_unavailable` / `exchange_maintenance` / `exchange_api_unreachable`
+
+约束（冻结）：
+- “资源门禁”一词在 V11 中明确包含：**Agent个体资源 + 系统交易资源（交易所 API 请求限制、接口不可用等）**。
+- 两层门禁都必须：fail-closed、落盘 gate 决策与 reason_code，并能被 Step91 证据链复核。
 
 ---
 
