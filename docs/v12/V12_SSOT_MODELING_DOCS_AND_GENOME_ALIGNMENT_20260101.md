@@ -31,6 +31,38 @@ V12 的建模链路按顺序冻结为四段：
   - **Ablation**：至少完成一次可复现的消融对照（dimension_on vs dimension_off），并能给出统计上可检出的差异或明确判定“无效”
   - **Fail-closed**：若 ablation 不可执行/不可测，必须 NOT_MEASURABLE，并禁止把该维度加入决策合同
 
+### 1.1 Candidate dim: “Cloud intensity” (unknown semantics, measurable strength)（冻结，v0）
+
+动机（冻结）：
+- 我们允许引入一个“语义未知”的候选维度（比喻为“一朵乌云”），但它**只能**作为“扰动强度可测”的可控旋钮进入实验；它不得成为万能解释，也不得破坏可审计性。
+
+定义（冻结，candidate-only，不等价于 genome schema）：
+- 维度名：`cloud_intensity`
+- 语义：**未知**（不做因果解释）；仅代表“外生扰动/不可解释因素”的强度标量
+- 类型：`float`
+- 范围（有界，冻结）：`0.0 <= cloud_intensity <= 1.0`
+- 可测性（冻结）：
+  - 可测：`cloud_mask = 1` 且 `cloud_reason_codes = []`
+  - 不可测：`cloud_mask = 0` 且 `cloud_intensity = null` 且 `cloud_reason_codes` 非空（例如 `not_measurable:cloud_intensity_source_missing`）
+- 证据落盘（冻结）：
+  - `decision_trace.jsonl` 中必须写入：`cloud_intensity`, `cloud_mask`, `cloud_reason_codes`
+  - `run_manifest.json` 中必须写入：`ablation.cloud.enabled` 与 `ablation.cloud.mode`（`on|off`）
+- 消融（冻结，必须）：
+  - `cloud` 必须支持 `on/off` 对照；`off` 时必须满足：
+    - `cloud_mask=0`，`cloud_intensity=null`，并写入 `cloud_reason_codes=["ablation:cloud_off"]`
+  - 任何无法进行消融的实现，一律视为 NOT_READY（不得进入决策输入合同）
+- 退火/衰减（可选，冻结为可扩展结构）：
+  - 允许在 manifest 记录：`ablation.cloud.schedule`（例如 `constant` / `linear_anneal`），但 v0 不强制实现
+
+收敛失败的“硬观测”建议（冻结为观测 vocabulary，具体计算可后置）：
+- 目的：防止 `cloud_intensity` 让系统变成“不可收敛噪声机”
+- 推荐至少记录以下指标到 `run_manifest.json.observations`（字段可追加，不可删除/改义）：
+  - `policy_switch_rate`（策略/行为切换率）
+  - `decision_entropy`（决策分布熵的时间均值/趋势）
+  - `cluster_stability`（簇稳定度/一致性指标）
+  - `effective_rank`（高维表达的有效秩/坍缩度 proxy）
+  - `not_measurable_ratio_cloud`（cloud 不可测比例）
+
 补充：REST vs WebSocket 的“对齐语义”（冻结）
 - **基因维度/建模维度不直接对齐传输层（REST/WS）**，而是对齐我们冻结的 **canonical schema**（例如 `market_snapshot.jsonl` 的字段与 mask 纪律）。
 - REST 与 WS 允许返回不同字段/不同更新频率，但必须映射到同一个 canonical schema：

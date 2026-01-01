@@ -55,6 +55,18 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 验收：建模文档（E dims contract + API parameter spaces）通过验收；`genome_alignment_table.json` 可从证据推导且自洽
   - 硬门槛：基因维度设计/重构仍后置（见 Start Here 的硬 gate）
 
+- **V12.4.1 — Candidate dim experiment v0 (“Cloud intensity”, ablation-first, auditable)**
+  - 对应：M1→M2 之间的“演化观测实验层”（不改 genome schema）
+  - 目标：以 E 维度为基础输入，引入一个“语义未知但强度可测”的候选维度 `cloud_intensity`，先跑可消融的演化/观测实验，验证是否出现可复现的聚类/维度坍缩信号
+  - 验收（fail-closed）：
+    - `decision_trace.jsonl` 必须落盘：`cloud_intensity`（有界）、`cloud_mask`、`cloud_reason_codes`
+    - `run_manifest.json` 必须落盘：`ablation.cloud.enabled` + `ablation.cloud.mode(on|off)`
+    - 必须至少完成一次可复现消融对照：`cloud_on` vs `cloud_off`
+    - 若 cloud 不可测：必须 `mask=0 + reason_codes`，不得伪装 0；该 run 对 cloud 维度判定为 NOT_MEASURABLE
+  - SSOT：
+    - Candidate dim gate: `docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`（§1.1）
+    - Evidence fields: `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（§3.2.1）
+
 - **V12.5 — Event-driven decision v0 (consume downlink events, still auditable)**
   - 对应：M3（核心）
   - 目标：决策从 tick 轮询升级为“事件驱动消费”（例如 `market_events` 或更高频 snapshot），但仍必须可回放/可审计

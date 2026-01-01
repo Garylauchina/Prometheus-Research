@@ -100,6 +100,23 @@ Decision 必须能回答“当时看到的市场是什么”：
   - `market_ts_utc`（snapshot 的时间戳锚点）
   - `market_source`（例如 `rest_snapshot` / `ws_public`）
 
+### 3.2.1 Decision record — candidate dims (unknown semantics but measurable)（冻结）
+
+目的（冻结）：
+- 允许引入“语义未知但强度可测”的候选维度（例如 `cloud_intensity`），用于演化/消融实验，但必须保持可审计与可回放。
+
+硬规则（冻结）：
+- `decision_trace.jsonl` 必须包含候选维度的 evidence 字段（若开启该实验）：
+  - `cloud_intensity`（float in [0,1] 或 null）
+  - `cloud_mask`（0/1）
+  - `cloud_reason_codes`（array[string]）
+- `run_manifest.json` 必须包含消融开关：
+  - `ablation.cloud.enabled`（bool）
+  - `ablation.cloud.mode`（`on|off`）
+- **Fail-closed**：
+  - 若 `ablation.cloud.enabled=true` 且缺少上述任一字段：该 run 必须判为 NOT_MEASURABLE（evidence_incomplete:candidate_dim）
+  - 若 `ablation.cloud.mode="off"`：必须写 `cloud_mask=0` + `cloud_intensity=null` + `cloud_reason_codes=["ablation:cloud_off"]`
+
 若未来使用事件流：
 - 使用 `market_event_ref`（指向 `market_events.jsonl` 的主键）替代或并存
 
