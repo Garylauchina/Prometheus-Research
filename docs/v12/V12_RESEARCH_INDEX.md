@@ -24,6 +24,36 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 
 ## V12 Work Plan (ordered, fail-closed)
 
+## V12 mini-releases (recommended cadence)
+
+目的：把 V12 拆成可控的小版本，每个版本只完成一个“可验收闭环”，避免目标爆炸。
+
+- **V12.0 — Scanner v0 (REST snapshot, candidate schema, tools verification PASS)**
+  - 对应：M0
+  - 验收：`market_snapshot.jsonl` 非空 + schema_verification PASS + evidence 可回放（source_call_ids 等）
+  - 备注：schema `status` 仍为 `candidate`（不提前宣称 verified）
+
+- **V12.1 — Scanner v0 hardening (repeatability + strict evidence replayability)**
+  - 对应：M0 迭代
+  - 验收：在多次 runs 下稳定通过；缺测字段必须 `degraded + reason_codes`，禁止 “overall=ok 但存在 null”
+
+- **V12.2 — WS ingestion only (DSM + evidence stream, tick-consumable)**
+  - 对应：M0.5
+  - 验收：WS sessions/requests/messages 全量落盘；WS→canonical snapshot 映射通过同一套 verification；订阅丢失/无推送超时必须 NOT_MEASURABLE 可见
+
+- **V12.3 — Modeling SSOT v1 + genome alignment table v0 (no genome design yet)**
+  - 对应：M1
+  - 验收：建模文档（E dims contract + API parameter spaces）通过验收；`genome_alignment_table.json` 可从证据推导且自洽
+  - 硬门槛：基因维度设计/重构仍后置（见 Start Here 的硬 gate）
+
+- **V12.4 — Metabolism v0 (truth-profile aware)**
+  - 对应：M4 的一部分
+  - 验收：新陈代谢触发与证据落盘可审计；不依赖“死亡审判”裁决
+
+- **V12.5 — Split reproduction v0 (capital-doubling)**
+  - 对应：M4 的一部分
+  - 验收：分裂繁殖触发基于可审计资本增长；证据链闭合
+
 ### M0 — World Feature Scanner v0（E: market info, single instId）
 
 - **Scope (frozen)**:
