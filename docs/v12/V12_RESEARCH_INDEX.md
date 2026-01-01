@@ -44,6 +44,11 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 - **V12.2 — WS ingestion only (DSM + evidence stream, tick-consumable)**
   - 对应：M0.5
   - 验收：WS sessions/requests/messages 全量落盘；WS→canonical snapshot 映射通过同一套 verification；订阅丢失/无推送超时必须 NOT_MEASURABLE 可见
+  - 里程碑（已完成，记录事实而非叙事）：
+    - DSM 已在 **VPS（direct, no proxy）** 上完成 REAL WS 验收闭环：连接→订阅→消息落盘→canonical→replayability join→verifier PASS
+    - Canonical `market_snapshot` 的 v0.9.1 版本已实现 **5 通道→9 字段** 的可审计兑现（字段全非 null 时 `quality.overall="ok"`）
+    - 关键冻结点：`index-tickers` 的 `instId` 必须使用 **underlying spot**（例如 `BTC-USDT`），而不是 `BTC-USDT-SWAP`（否则可能无推送→NOT_MEASURABLE）
+    - 参考 SSOT：`docs/v12/V12_SSOT_DOWNLINK_SUBSCRIPTION_MANAGER_20260101.md`（新增 §7），`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（新增 §2.1.1/§4.1）
 
 - **V12.3 — Dual-pipe evidence closure (Downlink DSM + Uplink Broker)**
   - 对应：M0.5 → M1 的桥接
@@ -112,6 +117,20 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - WS sessions/requests/messages evidence exists (append-only)
   - `market_snapshot.jsonl` can be produced from WS without breaking schema_verification rules
   - No silent reconnect/subscription loss (must be visible as NOT_MEASURABLE reasons)
+
+### M0.5 实施状态快照（只增不改，事实记录）
+
+已实现（VPS REAL WS 验收通过）：
+- 下行 evidence：`okx_ws_sessions.jsonl` / `okx_ws_requests.jsonl` / `okx_ws_messages.jsonl`
+- canonical：`market_snapshot.jsonl`（含 `source_message_ids` 回放锚点）
+- verifier：`tools/v12/verify_dsm_ws_ingestion_v0.py` 输出 PASS 时，manifest 必须同步 `verdict="PASS"`；若存在 `not_measurable:*` reason_codes，则 verdict 必须为 NOT_MEASURABLE（fail-closed）
+
+当前冻结的最小通道集（v0.9.1 参考实现）：
+- `tickers`（instId=`BTC-USDT-SWAP`）→ `last_px`
+- `mark-price`（instId=`BTC-USDT-SWAP`）→ `mark_px`
+- `books5`（instId=`BTC-USDT-SWAP`）→ `bid_px_1/ask_px_1/bid_sz_1/ask_sz_1`
+- `index-tickers`（instId=`BTC-USDT`）→ `index_px`（注意 underlying 映射）
+- `funding-rate`（instId=`BTC-USDT-SWAP`）→ `funding_rate/next_funding_ts_ms`
 
 ### M1 — Modeling docs from scanner (SSOT, additive-only)
 

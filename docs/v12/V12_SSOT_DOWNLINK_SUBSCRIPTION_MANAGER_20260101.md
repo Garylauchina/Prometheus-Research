@@ -94,6 +94,44 @@ Join 锚点（冻结入口）：
 
 ---
 
+## 7) DSM v0.5+ implementation reference (additive-only, frozen semantics)
+
+目的：
+- 记录 DSM 在 v0.5→v0.9.1 的“已验证实现要点”，作为后续扩展（v1 event-driven / internal pubsub）的稳定基底。
+- 本节只追加事实与冻结语义，不替代上文。
+
+### 7.1 Evidence join anchor for WS（冻结）
+
+- `market_snapshot.jsonl` 必须携带：`source_message_ids`（array）
+- `source_message_ids` 必须可在 `okx_ws_messages.jsonl.message_id` 中解析（replayability）
+- 若 snapshot 引用的 message_id 不可解析：verifier 必须 FAIL（不是 NOT_MEASURABLE）
+
+### 7.2 Public WS minimal channel set (v0.9.1 reference)（冻结入口）
+
+说明：
+- DSM 的“订阅集合”允许随版本扩展，但每次扩展必须保持：
+  - append-only evidence
+  - channel→字段映射可审计
+  - 缺测必须 NOT_MEASURABLE（不得用 0 伪装）
+
+参考通道集（已在 VPS REAL WS 验收跑通）：
+- `tickers`（instId=`BTC-USDT-SWAP`）→ `last_px`
+- `mark-price`（instId=`BTC-USDT-SWAP`）→ `mark_px`
+- `books5`（instId=`BTC-USDT-SWAP`）→ `bid_px_1/ask_px_1/bid_sz_1/ask_sz_1`
+- `index-tickers`（instId=`BTC-USDT`）→ `index_px`
+  - 关键规则（冻结）：对 `BTC-USDT-SWAP`，index 源通常属于 underlying/uly（`BTC-USDT`），不可直接用 swap instId 订阅，否则可能无推送→NOT_MEASURABLE
+- `funding-rate`（instId=`BTC-USDT-SWAP`）→ `funding_rate/next_funding_ts_ms`
+
+### 7.3 Verdict discipline (fail-closed)（冻结入口）
+
+动机：
+- 防止“字段缺失但 PASS”这类假阳性，确保后续建模/对照可复核。
+
+冻结语义（建议在 run_manifest 中体现）：
+- `PASS`：schema verifier PASS 且 canonical 字段满足该版本的“可测闭环”（例如 v0.9.1 需要 9/9 字段非 null）
+- `NOT_MEASURABLE`：存在 `not_measurable:*` reason_codes（例如无推送/窗口过短/参数不匹配/解析失败），必须显式记录原因
+- `FAIL`：证据缺失、join 不可回放、或 verifier rules 失败
+
 ## 6) Cross-links（只读）
 
 - V12 index: `docs/v12/V12_RESEARCH_INDEX.md`

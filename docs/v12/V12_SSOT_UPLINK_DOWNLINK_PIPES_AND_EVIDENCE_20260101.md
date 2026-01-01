@@ -63,6 +63,16 @@ Canonical outputs（必须）：
 - `market_snapshot.jsonl`（canonical schema, mask discipline）
 - （v1+ 可选）`market_events.jsonl`（更细粒度事件流；若引入必须同样可回放/可 join）
 
+### 2.1.1 Downlink replayability anchor (WS)（冻结入口）
+
+目的：
+- WS 下行没有 `source_call_ids`（REST 才有）。因此 canonical snapshot 必须能回指原始 WS 消息流。
+
+冻结规则：
+- `market_snapshot.jsonl` 必须包含：`source_message_ids`（array[string]）
+- `okx_ws_messages.jsonl` 必须包含：`message_id`（可被 snapshot 引用）
+- verifier 必须验证：snapshot 的 `source_message_ids` 全部可解析到 `okx_ws_messages.jsonl`
+
 Internal pub/sub evidence（必须）：
 - `agent_subscriptions.jsonl`
   - `ts_utc`, `agent_id_hash`, `topics[]`, `action` (subscribe/unsubscribe)
@@ -139,6 +149,19 @@ Decision 必须能回答“当时看到的市场是什么”：
 - “订阅成功但无推送”超时
 - REST/HTTP 调用失败或被限速
 - 关键证据文件缺失或不可回放（例如有交易但无 api_calls）
+
+### 4.1 Verdict semantics (PASS / NOT_MEASURABLE / FAIL)（冻结入口）
+
+动机：
+- 统一“verifier PASS”与“run verdict”之间的语义，避免出现字段缺失但 verdict=PASS 的假阳性。
+
+冻结建议（run_manifest）：
+- `verdict="PASS"`：verifier PASS 且该版本声明的关键字段闭环满足（例如 DSM v0.9.1 的 9/9 字段非 null）
+- `verdict="NOT_MEASURABLE"`：存在明确的 `not_measurable:*` 原因码（例如 no_push / window_short / param_mismatch / parse_failed）
+- `verdict="FAIL"`：verifier FAIL、证据文件缺失、或 replayability join 不可解析
+
+补充（冻结入口）：
+- 对下行 `index_px`：当订阅 `index-tickers` 时，instId 可能需要使用 underlying（例如 `BTC-USDT`）而非 `BTC-USDT-SWAP`；若订阅参数不匹配导致无推送，应记为 `not_measurable:index_tickers_param_mismatch`（而不是 not_implemented）
 
 ---
 
