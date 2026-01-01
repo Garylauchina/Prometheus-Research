@@ -17,6 +17,7 @@
 - Execution World Design: `docs/v11/V11_DESIGN_EXECUTION_WORLD_20251227.md`
 - Closure Allowlist: `docs/v11/V11_EXECUTION_WORLD_CLOSURE_ALLOWLIST_20251227.md`
 - Programmer AI Operating Rules: `docs/v11/V11_PROGRAMMER_AI_OPERATING_RULES_20251227.md`
+- Agent probing model + Proxy Trader contract: `docs/v11/V11_SSOT_AGENT_PROBING_AND_PROXY_TRADER_MODEL_20260101.md`
 
 ---
 
