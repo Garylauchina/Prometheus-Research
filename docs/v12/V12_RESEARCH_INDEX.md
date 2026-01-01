@@ -41,16 +41,26 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 对应：M0.5
   - 验收：WS sessions/requests/messages 全量落盘；WS→canonical snapshot 映射通过同一套 verification；订阅丢失/无推送超时必须 NOT_MEASURABLE 可见
 
-- **V12.3 — Modeling SSOT v1 + genome alignment table v0 (no genome design yet)**
+- **V12.3 — Dual-pipe evidence closure (Downlink DSM + Uplink Broker)**
+  - 对应：M0.5 → M1 的桥接
+  - 目标：把“双管道信息流”跑通且可 join（下行 market_snapshot_id ↔ 决策 ↔ 上行 order_attempts/api_calls）
+  - 验收：双管道证据文件齐全（见 `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`）+ join keys 可机验 + 关键缺失必须 NOT_MEASURABLE
+
+- **V12.4 — Modeling SSOT v1 + genome alignment table v0 (no genome design yet)**
   - 对应：M1
   - 验收：建模文档（E dims contract + API parameter spaces）通过验收；`genome_alignment_table.json` 可从证据推导且自洽
   - 硬门槛：基因维度设计/重构仍后置（见 Start Here 的硬 gate）
 
-- **V12.4 — Metabolism v0 (truth-profile aware)**
+- **V12.5 — Event-driven decision v0 (consume downlink events, still auditable)**
+  - 对应：M3（核心）
+  - 目标：决策从 tick 轮询升级为“事件驱动消费”（例如 `market_events` 或更高频 snapshot），但仍必须可回放/可审计
+  - 验收：Decision evidence 必须引用 `market_event_ref`/`market_snapshot_id`；断连/丢事件必须可见（NOT_MEASURABLE），禁止静默降级
+
+- **V12.6 — Metabolism v0 (truth-profile aware)**
   - 对应：M4 的一部分
   - 验收：新陈代谢触发与证据落盘可审计；不依赖“死亡审判”裁决
 
-- **V12.5 — Split reproduction v0 (capital-doubling)**
+- **V12.7 — Split reproduction v0 (capital-doubling)**
   - 对应：M4 的一部分
   - 验收：分裂繁殖触发基于可审计资本增长；证据链闭合
 
