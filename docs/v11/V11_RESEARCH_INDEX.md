@@ -18,6 +18,7 @@
 - Closure Allowlist: `docs/v11/V11_EXECUTION_WORLD_CLOSURE_ALLOWLIST_20251227.md`
 - Programmer AI Operating Rules: `docs/v11/V11_PROGRAMMER_AI_OPERATING_RULES_20251227.md`
 - Agent probing model + Proxy Trader contract: `docs/v11/V11_SSOT_AGENT_PROBING_AND_PROXY_TRADER_MODEL_20260101.md`
+- World Feature Scanner (modeling tool) SSOT: `docs/v11/V11_SSOT_WORLD_FEATURE_SCANNER_20260101.md`
 
 ---
 
