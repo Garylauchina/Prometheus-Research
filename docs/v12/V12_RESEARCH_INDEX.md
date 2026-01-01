@@ -32,6 +32,22 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - Any endpoint failure must be NOT_MEASURABLE (with reason_code), never silent
   - Tools verification must pass for canonical schema (candidate→verified) before modeling can consume it
 
+### M0.5 — WS ingestion only (event stream evidence, tick-consumable)
+
+目的：解决“不用 WS 会限制后续事件驱动/新陈代谢/繁殖；直接上 WS 又是大工程”的两难：  
+先把 WS 变成**可审计事件流输入**，但决策/演化系统先不强制改为 event-driven（仍可按 tick/采样消费）。
+
+- **Scope (frozen)**:
+  - OKX public WS (`/ws/v5/public`) only
+  - Evidence-only ingestion: subscribe + message stream persisted
+  - Map WS messages → canonical `market_snapshot.jsonl` (or future `market_event_ref`) with mask discipline
+- **SSOT**:
+  - Scanner v0/v0.5 schema: `docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md`
+- **Acceptance**:
+  - WS sessions/requests/messages evidence exists (append-only)
+  - `market_snapshot.jsonl` can be produced from WS without breaking schema_verification rules
+  - No silent reconnect/subscription loss (must be visible as NOT_MEASURABLE reasons)
+
 ### M1 — Modeling docs from scanner (SSOT, additive-only)
 
 - Freeze:

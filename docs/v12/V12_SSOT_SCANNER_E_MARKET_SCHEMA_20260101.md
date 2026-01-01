@@ -17,6 +17,12 @@ Scanner v0 只做 **E（外显）市场信息查询**，锁定单一产品 `BTC-
 - **v0 实现优先使用 REST 拉取快照**（request/response 证据最稳定，最易复现与审计）。
 - **WebSocket（事件驱动）作为 v1 扩展**：用于更低延迟/更高频的行情推送，但必须满足 WS 证据纪律（订阅与消息流落盘）后才允许作为“决策输入真值”。
 
+解决“两难”的节奏（冻结，推荐路径）：
+- **v0（REST snapshot）**：先把 `market_snapshot.jsonl` 的证据链跑通 + schema_verification gate 跑通。
+- **v0.5（WS ingestion only）**：引入 public WS，但只做“采集+证据落盘+映射到 canonical schema”，决策仍然可以按 tick/采样方式消费（不强迫全系统立即改成 event-driven）。
+- **v1（event-driven decision）**：当 WS ingestion 稳定后，再把“事件驱动决策/新陈代谢/繁殖触发”引入为下一阶段工程。
+这样可以避免一次性引入两类大工程（WS 工程 + 全系统事件化改造）。
+
 ---
 
 ## 2) OKX Public endpoints（v0 清单，冻结入口）
