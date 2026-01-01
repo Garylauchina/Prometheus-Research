@@ -25,6 +25,17 @@ where every conclusion must point back to evidence.
 
 ---
 
+## Foundation (methodology SSOT)
+
+This repository is built on a single, shared measurement method:
+
+- **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**: `docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
+
+This document defines **how we measure** (measurability gate, NOT_MEASURABLE discipline, measurement-bias dimensions),
+and is treated as a foundational reference for V11/V12 research contracts.
+
+---
+
 ## V11 goals (what we aim to deliver)
 
 - **A reviewable truth chain**: any statement about positions / capital / fills / fees must be traceable to exchange-retrievable JSON (or explicitly marked as unknown / NOT_MEASURABLE).
