@@ -129,6 +129,9 @@ Agent 应用 Δbalance 的幂等规则（冻结入口）：
 
 事件生成规则（冻结）：
 - **禁止在系统内“自算费用/资金费/强平损益”当真值**：必须来自 `bills/fills` 或 position snapshots 的交易所字段。
+- **费用真值口径（冻结，v0）**：
+  - `trade_fee` 的真值口径以 **bills** 为准（账务真值优先）
+  - fills 中的 `fee` 允许作为 *candidate* 证据来源（仅用于 v0 最小闭环），但必须显式标注，禁止被误读为“已对账”
 - `exchange_account_events.jsonl`：
   - 每条必须回指真值证据：`evidence_ref.kind in {"bill","fill","position_snapshot"}` 且 `ref_id` 为对应主键（例如 billId/fillId/snapshot_id）
   - `event_id` 必须稳定且幂等（冻结入口推荐）：
@@ -137,6 +140,13 @@ Agent 应用 Δbalance 的幂等规则（冻结入口）：
 - `agent_balance_events.jsonl`（source=`exchange_truth`）：
   - 默认从 **bill truth** 派生 Δbalance（冻结入口）：`evidence_ref.kind="bill"`, `ref_id=billId`
   - `event_id` 必须稳定且幂等（冻结入口推荐）：`event_id = "okx:bill_delta:" + billId`
+  - 若 `bills.jsonl` 缺失或为空，但仍希望保留 v0 样本（candidate）：
+    - 允许从 fills 的 `fee` 派生“候选 trade_fee Δbalance”
+    - 必须使用明确的 `reason_code`：`trade_fee_from_fills_candidate`
+    - 且必须在 manifest 的 settlement 小节写明：
+      - `fee_truth_source="fills_candidate"`
+      - `bills_missing=true`
+    - **verdict 约束（冻结）**：只要 `bills_missing=true`，该 run 的 settlement 相关 verdict 必须为 `NOT_MEASURABLE`（reason_code=`bills_missing`），不得 `PASS`
 
 归因规则（冻结，v0）：
 - 若 bill/fill 可明确 join 到某个 `client_order_id/clOrdId` 且该 order attempt 有明确 `agent_id_hash`：
@@ -152,6 +162,11 @@ Fail-closed（冻结）：
 - `fills.jsonl` / `bills.jsonl` 任一缺失或非 strict JSONL：该 run 必须 NOT_MEASURABLE（evidence_incomplete:settlement_truth）
 - 生成的 events 若出现 `event_id` 冲突但内容不一致：verifier 必须 FAIL
 - manifest 若出现 `join_verification.*.verified=false` 但 `verdict="PASS"`：verifier 必须 FAIL 并覆盖为一致结果
+
+Env discipline（冻结入口）：
+- Settlement 工具通常是独立运行（不依赖 broker/runner 先跑过），因此必须**自行加载 `.env`**：
+  - 统一使用同一套轻量 `env_loader.load_env_file()`（no-dependency）
+  - manifest 必须记录 env 加载统计（只记录 key presence/count，不得泄露密钥）
 
 ---
 

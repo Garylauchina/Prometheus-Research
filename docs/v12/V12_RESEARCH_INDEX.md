@@ -70,6 +70,8 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
     - `exchange_account_events.jsonl` 必须存在且每条可回指 `bills/fills/position_snapshot`
     - `agent_balance_events.jsonl` 必须存在且每条具备幂等 `event_id` + 可 join 的 `evidence_ref`
     - 无法归因到具体 Agent 的事件必须归因到 **System Agent-0**（`agent_id_hash="agent_0_system"`），且显式标注 system scope
+    - 费用真值口径：`trade_fee` 必须以 **bills** 为准；若 `bills_missing=true` 但临时用 fills fee 作为候选，则必须标注 `trade_fee_from_fills_candidate`，并且 settlement verdict 必须为 NOT_MEASURABLE（reason_code=`bills_missing`）
+    - Settlement 工具必须自行加载 `.env`（不得假设 broker 先跑过），并在 manifest 记录 env 加载统计（不泄露密钥）
     - `run_manifest.json` 的 `verdict` 与 `join_verification.*` 必须一致（禁止 verified=false 但 verdict=PASS）
   - SSOT：
     - Balance delta + exchange auto events: `docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`（§3.3）
