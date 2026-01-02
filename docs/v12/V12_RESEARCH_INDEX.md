@@ -86,6 +86,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - SSOT（入口）：
     - Modeling pipeline + alignment: `docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`
     - OKX order parameter space (v1): `docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md`
+    - OKX non-order parameter space (v1): `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
 
 - **V12.1.1 — Candidate dim experiment v0 (“Cloud intensity”, ablation-first, auditable)**
   - 对应：M0→M1 之间的“演化观测实验层”（不改 genome schema）

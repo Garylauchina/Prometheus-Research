@@ -1,0 +1,78 @@
+{
+  "exchange": "okx",
+  "inst_id": "BTC-USDT-SWAP",
+  "table_version": "v0",
+  "space": "account_position_and_pretrade",
+  "source_versions": {
+    "non_order_param_ssot": "docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md",
+    "order_param_ssot": "docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md"
+  },
+  "write_api_space": [
+    {
+      "api": "POST /api/v5/account/set-leverage",
+      "params": ["instId", "mgnMode", "lever", "posSide"],
+      "notes": ["posSide is conditional depending on position mode"]
+    }
+  ],
+  "truth_read_space": [
+    {
+      "api": "GET positions (path to be confirmed by evidence)",
+      "fields": ["instId", "mgnMode", "posSide", "lever"]
+    }
+  ],
+  "alignment": [
+    {
+      "knob_name": "leverage_target",
+      "knob_type": "string|number",
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "write_path": {
+        "api": "POST /api/v5/account/set-leverage",
+        "param_name": "lever"
+      },
+      "truth_read_path": {
+        "api": "GET positions",
+        "field_name": "lever"
+      },
+      "not_measurable_rules": [
+        "not_measurable:set_leverage_api_unavailable",
+        "not_measurable:positions_truth_unavailable"
+      ]
+    },
+    {
+      "knob_name": "mgnMode",
+      "knob_type": "string",
+      "agent_expressible": true,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "write_path": {
+        "api": "POST /api/v5/account/set-leverage",
+        "param_name": "mgnMode"
+      },
+      "truth_read_path": {
+        "api": "GET positions",
+        "field_name": "mgnMode"
+      },
+      "not_measurable_rules": ["not_measurable:account_mode_unknown"]
+    },
+    {
+      "knob_name": "posMode",
+      "knob_type": "string",
+      "agent_expressible": true,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "write_path": {
+        "api": "UNKNOWN (to be frozen by evidence)",
+        "param_name": null
+      },
+      "truth_read_path": {
+        "api": "UNKNOWN (to be frozen by evidence)",
+        "field_name": null
+      },
+      "not_measurable_rules": ["not_measurable:pos_mode_write_api_unknown"]
+    }
+  ]
+}
+
+
