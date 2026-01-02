@@ -83,6 +83,9 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 对应：M1
   - 验收：建模文档（E dims contract + API parameter spaces）通过验收；`genome_alignment_table.json` 可从证据推导且自洽
   - 硬门槛：基因维度设计/重构仍后置（见 Start Here 的硬 gate）
+  - SSOT（入口）：
+    - Modeling pipeline + alignment: `docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`
+    - OKX order parameter space (v1): `docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md`
 
 - **V12.1.1 — Candidate dim experiment v0 (“Cloud intensity”, ablation-first, auditable)**
   - 对应：M0→M1 之间的“演化观测实验层”（不改 genome schema）
