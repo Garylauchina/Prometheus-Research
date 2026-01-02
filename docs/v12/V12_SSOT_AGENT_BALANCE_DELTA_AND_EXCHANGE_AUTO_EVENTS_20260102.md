@@ -59,6 +59,25 @@ Agent 应用 Δbalance 的幂等规则（冻结入口）：
 - 若 `event_id` 已处理过：必须忽略重复事件（不得重复加减）
 - 去重状态建议落盘（可选）：`agent_balance_event_cursor.json`
 
+### 2.3 System balance attribution via Agent-0（冻结，v0）
+
+动机（冻结）：
+- 某些账户级真值事件（例如资金费、自动减仓/强平、未知调整）在多 Agent 共享账户时**无法可靠归因**到具体 Agent。
+- 为保持实现最小化但可回溯：引入一个“系统收支归因主体（System Agent-0）”。
+
+冻结规则：
+- **System Agent-0（保留字）**：
+  - 固定 `agent_id_hash = "agent_0_system"`（或其 hash，但必须稳定且跨 run 一致）
+  - **不参与演化**：不得进入选择/变异/繁殖/淘汰；仅用于记录系统级收支样本
+- 归因口径（冻结）：
+  - 若事件无法归因到具体 Agent：生成一条 `agent_balance_events.jsonl` 记录并归因到 Agent-0
+  - 该事件必须显式标注为系统级：`attribution_scope="system"`（建议字段；若实现暂不支持，可在 `reason_code` 使用前缀 `system:*` 作为等价替代）
+  - 事件仍必须满足幂等与可回指证据（`event_id` + `evidence_ref`）
+
+推荐（冻结入口）：
+- `exchange_account_events.jsonl` 记录 account-level truth 事件（billId/fillId/ordId…）
+- 同时为 Agent-0 生成对应 Δbalance（`source="exchange_truth"`），以统一“能量/收支”接口，但不污染个体演化归因
+
 ---
 
 ## 3) Exchange auto events must be recorded（冻结）

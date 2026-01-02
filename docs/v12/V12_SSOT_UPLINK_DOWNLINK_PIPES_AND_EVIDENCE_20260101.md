@@ -103,6 +103,7 @@ Exchange truth（First Flight / truth-first 时必须）：
 - `agent_balance_events.jsonl`
   - 每条必须含 `event_id`（幂等）与 `evidence_ref`（可 join），见：
     `docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`
+  - 系统级收支归因（冻结入口）：若无法归因到具体 Agent，必须归因到 **System Agent-0**（`agent_id_hash="agent_0_system"`），并显式标注 `attribution_scope="system"`（或等价 `reason_code` 前缀 `system:*`）
 - `exchange_account_events.jsonl`
   - 自动处置/非本系统主动交易的账户事件记录（同样必须可回指 bills/fills/position snapshots）
 
