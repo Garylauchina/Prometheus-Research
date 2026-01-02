@@ -142,6 +142,13 @@ PASS 条件：
 - 表中每个字段都能回指证据来源（endpoint 或 SSOT）
 - 对“接口不可用/限速/模式差异”的情况，有明确 NOT_MEASURABLE 规则与 reason_code vocabulary
 
+建议的“悬空旋钮扫描”（冻结入口）：
+- 对任意一个 **Phase2+Phase3 verdict=PASS** 的 broker run_dir，运行对齐漂移扫描工具：
+  - `python3 tools/v12/scan_alignment_drift_v0.py --run_dir <BROKER_RUN_DIR> --template docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`
+- 输出 `alignment_drift_report.json`（或 stdout）必须可机读，且：
+  - `unmapped_attempt_fields` 为空（否则说明存在“悬空旋钮”或 evidence schema 漂移，需先修正对齐表/证据合同）
+  - 若发现 `important_non_order_knobs_observed`（例如 leverage_*），必须在下一次 v0+ 里为其补充“非 order 参数空间”的对齐记录（additive-only）
+
 FAIL 条件：
 - Genome/Decision 输出维度中出现无法在 alignment table 映射的“悬空旋钮”
 - 关键字段被系统静默默认且无法审计（例如 leverage 等）
