@@ -93,6 +93,19 @@ Exchange truth（First Flight / truth-first 时必须）：
 - `fills.jsonl`
 - `bills.jsonl`
 
+### 2.3 Agent balance & exchange auto events（V12 life-system minimal interface, 冻结入口）
+
+目的：
+- 支持“事件驱动的新陈代谢/繁殖”而不引入复杂分账：Broker 只推送 Δbalance，Agent 自己累加。
+- 交易所自动处置（强平/ADL/资金费/手续费等）必须如实落盘，作为 account-level truth 的一部分。
+
+必须新增（append-only）：
+- `agent_balance_events.jsonl`
+  - 每条必须含 `event_id`（幂等）与 `evidence_ref`（可 join），见：
+    `docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`
+- `exchange_account_events.jsonl`
+  - 自动处置/非本系统主动交易的账户事件记录（同样必须可回指 bills/fills/position snapshots）
+
 ---
 
 ## 3) Join keys & attribution anchors（冻结）

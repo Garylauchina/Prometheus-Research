@@ -20,6 +20,10 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 - **Epoch Constitution（语义不变的最大连续区间）**：`docs/v12/V12_SSOT_EPOCH_CONSTITUTION_20260102.md`
   - Epoch 不是时间切片，只在“语义断裂”时切换（算子/世界合同/观测口径任一变化即切 epoch）
 
+个体 balance（Δ事件驱动，冻结入口）：
+- **Agent Balance Delta + Exchange Auto Events**：`docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`
+  - Broker 只推送 Δbalance（幂等 event_id + evidence_ref），交易所自动处置必须如实落盘（account-level truth）
+
 方法论提醒（冻结）：
 - 即使同时跑百万 Agent、跑万次实验，整体仍然只是演化空间中的**极小碎片**；V12 不追求“覆盖空间”，而追求在证据链约束下的 **可复现、可比较、可迁移的局部规律**。
 - 因此，V12 的优先级始终是：先把世界输入/证据落盘/NOT_MEASURABLE 边界冻结成合同，再谈机制（新陈代谢/分裂繁殖）与基因维度。
