@@ -132,4 +132,41 @@ PASS（v1）：
 FAIL：
 - 出现无法映射到本表的“下单参数旋钮”（例如 Decision 输出了不存在字段）
 
+---
+
+## 6) Evidence-backed field coverage (frozen entry, additive-only)
+
+目的：
+- 让“参数空间 SSOT”从静态表格升级为 **可回放事实 + 覆盖率口径**。
+- v1 只记录“已在真实 PASS run 中出现过的字段集合”；不把“未出现”误判为不可用。
+
+### 6.1 Observed in a PASS broker run (VPS demo, sample)
+
+样例 run（事实记录，字符串锚点；不代表唯一证据源）：
+- Quant run_id: `run_broker_uplink_v0_20260102T171036Z`
+- Settlement verdict: `PASS`（fills=1, bills=1）
+
+在该 PASS run 中，观察到的 `POST /api/v5/trade/order` request params keys（最小集合）：
+- `instId`
+- `tdMode`
+- `side`
+- `posSide`
+- `ordType`
+- `sz`
+- `clOrdId`
+
+未在该样例 run 中出现（不等于不可用；多为 optional/conditional，仍需后续覆盖）：
+- `px`（limit/post_only 才需）
+- `reduceOnly`（条件字段）
+- `expTime`（系统可选字段）
+- `attachAlgoOrds`（TP/SL 结构未冻结）
+- `tag`（系统可选字段）
+
+### 6.2 Coverage rule (v1, frozen entry)
+
+- v1 的 coverage 只统计“是否在 PASS run 里出现过该字段”，不统计取值分布。
+- 后续 v1.x 只允许 additive 增加：
+  - 追加更多 PASS runs 的观察记录
+  - 追加“字段覆盖率阈值”与“必须覆盖的场景集”（例如 market vs limit、reduceOnly on/off）
+
 
