@@ -112,6 +112,47 @@ Agent 应用 Δbalance 的幂等规则（冻结入口）：
 重要（冻结）：
 - public WS（行情）不承担账户事件真值；自动处置属于账户私有真值。
 
+### 3.3 Phase 3 — Settlement materialization (fills/bills → events)（冻结，v0）
+
+目的（冻结）：
+- 将“账户级真值（fills/bills/position snapshots）”物化为两类事件流：
+  - `exchange_account_events.jsonl`（account truth）
+  - `agent_balance_events.jsonl`（Agent 侧可消费的 Δbalance）
+- 形成可机验闭环：truth evidence → events → join verification → manifest verdict 一致。
+
+冻结输出（v0 最小集合）：
+- `fills.jsonl`（strict JSONL）
+- `bills.jsonl`（strict JSONL）
+- `exchange_account_events.jsonl`（strict JSONL）
+- `agent_balance_events.jsonl`（strict JSONL；允许 append）
+- `run_manifest.json`（必须写入 verifier 结果：`verdict` + `join_verification`）
+
+事件生成规则（冻结）：
+- **禁止在系统内“自算费用/资金费/强平损益”当真值**：必须来自 `bills/fills` 或 position snapshots 的交易所字段。
+- `exchange_account_events.jsonl`：
+  - 每条必须回指真值证据：`evidence_ref.kind in {"bill","fill","position_snapshot"}` 且 `ref_id` 为对应主键（例如 billId/fillId/snapshot_id）
+  - `event_id` 必须稳定且幂等（冻结入口推荐）：
+    - bill 驱动：`event_id = "okx:bill:" + billId`
+    - fill 驱动：`event_id = "okx:fill:" + fillId`（若 exchange 不提供 fillId，可用稳定组合键替代）
+- `agent_balance_events.jsonl`（source=`exchange_truth`）：
+  - 默认从 **bill truth** 派生 Δbalance（冻结入口）：`evidence_ref.kind="bill"`, `ref_id=billId`
+  - `event_id` 必须稳定且幂等（冻结入口推荐）：`event_id = "okx:bill_delta:" + billId`
+
+归因规则（冻结，v0）：
+- 若 bill/fill 可明确 join 到某个 `client_order_id/clOrdId` 且该 order attempt 有明确 `agent_id_hash`：
+  - 允许生成该 Agent 的 Δbalance 事件（`agent_balance_events.jsonl.agent_id_hash=...`）
+- 若无法可靠归因到具体 Agent（例如资金费、强平/ADL、未知调整、或 join 断裂）：
+  - 必须归因到 **System Agent-0**：`agent_id_hash="agent_0_system"`（见 §2.3）
+  - 且必须显式标注系统级（`attribution_scope="system"` 或 `reason_code` 前缀 `system:*`）
+- Funding fee（冻结，v0）：
+  - 初期视为系统级 account event：必须落在 `exchange_account_events.jsonl.event_type="funding_fee"`；
+  - 归因到 Agent-0（system），**不得**在 v0 自动分摊到个体 Agent。
+
+Fail-closed（冻结）：
+- `fills.jsonl` / `bills.jsonl` 任一缺失或非 strict JSONL：该 run 必须 NOT_MEASURABLE（evidence_incomplete:settlement_truth）
+- 生成的 events 若出现 `event_id` 冲突但内容不一致：verifier 必须 FAIL
+- manifest 若出现 `join_verification.*.verified=false` 但 `verdict="PASS"`：verifier 必须 FAIL 并覆盖为一致结果
+
 ---
 
 ## 4) Join keys（冻结）

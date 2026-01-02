@@ -63,6 +63,17 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 目标：把“双管道信息流”跑通且可 join（下行 market_snapshot_id ↔ 决策 ↔ 上行 order_attempts/api_calls）
   - 验收：双管道证据文件齐全（见 `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`）+ join keys 可机验 + 关键缺失必须 NOT_MEASURABLE
 
+- **V12.3.1 — Settlement v0 (fills/bills truth → account events → Δbalance events)**
+  - 目的：把“账户级真值（fills/bills）”物化为事件流，支撑生命系统的能量接口（Δbalance），并保证可机验闭环。
+  - 验收（冻结，fail-closed）：
+    - `fills.jsonl` + `bills.jsonl` 必须存在且 strict JSONL
+    - `exchange_account_events.jsonl` 必须存在且每条可回指 `bills/fills/position_snapshot`
+    - `agent_balance_events.jsonl` 必须存在且每条具备幂等 `event_id` + 可 join 的 `evidence_ref`
+    - 无法归因到具体 Agent 的事件必须归因到 **System Agent-0**（`agent_id_hash="agent_0_system"`），且显式标注 system scope
+    - `run_manifest.json` 的 `verdict` 与 `join_verification.*` 必须一致（禁止 verified=false 但 verdict=PASS）
+  - SSOT：
+    - Balance delta + exchange auto events: `docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`（§3.3）
+
 - **V12.4 — Modeling SSOT v1 + genome alignment table v0 (no genome design yet)**
   - 对应：M1
   - 验收：建模文档（E dims contract + API parameter spaces）通过验收；`genome_alignment_table.json` 可从证据推导且自洽
