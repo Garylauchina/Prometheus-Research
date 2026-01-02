@@ -75,6 +75,9 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
     - `run_manifest.json` 的 `verdict` 与 `join_verification.*` 必须一致（禁止 verified=false 但 verdict=PASS）
   - SSOT：
     - Balance delta + exchange auto events: `docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`（§3.3）
+  - VPS demo 事实样例（只增不改）：
+    - 当 `bills.jsonl>0`：`fee_truth_source="bills"`，verifier 必须输出 `verdict=PASS`
+    - 当 `bills.jsonl==0` 且 `fills.jsonl>0`：`fee_truth_source="fills_candidate"`，verifier 必须输出 `verdict=NOT_MEASURABLE`（`reason_code=bills_missing`）
 
 - **V12.4 — Modeling SSOT v1 + genome alignment table v0 (no genome design yet)**
   - 对应：M1

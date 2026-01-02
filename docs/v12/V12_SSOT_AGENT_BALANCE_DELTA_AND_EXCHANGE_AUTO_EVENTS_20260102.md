@@ -148,6 +148,16 @@ Agent 应用 Δbalance 的幂等规则（冻结入口）：
       - `bills_missing=true`
     - **verdict 约束（冻结）**：只要 `bills_missing=true`，该 run 的 settlement 相关 verdict 必须为 `NOT_MEASURABLE`（reason_code=`bills_missing`），不得 `PASS`
 
+Truth retrieval semantics (OKX, frozen entry)：
+- **Time-window queries MUST use `begin/end` (ms)** for truth materialization:
+  - Fills: `GET /api/v5/trade/fills-history?instType=SWAP&instId=...&begin=...&end=...`
+  - Bills: `GET /api/v5/account/bills-archive?instType=SWAP&begin=...&end=...`
+- `after/before` are **pagination cursors** (not time window); using `after=run_start_ts_ms` is invalid.
+- **Empty `data=[]` with OKX `code=0` is a valid success** (do not treat as error).
+- Pagination cursor discipline:
+  - Fills cursor should use a fill identifier (e.g., `tradeId`), not billId.
+  - Bills cursor uses `billId`.
+
 归因规则（冻结，v0）：
 - 若 bill/fill 可明确 join 到某个 `client_order_id/clOrdId` 且该 order attempt 有明确 `agent_id_hash`：
   - 允许生成该 Agent 的 Δbalance 事件（`agent_balance_events.jsonl.agent_id_hash=...`）
