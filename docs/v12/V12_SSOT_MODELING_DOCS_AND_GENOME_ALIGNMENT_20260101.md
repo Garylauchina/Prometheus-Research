@@ -146,7 +146,7 @@ PASS 条件：
 - 对任意一个 **Phase2+Phase3 verdict=PASS** 的 broker run_dir，运行对齐漂移扫描工具：
   - `python3 tools/v12/scan_alignment_drift_v0.py --run_dir <BROKER_RUN_DIR> --template docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`
 - 输出 `alignment_drift_report.json`（或 stdout）必须可机读，且：
-  - `unmapped_attempt_fields` 为空（否则说明存在“悬空旋钮”或 evidence schema 漂移，需先修正对齐表/证据合同）
+  - `unmapped_attempt_fields` 为空（该列表只包含“应当映射到 order 参数空间的 knob-candidate 字段”；执行/审计元数据字段应被过滤，不参与漂移判定）
   - 若发现 `important_non_order_knobs_observed`（例如 leverage_*），必须在下一次 v0+ 里为其补充“非 order 参数空间”的对齐记录（additive-only）
 
 FAIL 条件：
