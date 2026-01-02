@@ -107,6 +107,8 @@ V12 必须产生至少两类 SSOT 文档（additive-only）：
 必须生成一个机器可读文件（由 scanner 或独立生成器输出）：
 
 - 文件名建议：`genome_alignment_table.json`
+- 建议同时在 `docs/v12/` 提供一份 **template** 作为冻结格式入口（用于 code review 与 diff）：
+  - `docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`
 - 最小字段（语义冻结）：
   - `exchange`（e.g. `okx`）
   - `inst_id`（must be `BTC-USDT-SWAP` for v0）
@@ -122,6 +124,10 @@ V12 必须产生至少两类 SSOT 文档（additive-only）：
     - `gate_controlled`（bool）
     - `not_measurable_rules`（array[string]）
     - `evidence_sources`（array[string]，例如 endpoint 名称或 SSOT 引用）
+
+冻结解释（v0）：
+- Alignment table **不是 genome 设计**：它只回答“Agent 表达空间/系统默认空间/gate 控制空间”分别有哪些字段，避免出现“悬空旋钮”。
+- `order_api_parameter_space` 允许在 v0 先由 SSOT（V11 OKX 合约规则 §12）提供事实锚点；后续可由 scanner/feature scanner 增量验证并补齐生态 fences（限速/上限/禁用）。
 
 硬规则（hard）：
 - **禁止发明字段**：Genome/Decision 维度若声称可输出某下单参数，必须能在该表中找到同名/等价语义字段。

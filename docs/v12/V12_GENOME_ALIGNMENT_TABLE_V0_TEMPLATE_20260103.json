@@ -1,0 +1,219 @@
+{
+  "exchange": "okx",
+  "inst_id": "BTC-USDT-SWAP",
+  "table_version": "v0",
+  "source_versions": {
+    "modeling_ssot": "docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md",
+    "okx_order_param_anchor": "docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12",
+    "uplink_downlink_evidence": "docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md"
+  },
+  "order_api_parameter_space": [
+    "instId",
+    "tdMode",
+    "side",
+    "posSide",
+    "ordType",
+    "sz",
+    "px",
+    "clOrdId",
+    "reduceOnly",
+    "tpTriggerPx",
+    "tpOrdPx",
+    "slTriggerPx",
+    "slOrdPx",
+    "expTime"
+  ],
+  "alignment": [
+    {
+      "field_name": "instId",
+      "field_type": "string",
+      "required_rule": "required",
+      "enum_values": ["BTC-USDT-SWAP"],
+      "agent_expressible": false,
+      "system_default_or_derived": true,
+      "gate_controlled": false,
+      "not_measurable_rules": [],
+      "evidence_sources": [
+        "SSOT: docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md (inst_id frozen)",
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md"
+      ]
+    },
+    {
+      "field_name": "tdMode",
+      "field_type": "string",
+      "required_rule": "required",
+      "enum_values": ["isolated", "cross"],
+      "agent_expressible": true,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "not_measurable_rules": ["not_measurable:account_mode_unknown"],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12",
+        "evidence: order_attempts.jsonl.td_mode",
+        "evidence: exchange_api_calls.jsonl.params.tdMode"
+      ]
+    },
+    {
+      "field_name": "side",
+      "field_type": "string",
+      "required_rule": "required",
+      "enum_values": ["buy", "sell"],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": false,
+      "not_measurable_rules": [],
+      "evidence_sources": [
+        "evidence: decision_trace.jsonl",
+        "evidence: order_attempts.jsonl",
+        "evidence: exchange_api_calls.jsonl.params.side"
+      ]
+    },
+    {
+      "field_name": "posSide",
+      "field_type": "string",
+      "required_rule": "conditional: depends on position mode",
+      "enum_values": ["long", "short", "net"],
+      "agent_expressible": true,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "not_measurable_rules": ["not_measurable:position_mode_unknown"],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12",
+        "evidence: order_attempts.jsonl.pos_side",
+        "evidence: exchange_api_calls.jsonl.params.posSide"
+      ]
+    },
+    {
+      "field_name": "ordType",
+      "field_type": "string",
+      "required_rule": "required",
+      "enum_values": ["market", "limit", "post_only", "ioc", "fok"],
+      "agent_expressible": true,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "not_measurable_rules": [],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12",
+        "evidence: order_attempts.jsonl.order_type",
+        "evidence: exchange_api_calls.jsonl.params.ordType"
+      ]
+    },
+    {
+      "field_name": "sz",
+      "field_type": "string",
+      "required_rule": "required",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "not_measurable_rules": ["not_measurable:lot_size_rules_unknown"],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md",
+        "evidence: order_attempts.jsonl.requested_sz",
+        "evidence: exchange_api_calls.jsonl.params.sz"
+      ]
+    },
+    {
+      "field_name": "px",
+      "field_type": "string|null",
+      "required_rule": "conditional: required if ordType=limit/post_only",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "not_measurable_rules": ["not_measurable:price_precision_unknown"],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md",
+        "evidence: order_attempts.jsonl.limit_px",
+        "evidence: exchange_api_calls.jsonl.params.px"
+      ]
+    },
+    {
+      "field_name": "clOrdId",
+      "field_type": "string",
+      "required_rule": "optional (recommended)",
+      "enum_values": [],
+      "agent_expressible": false,
+      "system_default_or_derived": true,
+      "gate_controlled": false,
+      "not_measurable_rules": [],
+      "evidence_sources": [
+        "evidence: order_attempts.jsonl.client_order_id",
+        "evidence: exchange_api_calls.jsonl.params.clOrdId"
+      ]
+    },
+    {
+      "field_name": "reduceOnly",
+      "field_type": "boolean|null",
+      "required_rule": "optional",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "not_measurable_rules": ["not_measurable:reduce_only_semantics_unknown"],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12",
+        "evidence: exchange_api_calls.jsonl.params.reduceOnly"
+      ]
+    },
+    {
+      "field_name": "tpTriggerPx",
+      "field_type": "string|null",
+      "required_rule": "optional (conditional with TP/SL)",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "not_measurable_rules": [],
+      "evidence_sources": ["SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12"]
+    },
+    {
+      "field_name": "tpOrdPx",
+      "field_type": "string|null",
+      "required_rule": "optional (conditional with TP/SL)",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "not_measurable_rules": [],
+      "evidence_sources": ["SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12"]
+    },
+    {
+      "field_name": "slTriggerPx",
+      "field_type": "string|null",
+      "required_rule": "optional (conditional with TP/SL)",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "not_measurable_rules": [],
+      "evidence_sources": ["SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12"]
+    },
+    {
+      "field_name": "slOrdPx",
+      "field_type": "string|null",
+      "required_rule": "optional (conditional with TP/SL)",
+      "enum_values": [],
+      "agent_expressible": true,
+      "system_default_or_derived": false,
+      "gate_controlled": true,
+      "not_measurable_rules": [],
+      "evidence_sources": ["SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md#12"]
+    },
+    {
+      "field_name": "expTime",
+      "field_type": "string|null",
+      "required_rule": "optional",
+      "enum_values": [],
+      "agent_expressible": false,
+      "system_default_or_derived": true,
+      "gate_controlled": true,
+      "not_measurable_rules": [],
+      "evidence_sources": [
+        "SSOT: docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md (expTime notes)"
+      ]
+    }
+  ]
+}
+
+
