@@ -94,6 +94,32 @@ Join 锚点（冻结入口）：
 
 ---
 
+## 5.1) Status: capability sealed（封存状态，additive-only）
+
+当前策略（临时决策，冻结入口）：
+- DSM 已作为独立能力模块完成“功能验收闭环”（连接/订阅/落盘/canonical/replayability/verifier）。
+- **但 DSM 暂不作为系统主线依赖**：主线可先使用 tick + REST snapshot（或低频 canonical snapshot）推进生命系统（代谢 v0）与建模/对齐工作。
+- DSM 的“并入系统”需要长期稳定测试通过（见下节 integration gate）。
+
+---
+
+## 5.2) Integration gate: long-run stability（并入门槛：长期稳定测试，冻结入口）
+
+动机：
+- DSM 一旦并入系统，会横向影响：Decision、Broker、Settlement、Metabolism、Auditor 的时序与证据 join。
+- 因此短时“能跑通”不足以作为并入标准；必须证明长期稳定性与可回放性。
+
+并入门槛（建议口径，v0，冻结入口）：
+
+- **Long-run availability**：
+  - 连续运行 ≥ N 小时（N 由实验要求设定），连接断开/重连必须可见（落盘 sessions + reason_code），不得静默。
+- **Subscription integrity**：
+  - 订阅集合在运行期间保持一致；任何丢订阅/无推送超时必须 NOT_MEASURABLE 可见。
+- **Replayability**：
+  - 任意窗口的 `market_snapshot.jsonl` 必须能回指 `okx_ws_messages.jsonl`（`source_message_ids` 可解析），并可由 verifier 重放验证。
+- **Verdict discipline**：
+  - `run_manifest.json.verdict` 与 verifier 输出一致；若存在 `not_measurable:*`，必须 NOT_MEASURABLE（禁止假 PASS）。
+
 ## 7) DSM v0.5+ implementation reference (additive-only, frozen semantics)
 
 目的：

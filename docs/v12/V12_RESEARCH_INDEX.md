@@ -43,6 +43,13 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 
 目的：把 V12 拆成可控的小版本，每个版本只完成一个“可验收闭环”，避免目标爆炸。
 
+### 说明（临时决策，冻结入口，additive-only）
+
+为了避免“事件驱动（DSM/WS）”的横向复杂度在早期指数叠加，当前版本节奏暂定：
+- **主线目标不变**：**World Feature Scanner + Life System（优先 Metabolism v0）**
+- **DSM 暂时封存**：DSM 作为已验证的独立能力模块保留，但**不作为主线依赖**；系统输入可先采用 tick + REST snapshot（证据落盘/可回放不变）。
+- **并入门槛后置**：DSM 真正并入系统（成为上层决策/代谢/结算的硬依赖）必须先通过长期稳定性测试（见 DSM SSOT 的 integration gate）。
+
 - **V12.0 — Scanner v0 (REST snapshot, candidate schema, tools verification PASS)**
   - 对应：M0
   - 验收：`market_snapshot.jsonl` 非空 + schema_verification PASS + evidence 可回放（source_call_ids 等）
@@ -60,11 +67,15 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
     - Canonical `market_snapshot` 的 v0.9.1 版本已实现 **5 通道→9 字段** 的可审计兑现（字段全非 null 时 `quality.overall="ok"`）
     - 关键冻结点：`index-tickers` 的 `instId` 必须使用 **underlying spot**（例如 `BTC-USDT`），而不是 `BTC-USDT-SWAP`（否则可能无推送→NOT_MEASURABLE）
     - 参考 SSOT：`docs/v12/V12_SSOT_DOWNLINK_SUBSCRIPTION_MANAGER_20260101.md`（新增 §7），`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（新增 §2.1.1/§4.1）
+  - **当前节奏备注（additive）**：
+    - DSM 在当前版本作为“封存能力（capability sealed）”存在；主线可先不依赖 WS 事件驱动，输入可先采用 tick/snapshot。
 
 - **V12.3 — Dual-pipe evidence closure (Downlink DSM + Uplink Broker)**
   - 对应：M0.5 → M1 的桥接
   - 目标：把“双管道信息流”跑通且可 join（下行 market_snapshot_id ↔ 决策 ↔ 上行 order_attempts/api_calls）
   - 验收：双管道证据文件齐全（见 `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`）+ join keys 可机验 + 关键缺失必须 NOT_MEASURABLE
+  - **当前节奏备注（additive）**：
+    - 该版本可后置到 DSM 长期稳定测试通过之后；在此之前，上行/生命系统可先基于 tick/snapshot 的 join 口径推进。
 
 - **V12.3.1 — Settlement v0 (fills/bills truth → account events → Δbalance events)**
   - 目的：把“账户级真值（fills/bills）”物化为事件流，支撑生命系统的能量接口（Δbalance），并保证可机验闭环。
