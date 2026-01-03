@@ -54,6 +54,11 @@ SSOT anchors（只读引用）：
   - 若账户为单向持仓模式：`posSide="net"` 或不传（以 OKX 账户模式为准）
   - 若系统无法确认账户持仓模式：必须 NOT_MEASURABLE（`not_measurable:position_mode_unknown`）且 gate 必须 fail-closed（拒绝下单或切换到明确模式）
 
+补充（V12.4 policy, additive）：
+- `posSide` 虽然出现在 order 参数空间，但其语义与“是否双向持仓”强耦合。
+- 因此 `posMode` 必须首先作为 `system_fact` 被 Broker/ProxyTrader 读真值确认并冻结（见：`docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`）。
+- 在共享账户阶段：禁止 Agent 直接碰撞 `posMode`（否则共享状态污染导致不可归因），但允许 Agent 在已冻结的 `posMode` 前提下表达 `posSide`（order_expressible）。
+
 - `px`（conditional）：
   - `ordType in {"limit","post_only"}` ⇒ `px` 必填
   - `ordType="market"` ⇒ `px` 必须为空或不传（禁止伪造 0）

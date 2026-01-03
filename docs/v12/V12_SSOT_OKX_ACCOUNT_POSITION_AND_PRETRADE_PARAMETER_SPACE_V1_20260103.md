@@ -8,6 +8,26 @@
 
 ---
 
+## 0) Control-class discipline（冻结，V12.4 policy）
+
+目的：在“共享账户 + 多 Agent”阶段，**先净化可观测环境**，避免不可归因导致观测失效。
+
+本 SSOT 引入（additive）一个更清晰的控制分类词表 `control_class`，用于对齐表与 verifier：
+
+- `system_fact`：系统必须先读真值确认并冻结；Agent 不得直接控制（否则共享状态污染，无法归因）。
+- `agent_expressible`：Agent/Decision 直接表达（通常是 order 参数）；系统仍可 gate-control 以满足交易所条件。
+- `agent_proposable`：Agent 只能“提议”，由 Broker/ProxyTrader gate-control 执行；必须有 write+read truth 证据闭环。
+- `system_controlled`：仅系统策略可控（例如限速策略、生态围栏策略），不进入基因表达。
+
+V12.4（共享账户）推荐分类（冻结入口，只增不改）：
+
+- `posMode`：`system_fact`（必须先读出并冻结；切换写 API 未冻结前默认 NOT_MEASURABLE）。
+- `mgnMode`：`system_fact`（必须先读出并冻结；若未来开放，只能走 agent_proposable + 证据闭环）。
+- `posSide`：`agent_expressible`（order 参数），但其可用性/必填条件由 `posMode(system_fact)` 约束。
+- `leverage_target`：`agent_proposable`（你们 Phase B 已证明可做：set-leverage + positions truth）。
+
+---
+
 ## 1) Scope（冻结）
 
 - **exchange**: OKX

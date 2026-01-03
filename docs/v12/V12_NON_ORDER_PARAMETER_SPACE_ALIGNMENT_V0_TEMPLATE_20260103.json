@@ -24,6 +24,7 @@
     {
       "knob_name": "leverage_target",
       "knob_type": "string|number",
+      "control_class": "agent_proposable",
       "agent_expressible": true,
       "system_default_or_derived": false,
       "gate_controlled": true,
@@ -43,6 +44,7 @@
     {
       "knob_name": "mgnMode",
       "knob_type": "string",
+      "control_class": "system_fact",
       "agent_expressible": true,
       "system_default_or_derived": true,
       "gate_controlled": true,
@@ -59,6 +61,7 @@
     {
       "knob_name": "posMode",
       "knob_type": "string",
+      "control_class": "system_fact",
       "agent_expressible": true,
       "system_default_or_derived": true,
       "gate_controlled": true,
