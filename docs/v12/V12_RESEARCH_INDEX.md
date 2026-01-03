@@ -123,6 +123,15 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 对应：M4 的一部分
   - 验收：新陈代谢触发与证据落盘可审计；不依赖“死亡审判”裁决
 
+- **V12.6.1 — Interaction impedance probe v0 (broker-local, auditable)**
+  - 目的：把“交互阻抗/执行摩擦”从叙事变成 account-local truth，为代谢/裁决提供可观测环境压力信号（而不是基因可控旋钮）。
+  - 验收（冻结入口，fail-closed）：
+    - `interaction_impedance.jsonl` 必须存在且 strict JSONL
+    - 每条记录必须包含 `account_id_hash + window + metrics + evidence_refs + verdict`
+    - 当窗口内无样本或关键证据缺失：必须 NOT_MEASURABLE（不得伪造 0）
+  - SSOT：
+    - `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（§1.1.1）
+
 - **V12.7 — Split reproduction v0 (capital-doubling)**
   - 对应：M4 的一部分
   - 验收：分裂繁殖触发基于可审计资本增长；证据链闭合

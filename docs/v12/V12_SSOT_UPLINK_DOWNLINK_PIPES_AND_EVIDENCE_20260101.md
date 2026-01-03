@@ -45,6 +45,41 @@
 因此，证据必须显式携带“账号身份锚点”（脱敏可，但必须可 join）：
 - `account_id_hash`（或等价字段：subaccount_id_hash / user_id_hash）
 
+### 1.1.1 Interaction impedance probe v0（测试与落盘口径，冻结入口）
+
+目标：
+- 把“执行摩擦/交互阻抗”从叙事变成 **可机验、可回放、可对照** 的 account-local truth。
+- 该指标不是基因的可控旋钮（不是 knob），而是 Broker 根据执行证据计算的 **观测量/反馈量**（system_fact）。
+
+最小落盘要求（v0）：
+- 新增证据文件：`interaction_impedance.jsonl`（strict JSONL, append-only）
+- 每条记录必须包含：
+  - `ts_utc`
+  - `account_id_hash`
+  - `window`：窗口定义（v0 推荐 `prev_tick` 或 `last_n_attempts`，必须明确）
+  - `impedance_version`：例如 `v0`
+  - `metrics`（object）：可比较的数值集合（见下）
+  - `evidence_refs`（object/array）：回指用于计算的上游证据锚点（例如 order_attempts 的 attempt_id 列表、api_calls 的 call_id 列表，或 run-level 范围）
+  - `verdict`：`PASS|NOT_MEASURABLE|FAIL`
+  - `reason_codes`（array[string]）
+
+v0 metrics（冻结入口，后续只增不改）：
+- `order_attempts_count`（int）
+- `reject_count`（int）
+- `rate_limited_count`（int）：含 50011/50061 等
+- `http_error_count`（int）
+- `self_fill_ratio_prev_tick`（float|null, [0,1]）：若无法从 fills/bills 物化，则必须为 null + mask discipline（见 reason_codes）
+- `avg_ack_latency_ms`（float|null）：从 api_calls 计算（若无字段则 NOT_MEASURABLE）
+
+NOT_MEASURABLE（v0）：
+- `not_measurable:impedance_no_attempts`：窗口内无任何 order_attempts
+- `not_measurable:impedance_missing_api_calls`：缺少 api_calls 证据导致无法计算延迟/错误桶
+- `not_measurable:impedance_truth_missing`：需要 fills/bills 才能计算 fill_ratio，但 truth 缺失
+
+FAIL（v0）：
+- `fail:impedance_jsonl_invalid`：输出不满足 strict JSONL
+- `fail:impedance_missing_account_id_hash`：缺少 account 锚点，无法解释局部阻抗
+
 ---
 
 ## 2) Evidence files（冻结）
@@ -87,6 +122,10 @@ Internal pub/sub evidence（必须）：
 - `okx_api_calls.jsonl`（或统一 `exchange_api_calls.jsonl`）
   - 每一次 HTTP request/response（含 http_status、code/msg、sCode/sMsg）
   - 必须包含 `account_id_hash`（或等价字段）
+
+Interaction impedance（v0, must if enabled）：
+- `interaction_impedance.jsonl`
+  - Broker 基于执行证据计算的 account-local 执行摩擦指标（见 §1.1.1）
 
 Exchange truth（First Flight / truth-first 时必须）：
 - `orders_history.jsonl`
