@@ -57,6 +57,42 @@
 
 ---
 
+## 2.1) 操作规范（C 路线：仅靠规程约束，不依赖 MCP）
+
+目的：让程序员AI的“操作”也符合证据链与 fail-closed，避免临时调试绕过 run_dir/manifest，造成不可复现与不可归因。
+
+硬规则（必须遵守）：
+
+- **禁止裸跑（No bare runs）**：
+  - 任何涉及交易所读写/审计/结算/验证的运行，都必须产生 `run_dir`，并在 `run_manifest.json` 内写清 `runs_root/run_id` 与关键版本指纹（至少 `build_git_sha`）。
+  - 禁止只给终端输出而不落盘证据；禁止“跑过了但找不到 run_dir”。
+
+- **禁止绕过证据链（No direct probes outside evidence）**：
+  - 禁止用临时 `curl`、临时脚本直接打 OKX（尤其是写接口）；必须走系统入口（flight runners / tools verifiers）。
+  - 若确需临时探测：也必须落盘到某个 `run_dir`，并记录 `okx_api_calls.jsonl` 与 `errors.jsonl`（否则视为无效样本）。
+
+- **严格 JSONL（Strict JSONL, no exceptions）**：
+  - 所有 `*.jsonl` 证据文件必须“一行一个合法 JSON object”，不得包含注释、不得包含 `_note` 这类说明性字段。
+  - 任意不合法 JSONL 必须被 verifier 判为 FAIL（或至少 structure_check FAIL），禁止口头放行。
+
+- **共享状态冻结（Shared-state freeze, as policy）**：
+  - 在“多 Agent 共享账户/共享执行通道”的阶段，账户级共享状态默认冻结为 `system_fact`（例如 `posMode/mgnMode`），不得让 Agent 直接碰撞这些旋钮。
+  - 若未来开放：只能走“Agent 提议（proposable）→ Broker gate-control 执行 → write+read truth 闭环证据”的路径；否则一律 NOT_MEASURABLE。
+
+说明（入口链接，不影响当前版本节奏）：
+- V12 对“系统级/工程级公理”的更完整汇总：`docs/v12/V12_SSOT_AXIOMS_SYSTEM_AND_ENGINEERING_20260103.md`
+
+---
+
+## 2.2) Future: MCP（占位，不作为当前验收项）
+
+如果未来启用 Cursor MCP 来规范程序员AI操作，则应遵循：
+- **写侧能力默认禁用**：只有在具备 run_dir 落盘与 verifier 可机验闭环时才允许开放。
+- **所有工具必须输出可 join 的证据锚点**：`event_id/evidence_ref/run_id`，避免绕过证据链。
+- **MCP 只是“受控入口”，不是新的旁路**：启用后反而应减少裸命令与临时脚本。
+
+---
+
 ## 3) 交付物（每次改动至少给出）
 
 - **改动说明**：改了什么、为什么、对应哪条 SSOT/Design 条目（引用文件路径即可）。
