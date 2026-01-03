@@ -18,6 +18,15 @@ Scanner 是一个 **read-mostly** 的建模工具：
 - Scanner 不做策略，不做训练，不做收益评估。
 - Scanner 输出是“世界事实快照”，不得伪造成稳定规则；规则冻结必须回写到 SSOT（例如 OKX 合约规则 SSOT）。
 
+部署边界（冻结，重要）：
+- Scanner 是**建模工具/测量工具**，用于定义系统演化模型与参数空间（SSOT 对齐），**不是系统运行必备组件**。
+- 因此 Scanner **不要求部署到 VPS 容器**；它可以在本机/开发机运行，只要证据包（run_dir）可复现、可审计、可回放。
+- 若未来在 VPS 运行 Scanner，仅作为测量环境差异的事实样本（不改变其“非必备工具”定位）。
+
+独立性要求（冻结）：
+- Scanner 必须能独立完成其 probes 与证据落盘，**不得依赖 Broker 的运行或 Broker 的 run_dir**。
+- 允许复用底层 OKX connector 代码（签名/请求/证据落盘库），但不得依赖“系统角色链路”（Agent→Broker→Exchange）。
+
 ---
 
 ## 2) 输出物（run_dir 证据包，冻结）
@@ -124,6 +133,13 @@ OKX public（候选）接口清单（字段以“事实落盘”为先，后续�
 - `probe_set_leverage`：对指定 instId/tdMode/posSide 设置杠杆（用于 leverage truth binding）
 - `probe_place_order_min_sz`：按最小 sz 下一个可控订单（例如 limit 到远离市场价，避免成交；或 market 极小量，按风险承受配置）
 - `probe_cancel_order`：对上一单撤单验证（证明取消接口可用）
+
+交互阻抗（interaction impedance）探针（v0，独立测量入口，默认关闭）：
+- 目标：在不依赖 Broker 的前提下，测量 account-local 的交互摩擦（延迟/拒单/限速/回执桶），并落盘为建模事实。
+- 建议新增产物（run_dir 内）：
+  - `interaction_impedance.jsonl`：窗口聚合指标（strict JSONL，append-only）
+  - `probe_attempts.jsonl`（或等价）：每个 probe 的抽象记录（action/result/reason_code + evidence_refs）
+- 若 write probes 未启用：与写侧相关的阻抗指标必须判为 NOT_MEASURABLE（不得伪造 0）。
 
 每个写探针必须：
 - 有独立开关（默认 off）

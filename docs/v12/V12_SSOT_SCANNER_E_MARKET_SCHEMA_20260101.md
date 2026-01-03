@@ -14,6 +14,11 @@ Scanner v0 只做 **E（外显）市场信息查询**，锁定单一产品 `BTC-
 - **read-only**：本阶段不启用任何写探针（不下单、不撤单、不设杠杆）
  - **runs_root（frozen, Quant repo default）**：`./runs_v12/`（详见：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`）
 
+定位补充（additive, frozen entry）：
+- Scanner 是**建模工具/测量工具**，用于定义世界外显特征与 NOT_MEASURABLE 边界；它不是系统运行必备组件。
+- Scanner 运行环境不要求绑定 VPS 容器；本机/开发机运行同样有效，只要 run_dir 证据可复现、可审计。
+- 写侧交互阻抗探针（interaction impedance）属于 Scanner 的“可选 write probes”（V11 SSOT 定义），与本 v0 read-only scope 不冲突：v0 默认关闭，开启时必须严格落盘并 fail-closed。
+
 传输层选择（冻结）：
 - **v0 实现优先使用 REST 拉取快照**（request/response 证据最稳定，最易复现与审计）。
 - **WebSocket（事件驱动）作为 v1 扩展**：用于更低延迟/更高频的行情推送，但必须满足 WS 证据纪律（订阅与消息流落盘）后才允许作为“决策输入真值”。
