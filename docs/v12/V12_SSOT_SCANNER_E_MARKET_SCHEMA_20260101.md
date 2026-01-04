@@ -3,6 +3,10 @@
 目标：把 V12 的第一阶段（M0）冻结成“可实现、可验收、可迁移”的契约：  
 Scanner v0 只做 **E（外显）市场信息查询**，锁定单一产品 `BTC-USDT-SWAP`，并输出可机读证据与对齐表。
 
+口径统一（additive, frozen entry）：
+- Scanner 产出的是“API 可直接获取/返回的参数结构与字段空间”（request/response/schema + NOT_MEASURABLE 边界），用于建模对齐。
+- Scanner 不承担订单生命周期/微结构推断（例如 fill_ratio、部分成交统计等）；这类推断型真值由后续工具或生产系统证据链承载。
+
 本文件 additive-only。
 
 ---

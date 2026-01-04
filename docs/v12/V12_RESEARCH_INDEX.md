@@ -44,6 +44,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 
 - **World Feature Scanner（建模工具，独立）**
   - 定位：建模/测量工具，不是系统运行必备；不要求部署到 VPS 容器（见 Scanner SSOT）。
+  - 口径：只负责“API 可直接获取/返回的参数结构与字段空间”（request/response/schema + NOT_MEASURABLE 边界）；不承担订单生命周期/微结构推断（例如 fill_ratio）。
   - 产物：`market_snapshot.jsonl` + `okx_api_calls.jsonl` + `scanner_report.json` + `run_manifest.json`（strict JSONL / 可回放 / fail-closed）。
 
 - **Interaction impedance probe（并入 Scanner，独立测量）**
