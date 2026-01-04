@@ -76,6 +76,8 @@ SSOT 入口：
 - Scanner E schema verifier（market_snapshot canonical schema）：`python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
 - Genome alignment table verifier（V12.2, machine-readable）：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
 - Tick loop verifier（V12.3, sequence integrity）：`python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
+- Tick loop repeatability gate（V12.3, FAIL=0）：`python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <run_id_1,run_id_2,...>`
+- errors.jsonl summary（bucket statistics）：`python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl`
 
 ## V12 mini-releases (recommended cadence)
 
@@ -157,6 +159,13 @@ SSOT 入口：
     - tick 序列完整性通过 tick verifier（FAIL=0）：
       - `python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N> --max_backward_ms 0`
     - fail-closed：缺 required files / JSONL 非 strict / ts 回退 / snapshot_id 重复 → FAIL
+  - repeatability gate（建议作为 V12.3.1，冻结入口）：
+    - 在同一环境跑 N 次 tick loop（N 建议 >=20），收集 run_ids
+    - 对 run_ids 批量执行：
+      - `python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <...> --min_ticks 120 --max_backward_ms 0 --output <tick_gate_aggregate.json>`
+    - 通过条件：`FAIL=0`（NOT_MEASURABLE 允许，但必须可统计原因）
+    - 对每个 run 的 `errors.jsonl` 做统计归档（用于后续“交互阻抗/环境反馈”口径收敛）：
+      - `python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl --output <errors_summary.json>`
   - 验收样例锚点（只读，写实记录）：
     - Quant branch: `v12-broker-uplink-v0`
     - Quant commit: `790f984`
