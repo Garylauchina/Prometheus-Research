@@ -27,6 +27,11 @@ Scanner 是一个 **read-mostly** 的建模工具：
 - Scanner 必须能独立完成其 probes 与证据落盘，**不得依赖 Broker 的运行或 Broker 的 run_dir**。
 - 允许复用底层 OKX connector 代码（签名/请求/证据落盘库），但不得依赖“系统角色链路”（Agent→Broker→Exchange）。
 
+证据隔离（冻结入口，重要）：
+- Scanner 的 run_dir 证据包只用于建模/对齐（tooling evidence），不得与生产系统 run_dir 混用（避免证据污染）。
+- 推荐使用独立 runs_root（示例）：`./runs_v12_modeling_tool/`（见 V12 证据路径约定：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md` §0.1）。
+- 建议在 `run_manifest.json` 写入 `run_kind="modeling_tool"` 以便 verifier 与人类审阅快速判别。
+
 ---
 
 ## 2) 输出物（run_dir 证据包，冻结）

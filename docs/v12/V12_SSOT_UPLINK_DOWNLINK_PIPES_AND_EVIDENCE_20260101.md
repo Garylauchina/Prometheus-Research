@@ -21,6 +21,30 @@
   - `run_{component}_{truth_profile}_{YYYYMMDDTHHMMSSZ}`
   - 例：`run_scanner_v0_replay_20260101T091611Z`
 
+### 0.1 Modeling tool vs Production evidence isolation（隔离规则，冻结入口）
+
+动机（冻结）：
+- 建模工具（Scanner/impedance probes 等）的证据包用于“定义模型与 SSOT 对齐”，不应与生产系统运行证据混在同一目录树，否则会导致：
+  - 证据污染（工具样本被误当作生产 run）
+  - verifier/join 语义混乱（同名文件、不同语义）
+  - 难以复现与比较（run_kind 不明）
+
+隔离规则（冻结入口，additive-only）：
+- **建模工具 runs_root（推荐默认）**：`./runs_v12_modeling_tool/`
+- **生产系统 runs_root（推荐默认）**：`/var/lib/prometheus-quant/runs/`（生产环境约定）
+- 两类 runs_root **不得混用**；同一 run_dir 内不得出现“跨 run_kind 的证据文件”。
+
+run_id 前缀建议（冻结入口）：
+- 建模工具：`run_tool_scanner_*` / `run_tool_model_*`
+- 生产系统：`run_broker_*` / `run_tick_*` / `run_life_*`
+
+manifest 必填标记（冻结入口）：
+- `run_kind`：`modeling_tool|production`
+- `truth_profile`：如 `exchange_truth|replay_truth|broker_local`（已有口径延续）
+
+verifier 建议（冻结入口）：
+- 任一 verifier 在读取 run_dir 时必须校验 `run_manifest.json.run_kind`（若缺失→NOT_MEASURABLE 或 FAIL，按工具口径 fail-closed）。
+
 兼容（冻结入口）：
 - 若历史实现已使用 `./runs_v12_scanner/`（例如 v12-scanner-m0 的早期 run），允许继续读取，但从本冻结开始**新 run 统一写入 `./runs_v12/`**。
 
