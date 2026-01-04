@@ -74,6 +74,7 @@ SSOT 入口：
 工具入口（verifiers/tools）：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
 - Scanner E schema verifier（market_snapshot canonical schema）：`python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
+- Genome alignment table verifier（V12.2, machine-readable）：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
 
 ## V12 mini-releases (recommended cadence)
 
@@ -131,7 +132,15 @@ SSOT 入口：
 
 - **V12.2 — Genome refactor v0 (alignment + control_class, no expansion)**
   - 对应：Mainline/Genome refactor
-  - 验收：对齐表模板可机读；`control_class` 分类明确；悬空旋钮扫描可运行且结果可解释。
+  - 验收（机器可验，冻结入口）：
+    - `genome_alignment_table.json` 结构可机读，并通过 verifier：
+      - `python3 tools/v12/verify_genome_alignment_table_v0.py --input docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`（模板自检）
+      - 对实际表：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
+    - `control_class` 词表必须使用冻结集合：`system_fact|agent_expressible|agent_proposable|system_controlled`
+    - 悬空旋钮扫描（dangling knobs）必须可运行且可解释：
+      - 对任意一个 verdict=PASS 的 broker run_dir：
+        - `python3 tools/v12/scan_alignment_drift_v0.py --run_dir <BROKER_RUN_DIR> --template docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`
+      - 通过条件：`unmapped_attempt_fields` 为空（执行/审计元数据字段必须被过滤）
 
 - **V12.3 — Tick loop v0 (polling world, evidence-first)**
   - 对应：Mainline/Tick
