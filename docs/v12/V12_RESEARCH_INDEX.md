@@ -75,6 +75,7 @@ SSOT 入口：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
 - Scanner E schema verifier（market_snapshot canonical schema）：`python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
 - Genome alignment table verifier（V12.2, machine-readable）：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
+- Tick loop verifier（V12.3, sequence integrity）：`python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
 
 ## V12 mini-releases (recommended cadence)
 
@@ -148,7 +149,14 @@ SSOT 入口：
 
 - **V12.3 — Tick loop v0 (polling world, evidence-first)**
   - 对应：Mainline/Tick
-  - 验收：tick 轮询产生可回放的 `market_snapshot` 序列；失败必须 NOT_MEASURABLE 可见。
+  - SSOT：`docs/v12/V12_SSOT_TICK_LOOP_V0_20260104.md`
+  - 验收（机器可验，冻结入口）：
+    - 运行产生单 run_dir，包含多 tick 的 `market_snapshot.jsonl` 序列（strict JSONL）
+    - `market_snapshot.jsonl` 通过 E schema verifier：
+      - `python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
+    - tick 序列完整性通过 tick verifier（FAIL=0）：
+      - `python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N> --max_backward_ms 0`
+    - fail-closed：缺 required files / JSONL 非 strict / ts 回退 / snapshot_id 重复 → FAIL
 
 - **V12.4 — Life v0 (simple death + ROI doubling reproduction, interface-first)**
   - 对应：Mainline/Life
