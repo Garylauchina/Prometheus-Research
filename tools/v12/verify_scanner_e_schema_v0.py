@@ -268,23 +268,31 @@ def verify(run_dir: Path) -> CheckResult:
     counts: Dict[str, int] = {}
     coverage: Dict[str, Dict[str, Any]] = {}
 
+    # strict JSON / JSONL
+    manifest: Dict[str, Any] = {}
+    try:
+        manifest = _read_json(run_dir / "run_manifest.json")
+    except Exception as e:
+        errors.append(f"run_manifest.json invalid json: {e}")
+        return CheckResult(verdict="FAIL", errors=errors, warnings=warnings, counts=counts, field_coverage=coverage)
+
+    # Required files depend on run_kind:
+    # - modeling_tool (scanner): requires scanner_report.json
+    # - production (tick loop): does NOT require scanner_report.json
+    run_kind = manifest.get("run_kind")
     required = [
         "run_manifest.json",
         "okx_api_calls.jsonl",
         "errors.jsonl",
-        "scanner_report.json",
         "market_snapshot.jsonl",
     ]
+    if run_kind == "modeling_tool":
+        required.append("scanner_report.json")
+
     missing = _check_required_files(run_dir, required)
     if missing:
         errors.extend([f"missing required file: {name}" for name in missing])
         return CheckResult(verdict="FAIL", errors=errors, warnings=warnings, counts=counts, field_coverage=coverage)
-
-    # strict JSON / JSONL
-    try:
-        _ = _read_json(run_dir / "run_manifest.json")
-    except Exception as e:
-        errors.append(f"run_manifest.json invalid json: {e}")
 
     for name in ["okx_api_calls.jsonl", "errors.jsonl", "market_snapshot.jsonl"]:
         try:
