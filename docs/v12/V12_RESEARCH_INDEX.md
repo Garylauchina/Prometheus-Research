@@ -178,6 +178,12 @@ SSOT 入口：
       - `python3 tools/v12/verify_tick_loop_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_tick_loop_v0_20260104T132154Z --min_ticks 120 --max_backward_ms 0`
       - expected: `exit 0` + `verdict=NOT_MEASURABLE` (degraded but valid: errors.jsonl non-empty)
     - Note: 报告展示可带注释；但所有 evidence `.jsonl` 必须 strict JSONL（证据行内禁止 `//` 注释）。
+  - repeatability campaign（N=20, FAIL=0）锚点（只读，写实记录）：
+    - Gate report: `runs_v12/tick_loop_gate_aggregate_v3.json` (Quant local artifact)
+    - Run IDs file: `/tmp/tick_run_ids_campaign.txt` (local)
+    - Errors summaries:
+      - `runs_v12/tick_errors_summaries_campaign_20260104T191027Z/aggregate_errors_summary.json`
+      - by_error_type (20 runs aggregated): `get_books_unavailable=19`, `get_index_tickers_unavailable=17`, `get_mark_price_unavailable=15`, `get_funding_rate_unavailable=13`, `get_ticker_unavailable=5`
 
 - **V12.4 — Life v0 (simple death + ROI doubling reproduction, interface-first)**
   - 对应：Mainline/Life
