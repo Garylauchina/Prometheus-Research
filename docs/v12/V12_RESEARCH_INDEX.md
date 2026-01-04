@@ -157,6 +157,18 @@ SSOT 入口：
     - tick 序列完整性通过 tick verifier（FAIL=0）：
       - `python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N> --max_backward_ms 0`
     - fail-closed：缺 required files / JSONL 非 strict / ts 回退 / snapshot_id 重复 → FAIL
+  - 验收样例锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `790f984`
+    - Quant run_dir: `runs_v12/run_tick_loop_v0_20260104T132154Z`
+    - Evidence summary (reported):
+      - `market_snapshot.jsonl`: 120 lines (120 ticks)
+      - `okx_api_calls.jsonl`: 600 calls (5 endpoints × 120 ticks)
+      - `errors.jsonl`: 8 records (network/connection errors)
+    - Tick loop verifier:
+      - `python3 tools/v12/verify_tick_loop_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_tick_loop_v0_20260104T132154Z --min_ticks 120 --max_backward_ms 0`
+      - expected: `exit 0` + `verdict=NOT_MEASURABLE` (degraded but valid: errors.jsonl non-empty)
+    - Note: 报告展示可带注释；但所有 evidence `.jsonl` 必须 strict JSONL（证据行内禁止 `//` 注释）。
 
 - **V12.4 — Life v0 (simple death + ROI doubling reproduction, interface-first)**
   - 对应：Mainline/Life
