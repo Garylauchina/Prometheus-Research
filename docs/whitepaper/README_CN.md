@@ -109,6 +109,6 @@ Gate 0 失败 ≠ 实验失败，而是测量结论。
 
 - **方法论 SSOT（权威口径）**：`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
 - **V12 基础维度（禁止人为删减）**：`docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`
-- **V12 指挥台**：`docs/v12/V12_RESEARCH_INDEX.md`
+- **V12 指挥台（中文）**：`docs/v12/V12_RESEARCH_INDEX_CN.md`
 
 

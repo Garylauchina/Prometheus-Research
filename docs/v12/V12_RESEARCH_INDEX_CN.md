@@ -1,0 +1,282 @@
+# V12 Research Index / V12 研究入口（中文为主）
+
+定位（冻结）：
+- **V10 = 证据链诞生**
+- **V11 = 证据链工业化**
+- **V12 = 世界建模与生命系统上线**
+
+本 index 是 V12 的唯一指挥台（SSOT index）。从现在开始，V12 新增文档只写入 `docs/v12/`（additive-only）。
+
+---
+
+## Start Here
+
+V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现事实，避免基因维度设计漂移成主观拍脑袋。
+
+硬 gate（冻结）：
+- **基因扩维后置**：必须等“世界扫描器分批实现到阶段性全功能 + tools 验证通过 + 建模文档（SSOT）验收通过”，才能进入“新增维度/扩维”。否则一律视为 NOT_READY（避免先验基因导致漂移）。
+- **允许的最小基因重构（v0）**：仅做“对齐/分类/命名收敛”（例如 `control_class`、映射表、悬空旋钮扫描），不引入未经验证的新维度语义。
+
+演化宪法（冻结入口）：
+- **Epoch Constitution（语义不变的最大连续区间）**：`docs/v12/V12_SSOT_EPOCH_CONSTITUTION_20260102.md`
+  - Epoch 不是时间切片，只在“语义断裂”时切换（算子/世界合同/观测口径任一变化即切 epoch）
+
+指导性公理（冻结入口；不作为当前版本的工具验收项）：
+- **System-level vs Engineering-level axioms**：`docs/v12/V12_SSOT_AXIOMS_SYSTEM_AND_ENGINEERING_20260103.md`
+
+个体 balance（Δ事件驱动，冻结入口）：
+- **Agent Balance Delta + Exchange Auto Events**：`docs/v12/V12_SSOT_AGENT_BALANCE_DELTA_AND_EXCHANGE_AUTO_EVENTS_20260102.md`
+  - Broker 只推送 Δbalance（幂等 event_id + evidence_ref），交易所自动处置必须如实落盘（account-level truth）
+
+方法论提醒（冻结）：
+- 即使同时跑百万 Agent、跑万次实验，整体仍然只是演化空间中的**极小碎片**；V12 不追求“覆盖空间”，而追求在证据链约束下的 **可复现、可比较、可迁移的局部规律**。
+- 因此，V12 的优先级始终是：先把世界输入/证据落盘/NOT_MEASURABLE 边界冻结成合同，再谈机制（新陈代谢/分裂繁殖）与基因维度。
+- 任何新维度进入决策前必须先通过 **可审计+可测+可消融** 的验证；否则一律视为 NOT_READY（见：`docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`）。
+
+证据路径约定（冻结）：
+- V12 统一 `runs_root/run_id`：见 `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md` 的 “Evidence path convention”。
+
+---
+
+## V12 Mainline (light) — 版本目标（轻装上阵）
+
+本阶段把目标收敛为 6 件事（按依赖顺序）：
+
+- **World Feature Scanner（建模工具，独立）**
+  - 定位：建模/测量工具，不是系统运行必备；不要求部署到 VPS 容器（见 Scanner SSOT）。
+  - 口径：只负责“API 可直接获取/返回的参数结构与字段空间”（request/response/schema + NOT_MEASURABLE 边界）；不承担订单生命周期/微结构推断（例如 fill_ratio）。
+  - 产物：`market_snapshot.jsonl` + `okx_api_calls.jsonl` + `scanner_report.json` + `run_manifest.json`（strict JSONL / 可回放 / fail-closed）。
+  - 基本维度原则：Scanner 落盘的维度特征属于 **基本维度（base dimensions）**，可被演化筛选，但不得人为删减；不可测必须走 `null + reason_codes` 的 NOT_MEASURABLE 纪律（只允许 additive 增补）。
+
+- **Interaction impedance probe（并入 Scanner，独立测量）**
+  - 定位：account-local truth（执行摩擦/延迟/拒单/限速桶），用于建模与后续裁决输入；不依赖 Broker。
+  - 产物：`interaction_impedance.jsonl`（strict JSONL, append-only）+ 对应 probes 的证据回指（见 SSOT）。
+
+- **Genome refactor（对齐/分类，不扩维）**
+  - 目标：把“可表达/可提议/系统事实”分清（`control_class`），并完成悬空旋钮扫描与对齐表模板落盘。
+
+- **Tick 周期轮询（世界输入主循环）**
+  - 目标：先采用 tick + REST snapshot 的方式驱动世界输入（不依赖 DSM/event-driven）。
+
+- **简单死亡判定（v0）**
+  - 目标：定义一个最小、可审计、fail-closed 的死亡裁决接口（不引入复杂老化/不可逆损伤机制）。
+
+- **ROI 翻倍繁殖（v0）**
+  - 目标：定义繁殖触发与证据接口（不追求短期必然出现翻倍样本；验收以证据闭环为主）。
+
+SSOT 入口：
+- Scanner（工具定位 + probes + 可选阻抗探针）：`docs/v11/V11_SSOT_WORLD_FEATURE_SCANNER_20260101.md`
+- Scanner E schema（REST snapshot）：`docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md`
+- Base dimensions（E/I/M 基础维度合同）：`docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`
+- Interaction impedance evidence（v0 schema 入口）：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（§1.1.1）
+- Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
+
+工具入口（verifiers/tools）：
+- Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
+- Scanner E schema verifier（market_snapshot canonical schema）：`python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
+- Genome alignment table verifier（V12.2, machine-readable）：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
+- Tick loop verifier（V12.3, sequence integrity）：`python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
+- Tick loop repeatability gate（V12.3, FAIL=0）：`python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <run_id_1,run_id_2,...>`
+- errors.jsonl summary（bucket statistics）：`python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl`
+
+## V12 mini-releases (recommended cadence)
+
+目的：把 V12 拆成可控的小版本，每个版本只完成一个“可验收闭环”，避免目标爆炸。
+
+### 主线 mini-releases（light, recommended）
+
+为了避免复杂度指数叠加，当前主线以“建模工具 + tick + life v0”推进，DSM/event-driven 封存后置。
+
+- **V12.0 — Scanner v0 (REST snapshot, candidate schema, tools verification PASS)**
+  - 对应：Mainline/Scanner
+  - 验收：`market_snapshot.jsonl` 非空 + schema_verification PASS + evidence 可回放（source_call_ids 等）
+  - 备注：schema `status` 仍为 `candidate`（不提前宣称 verified）
+
+- **V12.0.1 — Scanner impedance probe v0 (optional write probes, independent)**
+  - 对应：Mainline/Impedance（并入 Scanner，但默认关闭）
+  - 验收：启用时必须生成 `interaction_impedance.jsonl`（strict JSONL）且每条具备 `account_id_hash + window + metrics + evidence_refs + verdict`；未启用时必须显式 NOT_MEASURABLE（不得伪造 0）。
+  - 验收样例锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `e43ab4c`
+    - Quant run_dir: `runs_v12_modeling_tool/run_scanner_v0_20260104T111402Z`
+    - Research verifier:
+      - `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_scanner_v0_20260104T111402Z`
+      - expected: `PASS (exit 0)`
+
+- **V12.1 — Scanner hardening (repeatability + strict evidence replayability)**
+  - 对应：Mainline/Scanner 迭代
+  - 验收（机器可验，冻结入口）：
+    - 在同一台机器上跑 N 次（建议 N≥20）的 seed sweep，形成可复核统计输出
+    - 运行：
+      - `python3 tools/v12/sweep_scanner_seeds.py --iterations N`
+    - 通过条件（v0.1）：
+      - `FAIL` 次数为 0（fail-closed：缺 required files / 非 strict JSONL / schema 破坏都必须显式 FAIL）
+      - 对 `NOT_MEASURABLE` 的出现必须可解释（reason_codes 可统计），不得出现“整体 PASS 但关键字段静默缺失”
+    - E schema verification gate（新增，冻结入口）：
+      - 对 sweep 生成的 `run_ids` 批量执行 E schema verifier，要求 `FAIL=0`
+      - 运行（示例）：
+        - `python3 tools/v12/verify_scanner_e_schema_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --summary_json <seed_sweep_summary.json> --output <e_schema_gate_report.json>`
+  - repeatability 验收样例锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `e43ab4c`
+    - Quant outputs (local artifacts, not in git):
+      - `runs_v12_modeling_tool/seed_sweep_summary_20260104T113247Z.json`
+      - `runs_v12_modeling_tool/repeatability_reports_20260104T113247Z/aggregate.json`
+    - Result: `100/100 PASS` (Research E/I/M verifier PASS, exit 0)
+  - E schema gate 100x 验收锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `4f360e4`
+    - Quant outputs (local artifacts, not in git):
+      - `runs_v12_modeling_tool/seed_sweep_summary_20260104T124247Z.json`
+      - `runs_v12_modeling_tool/e_schema_gate_100x_20260104T124247Z/aggregate.json`
+      - `runs_v12_modeling_tool/e_schema_gate_100x_20260104T124247Z/verify_*.json` (100 files)
+    - Result: `E schema canonical PASS 100/100` + `FAIL 0/100` (exit 0)
+    - Note: 报告展示可带注释；但所有 evidence `.jsonl` 必须 strict JSONL（证据行内禁止 `//` 注释）。
+
+- **V12.2 — Genome refactor v0 (alignment + control_class, no expansion)**
+  - 对应：Mainline/Genome refactor
+  - 验收（机器可验，冻结入口）：
+    - `genome_alignment_table.json` 结构可机读，并通过 verifier：
+      - `python3 tools/v12/verify_genome_alignment_table_v0.py --input docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`（模板自检）
+      - 对实际表：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
+    - `control_class` 词表必须使用冻结集合：`system_fact|agent_expressible|agent_proposable|system_controlled`
+    - 悬空旋钮扫描（dangling knobs）必须可运行且可解释：
+      - 对任意一个 verdict=PASS 的 broker run_dir：
+        - `python3 tools/v12/scan_alignment_drift_v0.py --run_dir <BROKER_RUN_DIR> --template docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`
+      - 通过条件：`unmapped_attempt_fields` 为空（执行/审计元数据字段必须被过滤）
+  - 验收样例锚点（只读，写实记录）：
+    - Broker run_id: `run_broker_uplink_v0_20260102T093735Z`
+    - Report: `runs_v12/run_broker_uplink_v0_20260102T093735Z/alignment_drift_report.json`
+    - Result: `issue_count=0` + `unmapped_attempt_fields=[]` + `important_non_order_knobs_observed=[]` (PASS)
+
+- **V12.3 — Tick loop v0 (polling world, evidence-first)**
+  - 对应：Mainline/Tick
+  - SSOT：`docs/v12/V12_SSOT_TICK_LOOP_V0_20260104.md`
+  - 验收（机器可验，冻结入口）：
+    - 运行产生单 run_dir，包含多 tick 的 `market_snapshot.jsonl` 序列（strict JSONL）
+    - `market_snapshot.jsonl` 通过 E schema verifier：
+      - `python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
+    - tick 序列完整性通过 tick verifier（FAIL=0）：
+      - `python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N> --max_backward_ms 0`
+    - fail-closed：缺 required files / JSONL 非 strict / ts 回退 / snapshot_id 重复 → FAIL
+  - repeatability gate（建议作为 V12.3.1，冻结入口）：
+    - 在同一环境跑 N 次 tick loop（N 建议 >=20），收集 run_ids
+    - 对 run_ids 批量执行：
+      - `python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <...> --min_ticks 120 --max_backward_ms 0 --output <tick_gate_aggregate.json>`
+    - 通过条件：`FAIL=0`（NOT_MEASURABLE 允许，但必须可统计原因）
+    - 对每个 run 的 `errors.jsonl` 做统计归档（用于后续“交互阻抗/环境反馈”口径收敛）：
+      - `python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl --output <errors_summary.json>`
+  - 验收样例锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `790f984`
+    - Quant run_dir: `runs_v12/run_tick_loop_v0_20260104T132154Z`
+    - Evidence summary (reported):
+      - `market_snapshot.jsonl`: 120 lines (120 ticks)
+      - `okx_api_calls.jsonl`: 600 calls (5 endpoints × 120 ticks)
+      - `errors.jsonl`: 8 records (network/connection errors)
+    - Tick loop verifier:
+      - `python3 tools/v12/verify_tick_loop_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_tick_loop_v0_20260104T132154Z --min_ticks 120 --max_backward_ms 0`
+      - expected: `exit 0` + `verdict=NOT_MEASURABLE` (degraded but valid: errors.jsonl non-empty)
+    - Note: 报告展示可带注释；但所有 evidence `.jsonl` 必须 strict JSONL（证据行内禁止 `//` 注释）。
+  - repeatability campaign（N=20, FAIL=0）锚点（只读，写实记录）：
+    - Gate report: `runs_v12/tick_loop_gate_aggregate_v3.json` (Quant local artifact)
+    - Run IDs file: `/tmp/tick_run_ids_campaign.txt` (local)
+    - Errors summaries:
+      - `runs_v12/tick_errors_summaries_campaign_20260104T191027Z/aggregate_errors_summary.json`
+      - by_error_type (20 runs aggregated): `get_books_unavailable=19`, `get_index_tickers_unavailable=17`, `get_mark_price_unavailable=15`, `get_funding_rate_unavailable=13`, `get_ticker_unavailable=5`
+
+- **V12.4 — Life v0 (simple death + ROI doubling reproduction, interface-first)**
+  - 对应：Mainline/Life
+  - 验收：死亡/繁殖的“事件接口 + 证据落盘 + fail-closed”存在；不要求短期必然出现翻倍样本（避免上帝视角）。
+
+---
+
+### 封存/后置（capability sealed or deferred）
+
+以下能力保留为“已验证/可选扩展”，但不作为当前主线依赖：
+
+- DSM/WS ingestion（封存能力 + 长期稳定并入门槛）：`docs/v12/V12_SSOT_DOWNLINK_SUBSCRIPTION_MANAGER_20260101.md`
+- 双管道 join（DSM↔Decision↔Broker）：后置到 DSM 长期稳定通过之后
+- Settlement/账户级自动事件：保留为 life-system 的真值来源能力面，但不作为当前“建模工具 + tick + life v0”必备依赖
+
+### M0 — World Feature Scanner v0（E: market info, single instId）
+
+- **Scope (frozen)**:
+  - Only `BTC-USDT-SWAP`
+  - Read-only market info first (E/exogenous)
+- **SSOT**:
+  - World Feature Scanner: `docs/v11/V11_SSOT_WORLD_FEATURE_SCANNER_20260101.md`
+  - Scanner v0 E schema (V12): `docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md`
+  - OKX contract + order parameter space: `docs/v11/V11_OKX_BTCUSDT_SWAP_CONTRACT_RULES_SSOT_20251231.md`（§12）
+- **Acceptance**:
+  - Scanner produces a run_dir with `run_manifest.json`, `okx_api_calls.jsonl`, `errors.jsonl`, `scanner_report.json`
+  - Must produce non-empty `market_snapshot.jsonl`
+  - Any endpoint failure must be NOT_MEASURABLE (with reason_code), never silent
+  - Tools verification must pass for canonical schema (candidate→verified) before modeling can consume it
+
+### M0.5 — WS ingestion only (event stream evidence, tick-consumable)
+
+目的：解决“不用 WS 会限制后续事件驱动/新陈代谢/繁殖；直接上 WS 又是大工程”的两难：  
+先把 WS 变成**可审计事件流输入**，但决策/演化系统先不强制改为 event-driven（仍可按 tick/采样消费）。
+
+- **Scope (frozen)**:
+  - OKX public WS (`/ws/v5/public`) only
+  - Evidence-only ingestion: subscribe + message stream persisted
+  - Map WS messages → canonical `market_snapshot.jsonl` (or future `market_event_ref`) with mask discipline
+- **SSOT**:
+  - Scanner v0/v0.5 schema: `docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md`
+  - Downlink subscription manager (DSM): `docs/v12/V12_SSOT_DOWNLINK_SUBSCRIPTION_MANAGER_20260101.md`
+  - Uplink/Downlink pipes + evidence + join keys: `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`
+- **Acceptance**:
+  - WS sessions/requests/messages evidence exists (append-only)
+  - `market_snapshot.jsonl` can be produced from WS without breaking schema_verification rules
+  - No silent reconnect/subscription loss (must be visible as NOT_MEASURABLE reasons)
+
+### M0.5 实施状态快照（只增不改，事实记录）
+
+已实现（VPS REAL WS 验收通过）：
+- 下行 evidence：`okx_ws_sessions.jsonl` / `okx_ws_requests.jsonl` / `okx_ws_messages.jsonl`
+- canonical：`market_snapshot.jsonl`（含 `source_message_ids` 回放锚点）
+- verifier：`tools/v12/verify_dsm_ws_ingestion_v0.py` 输出 PASS 时，manifest 必须同步 `verdict="PASS"`；若存在 `not_measurable:*` reason_codes，则 verdict 必须为 NOT_MEASURABLE（fail-closed）
+
+当前冻结的最小通道集（v0.9.1 参考实现）：
+- `tickers`（instId=`BTC-USDT-SWAP`）→ `last_px`
+- `mark-price`（instId=`BTC-USDT-SWAP`）→ `mark_px`
+- `books5`（instId=`BTC-USDT-SWAP`）→ `bid_px_1/ask_px_1/bid_sz_1/ask_sz_1`
+- `index-tickers`（instId=`BTC-USDT`）→ `index_px`（注意 underlying 映射）
+- `funding-rate`（instId=`BTC-USDT-SWAP`）→ `funding_rate/next_funding_ts_ms`
+
+### M1 — Modeling docs from scanner (SSOT, additive-only)
+
+- Freeze:
+  - Market feature schema (E dims) + mask/quality/reason_code
+  - Exchange API parameter spaces (order/cancel/replace, etc.)
+  - NOT_MEASURABLE conditions and ecological fences (rate limits, endpoint availability)
+- **SSOT**:
+  - Modeling docs pipeline + genome alignment table: `docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`
+
+### M2 — Genome refactor aligned to parameter spaces
+
+- Freeze:
+  - Genome dimensions must map to exchange parameter spaces (no invented knobs)
+  - Separate: agent expresses vs system defaults vs gate decisions
+
+### M3 — Event-driven (initial)
+
+- Market data: WS push (with evidence discipline)
+- Trading: REST (request/response evidence)
+
+### M4 — Life system (metabolism + split reproduction)
+
+- Metabolism replaces “death judgment”
+- Capital-doubling split reproduction replaces “reproduction judgment”
+
+---
+
+## Cross-version anchors (read-only)
+
+- V11 index: `docs/v11/V11_RESEARCH_INDEX.md`
+- Agent probing + Proxy Trader: `docs/v11/V11_SSOT_AGENT_PROBING_AND_PROXY_TRADER_MODEL_20260101.md`
+- Trade chain evidence: `docs/v11/V11_STEP91_TRADE_CHAIN_EVIDENCE_EXTENSION_20251231.md`
+
+

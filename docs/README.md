@@ -20,6 +20,7 @@ If you are here to **audit V10** or **reproduce conclusions**, start with the V1
 - **Acceptance Criteria / 验收标准**: [`docs/v10/V10_ACCEPTANCE_CRITERIA.md`](v10/V10_ACCEPTANCE_CRITERIA.md)
 - **V11 Index / V11入口**: [`docs/v11/V11_RESEARCH_INDEX.md`](v11/V11_RESEARCH_INDEX.md)
 - **V12 Index / V12入口**: [`docs/v12/V12_RESEARCH_INDEX.md`](v12/V12_RESEARCH_INDEX.md)
+- **V12 Index (CN) / V12入口（中文）**: [`docs/v12/V12_RESEARCH_INDEX_CN.md`](v12/V12_RESEARCH_INDEX_CN.md)
 
 ---
 

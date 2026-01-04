@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[English](README.md)** · **[Docs Index](docs/README.md)** · **[V12 Index](docs/v12/V12_RESEARCH_INDEX.md)** · **[V11 Index](docs/v11/V11_RESEARCH_INDEX.md)** · **[V10 Index](docs/v10/V10_RESEARCH_INDEX.md)**
+**[English](README.md)** · **[Docs Index](docs/README.md)** · **[V12 Index (CN)](docs/v12/V12_RESEARCH_INDEX_CN.md)** · **[V11 Index](docs/v11/V11_RESEARCH_INDEX.md)** · **[V10 Index](docs/v10/V10_RESEARCH_INDEX.md)**
 
 </div>
 
