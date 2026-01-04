@@ -7,6 +7,11 @@ Scanner v0 只做 **E（外显）市场信息查询**，锁定单一产品 `BTC-
 - Scanner 产出的是“API 可直接获取/返回的参数结构与字段空间”（request/response/schema + NOT_MEASURABLE 边界），用于建模对齐。
 - Scanner 不承担订单生命周期/微结构推断（例如 fill_ratio、部分成交统计等）；这类推断型真值由后续工具或生产系统证据链承载。
 
+基本维度原则（additive, frozen entry）：
+- Scanner v0 schema 中定义并落盘的字段集合属于 **基本维度（base dimensions）**，可被演化筛选，但不得人为删减字段集合。
+- 若某字段在某次运行中不可测：必须用 `null + quality.reason_codes` 表达 NOT_MEASURABLE（不得伪造 0），且不得通过删除字段“优化输出”。
+- schema 变更只能 additive：新增字段/新增 reason_codes/新增验证规则；不得删除旧字段或改变旧语义。
+
 本文件 additive-only。
 
 ---

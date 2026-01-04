@@ -46,6 +46,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
   - 定位：建模/测量工具，不是系统运行必备；不要求部署到 VPS 容器（见 Scanner SSOT）。
   - 口径：只负责“API 可直接获取/返回的参数结构与字段空间”（request/response/schema + NOT_MEASURABLE 边界）；不承担订单生命周期/微结构推断（例如 fill_ratio）。
   - 产物：`market_snapshot.jsonl` + `okx_api_calls.jsonl` + `scanner_report.json` + `run_manifest.json`（strict JSONL / 可回放 / fail-closed）。
+  - 基本维度原则：Scanner 落盘的维度特征属于 **基本维度（base dimensions）**，可被演化筛选，但不得人为删减；不可测必须走 `null + reason_codes` 的 NOT_MEASURABLE 纪律（只允许 additive 增补）。
 
 - **Interaction impedance probe（并入 Scanner，独立测量）**
   - 定位：account-local truth（执行摩擦/延迟/拒单/限速桶），用于建模与后续裁决输入；不依赖 Broker。
