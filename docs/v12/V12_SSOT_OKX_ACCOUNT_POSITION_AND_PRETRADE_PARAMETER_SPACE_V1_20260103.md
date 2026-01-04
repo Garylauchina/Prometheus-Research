@@ -103,7 +103,28 @@ SSOT anchors（只读）：
   - 必须包含：`endpoint`、`params`、`success`、以及可解析的 `response_data`（避免 string parsing）
 - `order_attempts.jsonl`
   - 必须记录：`leverage_target`（若决策表达）与应用状态字段（见下）
-- positions truth evidence（建议落盘为 `position_snapshots.jsonl` 或等价文件；v1 作为入口占位）
+
+### 5.1 Positions truth evidence — `position_snapshots.jsonl`（v1 入口，冻结）
+
+目的：提供可机验的“状态真值”快照，证明 non-order knobs 的真实生效状态（lever/mgnMode/posSide）。
+
+最小 record schema（冻结入口；只增不改）：
+- `snapshot_id`: string（run 内唯一）
+- `ts_utc`: string（ISO8601）
+- `account_id_hash`: string（account-local truth anchor）
+- `inst_id`: string
+- `mgn_mode`: string|null
+- `pos_side`: string|null
+- `lever`: string|number|null
+- `pos`: string|number|null
+- `avg_px`: string|number|null
+- `upl`: string|number|null
+- `evidence_refs`: object（必须存在；允许为空）
+  - `exchange_api_call_ids`: array[string]
+
+NOT_MEASURABLE（冻结入口）：
+- positions truth 不可用/字段缺失/无法回指 api_calls → 必须 `NOT_MEASURABLE`（禁止 PASS 假阳性）。
+提示：E/I/M 基础维度的统一入口见 `docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`。
 
 Join anchors（冻结）：
 - pretrade write call：`exchange_api_call_id`（或 request id）+ `endpoint=/account/set-leverage`

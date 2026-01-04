@@ -99,6 +99,10 @@ V12 必须产生至少两类 SSOT 文档（additive-only）：
   - 字段：type、required/conditional、enum、语义、与 `BTC-USDT-SWAP` 的适用性
   - 明确：哪些字段是“Agent 表达空间”，哪些是“系统默认/派生”，哪些由 gate 决策
 
+- **Base Dimensions Contract (E/I/M)**：
+  - 目的：冻结 Scanner 产出的基础维度集合（E=market_snapshot, I=positions truth, M=interaction_impedance），作为后续建模/对齐/演化的共同输入合同
+  - 入口：`docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`
+
 备注：
 - OKX 的下单参数空间目前以 V11 SSOT（OKX 合约规则 §12）为参照；V12 可在自身目录补充更严格的冻结版（只追加，不覆盖）。
 

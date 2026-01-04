@@ -67,6 +67,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 SSOT 入口：
 - Scanner（工具定位 + probes + 可选阻抗探针）：`docs/v11/V11_SSOT_WORLD_FEATURE_SCANNER_20260101.md`
 - Scanner E schema（REST snapshot）：`docs/v12/V12_SSOT_SCANNER_E_MARKET_SCHEMA_20260101.md`
+- Base dimensions（E/I/M 基础维度合同）：`docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`
 - Interaction impedance evidence（v0 schema 入口）：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（§1.1.1）
 - Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
 
