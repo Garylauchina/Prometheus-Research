@@ -73,6 +73,7 @@ SSOT 入口：
 
 工具入口（verifiers/tools）：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
+- Scanner E schema verifier（market_snapshot canonical schema）：`python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
 
 ## V12 mini-releases (recommended cadence)
 
@@ -107,6 +108,10 @@ SSOT 入口：
     - 通过条件（v0.1）：
       - `FAIL` 次数为 0（fail-closed：缺 required files / 非 strict JSONL / schema 破坏都必须显式 FAIL）
       - 对 `NOT_MEASURABLE` 的出现必须可解释（reason_codes 可统计），不得出现“整体 PASS 但关键字段静默缺失”
+    - E schema verification gate（新增，冻结入口）：
+      - 对 sweep 生成的 `run_ids` 批量执行 E schema verifier，要求 `FAIL=0`
+      - 运行（示例）：
+        - `python3 tools/v12/verify_scanner_e_schema_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --summary_json <seed_sweep_summary.json> --output <e_schema_gate_report.json>`
   - repeatability 验收样例锚点（只读，写实记录）：
     - Quant branch: `v12-broker-uplink-v0`
     - Quant commit: `e43ab4c`
