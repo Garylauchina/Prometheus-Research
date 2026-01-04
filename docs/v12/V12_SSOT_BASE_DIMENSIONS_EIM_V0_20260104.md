@@ -93,4 +93,29 @@ NOT_MEASURABLE 纪律（冻结入口）：
 - Non-order parameter space SSOT：`docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
 - Pipeline + alignment SSOT：`docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`
 
+---
+
+## 5) Verifier tool（冻结入口）
+
+工具（stdlib-only）：
+- `tools/v12/verify_base_dimensions_eim_v0.py`
+
+Required files（缺一即 FAIL；即使为空文件也必须存在）：
+- `run_manifest.json`
+- `market_snapshot.jsonl`（E）
+- `position_snapshots.jsonl`（I）
+- `interaction_impedance.jsonl`（M）
+- `errors.jsonl`
+
+强制规则（fail-closed）：
+- 严格 JSONL：每行必须是合法 JSON object（禁止注释/尾逗号/多行 JSON）。
+- I/M 最小 schema 必须满足（见本文件 §2/§3）。
+
+Exit codes（冻结）：
+- PASS / NOT_MEASURABLE → exit 0（NOT_MEASURABLE 必须打印 WARNING）
+- FAIL → exit 2
+
+Usage:
+- `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR> --output <REPORT.json>`
+
 
