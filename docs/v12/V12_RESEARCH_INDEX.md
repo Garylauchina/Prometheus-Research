@@ -141,6 +141,10 @@ SSOT 入口：
       - 对任意一个 verdict=PASS 的 broker run_dir：
         - `python3 tools/v12/scan_alignment_drift_v0.py --run_dir <BROKER_RUN_DIR> --template docs/v12/V12_GENOME_ALIGNMENT_TABLE_V0_TEMPLATE_20260103.json`
       - 通过条件：`unmapped_attempt_fields` 为空（执行/审计元数据字段必须被过滤）
+  - 验收样例锚点（只读，写实记录）：
+    - Broker run_id: `run_broker_uplink_v0_20260102T093735Z`
+    - Report: `runs_v12/run_broker_uplink_v0_20260102T093735Z/alignment_drift_report.json`
+    - Result: `issue_count=0` + `unmapped_attempt_fields=[]` + `important_non_order_knobs_observed=[]` (PASS)
 
 - **V12.3 — Tick loop v0 (polling world, evidence-first)**
   - 对应：Mainline/Tick
