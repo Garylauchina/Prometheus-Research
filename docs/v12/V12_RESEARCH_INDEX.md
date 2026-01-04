@@ -90,10 +90,23 @@ SSOT 入口：
 - **V12.0.1 — Scanner impedance probe v0 (optional write probes, independent)**
   - 对应：Mainline/Impedance（并入 Scanner，但默认关闭）
   - 验收：启用时必须生成 `interaction_impedance.jsonl`（strict JSONL）且每条具备 `account_id_hash + window + metrics + evidence_refs + verdict`；未启用时必须显式 NOT_MEASURABLE（不得伪造 0）。
+  - 验收样例锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `e43ab4c`
+    - Quant run_dir: `runs_v12_modeling_tool/run_scanner_v0_20260104T111402Z`
+    - Research verifier:
+      - `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_scanner_v0_20260104T111402Z`
+      - expected: `PASS (exit 0)`
 
 - **V12.1 — Scanner hardening (repeatability + strict evidence replayability)**
   - 对应：Mainline/Scanner 迭代
-  - 验收：在多次 runs 下稳定通过；缺测字段必须 `degraded + reason_codes`，禁止 “overall=ok 但存在 null”
+  - 验收（机器可验，冻结入口）：
+    - 在同一台机器上跑 N 次（建议 N≥20）的 seed sweep，形成可复核统计输出
+    - 运行：
+      - `python3 tools/v12/sweep_scanner_seeds.py --iterations N`
+    - 通过条件（v0.1）：
+      - `FAIL` 次数为 0（fail-closed：缺 required files / 非 strict JSONL / schema 破坏都必须显式 FAIL）
+      - 对 `NOT_MEASURABLE` 的出现必须可解释（reason_codes 可统计），不得出现“整体 PASS 但关键字段静默缺失”
 
 - **V12.2 — Genome refactor v0 (alignment + control_class, no expansion)**
   - 对应：Mainline/Genome refactor
