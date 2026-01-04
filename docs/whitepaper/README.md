@@ -81,6 +81,7 @@ Constraints:
 - It is selected only indirectly via survival/elimination
 
 It is not a reward function; it is an interpretation structure under verdict.
+Within this framework, every decision is a projection of life-meaning; there is no such thing as “irrational”.
 
 ---
 
