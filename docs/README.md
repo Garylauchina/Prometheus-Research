@@ -12,6 +12,9 @@ If you are here to **audit V10** or **reproduce conclusions**, start with the V1
 ## Quick Start / 快速入口
 
 - **Foundation / 方法论基石（SSOT）**: [`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`](v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md)
+- **Whitepaper / 白皮书版（叙事入口，中英双语）**:
+  - English: [`docs/whitepaper/README.md`](whitepaper/README.md)
+  - 中文: [`docs/whitepaper/README_CN.md`](whitepaper/README_CN.md)
 - **V10 Evidence Chain / V10证据链**: [`docs/v10/V10_RESEARCH_INDEX.md`](v10/V10_RESEARCH_INDEX.md)
 - **V10 Folder README / v10目录页**: [`docs/v10/README.md`](v10/README.md)
 - **Acceptance Criteria / 验收标准**: [`docs/v10/V10_ACCEPTANCE_CRITERIA.md`](v10/V10_ACCEPTANCE_CRITERIA.md)

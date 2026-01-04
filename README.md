@@ -29,8 +29,10 @@ where every conclusion must point back to evidence.
 
 This repository is built on a single, shared measurement method:
 
-- **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**: `docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`
 - **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**: [`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`](docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md)
+- **Whitepaper edition (narrative entry, bilingual)**:
+  - English: [`docs/whitepaper/README.md`](docs/whitepaper/README.md)
+  - 中文: [`docs/whitepaper/README_CN.md`](docs/whitepaper/README_CN.md)
 
 This document defines **how we measure** (measurability gate, NOT_MEASURABLE discipline, measurement-bias dimensions),
 and is treated as a foundational reference for V11/V12 research contracts.

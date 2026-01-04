@@ -26,6 +26,9 @@ V11 的核心定位是：在 **execution_world（交易所真值链）** 中，�
 本仓库建立在一份统一的“复杂系统测量方法论”之上：
 
 - **V10 — A Minimal Method for Measuring Complex Systems (Evolutionary Probing)**：[`docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md`](docs/v10/V10_METHOD_MEASURING_COMPLEX_SYSTEMS.md)
+- **白皮书版（叙事入口，中英双语）**：
+  - English：[`docs/whitepaper/README.md`](docs/whitepaper/README.md)
+  - 中文：[`docs/whitepaper/README_CN.md`](docs/whitepaper/README_CN.md)
 
 该文档定义的是**我们如何测量**（可测性 Gate、NOT_MEASURABLE 纪律、measurement-bias 维度等），
 并被视为 V11/V12 各类研究合同的上位基石引用。
