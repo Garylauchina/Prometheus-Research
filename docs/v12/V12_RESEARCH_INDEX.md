@@ -107,6 +107,13 @@ SSOT 入口：
     - 通过条件（v0.1）：
       - `FAIL` 次数为 0（fail-closed：缺 required files / 非 strict JSONL / schema 破坏都必须显式 FAIL）
       - 对 `NOT_MEASURABLE` 的出现必须可解释（reason_codes 可统计），不得出现“整体 PASS 但关键字段静默缺失”
+  - repeatability 验收样例锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `e43ab4c`
+    - Quant outputs (local artifacts, not in git):
+      - `runs_v12_modeling_tool/seed_sweep_summary_20260104T113247Z.json`
+      - `runs_v12_modeling_tool/repeatability_reports_20260104T113247Z/aggregate.json`
+    - Result: `100/100 PASS` (Research E/I/M verifier PASS, exit 0)
 
 - **V12.2 — Genome refactor v0 (alignment + control_class, no expansion)**
   - 对应：Mainline/Genome refactor
