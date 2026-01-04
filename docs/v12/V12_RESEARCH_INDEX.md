@@ -119,6 +119,15 @@ SSOT 入口：
       - `runs_v12_modeling_tool/seed_sweep_summary_20260104T113247Z.json`
       - `runs_v12_modeling_tool/repeatability_reports_20260104T113247Z/aggregate.json`
     - Result: `100/100 PASS` (Research E/I/M verifier PASS, exit 0)
+  - E schema gate 100x 验收锚点（只读，写实记录）：
+    - Quant branch: `v12-broker-uplink-v0`
+    - Quant commit: `4f360e4`
+    - Quant outputs (local artifacts, not in git):
+      - `runs_v12_modeling_tool/seed_sweep_summary_20260104T124247Z.json`
+      - `runs_v12_modeling_tool/e_schema_gate_100x_20260104T124247Z/aggregate.json`
+      - `runs_v12_modeling_tool/e_schema_gate_100x_20260104T124247Z/verify_*.json` (100 files)
+    - Result: `E schema canonical PASS 100/100` + `FAIL 0/100` (exit 0)
+    - Note: 报告展示可带注释；但所有 evidence `.jsonl` 必须 strict JSONL（证据行内禁止 `//` 注释）。
 
 - **V12.2 — Genome refactor v0 (alignment + control_class, no expansion)**
   - 对应：Mainline/Genome refactor
