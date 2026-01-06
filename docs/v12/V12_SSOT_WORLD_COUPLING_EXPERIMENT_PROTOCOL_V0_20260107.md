@@ -111,6 +111,32 @@ Required reporting (frozen; separates two effects):
 
 ---
 
+## 4.3) Falsification battery (must-run before any “evidence” claim)
+
+To prevent accidental “knife-fitting” (a fragile construction that only works for one permutation / one threshold), any claimed coupling evidence MUST run and report:
+
+### 4.3.1 Shuffle-seed robustness
+
+- Run SHUFFLE with **multiple shuffle seeds** (at least 5 distinct values).
+- Report per-shuffle-seed distributions of:
+  - `alignment_effect = metric(ON) - metric(SHUFFLE)`
+  - `reduction_ratio` (if using a gap-reduction criterion)
+
+FAIL condition (trial-level):
+- If the claim holds only for a single shuffle seed but collapses for others ⇒ FAIL (`control_invalid:shuffle_seed_fragile`).
+
+### 4.3.2 Knife-sensitivity (small perturbation sweep)
+
+- Sweep at least one small perturbation of the “knife” parameter (examples):
+  - threshold `g_hi` ± 0.05
+  - cluster penalty start index (e.g. `r_t-2` → `r_t-3`)
+- Report the effect distributions for each perturbation.
+
+FAIL condition (trial-level):
+- If the effect only appears at an extremely narrow knife setting and collapses under tiny perturbations ⇒ FAIL (`control_invalid:knife_too_brittle`).
+
+---
+
 ## 5) Verdict semantics (frozen)
 
 - **PASS**: W0 PASS + controls behaved as expected + pre-registered criteria satisfied.
