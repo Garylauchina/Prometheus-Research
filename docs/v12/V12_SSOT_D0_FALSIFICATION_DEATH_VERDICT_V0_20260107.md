@@ -136,3 +136,16 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
   - `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_1_WORLD_COUPLING_TEST_SUMMARY_2026-01-06T18:07:35.765714Z.json`
   - `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_1_per_seed_on_off_shuffle_20seeds.json`
 
+### 6.2 Trial-2 (planned; pre-registered)
+
+- **trial_id**: `d0_trial_2_v0_6_3_temporal_only_falsification_battery`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_2_V0_6_3_TEMPORAL_ONLY_FALSIFICATION_BATTERY_PRE_REG_V0_20260107.md`
+- **independence_basis**: `same market type + same inst universe (SWAP/universe_A) + strictly non-overlapping time window vs Trial-1`
+
+### 6.3 Trial-3 (planned; pre-registered)
+
+- **trial_id**: `d0_trial_3_v0_6_3_temporal_only_falsification_battery`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_3_V0_6_3_TEMPORAL_ONLY_FALSIFICATION_BATTERY_PRE_REG_V0_20260107.md`
+- **independence_basis**: `same market type (SWAP) + different inst universe (universe_B, disjoint from Trial-1/2)`
