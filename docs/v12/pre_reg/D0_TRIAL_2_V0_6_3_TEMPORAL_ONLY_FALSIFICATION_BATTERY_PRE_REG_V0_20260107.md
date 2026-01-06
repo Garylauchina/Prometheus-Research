@@ -151,4 +151,29 @@ Falsification rule (frozen):
   - `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_1_WORLD_COUPLING_TEST_SUMMARY_2026-01-06T18:07:35.765714Z.json`
   - `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_1_per_seed_on_off_shuffle_20seeds.json`
 
+---
+
+## 9) Amendments (append-only)
+
+### 9.1 Amendment A1 — OKX history min bar=1m → dataset tick interval override
+
+- amendment_id: `A1_okx_history_bar_1m_tick_interval_override`
+- date_utc: (TBD)
+- trigger: `constraint:okx_history_candles_min_granularity_1m`
+- rationale (factual): OKX historical candles do not support 1s granularity for 2018-2020; min bar is 1m.
+
+Additive-only override (for dataset generation and dataset manifest ONLY; does not retroactively change Trial-1):
+- dataset_generation.source: `okx_history_candles`
+- dataset_generation.bar: `1m`
+- dataset_generation.dataset_tick_interval_ms_effective: `60000`
+- dataset_manifest.world_contract.tick_interval_ms: `60000`
+
+Signal/anchor discipline under 1m bar (frozen for this trial after A1):
+- world signal remains: `signal_t = abs(log(px_t / px_{t-500}))` with `k=500`
+  - note: with 1m bar, `k=500` corresponds to 500 minutes (documented; not treated as a free knob).
+- signal_p99_anchor policy:
+  - source: `dataset_precomputed`
+  - MUST be computed ONCE from the full generated dataset (pre-run) and recorded before W0:
+    - record in dataset_manifest (additive-only metadata is allowed; do not mutate snapshots)
+    - record in this pre-reg under §1.0 "Frozen dataset identity fields" (append-only)
 
