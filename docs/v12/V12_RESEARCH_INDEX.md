@@ -246,6 +246,16 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - impedance_triggered_ratio: mean=0.0586, std=0.0
   - Note (factual): impedance_triggered_ratio is constant across seeds (same replay dataset quality sequence); extinction variation comes from cost sampling conditional on that sequence.
 
+- **V12.3.7 — Ugly baseline v0.2_extreme (gauss init stress; 5000 steps)**
+  - Scope: stress-test extinction distribution sensitivity to **initial energy distribution** (gauss init) under the death-only red-line (no reward→energy).
+  - Evidence (local artifact):
+    - Summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_extreme_summary_20260106T133241Z.json`
+  - Result (factual, from summary JSON):
+    - run_dirs=101 (unique_seeds=100; `rng_seed=1` was run twice)
+    - extinction_tick: mean=88.7921, std=5.7381, range=[77,100]
+    - impedance_triggered_ratio: mean=0.0, std=0.0
+  - Note (fail-closed semantics): since impedance_triggered_ratio is 0.0, **this run set did not exercise the “NOT_MEASURABLE snapshot → impedance_cost” branch**; treat it as “gauss-init extinction distribution” evidence, not as “high-impedance” evidence.
+
 - **V12.4 — Life v0 (death-only baseline, no reproduction yet)**
   - Scope: Mainline/Life
   - Acceptance: evidence-backed **death** interfaces exist (event interfaces + evidence persistence + fail-closed). Reproduction is explicitly deferred.

@@ -246,6 +246,16 @@ SSOT 入口：
     - impedance_triggered_ratio：mean=0.0586, std=0.0
   - 事实备注：impedance_triggered_ratio 对 seed 不变（同一 replay dataset 的 quality 序列）；extinction 的差异来自条件成本抽样。
 
+- **V12.3.7 — Ugly baseline v0.2_extreme（gauss 初始能量压力测试；5000 steps）**
+  - 对应：在 death-only 红线不变（禁止 reward→energy）的前提下，专门测试 **初始能量分布（gauss init）** 对灭绝分布的影响。
+  - 证据（本地产物）：
+    - Summary JSON：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_extreme_summary_20260106T133241Z.json`
+  - 结果（写实，来自 summary JSON）：
+    - run_dirs=101（unique_seeds=100；`rng_seed=1` 重复跑了 2 次）
+    - extinction_tick：mean=88.7921, std=5.7381, range=[77,100]
+    - impedance_triggered_ratio：mean=0.0, std=0.0
+  - 备注（fail-closed 口径）：由于 impedance_triggered_ratio=0.0，**这组 runs 并未触发“NOT_MEASURABLE snapshot → impedance_cost”分支**；因此只能将其视为“gauss-init 灭绝分布”的证据，而不是“高阻抗”证据。
+
 - **V12.4 — Life v0（只做死亡，暂不做繁殖）**
   - 对应：Mainline/Life
   - 验收：死亡相关的“事件接口 + 证据落盘 + fail-closed”存在；繁殖明确后置。

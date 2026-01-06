@@ -122,6 +122,11 @@ Experimental extension (non-acceptance; read-only factual record):
   - Result (50 seeds): extinction_tick mean=53.04, std=0.445, range=[52,54]; impedance_triggered_ratio mean=0.0586, std=0.0
   - Note: impedance_triggered_ratio constant across seeds (dataset-driven quality sequence); extinction variation comes from conditional cost sampling.
 
+- v0.2_extreme (gauss init stress; death-only)
+  - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_extreme_summary_20260106T133241Z.json`
+  - Result (factual): run_dirs=101 (unique_seeds=100; `rng_seed=1` duplicated); extinction_tick mean=88.7921, std=5.7381, range=[77,100]; impedance_triggered_ratio mean=0.0, std=0.0
+  - Note (fail-closed semantics): impedance_triggered_ratio=0.0 means this run set did not exercise the “NOT_MEASURABLE snapshot → impedance_cost” branch; it is valid evidence for **energy-init distribution effects**, not for **impedance-cost effects**.
+
 NOT_MEASURABLE:
 - evidence is valid but a higher-level measurement (not part of v0) is disabled/not measurable
 - (v0 death-only should usually be PASS if evidence is correct)
