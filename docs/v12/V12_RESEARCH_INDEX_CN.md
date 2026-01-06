@@ -237,6 +237,15 @@ SSOT 入口：
     - reject/invalid：0%（invalid_ratio_mean=0.0）
   - 冻结解释：只要每 tick 给所有 alive agent 相同成本，灭绝必然确定性。
 
+- **V12.3.6 — Ugly baseline v0.2（impedance-cost；世界可测性影响能量）**
+  - 对应：将世界可测性（snapshot quality）映射为 `impedance_cost` 进入能量（仍然禁止 reward→energy）。
+  - 证据（本地产物）：
+    - Summary JSON：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_impedance_cost_50seeds_summary_20260106T124935Z.json`
+  - 结果（50 seeds）：
+    - extinction_tick：mean=53.04, std=0.445, range=[52,54]
+    - impedance_triggered_ratio：mean=0.0586, std=0.0
+  - 事实备注：impedance_triggered_ratio 对 seed 不变（同一 replay dataset 的 quality 序列）；extinction 的差异来自条件成本抽样。
+
 - **V12.4 — Life v0（只做死亡，暂不做繁殖）**
   - 对应：Mainline/Life
   - 验收：死亡相关的“事件接口 + 证据落盘 + fail-closed”存在；繁殖明确后置。

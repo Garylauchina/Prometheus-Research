@@ -117,6 +117,11 @@ Experimental extension (non-acceptance; read-only factual record):
   - Result (50 seeds): extinction_tick mean=67, std=0.0, range=[67,67]; invalid_ratio_mean=0.0
   - Note: This demonstrates that “reading world input” does not imply world affects survival unless mapped into action_cost/impedance_cost.
 
+- v0.2 impedance-cost (world measurability affects energy via impedance_cost)
+  - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_impedance_cost_50seeds_summary_20260106T124935Z.json`
+  - Result (50 seeds): extinction_tick mean=53.04, std=0.445, range=[52,54]; impedance_triggered_ratio mean=0.0586, std=0.0
+  - Note: impedance_triggered_ratio constant across seeds (dataset-driven quality sequence); extinction variation comes from conditional cost sampling.
+
 NOT_MEASURABLE:
 - evidence is valid but a higher-level measurement (not part of v0) is disabled/not measurable
 - (v0 death-only should usually be PASS if evidence is correct)

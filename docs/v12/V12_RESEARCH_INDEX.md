@@ -237,6 +237,15 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - reject/invalid: 0% (invalid_ratio_mean=0.0)
   - Interpretation (frozen): deterministic extinction is expected if all alive agents receive identical per-tick costs.
 
+- **V12.3.6 — Ugly baseline v0.2 (impedance-cost; world measurability affects energy)**
+  - Scope: Map world measurability (snapshot quality) into energy via `impedance_cost` (still no reward→energy).
+  - Evidence (local artifact):
+    - Summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_impedance_cost_50seeds_summary_20260106T124935Z.json`
+  - Result (50 seeds):
+    - extinction_tick: mean=53.04, std=0.445, range=[52,54]
+    - impedance_triggered_ratio: mean=0.0586, std=0.0
+  - Note (factual): impedance_triggered_ratio is constant across seeds (same replay dataset quality sequence); extinction variation comes from cost sampling conditional on that sequence.
+
 - **V12.4 — Life v0 (death-only baseline, no reproduction yet)**
   - Scope: Mainline/Life
   - Acceptance: evidence-backed **death** interfaces exist (event interfaces + evidence persistence + fail-closed). Reproduction is explicitly deferred.
