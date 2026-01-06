@@ -157,22 +157,19 @@ def verify(dataset_dir: Path, min_ticks: int, max_jitter_ms: int) -> Tuple[str, 
         errors.append(f"inst_id mismatch for {inst_id_bad} record(s)")
 
     # Interval quality semantics:
-    # - If we can enforce tick_ms_expected: many violations => FAIL, few => NOT_MEASURABLE
+    # - Tick interval stability is a QUALITY signal for replay datasets.
+    # - Hard failures are reserved for missing evidence / strict-jsonl / backward time / duplicates / mixed inst_id.
+    # - Excessive jitter degrades dataset to NOT_MEASURABLE (still usable for many baselines that only need ordering).
     if tick_ms_expected is not None and deltas_ms:
         violation_ratio = interval_violations / max(1, len(deltas_ms))
         stats["interval_violation_ratio"] = round(violation_ratio, 6)
         if interval_violations > 0:
             # Conservative: baseline dataset should have stable intervals.
-            if violation_ratio > 0.05:
-                errors.append(
-                    f"tick interval unstable: violations={interval_violations} ratio={violation_ratio:.3f} "
-                    f"(expected {tick_ms_expected}ms ± {max_jitter_ms}ms)"
-                )
-            else:
-                warnings.append(
-                    f"tick interval drift observed: violations={interval_violations} ratio={violation_ratio:.3f} "
-                    f"(expected {tick_ms_expected}ms ± {max_jitter_ms}ms)"
-                )
+            level = "unstable" if violation_ratio > 0.05 else "drift"
+            warnings.append(
+                f"tick interval {level}: violations={interval_violations} ratio={violation_ratio:.3f} "
+                f"(expected {tick_ms_expected}ms ± {max_jitter_ms}ms)"
+            )
 
     if errors:
         return "FAIL", errors, warnings, stats
