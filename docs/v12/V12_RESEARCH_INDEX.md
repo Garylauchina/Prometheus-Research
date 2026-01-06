@@ -278,6 +278,20 @@ To avoid exponential complexity, the current mainline advances via “modeling t
   - Admit rule (reported): NOT triggered (std=15.04 > 10 AND range=134 > 50)
   - Note (friend’s “hope” target): if requiring `std>50` and `range>200`, this run set does **not** meet that stronger target yet; it does demonstrate a measurable tail widening relative to v0.3 (std 1.42, range 6).
 
+- **V12.3.5.4 — Ugly baseline v0.5 dirty_tail (early stop; 100000 steps target; 300 seeds)**
+  - Scope: “ultimate dirty” stress with **early stop on extinction** (reality constraint) to enable large seed campaigns without wasting post-extinction ticks.
+  - Evidence (reported):
+    - Quant commits: `d1f9a87`, `1195fa9` (branch: `v12-broker-uplink-v0`)
+    - Runs root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (305 run_dirs reported; seeds `1..300`)
+    - Summary JSON: `runs_v12/v0_5_dirty_tail_300seeds_raw_summary_*.json`
+    - Summarizer: `tools/v12/summarize_v0_5_dirty_tail_300seeds_raw.py` (4 gate checks)
+  - Result (reported; early stop enabled):
+    - extinction_tick: mean=168, std=11.99, range=67 (142..209)
+    - reject_rate: mean=59.97%, std=0.45%
+    - alive@5000: 0% (all extinct before tick 5000)
+  - Gate checks (reported): 0/4 passed (FAIL)
+  - Note (factual): early stop reduced effective ticks to ~300×168 ≈ 50,400 (≈99.5% saved vs 300×100,000).
+
 - **V12.3.6 — Ugly baseline v0.2 (impedance-cost; world measurability affects energy)**
   - Scope: Map world measurability (snapshot quality) into energy via `impedance_cost` (still no reward→energy).
   - Evidence (local artifact):

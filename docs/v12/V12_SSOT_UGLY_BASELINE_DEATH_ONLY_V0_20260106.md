@@ -152,6 +152,19 @@ Experimental extension (non-acceptance; read-only factual record):
   - Admit rule (reported): NOT triggered (std>=10 or range>=50 satisfied)
   - Note (friend “hope” target): if requiring `std>50` and `range>200`, this run set does not meet it yet; it is still a meaningful tail-widening compared to v0.3.
 
+- v0.5 dirty_tail (early stop; 100000 steps target; 300 seeds)
+  - Quant artifacts (reported):
+    - Quant commits: `d1f9a87`, `1195fa9` (branch: `v12-broker-uplink-v0`)
+    - runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (305 run_dirs reported; seeds `1..300`)
+    - raw summary: `runs_v12/v0_5_dirty_tail_300seeds_raw_summary_*.json`
+    - summarizer: `tools/v12/summarize_v0_5_dirty_tail_300seeds_raw.py` (4 gate checks)
+  - Result (reported; early stop enabled):
+    - extinction_tick mean=168, std=11.99, range=67 (142..209)
+    - reject_rate mean=59.97%, std=0.45%
+    - alive@5000: 0% (all extinct before tick 5000)
+  - Gate checks (reported): 0/4 passed (FAIL)
+  - Note (factual): early stop reduced effective ticks to ~300×168 ≈ 50,400 (≈99.5% saved vs 300×100,000).
+
 - v0.2 impedance-cost (world measurability affects energy via impedance_cost)
   - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_impedance_cost_50seeds_summary_20260106T124935Z.json`
   - Result (50 seeds): extinction_tick mean=53.04, std=0.445, range=[52,54]; impedance_triggered_ratio mean=0.0586, std=0.0

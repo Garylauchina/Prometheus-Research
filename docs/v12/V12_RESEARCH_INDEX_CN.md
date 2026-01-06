@@ -278,6 +278,20 @@ SSOT 入口：
   - Admit rule（用户汇报）：未触发（std=15.04 > 10 且 range=134 > 50）
   - 备注（朋友的“希望目标”）：若要求 `std>50` 且 `range>200`，本次仍**未达标**；但相对 v0.3（std 1.42, range 6）已证明尾部分布可被显著拉宽。
 
+- **V12.3.5.4 — Ugly baseline v0.5 dirty_tail（early stop；100000 steps 目标；300 seeds）**
+  - 对应：终极脏版压力测试，并加入“灭绝即停”的 **early stop**（现实约束）以避免浪费灭绝后的 ticks，从而让大 seed 扫描可行。
+  - 证据（用户汇报）：
+    - Quant commits：`d1f9a87`, `1195fa9`（branch：`v12-broker-uplink-v0`）
+    - Runs root：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/`（用户汇报 305 个 run_dirs；seeds `1..300`）
+    - Summary JSON：`runs_v12/v0_5_dirty_tail_300seeds_raw_summary_*.json`
+    - Summarizer：`tools/v12/summarize_v0_5_dirty_tail_300seeds_raw.py`（4 个 gate checks）
+  - 结果（用户汇报；启用 early stop）：
+    - extinction_tick：mean=168, std=11.99, range=67（142..209）
+    - reject_rate：mean=59.97%, std=0.45%
+    - Alive@5000：0%（全部在 5000 前灭绝）
+  - Gate checks（用户汇报）：0/4 通过（FAIL）
+  - 事实备注：early stop 将有效 ticks 降到约 300×168 ≈ 50,400（相对 300×100,000 节省约 99.5%）。
+
 - **V12.3.6 — Ugly baseline v0.2（impedance-cost；世界可测性影响能量）**
   - 对应：将世界可测性（snapshot quality）映射为 `impedance_cost` 进入能量（仍然禁止 reward→energy）。
   - 证据（本地产物）：
