@@ -265,6 +265,19 @@ SSOT 入口：
     - `reject_rate mean >= 30%` ⇒ **PASS**
   - 备注（尺度现实）：平均 ~14 tick 灭绝意味着 30000 steps 仍然主要是在记录“灭绝后 ticks”；若要观测“尾巴/阶段性稳定”，必须先对齐时间尺度（提高 E0 / 降低罚则），同时保持红线不变（禁止 reward→energy）。
 
+- **V12.3.5.3 — Ugly baseline v0.4 tail_reject_stress（尾巴友好尺度；50000 steps；200 seeds）**
+  - 对应：重新平衡 reject 过程以拉长存活、让尾部分布可见，同时严格保持红线（NO reward→energy；death 仅由 energy<=0）。
+  - 证据（本地产物；用户汇报）：
+    - Quant commits：`678e4a0`, `047629c`, `d81ba6d`（branch：`v12-broker-uplink-v0`）
+    - Runs root：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/`（200 个 run_dirs：`seed[1..200]`）
+    - Summary JSON：`runs_v12/v0_4_tail_reject_stress_200seeds_raw_summary_20260106T154931Z.json`
+    - Summarizer：`tools/v12/summarize_v0_4_tail_reject_stress_200seeds_raw.py`（含 admit-rule 输出）
+  - 结果（用户汇报）：
+    - extinction_tick：mean=183, std=15.04, range=134
+    - reject_rate：mean=50.06%（备注：略高于建议的 50% 上限）
+  - Admit rule（用户汇报）：未触发（std=15.04 > 10 且 range=134 > 50）
+  - 备注（朋友的“希望目标”）：若要求 `std>50` 且 `range>200`，本次仍**未达标**；但相对 v0.3（std 1.42, range 6）已证明尾部分布可被显著拉宽。
+
 - **V12.3.6 — Ugly baseline v0.2（impedance-cost；世界可测性影响能量）**
   - 对应：将世界可测性（snapshot quality）映射为 `impedance_cost` 进入能量（仍然禁止 reward→energy）。
   - 证据（本地产物）：

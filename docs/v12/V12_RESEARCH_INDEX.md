@@ -265,6 +265,19 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - `reject_rate mean >= 30%` ⇒ **PASS**
   - Note (scale reality): extinction at ~14 ticks implies the 30000-step run is still dominated by “post-extinction ticks”; “tails / phase stability” remain not observable unless the time scale is aligned (raise E0 and/or reduce penalties) while keeping the red-line (no reward→energy).
 
+- **V12.3.5.3 — Ugly baseline v0.4 tail_reject_stress (tail-friendly scale; 50000 steps; 200 seeds)**
+  - Scope: rebalance reject process to enable longer survival and visible tail distribution, while keeping the hard red-line (NO reward→energy; death is energy-only).
+  - Evidence (local artifacts; reported):
+    - Quant commits: `678e4a0`, `047629c`, `d81ba6d` (branch: `v12-broker-uplink-v0`)
+    - Runs root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (200 run_dirs: `seed[1..200]`)
+    - Summary JSON: `runs_v12/v0_4_tail_reject_stress_200seeds_raw_summary_20260106T154931Z.json`
+    - Summarizer: `tools/v12/summarize_v0_4_tail_reject_stress_200seeds_raw.py` (includes admit-rule print)
+  - Result (reported):
+    - extinction_tick: mean=183, std=15.04, range=134
+    - reject_rate: mean=50.06% (note: slightly above the suggested 50% upper bound)
+  - Admit rule (reported): NOT triggered (std=15.04 > 10 AND range=134 > 50)
+  - Note (friend’s “hope” target): if requiring `std>50` and `range>200`, this run set does **not** meet that stronger target yet; it does demonstrate a measurable tail widening relative to v0.3 (std 1.42, range 6).
+
 - **V12.3.6 — Ugly baseline v0.2 (impedance-cost; world measurability affects energy)**
   - Scope: Map world measurability (snapshot quality) into energy via `impedance_cost` (still no reward→energy).
   - Evidence (local artifact):

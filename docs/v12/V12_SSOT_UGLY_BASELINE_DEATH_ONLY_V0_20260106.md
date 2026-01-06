@@ -140,6 +140,18 @@ Experimental extension (non-acceptance; read-only factual record):
   - Friend gate semantics (factual): reject_rate mean >= 30% ⇒ PASS (reject-stress achieved)
   - Note (scale reality): extinction at ~14 ticks implies the long-run (30000 steps) is still dominated by “post-extinction ticks”; observing “tails” requires time-scale alignment (raise E0 and/or reduce penalties) while keeping the life red-line.
 
+- v0.4 tail_reject_stress (tail-friendly scale; 50000 steps; 200 seeds)
+  - Quant artifacts (reported):
+    - Quant commits: `678e4a0`, `047629c`, `d81ba6d` (branch: `v12-broker-uplink-v0`)
+    - runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (200 run_dirs: `seed[1..200]`)
+    - raw summary: `runs_v12/v0_4_tail_reject_stress_200seeds_raw_summary_20260106T154931Z.json`
+    - summarizer: `tools/v12/summarize_v0_4_tail_reject_stress_200seeds_raw.py` (includes admit rule)
+  - Result (reported):
+    - extinction_tick mean=183, std=15.04, range=134
+    - reject_rate mean=50.06% (slightly above suggested 50% upper bound)
+  - Admit rule (reported): NOT triggered (std>=10 or range>=50 satisfied)
+  - Note (friend “hope” target): if requiring `std>50` and `range>200`, this run set does not meet it yet; it is still a meaningful tail-widening compared to v0.3.
+
 - v0.2 impedance-cost (world measurability affects energy via impedance_cost)
   - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_impedance_cost_50seeds_summary_20260106T124935Z.json`
   - Result (50 seeds): extinction_tick mean=53.04, std=0.445, range=[52,54]; impedance_triggered_ratio mean=0.0586, std=0.0
