@@ -84,6 +84,20 @@ Rationale: allowing reward→energy would effectively create reward→death, whi
 Audit requirement:
 - Every non-zero energy delta MUST carry a `reason_code` at evidence level (e.g. `tick_survival_cost`, `action_cost:order_attempt`, `impedance_cost:rate_limited`).
 
+### R6) Death is non-allocative (no inheritance; freezes ledger explosion)
+
+This rule deliberately cuts off a major source of complexity explosion:
+
+- **Death MUST NOT trigger inheritance / asset redistribution / estate accounting.**
+- A dead agent’s “external equity/position truth” is **not** a prerequisite for life-system correctness.
+
+If any cleanup is needed (risk reduction, cancel orders, flatten positions), it is:
+
+- a **system-level** responsibility (resource cleanup / safety gate), not “the agent’s legacy”
+- recorded as system evidence and attributed to system scope (e.g., `agent_0_system` or system gate), not as “inheritance”
+
+Rationale: nobody cares about your legacy in early mainline; life correctness must not be blocked by settlement/ledger complexity.
+
 ---
 
 ## 3) Baseline v0 (death-only) contract (frozen)
