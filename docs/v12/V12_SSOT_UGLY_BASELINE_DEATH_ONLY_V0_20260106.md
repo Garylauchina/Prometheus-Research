@@ -112,6 +112,11 @@ Experimental extension (non-acceptance; read-only factual record):
   - Result (50 seeds, survival_cost_uniform_max=2.0): extinction_tick mean=55.56, std=1.00, range=[54,59]
   - Quant commits: `5f9134e` (feat v0_dirty), `f555f67` (fix run_id collision)
 
+- v0.1 decision-cost (decision record exists; deterministic negative control)
+  - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_1_decision_cost_50seeds_summary_20260106T123740Z.json`
+  - Result (50 seeds): extinction_tick mean=67, std=0.0, range=[67,67]; invalid_ratio_mean=0.0
+  - Note: This demonstrates that “reading world input” does not imply world affects survival unless mapped into action_cost/impedance_cost.
+
 NOT_MEASURABLE:
 - evidence is valid but a higher-level measurement (not part of v0) is disabled/not measurable
 - (v0 death-only should usually be PASS if evidence is correct)

@@ -228,6 +228,15 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - `5f9134e` feat: add v0_dirty_random_cost extension (mode/rng_seed/survival_cost_uniform_max)
     - `f555f67` fix: run_id collision (nanosecond + seed suffix)
 
+- **V12.3.5 — Ugly baseline v0.1 (decision-cost; deterministic negative control)**
+  - Scope: Show that “reading world input” alone does not imply world affects survival (must connect to action_cost/impedance_cost).
+  - Evidence (local artifact):
+    - Summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_1_decision_cost_50seeds_summary_20260106T123740Z.json`
+  - Result (50 seeds):
+    - extinction_tick: mean=67, std=0.0, range=[67,67]
+    - reject/invalid: 0% (invalid_ratio_mean=0.0)
+  - Interpretation (frozen): deterministic extinction is expected if all alive agents receive identical per-tick costs.
+
 - **V12.4 — Life v0 (death-only baseline, no reproduction yet)**
   - Scope: Mainline/Life
   - Acceptance: evidence-backed **death** interfaces exist (event interfaces + evidence persistence + fail-closed). Reproduction is explicitly deferred.

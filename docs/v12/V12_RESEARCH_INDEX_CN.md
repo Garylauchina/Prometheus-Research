@@ -228,6 +228,15 @@ SSOT 入口：
     - `5f9134e` feat：增加 v0_dirty_random_cost 扩展（mode/rng_seed/survival_cost_uniform_max）
     - `f555f67` fix：修复 run_id 冲突（纳秒 + seed 后缀）
 
+- **V12.3.5 — Ugly baseline v0.1（decision-cost；确定性负对照）**
+  - 对应：证明“读取世界输入”≠“世界影响生死”（必须把世界接入 action_cost/impedance_cost 才会影响能量）
+  - 证据（本地产物）：
+    - Summary JSON：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_1_decision_cost_50seeds_summary_20260106T123740Z.json`
+  - 结果（50 seeds）：
+    - extinction_tick：mean=67, std=0.0, range=[67,67]
+    - reject/invalid：0%（invalid_ratio_mean=0.0）
+  - 冻结解释：只要每 tick 给所有 alive agent 相同成本，灭绝必然确定性。
+
 - **V12.4 — Life v0（只做死亡，暂不做繁殖）**
   - 对应：Mainline/Life
   - 验收：死亡相关的“事件接口 + 证据落盘 + fail-closed”存在；繁殖明确后置。
