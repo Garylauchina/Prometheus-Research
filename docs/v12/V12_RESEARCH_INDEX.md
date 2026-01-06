@@ -251,6 +251,20 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - `extinction std > 10~20` ⇒ **NOT MET** (std=2.92)
   - Note (scale reality): with `E0=100` and invalid penalty `10..30`, extinction is expected to occur very early; 20000-step runs mostly record “post-extinction ticks”. Observing “survival tails / phase stability” requires aligning the time scale (e.g. increase E0 or reduce penalty), without touching the red-line (still no reward→energy).
 
+- **V12.3.5.2 — Ugly baseline v0.3 reject-stress (dynamic threshold + harsher penalties; 30000 steps + dataset wrap)**
+  - Scope: push reject-stress harder (dynamic invalid threshold), and run longer steps (30000) to test whether “tails / phase stability” can appear under a stronger reject process.
+  - Evidence (local artifacts; raw output reported by user):
+    - Quant commit: `8172caa` (branch: `v12-broker-uplink-v0`)
+    - Runs root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (154 run_dirs reported)
+    - Summary JSON: `runs_v12/v0_3_reject_stress_150seeds_raw_summary_20260106T152605Z.json`
+    - Raw bundle: `/tmp/V0_3_REJECT_STRESS_FINAL_RAW_OUTPUT_20260106.txt`
+  - Result (150 values list; reported):
+    - extinction_tick: mean=13.95, std=1.42, range=[12,18]
+    - reject_rate: mean=78.58%, std=6.53%
+  - Friend gate verdict (factual):
+    - `reject_rate mean >= 30%` ⇒ **PASS**
+  - Note (scale reality): extinction at ~14 ticks implies the 30000-step run is still dominated by “post-extinction ticks”; “tails / phase stability” remain not observable unless the time scale is aligned (raise E0 and/or reduce penalties) while keeping the red-line (no reward→energy).
+
 - **V12.3.6 — Ugly baseline v0.2 (impedance-cost; world measurability affects energy)**
   - Scope: Map world measurability (snapshot quality) into energy via `impedance_cost` (still no reward→energy).
   - Evidence (local artifact):

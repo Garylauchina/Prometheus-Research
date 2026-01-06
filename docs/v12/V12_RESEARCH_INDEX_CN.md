@@ -251,6 +251,20 @@ SSOT 入口：
     - `extinction std > 10~20` ⇒ **未满足**（std=2.92）
   - 备注（尺度现实）：在 `E0=100` 且 invalid 罚 `10..30` 的能量尺度下，早灭绝是预期；20000 steps 大部分 tick 会变成“灭绝后记录”。若要观测“存活尾巴/阶段性稳定”，必须对齐时间尺度（例如提高 E0 或降低罚则），但仍保持红线不变（禁止 reward→energy）。
 
+- **V12.3.5.2 — Ugly baseline v0.3 reject-stress（动态阈值 + 更狠罚；30000 steps + dataset wrap）**
+  - 对应：进一步加大 reject-stress（动态 invalid 阈值），并把 steps 拉到 30000，尝试观察“尾巴/阶段性稳定”是否出现。
+  - 证据（本地产物；用户汇报的 raw 输出）：
+    - Quant commit：`8172caa`（branch：`v12-broker-uplink-v0`）
+    - Runs root：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/`（用户汇报 154 个 run_dirs）
+    - Summary JSON：`runs_v12/v0_3_reject_stress_150seeds_raw_summary_20260106T152605Z.json`
+    - Raw bundle：`/tmp/V0_3_REJECT_STRESS_FINAL_RAW_OUTPUT_20260106.txt`
+  - 结果（150 值列表；用户汇报）：
+    - extinction_tick：mean=13.95, std=1.42, range=[12,18]
+    - reject_rate：mean=78.58%, std=6.53%
+  - 朋友 gate 判据（写实）：
+    - `reject_rate mean >= 30%` ⇒ **PASS**
+  - 备注（尺度现实）：平均 ~14 tick 灭绝意味着 30000 steps 仍然主要是在记录“灭绝后 ticks”；若要观测“尾巴/阶段性稳定”，必须先对齐时间尺度（提高 E0 / 降低罚则），同时保持红线不变（禁止 reward→energy）。
+
 - **V12.3.6 — Ugly baseline v0.2（impedance-cost；世界可测性影响能量）**
   - 对应：将世界可测性（snapshot quality）映射为 `impedance_cost` 进入能量（仍然禁止 reward→energy）。
   - 证据（本地产物）：
