@@ -90,8 +90,17 @@ Pass condition for “world-coupling exists” requires ON and OFF to be measura
 
 Shuffle the world signal across ticks (preserve marginal distribution, break time coupling).
 
+Hard requirements (frozen; prevents “fake coupling” by inconsistent normalization):
+- **Shared normalization anchor**: any normalization such as `g = signal / signal_p99` MUST use the **same** `signal_p99_anchor` across ON/OFF/SHUFFLE:
+  - either a precomputed dataset-level anchor (recommended), or
+  - a pre-registered constant.
+  - It MUST NOT be recomputed per-mode or per-run in a way that changes the mapping scale.
+- **Shuffle definition**: SHUFFLE MUST permute the per-tick signal values with a deterministic permutation (seeded), preserving the marginal distribution and length; only the **time alignment** is broken.
+- **OFF definition**: OFF MUST not read the world signal at all (baseline-only).
+
 Expectation:
 - If ON ≈ SHUFFLE, then “world time structure” is NOT driving outcomes ⇒ FAIL (coupling_not_detected).
+- If OFF is not ≈ SHUFFLE, then the negative control is invalid ⇒ FAIL (control_invalid:off_not_equivalent_to_shuffle).
 
 ---
 
