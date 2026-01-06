@@ -237,6 +237,20 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - reject/invalid: 0% (invalid_ratio_mean=0.0)
   - Interpretation (frozen): deterministic extinction is expected if all alive agents receive identical per-tick costs.
 
+- **V12.3.5.1 — Ugly baseline v0.1 reject-stress (action_cost invalid penalty; 20000 steps + dataset wrap)**
+  - Scope: force “proposal invalid / reject-like” events to become **measurable** (target reject_rate ≥ 20%), to test whether the “world → proposal → cost → death” chain is intact.
+  - Evidence (local artifacts; raw output reported by user):
+    - Runs root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (101 run_dirs: 100-seed sweep + 1 smoke)
+    - Raw summary JSON: `runs_v12/v0_1_reject_stress_100seeds_raw_summary.json`
+    - Raw text bundle: `docs/v12/V12_V0_1_REJECT_STRESS_100SEED_RAW_OUTPUT_20260106.txt`
+  - Result (100-seed list; reported):
+    - extinction_tick: mean=27.40, std=2.92, range=[22,35]
+    - reject_rate: mean=30.20%, std=1.31%
+  - Friend gate verdict (factual):
+    - `reject_rate > 20%` ⇒ **PASS (chain intact)**
+    - `extinction std > 10~20` ⇒ **NOT MET** (std=2.92)
+  - Note (scale reality): with `E0=100` and invalid penalty `10..30`, extinction is expected to occur very early; 20000-step runs mostly record “post-extinction ticks”. Observing “survival tails / phase stability” requires aligning the time scale (e.g. increase E0 or reduce penalty), without touching the red-line (still no reward→energy).
+
 - **V12.3.6 — Ugly baseline v0.2 (impedance-cost; world measurability affects energy)**
   - Scope: Map world measurability (snapshot quality) into energy via `impedance_cost` (still no reward→energy).
   - Evidence (local artifact):

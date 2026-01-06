@@ -237,6 +237,20 @@ SSOT 入口：
     - reject/invalid：0%（invalid_ratio_mean=0.0）
   - 冻结解释：只要每 tick 给所有 alive agent 相同成本，灭绝必然确定性。
 
+- **V12.3.5.1 — Ugly baseline v0.1 reject-stress（invalid 重罚 action_cost；20000 steps + dataset wrap）**
+  - 对应：强行让“proposal invalid / 类 reject”事件变成**可测**（目标 reject_rate ≥ 20%），用于检验“世界 → proposal → cost → death”链条是否真实连通。
+  - 证据（本地产物；用户汇报的 raw 输出）：
+    - Runs root：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/`（101 个 run_dirs：100-seed sweep + 1 smoke）
+    - Raw summary JSON：`runs_v12/v0_1_reject_stress_100seeds_raw_summary.json`
+    - Raw text bundle：`docs/v12/V12_V0_1_REJECT_STRESS_100SEED_RAW_OUTPUT_20260106.txt`
+  - 结果（100-seed 列表；用户汇报）：
+    - extinction_tick：mean=27.40, std=2.92, range=[22,35]
+    - reject_rate：mean=30.20%, std=1.31%
+  - 朋友 gate 判据（写实）：
+    - `reject_rate > 20%` ⇒ **PASS（链条未断）**
+    - `extinction std > 10~20` ⇒ **未满足**（std=2.92）
+  - 备注（尺度现实）：在 `E0=100` 且 invalid 罚 `10..30` 的能量尺度下，早灭绝是预期；20000 steps 大部分 tick 会变成“灭绝后记录”。若要观测“存活尾巴/阶段性稳定”，必须对齐时间尺度（例如提高 E0 或降低罚则），但仍保持红线不变（禁止 reward→energy）。
+
 - **V12.3.6 — Ugly baseline v0.2（impedance-cost；世界可测性影响能量）**
   - 对应：将世界可测性（snapshot quality）映射为 `impedance_cost` 进入能量（仍然禁止 reward→energy）。
   - 证据（本地产物）：

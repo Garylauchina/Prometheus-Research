@@ -117,6 +117,17 @@ Experimental extension (non-acceptance; read-only factual record):
   - Result (50 seeds): extinction_tick mean=67, std=0.0, range=[67,67]; invalid_ratio_mean=0.0
   - Note: This demonstrates that “reading world input” does not imply world affects survival unless mapped into action_cost/impedance_cost.
 
+- v0.1 reject-stress (action_cost invalid penalty; 20000 steps + dataset wrap)
+  - Quant artifacts (reported):
+    - runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/` (101 run_dirs: 100-seed sweep + 1 smoke)
+    - raw summary: `runs_v12/v0_1_reject_stress_100seeds_raw_summary.json`
+    - raw bundle: `docs/v12/V12_V0_1_REJECT_STRESS_100SEED_RAW_OUTPUT_20260106.txt`
+  - Result (reported, 100 values list):
+    - extinction_tick mean=27.40, std=2.92, range=[22,35]
+    - reject_rate mean=30.20%, std=1.31%
+  - Friend gate semantics (factual): reject_rate >= 20% ⇒ chain intact (PASS); extinction std > 10~20 not met (std=2.92)
+  - Note (scale reality): with `E0=100` and invalid penalty `10..30`, early extinction is expected; long-run “tails” require time-scale alignment (raise E0 or reduce penalty) while keeping the life red-line (no reward→energy).
+
 - v0.2 impedance-cost (world measurability affects energy via impedance_cost)
   - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_2_impedance_cost_50seeds_summary_20260106T124935Z.json`
   - Result (50 seeds): extinction_tick mean=53.04, std=0.445, range=[52,54]; impedance_triggered_ratio mean=0.0586, std=0.0
