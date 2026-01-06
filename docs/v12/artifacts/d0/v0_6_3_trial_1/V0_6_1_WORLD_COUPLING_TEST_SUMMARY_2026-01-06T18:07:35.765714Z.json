@@ -1,0 +1,217 @@
+{
+  "campaign": "v0_6_1_world_coupling_test",
+  "ts_utc": "2026-01-06T18:07:35.765714Z",
+  "seeds_count": 20,
+  "per_seed_results": [
+    {
+      "seed": 1,
+      "extinction_off": 669,
+      "extinction_on": 646,
+      "extinction_shuffle": 460
+    },
+    {
+      "seed": 2,
+      "extinction_off": 676,
+      "extinction_on": 627,
+      "extinction_shuffle": 460
+    },
+    {
+      "seed": 3,
+      "extinction_off": 665,
+      "extinction_on": 633,
+      "extinction_shuffle": 448
+    },
+    {
+      "seed": 4,
+      "extinction_off": 666,
+      "extinction_on": 621,
+      "extinction_shuffle": 440
+    },
+    {
+      "seed": 5,
+      "extinction_off": 684,
+      "extinction_on": 649,
+      "extinction_shuffle": 473
+    },
+    {
+      "seed": 6,
+      "extinction_off": 734,
+      "extinction_on": 684,
+      "extinction_shuffle": 506
+    },
+    {
+      "seed": 7,
+      "extinction_off": 608,
+      "extinction_on": 595,
+      "extinction_shuffle": 416
+    },
+    {
+      "seed": 8,
+      "extinction_off": 736,
+      "extinction_on": 685,
+      "extinction_shuffle": 503
+    },
+    {
+      "seed": 9,
+      "extinction_off": 743,
+      "extinction_on": 711,
+      "extinction_shuffle": 521
+    },
+    {
+      "seed": 10,
+      "extinction_off": 714,
+      "extinction_on": 657,
+      "extinction_shuffle": 478
+    },
+    {
+      "seed": 11,
+      "extinction_off": 763,
+      "extinction_on": 702,
+      "extinction_shuffle": 527
+    },
+    {
+      "seed": 12,
+      "extinction_off": 787,
+      "extinction_on": 725,
+      "extinction_shuffle": 539
+    },
+    {
+      "seed": 13,
+      "extinction_off": 643,
+      "extinction_on": 614,
+      "extinction_shuffle": 441
+    },
+    {
+      "seed": 14,
+      "extinction_off": 666,
+      "extinction_on": 630,
+      "extinction_shuffle": 452
+    },
+    {
+      "seed": 15,
+      "extinction_off": 698,
+      "extinction_on": 655,
+      "extinction_shuffle": 465
+    },
+    {
+      "seed": 16,
+      "extinction_off": 641,
+      "extinction_on": 619,
+      "extinction_shuffle": 431
+    },
+    {
+      "seed": 17,
+      "extinction_off": 697,
+      "extinction_on": 654,
+      "extinction_shuffle": 473
+    },
+    {
+      "seed": 18,
+      "extinction_off": 694,
+      "extinction_on": 657,
+      "extinction_shuffle": 475
+    },
+    {
+      "seed": 19,
+      "extinction_off": 640,
+      "extinction_on": 615,
+      "extinction_shuffle": 444
+    },
+    {
+      "seed": 20,
+      "extinction_off": 636,
+      "extinction_on": 612,
+      "extinction_shuffle": 435
+    }
+  ],
+  "delta_on_minus_off": {
+    "mean": -38.45,
+    "std": 13.477666712009167,
+    "min": -62,
+    "max": -13,
+    "values": [
+      -23,
+      -49,
+      -32,
+      -45,
+      -35,
+      -50,
+      -13,
+      -51,
+      -32,
+      -57,
+      -61,
+      -62,
+      -29,
+      -36,
+      -43,
+      -22,
+      -43,
+      -37,
+      -25,
+      -24
+    ]
+  },
+  "delta_on_minus_shuffle": {
+    "mean": 180.2,
+    "std": 6.038211655780211,
+    "min": 167,
+    "max": 190,
+    "values": [
+      186,
+      167,
+      185,
+      181,
+      176,
+      178,
+      179,
+      182,
+      190,
+      179,
+      175,
+      186,
+      173,
+      178,
+      190,
+      188,
+      181,
+      182,
+      171,
+      177
+    ]
+  },
+  "delta_off_minus_shuffle": {
+    "mean": 218.65,
+    "std": 14.364104566592378,
+    "min": 192,
+    "max": 248,
+    "values": [
+      209,
+      216,
+      217,
+      226,
+      211,
+      228,
+      192,
+      233,
+      222,
+      236,
+      236,
+      248,
+      202,
+      214,
+      233,
+      210,
+      224,
+      219,
+      196,
+      201
+    ]
+  },
+  "significance_checks": {
+    "on_vs_off_significant": true,
+    "on_vs_shuffle_significant": true,
+    "off_vs_shuffle_ok": false
+  },
+  "verdict": "CONTROLS_DIFFER_FAIL"
+}

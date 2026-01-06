@@ -110,4 +110,29 @@ Recommended to record in each trial manifest:
 - `d0.primary_metric_name`
 - `d0.f1_f2_f3_status` (one of: `pass|fail:<reason>|not_measurable`)
 
+---
+
+## 6) Trial entry records (append-only factual log; recommended)
+
+This section is a **factual ledger** of D0 trial entries. Add new records only.
+
+### 6.1 Trial-1 — V0.6.3 temporal-only falsification battery (ON vs SHUFFLE)
+
+- **trial_id**: `d0_trial_1_v0_6_3_temporal_only_falsification_battery`
+- **entry_ts_utc**: `2026-01-06T19:22:44Z` (campaign generated_at; see PRIMARY JSON)
+- **artifacts_dir**: `docs/v12/artifacts/d0/v0_6_3_trial_1/`
+- **primary_json**: `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_3_BATTERY_AUDITABLE_COMPLETE_FINAL.json`
+  - **sha256**: `eb3c4e2bbf1e15141be7389bad489b12e7ee1c60389f56af3bfc86a7ff00db56`
+- **derived_json**: `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_3_DERIVED_SHUFFLE_SEED_COMPLETE_DATA.json`
+- **verifier_script**: `docs/v12/artifacts/d0/v0_6_3_trial_1/verify_v0_6_3_reproducibility.py`
+- **delivery_manifest**: `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_3_ABSOLUTE_FINAL_DELIVERY.md`
+
+Verification command (stdlib only; run from repo root):
+- `python3 docs/v12/artifacts/d0/v0_6_3_trial_1/verify_v0_6_3_reproducibility.py docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_3_BATTERY_AUDITABLE_COMPLETE_FINAL.json`
+
+OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided separately):
+- **off_mode.status**: `NOT_INCLUDED_IN_THIS_DATASET`
+- **off_mode.v0_6_1_reference.evidence_files**:
+  - `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_1_WORLD_COUPLING_TEST_SUMMARY_2026-01-06T18:07:35.765714Z.json`
+  - `docs/v12/artifacts/d0/v0_6_3_trial_1/V0_6_1_per_seed_on_off_shuffle_20seeds.json`
 
