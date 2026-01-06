@@ -17,9 +17,9 @@ Fill this template **before running**. Do not edit after execution (append-only 
 ## 1) World input (frozen for this trial)
 
 - dataset_dir: `data/market/SWAP/universe_A/2018-01-01__2019-12-31`
-- dataset_id: (TBD; MUST be a stable id)
+- dataset_id: `SWAP_universe_A_2018-01-01__2019-12-31`
 - inst_id: `universe_A` (SWAP universe; must be consistent with dataset)
-- tick_interval_ms: (TBD)
+- tick_interval_ms: `1000`
 - segment/window description:
   - Time window is **strictly non-overlapping** with Trial-1.
   - Boundary rule: if Trial-1 covers up to `2020-12-31`, then Trial-2 uses `2019-12-31` as a strict boundary.
@@ -76,7 +76,7 @@ Normalization anchor (must be shared across ON/OFF/SHUFFLE):
 - ON: run (required)
 - SHUFFLE: run (required)
   - shuffle algorithm: `random.Random(shuffle_seed).shuffle(g_sequence_full_len_5000)`
-  - shuffle_seed: (TBD; must be recorded)
+  - shuffle_seed: `1000003 + seed` (derived; deterministic)
 - OFF (ablation):
   - status: `NOT_RUN_IN_THIS_TRIAL`
   - evidence_ref: use V0.6.1 OFF evidence (see §8.2)
@@ -102,7 +102,9 @@ Falsification rule (frozen):
 
 ## 7) Run plan (frozen)
 
-- seeds: 20 seeds, **disjoint** from Trial-1 and Trial-3 (exact list TBD)
+- seeds: 20 seeds, **disjoint** from Trial-1 and Trial-3
+  - seed_range: `3001–3020`
+  - seed_list: `3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018,3019,3020`
 - steps_target: (TBD)
 - early_stop: (TBD)
 - expected run_dirs naming: (TBD)

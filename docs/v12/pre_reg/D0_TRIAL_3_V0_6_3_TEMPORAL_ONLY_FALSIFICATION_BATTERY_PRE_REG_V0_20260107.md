@@ -19,8 +19,8 @@ Fill this template **before running**. Do not edit after execution (append-only 
 - market_type: `SWAP` (same market type as Trial-1/Trial-2)
 - inst_id: `universe_B` (must be disjoint from Trial-1/Trial-2)
 - dataset_dir: `data/market/SWAP/universe_B/2019-01-01__2020-12-31`
-- dataset_id: (TBD; MUST be a stable id)
-- tick_interval_ms: (TBD)
+- dataset_id: `SWAP_universe_B_2019-01-01__2020-12-31`
+- tick_interval_ms: `1000`
 - segment/window description:
   - Different `inst_id` universe than Trial-1/Trial-2, same market type SWAP.
   - If dataset does not exist yet: first generate an equivalent dataset via tick loop, then freeze the resulting dataset_dir + dataset_id here.
@@ -45,7 +45,7 @@ Result:
 
 Normalization anchor (must be shared across ON/OFF/SHUFFLE):
 - signal_p99_anchor source: `dataset_precomputed`
-- signal_p99_anchor value: `0.002507` (frozen; carried from Trial-1 unless re-precomputed on this dataset is explicitly pre-registered)
+- signal_p99_anchor value: `0.002507` (frozen; carried from Trial-1; do not re-compute per-trial)
 
 ---
 
@@ -77,7 +77,7 @@ Normalization anchor (must be shared across ON/OFF/SHUFFLE):
 - ON: run (required)
 - SHUFFLE: run (required)
   - shuffle algorithm: `random.Random(shuffle_seed).shuffle(g_sequence_full_len_5000)`
-  - shuffle_seed: (TBD; must be recorded)
+  - shuffle_seed: `1000003 + seed` (derived; deterministic)
 - OFF (ablation):
   - status: `NOT_RUN_IN_THIS_TRIAL`
   - evidence_ref: use V0.6.1 OFF evidence (see §8.2)
@@ -103,7 +103,9 @@ Falsification rule (frozen):
 
 ## 7) Run plan (frozen)
 
-- seeds: 20 seeds, **disjoint** from Trial-1 and Trial-2 (exact list TBD)
+- seeds: 20 seeds, **disjoint** from Trial-1 and Trial-2
+  - seed_range: `4001–4020`
+  - seed_list: `4001,4002,4003,4004,4005,4006,4007,4008,4009,4010,4011,4012,4013,4014,4015,4016,4017,4018,4019,4020`
 - steps_target: (TBD)
 - early_stop: (TBD)
 - expected run_dirs naming: (TBD)
