@@ -99,8 +99,15 @@ Hard requirements (frozen; prevents “fake coupling” by inconsistent normaliz
 - **OFF definition**: OFF MUST not read the world signal at all (baseline-only).
 
 Expectation:
-- If ON ≈ SHUFFLE, then “world time structure” is NOT driving outcomes ⇒ FAIL (coupling_not_detected).
-- If OFF is not ≈ SHUFFLE, then the negative control is invalid ⇒ FAIL (control_invalid:off_not_equivalent_to_shuffle).
+- Negative control falsifies “time-structure coupling” as follows:
+  - If **ON ≈ SHUFFLE**, then “world time structure” is NOT driving outcomes ⇒ FAIL (`coupling_not_detected:time_alignment`).
+
+Clarification (frozen; avoid a common false requirement):
+- **OFF is an ablation**, not a negative control. It is normal and expected that `OFF != SHUFFLE` when the pressure mapping is sensitive to the **signal distribution** (distribution effect). Therefore we MUST NOT require `OFF ≈ SHUFFLE`.
+
+Required reporting (frozen; separates two effects):
+- **Alignment effect**: compare `ON` vs `SHUFFLE` (time alignment preserved vs broken).
+- **Distribution effect**: compare `SHUFFLE` vs `OFF` (signal present vs absent, time alignment removed).
 
 ---
 
