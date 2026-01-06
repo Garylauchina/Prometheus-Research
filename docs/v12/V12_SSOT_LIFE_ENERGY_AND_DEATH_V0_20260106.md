@@ -151,6 +151,20 @@ Hard rule: all `.jsonl` evidence must be strict JSONL (no comments).
 
 ---
 
+## 5.1) W0 — World structure measurability gate (frozen; fail-closed)
+
+Principle:
+- In **no-structure worlds** (e.g., extreme stable markets), the system MUST NOT “manufacture” world-coupling verdicts by running long experiments that only reflect baseline costs + injected randomness.
+
+Rule (W0):
+- Any experiment that claims “world-coupling” (world → cost/pressure) MUST first run **W0** on its world input (`market_snapshot.jsonl`), and record the W0 verdict.
+- If W0 verdict is `NOT_MEASURABLE`, the experiment MUST stop and label itself `NOT_MEASURABLE` (no further seed sweep / no narrative “PASS”).
+
+Tool (Research, stdlib):
+- `python3 tools/v12/verify_world_structure_gate_v0.py --dataset_dir <DATASET_DIR> --k_windows 1,100,500 --p99_threshold 0.001 --min_samples 1000`
+
+---
+
 ## 6) Cross-links (frozen entries)
 
 - V12 index (EN): `docs/v12/V12_RESEARCH_INDEX.md`

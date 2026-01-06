@@ -187,6 +187,19 @@ FAIL:
 
 ---
 
+## 3.1) W0 — World structure measurability gate (frozen; for world-coupling experiments)
+
+This SSOT is “death-only”; however, many experimental extensions attempted to add “world-coupling”.
+To prevent **manufacturing** pseudo-signal in no-structure worlds, we freeze a gate:
+
+- If a run’s intent is “world-coupling” (world → cost/pressure), it MUST run W0 on `market_snapshot.jsonl` first.
+- If W0 verdict is `NOT_MEASURABLE`, the run MUST stop (or self-label `NOT_MEASURABLE`) and MUST NOT proceed to large seed sweeps.
+
+Tool:
+- `python3 tools/v12/verify_world_structure_gate_v0.py --dataset_dir <DATASET_DIR> --k_windows 1,100,500 --p99_threshold 0.001 --min_samples 1000`
+
+---
+
 ## 4) Tools (frozen entry)
 
 - Verifier:
