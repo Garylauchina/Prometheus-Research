@@ -67,6 +67,23 @@ Forbidden (outcome-type / success-type) energy deltas:
 - “good trade” bonus
 - “alpha score” bonus
 
+### R5) Energy update sources: allowed vs forbidden (frozen semantics)
+
+This clause removes the common ambiguity:
+
+- **Allowed sources** (energy depends on *what the agent did* and *world impedance*):
+  - `action_cost`: costs derived from the agent’s own actions/attempts (e.g., order attempt cost, cancel attempt cost, compute cost)
+  - `impedance_cost`: costs derived from **account-local interaction impedance** (e.g., rate-limit buckets, rejects, network latency tiers), when measurable
+
+- **Forbidden sources** (energy MUST NOT depend on outcomes/rewards):
+  - `reward_score` / `reward` / `fitness`
+  - `profit` / `ROI` / `Δequity` / `Δbalance` (both broker_local and exchange_truth)
+
+Rationale: allowing reward→energy would effectively create reward→death, which violates the “death is NOT reward” red-line.
+
+Audit requirement:
+- Every non-zero energy delta MUST carry a `reason_code` at evidence level (e.g. `tick_survival_cost`, `action_cost:order_attempt`, `impedance_cost:rate_limited`).
+
 ---
 
 ## 3) Baseline v0 (death-only) contract (frozen)
