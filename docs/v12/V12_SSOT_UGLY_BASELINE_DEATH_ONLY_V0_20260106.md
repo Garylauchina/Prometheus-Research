@@ -97,6 +97,14 @@ PASS requires:
 - If `extinction_tick` is non-null, it matches the first tick where `alive_count == 0`
 - No violation of the Life red-line is detected
 
+Acceptance anchor (read-only, factual record):
+- Quant tick run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_tick_loop_v0_20260106T083725Z`
+- Dataset dir (local artifact): `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_BTC-USDT-SWAP_20260106T083725.364788Z_20260106T105939.297603Z_1000ms`
+- Dataset verifier verdict: `NOT_MEASURABLE` (tick interval unstable: violations=2225/4999, ratio=0.445; delta_ms_min=941, delta_ms_max=13211)
+- Baseline run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_ugly_baseline_v0_20260106T115105Z`
+- Baseline verifier verdict: `PASS`
+- Extinction tick (observed): `100` (agent_count=100, E0=100, delta=-1)
+
 NOT_MEASURABLE:
 - evidence is valid but a higher-level measurement (not part of v0) is disabled/not measurable
 - (v0 death-only should usually be PASS if evidence is correct)

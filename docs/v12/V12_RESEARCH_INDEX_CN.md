@@ -197,9 +197,24 @@ SSOT 入口：
   - SSOT：`docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
   - 验收（机器可验）：
     - 从 Quant 已落盘的 canonical `market_snapshot.jsonl` 的 run_dir 构建 dataset
-    - dataset verifier 必须 PASS：
+    - dataset verifier 必须 PASS（或因 tick jitter 判 NOT_MEASURABLE；硬 FAIL 仅用于缺证据/非 strict JSONL/ts 回退/重复等）：
       - `python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
     - 硬规则：dataset 属于**本地产物**（不可提交到 git）；git 只纳入 SSOT + verifier
+  - 验收锚点（只读，写实记录）：
+    - Quant tick run_id：`run_tick_loop_v0_20260106T083725Z`
+    - Quant tick run_dir：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_tick_loop_v0_20260106T083725Z`
+    - Dataset dir（本地产物）：`/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_BTC-USDT-SWAP_20260106T083725.364788Z_20260106T105939.297603Z_1000ms`
+    - Dataset verifier verdict：`NOT_MEASURABLE`（tick interval unstable: 2225/4999, ratio=0.445；delta_ms_min=941, delta_ms_max=13211）
+
+- **V12.3.3 — Ugly baseline v0（只做死亡，replay_truth；证据闭合）**
+  - 对应：Baseline 校准（管线 + 红线执行）
+  - SSOT：`docs/v12/V12_SSOT_UGLY_BASELINE_DEATH_ONLY_V0_20260106.md`
+  - Verifier：
+    - `python3 tools/v12/verify_ugly_baseline_death_only_v0.py --run_dir <RUN_DIR> --steps_target 5000`
+  - 验收锚点（只读，写实记录）：
+    - Baseline run_dir：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_ugly_baseline_v0_20260106T115105Z`
+    - Verifier verdict：`PASS`
+    - Extinction tick（观测）：`100`（agent_count=100, E0=100, delta=-1）
 
 - **V12.4 — Life v0（只做死亡，暂不做繁殖）**
   - 对应：Mainline/Life

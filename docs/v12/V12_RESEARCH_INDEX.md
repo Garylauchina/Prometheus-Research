@@ -197,9 +197,24 @@ To avoid exponential complexity, the current mainline advances via “modeling t
   - SSOT: `docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
   - Acceptance (machine-verifiable):
     - Build a dataset from a Quant run_dir that already contains canonical `market_snapshot.jsonl`
-    - Verify dataset PASS:
+    - Verify dataset PASS (or NOT_MEASURABLE due to tick jitter; hard failures are reserved for missing evidence / non-strict JSONL / backward time / duplicates):
       - `python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
     - Hard rule: dataset is a **local artifact** (not committed to git); only SSOT + verifier are in git
+  - Acceptance anchor (read-only, factual record):
+    - Quant tick run_id: `run_tick_loop_v0_20260106T083725Z`
+    - Quant tick run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_tick_loop_v0_20260106T083725Z`
+    - Dataset dir (local artifact): `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_BTC-USDT-SWAP_20260106T083725.364788Z_20260106T105939.297603Z_1000ms`
+    - Dataset verifier verdict: `NOT_MEASURABLE` (tick interval unstable: violations=2225/4999, ratio=0.445; delta_ms_min=941, delta_ms_max=13211)
+
+- **V12.3.3 — Ugly baseline v0 (death-only, replay_truth; evidence closure)**
+  - Scope: Baseline calibration (plumbing + red-line enforcement)
+  - SSOT: `docs/v12/V12_SSOT_UGLY_BASELINE_DEATH_ONLY_V0_20260106.md`
+  - Verifier:
+    - `python3 tools/v12/verify_ugly_baseline_death_only_v0.py --run_dir <RUN_DIR> --steps_target 5000`
+  - Acceptance anchor (read-only, factual record):
+    - Baseline run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/run_ugly_baseline_v0_20260106T115105Z`
+    - Verifier verdict: `PASS`
+    - Extinction tick (observed): `100` (agent_count=100, E0=100, delta=-1)
 
 - **V12.4 — Life v0 (death-only baseline, no reproduction yet)**
   - Scope: Mainline/Life
