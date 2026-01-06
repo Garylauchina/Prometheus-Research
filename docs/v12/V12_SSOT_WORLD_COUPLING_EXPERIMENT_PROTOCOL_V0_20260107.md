@@ -117,4 +117,7 @@ Required reporting (frozen; separates two effects):
 - **FAIL**: contract drift, evidence missing, or controls falsify the claimed coupling.
 - **NOT_MEASURABLE**: W0 NOT_MEASURABLE (no-structure world) or world signal not measurable under frozen rules.
 
+Cross-link (constitution-level stop rule):
+- D0 falsification death verdict: `docs/v12/V12_SSOT_D0_FALSIFICATION_DEATH_VERDICT_V0_20260107.md`
+
 
