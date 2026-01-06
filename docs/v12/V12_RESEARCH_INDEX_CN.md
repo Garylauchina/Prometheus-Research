@@ -60,6 +60,7 @@ V12 的第一阶段只做一件事：**世界建模**，并将其变成可复现
 
 - **简单死亡判定（v0）**
   - 目标：定义一个最小、可审计、fail-closed 的死亡裁决接口（不引入复杂老化/不可逆损伤机制）。
+  - 冻结红线：**绝对禁止**把“死亡裁决”偷偷变成 reward shaping 的一部分（见 Life SSOT）。
 
 - **ROI 翻倍繁殖（v0）**
   - 目标：定义繁殖触发与证据接口（不追求短期必然出现翻倍样本；验收以证据闭环为主）。
@@ -71,6 +72,7 @@ SSOT 入口：
 - Interaction impedance evidence（v0 schema 入口）：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（§1.1.1）
 - Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
 - Replay dataset（交易所快照 → replay_truth baseline）：`docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
+- Life（能量 + 死亡；红线：死亡不是 reward）：`docs/v12/V12_SSOT_LIFE_ENERGY_AND_DEATH_V0_20260106.md`
 
 工具入口（verifiers/tools）：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`

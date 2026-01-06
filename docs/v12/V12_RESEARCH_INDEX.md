@@ -60,6 +60,7 @@ This phase narrows to 6 items (dependency order):
 
 - **Simple death judgment (v0)**
   - Goal: minimal auditable, fail-closed death verdict interface (no complex aging/irreversible damage yet).
+  - Hard red-line (frozen): death verdict must NOT be smuggled into reward shaping (see Life SSOT).
 
 - **ROI-doubling split reproduction (v0)**
   - Goal: define reproduction trigger and evidence interfaces (do not require near-term doubling samples; acceptance is evidence closure).
@@ -71,6 +72,7 @@ SSOT entry points:
 - Interaction impedance evidence (v0 schema entry): `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md` (§1.1.1)
 - Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
 - Replay dataset (exchange snapshot → replay_truth baseline): `docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
+- Life (energy + death, red-line: death is NOT reward): `docs/v12/V12_SSOT_LIFE_ENERGY_AND_DEATH_V0_20260106.md`
 
 Tools entry points (verifiers/tools):
 - Base dimensions verifier (E/I/M): `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
