@@ -73,6 +73,7 @@ SSOT entry points:
 - Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
 - Replay dataset (exchange snapshot → replay_truth baseline): `docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
 - Life (energy + death, red-line: death is NOT reward): `docs/v12/V12_SSOT_LIFE_ENERGY_AND_DEATH_V0_20260106.md`
+- Ugly baseline (death-only, replay_truth): `docs/v12/V12_SSOT_UGLY_BASELINE_DEATH_ONLY_V0_20260106.md`
 
 Tools entry points (verifiers/tools):
 - Base dimensions verifier (E/I/M): `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
@@ -83,6 +84,7 @@ Tools entry points (verifiers/tools):
 - errors.jsonl summary (bucket statistics): `python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl`
 - Replay dataset builder: `python3 tools/v12/build_replay_dataset_v0.py --source_run_dir <QUANT_RUN_DIR> --output_root <DATASETS_ROOT>`
 - Replay dataset verifier: `python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
+- Ugly baseline verifier (death-only): `python3 tools/v12/verify_ugly_baseline_death_only_v0.py --run_dir <RUN_DIR> --steps_target 5000`
 
 ## V12 mini-releases (recommended cadence)
 
