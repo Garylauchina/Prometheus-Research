@@ -216,6 +216,18 @@ To avoid exponential complexity, the current mainline advances via “modeling t
     - Verifier verdict: `PASS`
     - Extinction tick (observed): `100` (agent_count=100, E0=100, delta=-1)
 
+- **V12.3.4 — Ugly baseline v0_dirty (random action_cost; 50-seed sweep)**
+  - Scope: Fast sanity check to break determinism (still **no reward→energy**, red-line preserved)
+  - Status: experimental extension (does NOT replace v0_baseline acceptance)
+  - Evidence (local artifacts):
+    - Summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_dirty_random_cost_50seeds_CLEAN_summary_20260106T121350Z.json`
+    - Acceptance report: `/tmp/V12_UGLY_BASELINE_V0_DIRTY_ACCEPTANCE_20260106.md`
+  - Result (50 seeds, survival_cost_uniform_max=2.0):
+    - extinction_tick mean=55.56, std=1.00, range=[54,59]
+  - Quant commits (implementation facts):
+    - `5f9134e` feat: add v0_dirty_random_cost extension (mode/rng_seed/survival_cost_uniform_max)
+    - `f555f67` fix: run_id collision (nanosecond + seed suffix)
+
 - **V12.4 — Life v0 (death-only baseline, no reproduction yet)**
   - Scope: Mainline/Life
   - Acceptance: evidence-backed **death** interfaces exist (event interfaces + evidence persistence + fail-closed). Reproduction is explicitly deferred.

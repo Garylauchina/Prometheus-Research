@@ -105,6 +105,13 @@ Acceptance anchor (read-only, factual record):
 - Baseline verifier verdict: `PASS`
 - Extinction tick (observed): `100` (agent_count=100, E0=100, delta=-1)
 
+Experimental extension (non-acceptance; read-only factual record):
+- v0_dirty_random_cost (random action_cost; still no reward→energy)
+  - Quant summary JSON: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_dirty_random_cost_50seeds_CLEAN_summary_20260106T121350Z.json`
+  - Acceptance report: `/tmp/V12_UGLY_BASELINE_V0_DIRTY_ACCEPTANCE_20260106.md`
+  - Result (50 seeds, survival_cost_uniform_max=2.0): extinction_tick mean=55.56, std=1.00, range=[54,59]
+  - Quant commits: `5f9134e` (feat v0_dirty), `f555f67` (fix run_id collision)
+
 NOT_MEASURABLE:
 - evidence is valid but a higher-level measurement (not part of v0) is disabled/not measurable
 - (v0 death-only should usually be PASS if evidence is correct)

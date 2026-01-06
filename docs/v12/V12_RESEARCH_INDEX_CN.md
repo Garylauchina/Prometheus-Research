@@ -216,6 +216,18 @@ SSOT 入口：
     - Verifier verdict：`PASS`
     - Extinction tick（观测）：`100`（agent_count=100, E0=100, delta=-1）
 
+- **V12.3.4 — Ugly baseline v0_dirty（随机 action_cost；50-seed 扫描）**
+  - 对应：快速打破确定性（仍然 **禁止 reward→energy**，红线不变）
+  - 状态：实验扩展（不替代 v0_baseline 的验收锚点）
+  - 证据（本地产物）：
+    - Summary JSON：`/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12/v0_dirty_random_cost_50seeds_CLEAN_summary_20260106T121350Z.json`
+    - Acceptance report：`/tmp/V12_UGLY_BASELINE_V0_DIRTY_ACCEPTANCE_20260106.md`
+  - 结果（50 seeds, survival_cost_uniform_max=2.0）：
+    - extinction_tick mean=55.56, std=1.00, range=[54,59]
+  - Quant commits（实现事实）：
+    - `5f9134e` feat：增加 v0_dirty_random_cost 扩展（mode/rng_seed/survival_cost_uniform_max）
+    - `f555f67` fix：修复 run_id 冲突（纳秒 + seed 后缀）
+
 - **V12.4 — Life v0（只做死亡，暂不做繁殖）**
   - 对应：Mainline/Life
   - 验收：死亡相关的“事件接口 + 证据落盘 + fail-closed”存在；繁殖明确后置。
