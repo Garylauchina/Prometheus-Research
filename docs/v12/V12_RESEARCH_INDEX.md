@@ -74,10 +74,12 @@ SSOT entry points:
 - Replay dataset (exchange snapshot → replay_truth baseline): `docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
 - Life (energy + death, red-line: death is NOT reward): `docs/v12/V12_SSOT_LIFE_ENERGY_AND_DEATH_V0_20260106.md`
 - Ugly baseline (death-only, replay_truth): `docs/v12/V12_SSOT_UGLY_BASELINE_DEATH_ONLY_V0_20260106.md`
+- World-coupling experiment protocol (pre-registration + controls): `docs/v12/V12_SSOT_WORLD_COUPLING_EXPERIMENT_PROTOCOL_V0_20260107.md`
 
 Tools entry points (verifiers/tools):
 - Base dimensions verifier (E/I/M): `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
 - Scanner E schema verifier (market_snapshot canonical schema): `python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
+- World structure gate (W0, world-coupling prerequisite): `python3 tools/v12/verify_world_structure_gate_v0.py --dataset_dir <DATASET_DIR> --k_windows 1,100,500 --p99_threshold 0.001 --min_samples 1000`
 - Genome alignment table verifier (V12.2, machine-readable): `python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
 - Tick loop verifier (V12.3, sequence integrity): `python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
 - Tick loop repeatability gate (V12.3, FAIL=0): `python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <run_id_1,run_id_2,...>`
