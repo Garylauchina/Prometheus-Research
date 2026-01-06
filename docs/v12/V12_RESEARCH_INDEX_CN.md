@@ -70,6 +70,7 @@ SSOT 入口：
 - Base dimensions（E/I/M 基础维度合同）：`docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`
 - Interaction impedance evidence（v0 schema 入口）：`docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md`（§1.1.1）
 - Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
+- Replay dataset（交易所快照 → replay_truth baseline）：`docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
 
 工具入口（verifiers/tools）：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
@@ -78,6 +79,8 @@ SSOT 入口：
 - Tick loop verifier（V12.3, sequence integrity）：`python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
 - Tick loop repeatability gate（V12.3, FAIL=0）：`python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <run_id_1,run_id_2,...>`
 - errors.jsonl summary（bucket statistics）：`python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl`
+- Replay dataset builder：`python3 tools/v12/build_replay_dataset_v0.py --source_run_dir <QUANT_RUN_DIR> --output_root <DATASETS_ROOT>`
+- Replay dataset verifier：`python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
 
 ## V12 mini-releases (recommended cadence)
 
@@ -185,9 +188,18 @@ SSOT 入口：
       - `runs_v12/tick_errors_summaries_campaign_20260104T191027Z/aggregate_errors_summary.json`
       - by_error_type (20 runs aggregated): `get_books_unavailable=19`, `get_index_tickers_unavailable=17`, `get_mark_price_unavailable=15`, `get_funding_rate_unavailable=13`, `get_ticker_unavailable=5`
 
-- **V12.4 — Life v0 (simple death + ROI doubling reproduction, interface-first)**
+- **V12.3.2 — Replay dataset v0（交易所快照录制 → replay_truth baseline）**
+  - 对应：Baseline 基建（离线回放 + seed 稳定性压力测试）
+  - SSOT：`docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
+  - 验收（机器可验）：
+    - 从 Quant 已落盘的 canonical `market_snapshot.jsonl` 的 run_dir 构建 dataset
+    - dataset verifier 必须 PASS：
+      - `python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
+    - 硬规则：dataset 属于**本地产物**（不可提交到 git）；git 只纳入 SSOT + verifier
+
+- **V12.4 — Life v0（只做死亡，暂不做繁殖）**
   - 对应：Mainline/Life
-  - 验收：死亡/繁殖的“事件接口 + 证据落盘 + fail-closed”存在；不要求短期必然出现翻倍样本（避免上帝视角）。
+  - 验收：死亡相关的“事件接口 + 证据落盘 + fail-closed”存在；繁殖明确后置。
 
 ---
 

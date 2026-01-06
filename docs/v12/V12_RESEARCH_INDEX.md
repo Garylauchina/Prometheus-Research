@@ -70,6 +70,7 @@ SSOT entry points:
 - Base dimensions (E/I/M base-dimensions contract): `docs/v12/V12_SSOT_BASE_DIMENSIONS_EIM_V0_20260104.md`
 - Interaction impedance evidence (v0 schema entry): `docs/v12/V12_SSOT_UPLINK_DOWNLINK_PIPES_AND_EVIDENCE_20260101.md` (§1.1.1)
 - Alignment / control_class：`docs/v12/V12_SSOT_OKX_ORDER_PARAMETER_SPACE_V1_20260103.md` + `docs/v12/V12_SSOT_OKX_ACCOUNT_POSITION_AND_PRETRADE_PARAMETER_SPACE_V1_20260103.md`
+- Replay dataset (exchange snapshot → replay_truth baseline): `docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
 
 Tools entry points (verifiers/tools):
 - Base dimensions verifier (E/I/M): `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
@@ -78,6 +79,8 @@ Tools entry points (verifiers/tools):
 - Tick loop verifier (V12.3, sequence integrity): `python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
 - Tick loop repeatability gate (V12.3, FAIL=0): `python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <run_id_1,run_id_2,...>`
 - errors.jsonl summary (bucket statistics): `python3 tools/v12/summarize_errors_jsonl_v0.py --errors_jsonl <RUN_DIR>/errors.jsonl`
+- Replay dataset builder: `python3 tools/v12/build_replay_dataset_v0.py --source_run_dir <QUANT_RUN_DIR> --output_root <DATASETS_ROOT>`
+- Replay dataset verifier: `python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
 
 ## V12 mini-releases (recommended cadence)
 
@@ -185,9 +188,18 @@ To avoid exponential complexity, the current mainline advances via “modeling t
       - `runs_v12/tick_errors_summaries_campaign_20260104T191027Z/aggregate_errors_summary.json`
       - by_error_type (20 runs aggregated): `get_books_unavailable=19`, `get_index_tickers_unavailable=17`, `get_mark_price_unavailable=15`, `get_funding_rate_unavailable=13`, `get_ticker_unavailable=5`
 
-- **V12.4 — Life v0 (simple death + ROI doubling reproduction, interface-first)**
+- **V12.3.2 — Replay dataset v0 (exchange snapshot recording → replay_truth baseline)**
+  - Scope: Baseline infrastructure (offline replay, seed-stability stress)
+  - SSOT: `docs/v12/V12_SSOT_REPLAY_DATASET_V0_20260106.md`
+  - Acceptance (machine-verifiable):
+    - Build a dataset from a Quant run_dir that already contains canonical `market_snapshot.jsonl`
+    - Verify dataset PASS:
+      - `python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
+    - Hard rule: dataset is a **local artifact** (not committed to git); only SSOT + verifier are in git
+
+- **V12.4 — Life v0 (death-only baseline, no reproduction yet)**
   - Scope: Mainline/Life
-  - Acceptance: evidence-backed interfaces exist for death/reproduction (event interfaces + evidence persistence + fail-closed). No requirement for near-term doubling samples (avoid “god’s-eye” acceptance).
+  - Acceptance: evidence-backed **death** interfaces exist (event interfaces + evidence persistence + fail-closed). Reproduction is explicitly deferred.
 
 ---
 
