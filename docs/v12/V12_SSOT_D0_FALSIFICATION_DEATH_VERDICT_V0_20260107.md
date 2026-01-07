@@ -238,3 +238,10 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
   - **sha256**: `1cc87a953fda0f2f693c1d855ae6ad933137b61caf587b7b36b1a50c380c0d85`
 - **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_8/trial_8_time_reversal_neg_control_recomputed_summary.json`
   - **sha256**: `f58d3fa3ff64f8e04d2e9e21eab1395e2b872939c7857befbb0d4b1f532011f1`
+
+### 6.9 Trial-9 (planned; pre-registered pseudo-independence)
+
+- **trial_id**: `d0_trial_9_cross_market_pseudo_independence_v0`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_9_CROSS_MARKET_PSEUDO_INDEPENDENCE_V0_20260107.md`
+- **purpose**: `cross-market pseudo-independence: freeze knobs, compare ETH vs BTC under identical semantics to test market-specificity`
