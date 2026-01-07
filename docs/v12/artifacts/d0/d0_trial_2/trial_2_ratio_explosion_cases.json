@@ -1,0 +1,90 @@
+{
+  "tool": "extract_ratio_explosion_cases_v0",
+  "generated_at_utc": "2026-01-07T05:09:33.251245Z",
+  "input": {
+    "trial_2_sweep_summary_path": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/d0/d0_trial_2/trial_2_sweep_summary.json",
+    "trial_2_sweep_summary_sha256": "f95425801ab5d1c57f73309d22a5b4cb32c1a0099b9a3ba184a7f3cde4d420c9",
+    "pair_count": 60
+  },
+  "selection_rules": {
+    "abs_gap_on_lt_10": true,
+    "reduction_ratio_gt_5": true,
+    "reduction_ratio_lt_-1": true,
+    "note": "These flags indicate denominator sensitivity (gap_on near 0) or extreme ratios; they do not change PASS/FAIL by themselves."
+  },
+  "case_count": 5,
+  "cases": [
+    {
+      "g_hi": 0.65,
+      "seed": 3019,
+      "shuffle_seed": 1003022,
+      "gap_on": -2,
+      "gap_shuffle": -194,
+      "denom": 2,
+      "reduction_ratio": 96.0,
+      "on_run_dir": "run_temporal_only_falsification_v0_20260107T045502Z_ns1767761702192052000_seed3019_on",
+      "shuffle_run_dir": "run_temporal_only_falsification_v0_20260107T045502Z_ns1767761702713844000_seed3019_shuffle",
+      "flags": [
+        "abs_gap_on_lt_10",
+        "reduction_ratio_gt_5"
+      ]
+    },
+    {
+      "g_hi": 0.65,
+      "seed": 3013,
+      "shuffle_seed": 1003016,
+      "gap_on": -5,
+      "gap_shuffle": -285,
+      "denom": 5,
+      "reduction_ratio": 56.0,
+      "on_run_dir": "run_temporal_only_falsification_v0_20260107T045455Z_ns1767761695411324000_seed3013_on",
+      "shuffle_run_dir": "run_temporal_only_falsification_v0_20260107T045455Z_ns1767761695905608000_seed3013_shuffle",
+      "flags": [
+        "abs_gap_on_lt_10",
+        "reduction_ratio_gt_5"
+      ]
+    },
+    {
+      "g_hi": 0.6,
+      "seed": 3018,
+      "shuffle_seed": 1003021,
+      "gap_on": 38,
+      "gap_shuffle": -188,
+      "denom": 38,
+      "reduction_ratio": 5.947368421052632,
+      "on_run_dir": "run_temporal_only_falsification_v0_20260107T045438Z_ns1767761678969780000_seed3018_on",
+      "shuffle_run_dir": "run_temporal_only_falsification_v0_20260107T045439Z_ns1767761679612807000_seed3018_shuffle",
+      "flags": [
+        "reduction_ratio_gt_5"
+      ]
+    },
+    {
+      "g_hi": 0.55,
+      "seed": 3013,
+      "shuffle_seed": 1003016,
+      "gap_on": 65,
+      "gap_shuffle": -285,
+      "denom": 65,
+      "reduction_ratio": 5.384615384615385,
+      "on_run_dir": "run_temporal_only_falsification_v0_20260107T045413Z_ns1767761653536234000_seed3013_on",
+      "shuffle_run_dir": "run_temporal_only_falsification_v0_20260107T045414Z_ns1767761654009655000_seed3013_shuffle",
+      "flags": [
+        "reduction_ratio_gt_5"
+      ]
+    },
+    {
+      "g_hi": 0.6,
+      "seed": 3013,
+      "shuffle_seed": 1003016,
+      "gap_on": 67,
+      "gap_shuffle": -285,
+      "denom": 67,
+      "reduction_ratio": 5.253731343283582,
+      "on_run_dir": "run_temporal_only_falsification_v0_20260107T045433Z_ns1767761673950052000_seed3013_on",
+      "shuffle_run_dir": "run_temporal_only_falsification_v0_20260107T045434Z_ns1767761674437774000_seed3013_shuffle",
+      "flags": [
+        "reduction_ratio_gt_5"
+      ]
+    }
+  ]
+}
