@@ -193,3 +193,10 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
   - **sha256**: `fed8bd2702d444e8c1508d2db2bd4653cee04069eb6bb6e48017ad42794e946d`
 - **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_5/trial_5_visibility_knife_recomputed_summary.json`
   - **sha256**: `a44f647dd44169836fb8b863d5aabdc177562a4ba871d673287bb2cd1dde3d44`
+
+### 6.6 Trial-6 (planned; pre-registered knife)
+
+- **trial_id**: `d0_trial_6_signal_visibility_window_knife_v0`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_6_SIGNAL_VISIBILITY_WINDOW_KNIFE_V0_20260107.md`
+- **purpose**: `front-end blindness: compute signal only from visible window; attempt to kill time-structure claim by removing access to long lookback point (k=500)`
