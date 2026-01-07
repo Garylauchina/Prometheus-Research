@@ -105,10 +105,12 @@ Expected run counts:
 
 ## 8) Post-run evidence anchors (fill after completion; do not change above)
 
-- runs_root_eth: (TBD)
-- runs_root_btc: (TBD)
-- summary_json_path: (TBD)
-- summary_sha256: (TBD)
+- runs_root_eth: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_9_cross_market_eth/` (120 run_dirs)
+- runs_root_btc: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_9_cross_market_btc/` (120 run_dirs)
+- operator_summary_json_path: `docs/v12/artifacts/d0/d0_trial_9/D0_TRIAL_9_CROSS_MARKET_PSEUDO_INDEPENDENCE_SUMMARY_from_operator.json`
+  - operator_summary_sha256: `6e2ff158dbd61a904d15fa23742d8b75d9b3601e30ccbea2f76254a974f2ef91`
+- recomputed_summary_json_path: `docs/v12/artifacts/d0/d0_trial_9/trial_9_cross_market_recomputed_summary.json`
+  - recomputed_summary_sha256: `e8f98ecabc845841d7d7abe38691e8354fffa192907ce7b3bdb2e1331e158ec9`
 - notes: (append-only)
 
 

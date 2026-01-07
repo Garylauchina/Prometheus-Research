@@ -242,6 +242,15 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.9 Trial-9 (planned; pre-registered pseudo-independence)
 
 - **trial_id**: `d0_trial_9_cross_market_pseudo_independence_v0`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_9_CROSS_MARKET_PSEUDO_INDEPENDENCE_V0_20260107.md`
 - **purpose**: `cross-market pseudo-independence: freeze knobs, compare ETH vs BTC under identical semantics to test market-specificity`
+
+### 6.9.1 Trial-9 completion anchors (append-only)
+
+- **runs_root_eth**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_9_cross_market_eth/`
+- **runs_root_btc**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_9_cross_market_btc/`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/d0_trial_9/D0_TRIAL_9_CROSS_MARKET_PSEUDO_INDEPENDENCE_SUMMARY_from_operator.json`
+  - **sha256**: `6e2ff158dbd61a904d15fa23742d8b75d9b3601e30ccbea2f76254a974f2ef91`
+- **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_9/trial_9_cross_market_recomputed_summary.json`
+  - **sha256**: `e8f98ecabc845841d7d7abe38691e8354fffa192907ce7b3bdb2e1331e158ec9`

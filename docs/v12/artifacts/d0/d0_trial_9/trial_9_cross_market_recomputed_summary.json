@@ -1,0 +1,107 @@
+{
+  "tool": "recompute_trial9_cross_market_pseudo_independence_summary_v0",
+  "generated_at_utc": "2026-01-07T10:33:39.799146Z",
+  "runs_root_eth": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_9_cross_market_eth",
+  "runs_root_btc": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_9_cross_market_btc",
+  "run_count_eth": 120,
+  "run_count_btc": 120,
+  "pair_count_eth": 60,
+  "pair_count_btc": 60,
+  "eth": {
+    "reduction_ratio_full": {
+      "count": 60,
+      "mean": 0.9442991454514421,
+      "std": 0.18715362328464502,
+      "min": 0.6419437340153452,
+      "max": 1.3253796095444685
+    },
+    "gap_on": {
+      "count": 60,
+      "mean": 1293.75,
+      "std": 171.35466387972443,
+      "min": 922,
+      "max": 1617
+    },
+    "gap_shuffle": {
+      "count": 60,
+      "mean": 95.95,
+      "std": 251.69018157250395,
+      "min": -310,
+      "max": 560
+    }
+  },
+  "btc": {
+    "reduction_ratio_full": {
+      "count": 60,
+      "mean": 12.02433746387389,
+      "std": 57.78950177128305,
+      "min": 0.07633587786259542,
+      "max": 324.0
+    },
+    "gap_on": {
+      "count": 60,
+      "mean": 308.18333333333334,
+      "std": 210.32399543455702,
+      "min": -80,
+      "max": 714
+    },
+    "gap_shuffle": {
+      "count": 60,
+      "mean": 97.4,
+      "std": 259.80320757578545,
+      "min": -325,
+      "max": 605
+    },
+    "denom": {
+      "count": 60,
+      "mean": 314.55,
+      "std": 200.67747133148754,
+      "min": 1.0,
+      "max": 714
+    },
+    "denom_eq_1_count": 2,
+    "rr_abs_top5": [
+      {
+        "g_hi": 0.6,
+        "seed": 10006,
+        "gap_on": 1,
+        "gap_shuffle": -323,
+        "rr": 324.0,
+        "denom": 1.0
+      },
+      {
+        "g_hi": 0.55,
+        "seed": 10006,
+        "gap_on": -1,
+        "gap_shuffle": -323,
+        "rr": 322.0,
+        "denom": 1.0
+      },
+      {
+        "g_hi": 0.55,
+        "seed": 10019,
+        "gap_on": 21,
+        "gap_shuffle": -325,
+        "rr": 16.476190476190474,
+        "denom": 21
+      },
+      {
+        "g_hi": 0.65,
+        "seed": 10019,
+        "gap_on": -52,
+        "gap_shuffle": -325,
+        "rr": 5.25,
+        "denom": 52
+      },
+      {
+        "g_hi": 0.6,
+        "seed": 10019,
+        "gap_on": -58,
+        "gap_shuffle": -325,
+        "rr": 4.603448275862069,
+        "denom": 58
+      }
+    ],
+    "rr_explosion_case_count": 2
+  }
+}
