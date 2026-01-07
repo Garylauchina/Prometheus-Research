@@ -36,9 +36,7 @@ Definition (frozen; fail-closed):
 - The replay order is reversed: index t uses world record at index (T-1-t).
 - No resampling, no interpolation, no filtering.
 - `ts_utc` may become non-monotonic relative to original direction; this is allowed because replay index order is the driver.
-- If an implementation requires a materialized dataset, it MUST:
-  - write a new dataset dir (separate from base) and record hashes before any run.
-  - remain strict JSON/JSONL and 1:1 row reuse (only order changes).
+- Runner-internal transform is the execution choice for this trial (see Amendment A1).
 
 Evidence requirement:
 - Each run MUST record:
@@ -46,6 +44,17 @@ Evidence requirement:
   - `world_transform.base_dataset_dir`
   - `world_transform.base_dataset_hash`
   - `world_transform.reversed_record_count`
+
+---
+
+## 2.1) Amendment A1 (execution choice; append-only)
+
+We choose a single execution semantics to minimize freedom and avoid “new dataset” ambiguity.
+
+- amendment_id: `A1_runner_internal_time_reversal_only`
+- decision: `runner_internal_transform`
+- hard ban: `materialize_reversed_dataset_dir = FORBIDDEN`
+- rationale: `negative control; keep dataset identity stable; evidence semantics cleaner`
 
 ---
 
