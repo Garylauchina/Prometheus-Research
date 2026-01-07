@@ -11,6 +11,10 @@ D1 base theme:
 - **Active interoception**: death-proximity is a decision input (derived from survival ledger only).
 - **Bidirectional interaction adjudication**: decisions change interaction intensity; interaction intensity changes cost exposure; cost exposure changes survival energy; survival energy changes interoception.
 
+D1 purpose (non-goal; frozen):
+- **Measurement tool, not goal pursuit**: D1 is an evolutionary-mechanism instrument to measure complex-system coupling under frozen contracts. It does **not** require a predetermined “evolution target” (no fixed optimum to reach).
+- **Mechanism reproducibility is required** (evidence, joins, controls, recomputation), but **outcome sameness is not a success criterion**. If results collapse to a single stable attractor across independent worlds under frozen knobs, treat it as **domestication risk** (a “captive breeding” artifact), not as “stronger evolution”.
+
 Hard boundary:
 - Rewards (including reproduction reward) **must not usurp death adjudication** (directly). Allowed only to bias action choice (indirect).
 
