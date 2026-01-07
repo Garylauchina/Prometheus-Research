@@ -260,3 +260,7 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ## 7) D0 summary records (append-only)
 
 - **d0_summary_v1**: `docs/v12/D0_SUMMARY_APPEND_ONLY_V1_20260107.md`
+
+## 8) D1 starting points (append-only pointers)
+
+- **d1_killable_axioms_v0**: `docs/v12/D1_KILLABLE_AXIOMS_V0_20260107.md`
