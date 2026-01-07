@@ -105,9 +105,11 @@ Expected run count:
 
 ## 8) Post-run evidence anchors (fill after completion; do not change above)
 
-- runs_root: (TBD)
-- summary_json_path: (TBD)
-- summary_sha256: (TBD)
+- runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_7_signal_window_ge_k_staircase/` (900 run_dirs)
+- operator_summary_json_path: `docs/v12/artifacts/d0/d0_trial_7/D0_TRIAL_7_W_GE_K_STAIRCASE_SUMMARY_from_operator.json`
+  - operator_summary_sha256: `4016b3f7e541fbb43d3d3895a57ebac4f87f47b43ec1f1bec951996f95010168`
+- recomputed_summary_json_path: `docs/v12/artifacts/d0/d0_trial_7/trial_7_w_ge_k_staircase_recomputed_summary.json`
+  - recomputed_summary_sha256: `f750ba46783b3ac8e79b626659f525026ba8b538b003b053e6fa6dc86517a62b`
 - notes: (append-only)
 
 

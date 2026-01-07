@@ -212,9 +212,17 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.7 Trial-7 (planned; pre-registered knife)
 
 - **trial_id**: `d0_trial_7_signal_window_ge_k_staircase_v0`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_7_SIGNAL_WINDOW_GE_K_STAIRCASE_V0_20260107.md`
 - **purpose**: `W ≥ k visibility degradation staircase; attempt to kill time-structure claim within legal computable window range`
+
+### 6.7.1 Trial-7 completion anchors (append-only)
+
+- **runs_root**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_7_signal_window_ge_k_staircase/`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/d0_trial_7/D0_TRIAL_7_W_GE_K_STAIRCASE_SUMMARY_from_operator.json`
+  - **sha256**: `4016b3f7e541fbb43d3d3895a57ebac4f87f47b43ec1f1bec951996f95010168`
+- **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_7/trial_7_w_ge_k_staircase_recomputed_summary.json`
+  - **sha256**: `f750ba46783b3ac8e79b626659f525026ba8b538b003b053e6fa6dc86517a62b`
 
 ### 6.8 Trial-8 (planned; pre-registered negative control)
 
