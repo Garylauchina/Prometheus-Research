@@ -208,3 +208,17 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
   - **sha256**: `3ed0d09ce239157593661e680e501014a0eba4ab117d579faa3f7d7fff5af3e4`
 - **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_6/trial_6_signal_visibility_window_knife_recomputed_summary.json`
   - **sha256**: `2bb7182365770f4f1299d723bd5b09c4e3ace3167350fc4ed0b05d115ad0cd20`
+
+### 6.7 Trial-7 (planned; pre-registered knife)
+
+- **trial_id**: `d0_trial_7_signal_window_ge_k_staircase_v0`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_7_SIGNAL_WINDOW_GE_K_STAIRCASE_V0_20260107.md`
+- **purpose**: `W ≥ k visibility degradation staircase; attempt to kill time-structure claim within legal computable window range`
+
+### 6.8 Trial-8 (planned; pre-registered negative control)
+
+- **trial_id**: `d0_trial_8_time_reversal_neg_control_v0`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_8_TIME_REVERSAL_NEG_CONTROL_V0_20260107.md`
+- **purpose**: `time reversal replay negative control; test sensitivity to time arrow without changing distributions or death rules`
