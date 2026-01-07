@@ -121,9 +121,11 @@ Expected run count:
 
 ## 8) Post-run evidence anchors (fill after completion; do not change above)
 
-- runs_root: (TBD)
-- summary_json_path: (TBD)
-- summary_sha256: (TBD)
+- runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_4_block_knife/` (180 run_dirs)
+- operator_summary_json_path: `docs/v12/artifacts/d0/d0_trial_4/D0_TRIAL_4_BLOCK_PERMUTE_KNIFE_SUMMARY_from_operator.json`
+  - operator_summary_sha256: `2f47e03f0a937c23e1e23e54d6e5378584ff57a2c33b80f85036c9a2117a6e21`
+- recomputed_summary_json_path: `docs/v12/artifacts/d0/d0_trial_4/trial_4_block_knife_recomputed_summary.json`
+  - recomputed_summary_sha256: `5515eb6982eadedb86b39dfb7043e222f05831cb4bf9ce040407812efa8b3471`
 - verifier_output_path: (TBD)
 - notes: (append-only)
 

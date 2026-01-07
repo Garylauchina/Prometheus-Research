@@ -167,6 +167,14 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.4 Trial-4 (planned; pre-registered knife)
 
 - **trial_id**: `d0_trial_4_temporal_causality_break_block_permute_knife_v0`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_4_TEMPORAL_CAUSALITY_BREAK_BLOCK_PERMUTE_KNIFE_V0_20260107.md`
 - **purpose**: `structural ablation knife (block-wise time permutation) to attempt to kill the time-structure claim with minimal extra freedom`
+
+### 6.4.1 Trial-4 completion anchors (append-only)
+
+- **runs_root**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_4_block_knife/`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/d0_trial_4/D0_TRIAL_4_BLOCK_PERMUTE_KNIFE_SUMMARY_from_operator.json`
+  - **sha256**: `2f47e03f0a937c23e1e23e54d6e5378584ff57a2c33b80f85036c9a2117a6e21`
+- **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_4/trial_4_block_knife_recomputed_summary.json`
+  - **sha256**: `5515eb6982eadedb86b39dfb7043e222f05831cb4bf9ce040407812efa8b3471`
