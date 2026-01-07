@@ -163,3 +163,10 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 - **sweep_summary**: `docs/v12/artifacts/d0/d0_trial_3/trial_3_sweep_summary.json`
   - **sha256**: `c2981d891c97c1c73fe2e9ad682bd838e5e0468bdf2936b312900ee5f7e98e66`
 - **operator_summary** (archived): `docs/v12/artifacts/d0/D0_TRIAL_2_3_COMPLETE_SUMMARY_from_operator.json`
+
+### 6.4 Trial-4 (planned; pre-registered knife)
+
+- **trial_id**: `d0_trial_4_temporal_causality_break_block_permute_knife_v0`
+- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_4_TEMPORAL_CAUSALITY_BREAK_BLOCK_PERMUTE_KNIFE_V0_20260107.md`
+- **purpose**: `structural ablation knife (block-wise time permutation) to attempt to kill the time-structure claim with minimal extra freedom`
