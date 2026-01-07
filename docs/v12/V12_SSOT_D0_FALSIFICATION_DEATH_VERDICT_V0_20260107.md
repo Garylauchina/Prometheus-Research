@@ -139,13 +139,27 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.2 Trial-2 (planned; pre-registered)
 
 - **trial_id**: `d0_trial_2_v0_6_3_temporal_only_falsification_battery`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_2_V0_6_3_TEMPORAL_ONLY_FALSIFICATION_BATTERY_PRE_REG_V0_20260107.md`
 - **independence_basis**: `same market type + same inst universe (SWAP/universe_A) + strictly non-overlapping time window vs Trial-1`
 
 ### 6.3 Trial-3 (planned; pre-registered)
 
 - **trial_id**: `d0_trial_3_v0_6_3_temporal_only_falsification_battery`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_3_V0_6_3_TEMPORAL_ONLY_FALSIFICATION_BATTERY_PRE_REG_V0_20260107.md`
 - **independence_basis**: `same market type (SWAP) + different inst universe (universe_B, disjoint from Trial-1/2)`
+
+### 6.2.1 Trial-2 completion anchors (append-only)
+
+- **w0_report**: `docs/v12/artifacts/d0/d0_trial_2/w0_report.json`
+- **sweep_summary**: `docs/v12/artifacts/d0/d0_trial_2/trial_2_sweep_summary.json`
+  - **sha256**: `f95425801ab5d1c57f73309d22a5b4cb32c1a0099b9a3ba184a7f3cde4d420c9`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/D0_TRIAL_2_3_COMPLETE_SUMMARY_from_operator.json`
+
+### 6.3.1 Trial-3 completion anchors (append-only)
+
+- **w0_report**: `docs/v12/artifacts/d0/d0_trial_3/w0_report.json`
+- **sweep_summary**: `docs/v12/artifacts/d0/d0_trial_3/trial_3_sweep_summary.json`
+  - **sha256**: `c2981d891c97c1c73fe2e9ad682bd838e5e0468bdf2936b312900ee5f7e98e66`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/D0_TRIAL_2_3_COMPLETE_SUMMARY_from_operator.json`

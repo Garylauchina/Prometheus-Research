@@ -184,11 +184,14 @@ Falsification rule (frozen):
 
 ### 8.1 Trial-3 run anchors (to fill)
 
-- runs_root: (TBD)
-- run_ids (ON): (TBD)
-- run_ids (SHUFFLE): (TBD)
-- summary_json_path: (TBD)
-- verifier_output_path: (TBD)
+- runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_3` (120 run_dirs; g_hi sweep × seeds × {on,shuffle})
+- run_ids (ON): `SEE sweep_summary_json.pairs[].on_run_dir` (append-only; avoids duplicating 60 ids inline)
+- run_ids (SHUFFLE): `SEE sweep_summary_json.pairs[].shuffle_run_dir` (append-only; avoids duplicating 60 ids inline)
+- w0_report_path: `docs/v12/artifacts/d0/d0_trial_3/w0_report.json`
+- sweep_summary_json_path: `docs/v12/artifacts/d0/d0_trial_3/trial_3_sweep_summary.json`
+  - sweep_summary_sha256: `c2981d891c97c1c73fe2e9ad682bd838e5e0468bdf2936b312900ee5f7e98e66`
+- operator_summary_json_path: `docs/v12/artifacts/d0/D0_TRIAL_2_3_COMPLETE_SUMMARY_from_operator.json`
+  - operator_summary_sha256: `bf3443a9847f9b4c80d6136c6620278b83c11e4253be3a49ff0e99bf37c571f1`
 
 ### 8.2 External OFF evidence reference (frozen reference; already archived in Research)
 
