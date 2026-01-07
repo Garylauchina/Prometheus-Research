@@ -117,9 +117,11 @@ Expected run count:
 
 ## 8) Post-run evidence anchors (fill after completion; do not change above)
 
-- runs_root: (TBD)
-- summary_json_path: (TBD)
-- summary_sha256: (TBD)
+- runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_6_signal_visibility_knife/` (600 run_dirs)
+- operator_summary_json_path: `docs/v12/artifacts/d0/d0_trial_6/D0_TRIAL_6_SIGNAL_VISIBILITY_WINDOW_KNIFE_SUMMARY_from_operator.json`
+  - operator_summary_sha256: `3ed0d09ce239157593661e680e501014a0eba4ab117d579faa3f7d7fff5af3e4`
+- recomputed_summary_json_path: `docs/v12/artifacts/d0/d0_trial_6/trial_6_signal_visibility_window_knife_recomputed_summary.json`
+  - recomputed_summary_sha256: `2bb7182365770f4f1299d723bd5b09c4e3ace3167350fc4ed0b05d115ad0cd20`
 - notes: (append-only)
 
 

@@ -197,6 +197,14 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.6 Trial-6 (planned; pre-registered knife)
 
 - **trial_id**: `d0_trial_6_signal_visibility_window_knife_v0`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_6_SIGNAL_VISIBILITY_WINDOW_KNIFE_V0_20260107.md`
 - **purpose**: `front-end blindness: compute signal only from visible window; attempt to kill time-structure claim by removing access to long lookback point (k=500)`
+
+### 6.6.1 Trial-6 completion anchors (append-only)
+
+- **runs_root**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_6_signal_visibility_knife/`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/d0_trial_6/D0_TRIAL_6_SIGNAL_VISIBILITY_WINDOW_KNIFE_SUMMARY_from_operator.json`
+  - **sha256**: `3ed0d09ce239157593661e680e501014a0eba4ab117d579faa3f7d7fff5af3e4`
+- **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_6/trial_6_signal_visibility_window_knife_recomputed_summary.json`
+  - **sha256**: `2bb7182365770f4f1299d723bd5b09c4e3ace3167350fc4ed0b05d115ad0cd20`
