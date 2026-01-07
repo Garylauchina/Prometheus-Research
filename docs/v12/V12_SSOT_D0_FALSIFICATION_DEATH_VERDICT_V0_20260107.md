@@ -266,3 +266,4 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 - **d1_killable_axioms_v0**: `docs/v12/D1_KILLABLE_AXIOMS_V0_20260107.md`
 - **d1_nonlinear_life_death_min_reqs_v0**: `docs/v12/D1_NONLINEAR_LIFE_DEATH_MIN_REQS_V0_20260107.md`
 - **d1_avida_death_interoception_audit_v0**: `docs/v12/D1_AVIDA_DEATH_INTEROCEPTION_AUDIT_V0_20260107.md`
+- **d1_base_ssot_active_interoception_bidirectional_coupling_v0**: `docs/v12/D1_SSOT_ACTIVE_INTEROCEPTION_AND_BIDIRECTIONAL_COUPLING_V0_20260107.md`
