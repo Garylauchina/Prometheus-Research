@@ -110,9 +110,11 @@ Expected run count:
 
 ## 7) Post-run evidence anchors (fill after completion; do not change above)
 
-- runs_root: (TBD)
-- summary_json_path: (TBD)
-- summary_sha256: (TBD)
+- runs_root: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_8_time_reversal_neg_control/` (120 run_dirs)
+- operator_summary_json_path: `docs/v12/artifacts/d0/d0_trial_8/D0_TRIAL_8_TIME_REVERSAL_NEG_CONTROL_SUMMARY_from_operator.json`
+  - operator_summary_sha256: `1cc87a953fda0f2f693c1d855ae6ad933137b61caf587b7b36b1a50c380c0d85`
+- recomputed_summary_json_path: `docs/v12/artifacts/d0/d0_trial_8/trial_8_time_reversal_neg_control_recomputed_summary.json`
+  - recomputed_summary_sha256: `f58d3fa3ff64f8e04d2e9e21eab1395e2b872939c7857befbb0d4b1f532011f1`
 - notes: (append-only)
 
 

@@ -227,6 +227,14 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.8 Trial-8 (planned; pre-registered negative control)
 
 - **trial_id**: `d0_trial_8_time_reversal_neg_control_v0`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_8_TIME_REVERSAL_NEG_CONTROL_V0_20260107.md`
 - **purpose**: `time reversal replay negative control; test sensitivity to time arrow without changing distributions or death rules`
+
+### 6.8.1 Trial-8 completion anchors (append-only)
+
+- **runs_root**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_8_time_reversal_neg_control/`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/d0_trial_8/D0_TRIAL_8_TIME_REVERSAL_NEG_CONTROL_SUMMARY_from_operator.json`
+  - **sha256**: `1cc87a953fda0f2f693c1d855ae6ad933137b61caf587b7b36b1a50c380c0d85`
+- **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_8/trial_8_time_reversal_neg_control_recomputed_summary.json`
+  - **sha256**: `f58d3fa3ff64f8e04d2e9e21eab1395e2b872939c7857befbb0d4b1f532011f1`

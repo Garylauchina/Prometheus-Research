@@ -1,0 +1,109 @@
+{
+  "tool": "recompute_trial8_time_reversal_neg_control_summary_v0",
+  "generated_at_utc": "2026-01-07T08:48:55.903301Z",
+  "runs_root": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_8_time_reversal_neg_control",
+  "run_count": 120,
+  "pair_count": 60,
+  "world_transform": {
+    "kinds": [
+      "time_reversal_replay_v0"
+    ],
+    "base_dataset_hash_unique": 1,
+    "reversed_record_count_unique": 1,
+    "missing_count": 0
+  },
+  "aggregate": {
+    "reduction_ratio_full": {
+      "count": 60,
+      "mean": -1.7098209257476176,
+      "std": 7.369729260287848,
+      "min": -36.0,
+      "max": 0.2807017543859649
+    },
+    "gap_on": {
+      "count": 60,
+      "mean": -69.65,
+      "std": 150.44465482916522,
+      "min": -314,
+      "max": 221
+    },
+    "gap_shuffle": {
+      "count": 60,
+      "mean": -66.3,
+      "std": 147.67625627251886,
+      "min": -297,
+      "max": 209
+    }
+  },
+  "by_g_hi": {
+    "0.55": {
+      "reduction_ratio_full": {
+        "count": 20,
+        "mean": -1.4744956555191155,
+        "std": 6.31656850843083,
+        "min": -29.0,
+        "max": 0.2807017543859649
+      },
+      "gap_on": {
+        "count": 20,
+        "mean": -69.55,
+        "std": 150.3460924001685,
+        "min": -313,
+        "max": 221
+      },
+      "gap_shuffle": {
+        "count": 20,
+        "mean": -67.2,
+        "std": 144.99020656582292,
+        "min": -297,
+        "max": 195
+      }
+    },
+    "0.6": {
+      "reduction_ratio_full": {
+        "count": 20,
+        "mean": -1.8274835608618685,
+        "std": 7.840810653686144,
+        "min": -36.0,
+        "max": 0.2807017543859649
+      },
+      "gap_on": {
+        "count": 20,
+        "mean": -69.7,
+        "std": 150.49388691903735,
+        "min": -314,
+        "max": 221
+      },
+      "gap_shuffle": {
+        "count": 20,
+        "mean": -65.85,
+        "std": 148.9990855676638,
+        "min": -297,
+        "max": 209
+      }
+    },
+    "0.65": {
+      "reduction_ratio_full": {
+        "count": 20,
+        "mean": -1.8274835608618685,
+        "std": 7.840810653686144,
+        "min": -36.0,
+        "max": 0.2807017543859649
+      },
+      "gap_on": {
+        "count": 20,
+        "mean": -69.7,
+        "std": 150.49388691903735,
+        "min": -314,
+        "max": 221
+      },
+      "gap_shuffle": {
+        "count": 20,
+        "mean": -65.85,
+        "std": 148.9990855676638,
+        "min": -297,
+        "max": 209
+      }
+    }
+  }
+}
