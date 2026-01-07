@@ -44,6 +44,14 @@ Frozen generation inputs:
   - (any additional files MUST be additive-only; no mutation of `market_snapshot.jsonl`)
 
 Frozen dataset identity fields (to be filled after generation, before any trial run):
+- dataset_dir: `datasets_v12/dataset_replay_v0_SWAP_ETH-USDT-SWAP_2024-10-01__2024-12-31_bar1m`
+- dataset_hash (sha256 of market_snapshot.jsonl): `0b8de3f5d54f09d88af2b4d4fc47a97ab52caa30c944a530a402882e1e87fb46`
+- dataset_manifest_hash: `f4b60116f02fe9823934e5b31fbab6b6ae9707d8f014aa660b2f941e21c1a23c`
+- signal_p99_anchor_value: `0.06402566967844568`
+- signal_p99_anchor_k_window: `500`
+- anchor_computation_scope: `full_dataset`
+- dataset_generated_at_utc: `2026-01-07T04:45:39.711148Z`
+- dataset_record_count: `132480`
 
 ### 1.0.1 Additive-only amendment A1: tick_interval_ms correction (2026-01-07)
 
@@ -68,6 +76,23 @@ Frozen dataset identity fields (to be filled after generation, before any trial 
 - dataset_hash (sha256 of `market_snapshot.jsonl`): (TBD; MUST be recorded before W0)
 - dataset_manifest_hash (sha256 of `dataset_manifest.json`): (TBD)
 
+### 1.0.2 Additive-only amendment A1-P2: time window + dataset_id correction (OKX SWAP listing constraint + feasibility)
+
+**Issue discovered**:
+- Original frozen time window `2019-01-01__2020-12-31` is not usable for `ETH-USDT-SWAP` (instrument listing-date conflict).
+- We must not fabricate pre-listing data. Also, feasibility requires a bounded window to execute the falsification protocol quickly.
+
+**Effective window (frozen for Trial-3 dataset generation)**:
+- time_window_effective: `2024-10-01__2024-12-31` (3 months)
+- dataset_id_effective: `SWAP_ETH-USDT-SWAP_2024-10-01__2024-12-31`
+- inst_id_effective: `ETH-USDT-SWAP`
+- source_effective: `okx_history_candles`
+- bar_effective: `1m` (tick_interval_ms_effective=60000)
+
+Rule:
+- The originally registered `dataset_id` remains as historical record only and MUST NOT be used to build a dataset.
+- The effective values above MUST match the generated dataset's `market_snapshot.jsonl.source{kind,bar,start_utc,end_utc}` and `dataset_manifest.json`.
+
 ### 1.1 W0 gate parameters + result (frozen params; result must be recorded)
 
 Command (same params as Trial-1):
@@ -88,7 +113,7 @@ Result:
 
 Normalization anchor (must be shared across ON/OFF/SHUFFLE):
 - signal_p99_anchor source: `dataset_precomputed`
-- signal_p99_anchor value: `0.002507` (frozen; carried from Trial-1; do not re-compute per-trial)
+- signal_p99_anchor value: `SEE §1.0 Frozen dataset identity fields (dataset-specific; MUST be recorded before W0)`
 
 ---
 
@@ -196,7 +221,15 @@ Signal/anchor discipline under 1m bar (frozen for this trial after A1):
   - source: `dataset_precomputed`
   - MUST be computed ONCE from the full generated dataset (pre-run) and recorded before W0:
     - record in dataset_manifest (additive-only metadata is allowed; do not mutate snapshots)
-    - record in this pre-reg under §1.0 "Frozen dataset identity fields" (append-only)
+    - record in this pre-reg under §1.0 "Frozen dataset identity fields (to be filled after generation, before any trial run):
+- dataset_dir: `datasets_v12/dataset_replay_v0_SWAP_ETH-USDT-SWAP_2024-10-01__2024-12-31_bar1m`
+- dataset_hash (sha256 of market_snapshot.jsonl): `0b8de3f5d54f09d88af2b4d4fc47a97ab52caa30c944a530a402882e1e87fb46`
+- dataset_manifest_hash: `f4b60116f02fe9823934e5b31fbab6b6ae9707d8f014aa660b2f941e21c1a23c`
+- signal_p99_anchor_value: `0.06402566967844568`
+- signal_p99_anchor_k_window: `500`
+- anchor_computation_scope: `full_dataset`
+- dataset_generated_at_utc: `2026-01-07T04:45:39.711148Z`
+- dataset_record_count: `132480`
 
 ### 9.2 Amendment A1-P2 — OKX SWAP listing-date constraint → time window correction
 
