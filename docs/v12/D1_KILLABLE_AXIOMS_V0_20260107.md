@@ -67,5 +67,8 @@ This is not encouragement or narrative. It is a constraint set for future work (
 - Do not use these axioms to retroactively “explain” results. They are **pre-registered targets** for future falsification.
 - Do not treat “SUPPORTED in D0” as “proved”. It only means: the specific falsification attempt did not kill it.
 - Do not conflate RR explosion with stronger effects when `gap_on≈0` (structural denominator amplification).
+- Reward must not usurp death adjudication:
+  - Forbidden (direct): reward MUST NOT increase survival energy or alter death thresholds/caps/cost tables.
+  - Allowed (indirect): reward MAY bias action choices, indirectly changing future cost exposure.
 
 

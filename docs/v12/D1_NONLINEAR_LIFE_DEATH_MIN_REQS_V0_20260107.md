@@ -12,6 +12,9 @@ It does not justify them; it defines what must be true, and how to falsify / sto
 - **Energy updates are allowed only from**:
   - `action_cost`
   - `impedance_cost`
+- **Reward non-usurpation rule (Option A)**:
+  - Forbidden (direct): reward MUST NOT increase energy, modify `death_threshold`, modify `energy_cap`, or modify the cost function/tables that feed the survival ledger.
+  - Allowed (indirect): reward MAY influence action selection/policy, which may indirectly change future `action_cost/impedance_cost` exposure; this does not change the death rule itself.
 - **Strict evidence**:
   - strict JSON / JSONL (one valid JSON object per line; no comments)
   - fail-closed on missing evidence (stop)
