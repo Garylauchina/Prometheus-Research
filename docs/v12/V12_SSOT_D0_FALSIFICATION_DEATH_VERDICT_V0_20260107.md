@@ -254,3 +254,9 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
   - **sha256**: `6e2ff158dbd61a904d15fa23742d8b75d9b3601e30ccbea2f76254a974f2ef91`
 - **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_9/trial_9_cross_market_recomputed_summary.json`
   - **sha256**: `e8f98ecabc845841d7d7abe38691e8354fffa192907ce7b3bdb2e1331e158ec9`
+
+---
+
+## 7) D0 summary records (append-only)
+
+- **d0_summary_v1**: `docs/v12/D0_SUMMARY_APPEND_ONLY_V1_20260107.md`
