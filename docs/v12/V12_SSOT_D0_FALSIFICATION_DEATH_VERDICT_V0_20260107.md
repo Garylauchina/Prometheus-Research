@@ -182,6 +182,14 @@ OFF evidence note (OFF is not included in V0.6.3 dataset; evidence is provided s
 ### 6.5 Trial-5 (planned; pre-registered knife)
 
 - **trial_id**: `d0_trial_5_visibility_horizon_r_cap_knife_v0`
-- **status**: `PRE_REGISTERED (NOT_RUN_YET)`
+- **status**: `COMPLETED`
 - **pre_reg_doc**: `docs/v12/pre_reg/D0_TRIAL_5_VISIBILITY_HORIZON_R_CAP_KNIFE_V0_20260107.md`
 - **purpose**: `visibility horizon ablation (cap run-length memory) to attempt to kill the local-structure explanation without changing the world`
+
+### 6.5.1 Trial-5 completion anchors (append-only)
+
+- **runs_root**: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_d0_trial_5_visibility_knife/`
+- **operator_summary** (archived): `docs/v12/artifacts/d0/d0_trial_5/D0_TRIAL_5_VISIBILITY_HORIZON_KNIFE_SUMMARY_from_operator.json`
+  - **sha256**: `fed8bd2702d444e8c1508d2db2bd4653cee04069eb6bb6e48017ad42794e946d`
+- **recomputed_summary** (audit): `docs/v12/artifacts/d0/d0_trial_5/trial_5_visibility_knife_recomputed_summary.json`
+  - **sha256**: `a44f647dd44169836fb8b863d5aabdc177562a4ba871d673287bb2cd1dde3d44`
