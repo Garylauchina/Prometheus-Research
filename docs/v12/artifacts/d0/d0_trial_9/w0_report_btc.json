@@ -1,0 +1,59 @@
+{
+  "tool": "verify_world_structure_gate_v0",
+  "generated_at_utc": "2026-01-07T08:56:56.777851Z",
+  "input_path": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2022-10-01__2022-12-31_bar1m",
+  "market_snapshot_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2022-10-01__2022-12-31_bar1m/market_snapshot.jsonl",
+  "verdict": "PASS",
+  "k_windows": [
+    1,
+    100,
+    500
+  ],
+  "primary_k": 500,
+  "p99_threshold": 0.001,
+  "min_samples": 1000,
+  "stats": {
+    "input": {
+      "record_count": 132480,
+      "last_px_valid_count": 132480,
+      "last_px_invalid_count": 0
+    },
+    "abs_log_return_by_k": {
+      "1": {
+        "count": 132479,
+        "min": 0.0,
+        "mean": 0.0004915321283146179,
+        "std": 0.0015325271294546858,
+        "p50": 0.00018499676308430212,
+        "p90": 0.0008963582347671858,
+        "p99": 0.00600117893415063,
+        "max": 0.05638425247864538
+      },
+      "100": {
+        "count": 132380,
+        "min": 0.0,
+        "mean": 0.004009837127034827,
+        "std": 0.0066649182820052305,
+        "p50": 0.0019185139886700579,
+        "p90": 0.009128108533943299,
+        "p99": 0.03650904644884377,
+        "max": 0.08712883881339539
+      },
+      "500": {
+        "count": 131980,
+        "min": 0.0,
+        "mean": 0.008126392030263262,
+        "std": 0.010801627178954902,
+        "p50": 0.004324288830334955,
+        "p90": 0.019999764853541716,
+        "p99": 0.05430568196465006,
+        "max": 0.11978691154432249
+      }
+    },
+    "primary_k": 500,
+    "primary_p99_threshold": 0.001,
+    "min_samples": 1000
+  },
+  "errors": [],
+  "warnings": []
+}
