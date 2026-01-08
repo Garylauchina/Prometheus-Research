@@ -204,6 +204,7 @@ def _verify_ablation_semantics(
         imp_rc = rec.get("L_imp_reason_codes", [])
         L = rec.get("L")
         L_m = rec.get("L_mask")
+        L_rc = rec.get("L_reason_codes", [])
 
         def _must_have_ab_reason(rc: Any, code: str) -> bool:
             return isinstance(rc, list) and code in rc
@@ -230,6 +231,12 @@ def _verify_ablation_semantics(
             if not (liq is None and liq_m == 0 and imp is None and imp_m == 0 and L is None and L_m == 0):
                 mismatches += 1
                 errors.append(f"ablation(null) violated at line {line_no}: all L_* must be null with masks=0")
+            # SSOT requires an explicit frozen reason code for null ablation
+            if not _must_have_ab_reason(L_rc, "ablation:survival_space_null"):
+                mismatches += 1
+                errors.append(
+                    f"ablation(null) violated at line {line_no}: L_reason_codes must include ablation:survival_space_null"
+                )
 
         if mode == "full":
             # no explicit constraints beyond schema; still ensure not silently ablated

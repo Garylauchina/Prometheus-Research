@@ -76,7 +76,7 @@ Semantics (must match SSOT §5.2):
 - `full`
 - `no_m`: `L_imp=null`, `L_imp_mask=0`, `L_imp_reason_codes=["ablation:M_off"]`, and `L=L_liq`
 - `no_e`: symmetric, and `L=L_imp`
-- `null`: all `L_*_mask=0`, gate should be effectively “always allowed” (control for linear timer / fake loop)
+- `null`: all `L_*_mask=0`, `L_reason_codes` MUST include `ablation:survival_space_null`, gate should be effectively “always allowed” (control for linear timer / fake loop)
 
 Fail-closed:
 - if ablation enabled but any required file/field missing ⇒ `NOT_MEASURABLE` or `FAIL` (per verifier rules).
