@@ -15,6 +15,10 @@ D1 purpose (non-goal; frozen):
 - **Measurement tool, not goal pursuit**: D1 is an evolutionary-mechanism instrument to measure complex-system coupling under frozen contracts. It does **not** require a predetermined “evolution target” (no fixed optimum to reach).
 - **Mechanism reproducibility is required** (evidence, joins, controls, recomputation), but **outcome sameness is not a success criterion**. If results collapse to a single stable attractor across independent worlds under frozen knobs, treat it as **domestication risk** (a “captive breeding” artifact), not as “stronger evolution”.
 
+Clarification (principle vs hypotheses; frozen):
+- **First principle (tool stance)**: “using evolutionary mechanisms to measure complex systems” is a positioning constraint (what D1 is for), not a claim about what must be true in nature.
+- **Hypotheses (killable; NOT principles)**: “common drive” and “projection of life meaning” are treated as candidate hypotheses only. They must be pre-registered per campaign with explicit falsification criteria; they are allowed to fail without invalidating the tool stance.
+
 Hard boundary:
 - Rewards (including reproduction reward) **must not usurp death adjudication** (directly). Allowed only to bias action choice (indirect).
 

@@ -67,6 +67,9 @@ This is not encouragement or narrative. It is a constraint set for future work (
 - Do not use these axioms to retroactively “explain” results. They are **pre-registered targets** for future falsification.
 - Do not treat “SUPPORTED in D0” as “proved”. It only means: the specific falsification attempt did not kill it.
 - Do not conflate RR explosion with stronger effects when `gap_on≈0` (structural denominator amplification).
+- Principle vs hypothesis discipline:
+  - “Evolutionary mechanisms can be used as a measurement tool for complex systems” is a **positioning constraint** (tool stance), not a falsifiable axiom in this set.
+  - Candidate ideas like “common drive” or “projection of life meaning” are **hypotheses**, not principles; they must be stated with explicit falsification criteria in SSOT/pre-reg before being used to motivate mechanisms.
 - Reward must not usurp death adjudication:
   - Forbidden (direct): reward MUST NOT increase survival energy or alter death thresholds/caps/cost tables.
   - Allowed (indirect): reward MAY bias action choices, indirectly changing future cost exposure.
