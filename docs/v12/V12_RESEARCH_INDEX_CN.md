@@ -76,6 +76,7 @@ SSOT 入口：
 - Ugly baseline（只做死亡，replay_truth）：`docs/v12/V12_SSOT_UGLY_BASELINE_DEATH_ONLY_V0_20260106.md`
 - World-coupling 实验协议（预注册 + 消融/负对照）：`docs/v12/V12_SSOT_WORLD_COUPLING_EXPERIMENT_PROTOCOL_V0_20260107.md`
 - D0 证伪死亡判决（宪法级停止规则）：`docs/v12/V12_SSOT_D0_FALSIFICATION_DEATH_VERDICT_V0_20260107.md`
+- V12 避坑手册（append-only，上线前“六拷问”门禁）：`docs/v12/V12_AVOID_PIT_HAND_BOOK_v1_20260108.md`
 
 工具入口（verifiers/tools）：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
