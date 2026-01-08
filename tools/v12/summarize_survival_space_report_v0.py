@@ -149,6 +149,30 @@ def summarize(run_dir: Path, l_epsilon: float, bins: List[Tuple[float, float]]) 
     gate_rate_decision = (gate_blocked_decision / gate_total_decision) if gate_total_decision > 0 else None
     gate_rate_attempt = (gate_blocked_attempt / gate_total_attempt) if gate_total_attempt > 0 else None
 
+    # Gate suppression (cap/downshift) at decision-level:
+    # If decision_trace carries both interaction_intensity and post_gate_intensity, we can measure:
+    #  - downshift_rate: fraction of decisions where post < proposed
+    #  - suppression_ratio: (sum(proposed) - sum(post)) / sum(proposed)
+    proposed_sum = 0.0
+    post_sum = 0.0
+    downshift_cnt = 0
+    downshift_total = 0
+    for _ln, rec in _iter_jsonl(run_dir / "decision_trace.jsonl"):
+        it = _safe_get(rec, ["interaction_intensity", "intensity", "action_intensity"])
+        pt = rec.get("post_gate_intensity")
+        if _is_num(it) and _is_num(pt):
+            itf = float(it)
+            ptf = float(pt)
+            proposed_sum += itf
+            post_sum += ptf
+            downshift_total += 1
+            if ptf < itf:
+                downshift_cnt += 1
+
+    suppression_ratio = None
+    if proposed_sum > 0:
+        suppression_ratio = float((proposed_sum - post_sum) / proposed_sum)
+
     # --- Read survival_space series (for exhaustion + collapse + dL_imp/dt)
     # We join by index/order (tick alignment is assumed by strict per-tick write requirement).
     L_series: List[Optional[float]] = []
@@ -302,6 +326,15 @@ def summarize(run_dir: Path, l_epsilon: float, bins: List[Tuple[float, float]]) 
                         sorted(gate_reason_counts_attempt.items(), key=lambda x: (-x[1], x[0]))[:50]
                     ),
                     "note": "Attempt-level can be biased if order_attempts are only written when action_allowed=True.",
+                },
+                "suppression": {
+                    "downshift_samples": downshift_cnt,
+                    "downshift_total": downshift_total,
+                    "downshift_rate": (downshift_cnt / downshift_total) if downshift_total > 0 else None,
+                    "proposed_intensity_sum": proposed_sum,
+                    "post_gate_intensity_sum": post_sum,
+                    "suppression_ratio": suppression_ratio,
+                    "note": "suppression_ratio captures cap/downshift impact even when action_allowed is always true.",
                 },
             },
             "exhaustion_attribution": first_exhaust,
