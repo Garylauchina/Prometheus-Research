@@ -77,6 +77,7 @@ SSOT entry points:
 - World-coupling experiment protocol (pre-registration + controls): `docs/v12/V12_SSOT_WORLD_COUPLING_EXPERIMENT_PROTOCOL_V0_20260107.md`
 - D0 falsification death verdict (constitution-level stop rule): `docs/v12/V12_SSOT_D0_FALSIFICATION_DEATH_VERDICT_V0_20260107.md`
 - Avoid Pit Handbook (append-only “pre-flight interrogation” gate): `docs/v12/V12_AVOID_PIT_HAND_BOOK_v1_20260108.md`
+- Survival Space (E+M minimal contract): `docs/v12/V12_SSOT_SURVIVAL_SPACE_EM_V1_20260108.md`
 
 Tools entry points (verifiers/tools):
 - Base dimensions verifier (E/I/M): `python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
