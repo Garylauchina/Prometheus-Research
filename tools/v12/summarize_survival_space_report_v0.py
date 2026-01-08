@@ -104,40 +104,50 @@ def summarize(run_dir: Path, l_epsilon: float, bins: List[Tuple[float, float]]) 
     ab_enabled = bool(ss_ab.get("enabled")) if isinstance(ss_ab, dict) else False
     ab_mode = ss_ab.get("mode") if isinstance(ss_ab, dict) else None
 
-    # --- Gate trigger rate (prefer order_attempts; fall back to decision_trace)
-    gate_total = 0
-    gate_blocked = 0
-    gate_reason_counts: Dict[str, int] = {}
+    # --- Gate trigger rate
+    # IMPORTANT: decision-level gate must be computed from decision_trace, not order_attempts.
+    # Many implementations only write order_attempts when action_allowed=True, which would hide blocks.
+    gate_total_decision = 0
+    gate_blocked_decision = 0
+    gate_reason_counts_decision: Dict[str, int] = {}
 
-    def _consume_gate(rec: Dict[str, Any]) -> None:
-        nonlocal gate_total, gate_blocked
+    gate_total_attempt = 0
+    gate_blocked_attempt = 0
+    gate_reason_counts_attempt: Dict[str, int] = {}
+
+    def _consume_gate(rec: Dict[str, Any], *, scope: str) -> None:
+        nonlocal gate_total_decision, gate_blocked_decision, gate_total_attempt, gate_blocked_attempt
         aa = rec.get("action_allowed")
         grc = rec.get("gate_reason_codes")
         if not isinstance(aa, bool):
             return
         if grc is not None and not _is_list_of_str(grc):
             return
-        gate_total += 1
-        if aa is False:
-            gate_blocked += 1
-        if isinstance(grc, list):
-            for c in grc:
-                gate_reason_counts[c] = gate_reason_counts.get(c, 0) + 1
+        if scope == "decision":
+            gate_total_decision += 1
+            if aa is False:
+                gate_blocked_decision += 1
+            if isinstance(grc, list):
+                for c in grc:
+                    gate_reason_counts_decision[c] = gate_reason_counts_decision.get(c, 0) + 1
+        else:
+            gate_total_attempt += 1
+            if aa is False:
+                gate_blocked_attempt += 1
+            if isinstance(grc, list):
+                for c in grc:
+                    gate_reason_counts_attempt[c] = gate_reason_counts_attempt.get(c, 0) + 1
 
-    # Try order_attempts first (closer to actual attempts)
-    try:
-        for _ln, rec in _iter_jsonl(run_dir / "order_attempts.jsonl"):
-            _consume_gate(rec)
-    except Exception:
-        # strict-jsonl issues should be caught by verifier; for report we still fail
-        raise
+    # Decision-level (primary)
+    for _ln, rec in _iter_jsonl(run_dir / "decision_trace.jsonl"):
+        _consume_gate(rec, scope="decision")
 
-    if gate_total == 0:
-        # fallback to decision_trace if attempts don't carry gate fields
-        for _ln, rec in _iter_jsonl(run_dir / "decision_trace.jsonl"):
-            _consume_gate(rec)
+    # Attempt-level (secondary; may be biased if attempts only emitted when allowed)
+    for _ln, rec in _iter_jsonl(run_dir / "order_attempts.jsonl"):
+        _consume_gate(rec, scope="attempt")
 
-    gate_rate = (gate_blocked / gate_total) if gate_total > 0 else None
+    gate_rate_decision = (gate_blocked_decision / gate_total_decision) if gate_total_decision > 0 else None
+    gate_rate_attempt = (gate_blocked_attempt / gate_total_attempt) if gate_total_attempt > 0 else None
 
     # --- Read survival_space series (for exhaustion + collapse + dL_imp/dt)
     # We join by index/order (tick alignment is assumed by strict per-tick write requirement).
@@ -276,10 +286,23 @@ def summarize(run_dir: Path, l_epsilon: float, bins: List[Tuple[float, float]]) 
         },
         "signals": {
             "gate_trigger_rate": {
-                "total_samples": gate_total,
-                "blocked_samples": gate_blocked,
-                "blocked_rate": gate_rate,
-                "top_reason_codes": dict(sorted(gate_reason_counts.items(), key=lambda x: (-x[1], x[0]))[:50]),
+                "decision_level": {
+                    "total_samples": gate_total_decision,
+                    "blocked_samples": gate_blocked_decision,
+                    "blocked_rate": gate_rate_decision,
+                    "top_reason_codes": dict(
+                        sorted(gate_reason_counts_decision.items(), key=lambda x: (-x[1], x[0]))[:50]
+                    ),
+                },
+                "attempt_level": {
+                    "total_samples": gate_total_attempt,
+                    "blocked_samples": gate_blocked_attempt,
+                    "blocked_rate": gate_rate_attempt,
+                    "top_reason_codes": dict(
+                        sorted(gate_reason_counts_attempt.items(), key=lambda x: (-x[1], x[0]))[:50]
+                    ),
+                    "note": "Attempt-level can be biased if order_attempts are only written when action_allowed=True.",
+                },
             },
             "exhaustion_attribution": first_exhaust,
             "action_dissipation_coupling": {
