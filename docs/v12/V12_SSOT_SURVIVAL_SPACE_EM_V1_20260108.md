@@ -24,6 +24,73 @@ Hard boundary (inherits V12 Life red-line):
 - Reward / profit / ROI MUST NOT directly enter survival energy or death adjudication.  
   (Survival Space is observational; it must not become reward shaping.)
 
+Implementation principles (v1.0; frozen):
+
+1) **Input → readout (never feedback → target)**  
+   - Allowed:
+     - `L` as an action gate (legal / illegal)
+     - `L` as an intensity cap (rate limit / interaction_intensity ceiling)
+   - Forbidden:
+     - `L` enters loss / score / utility
+     - agent tries to “maximize L”
+     - agent adapts parameters based on history of `L` (learning / feedback optimization)
+   - Self-check sentence:
+     - “If we replace the agent with pure random, does the statistical structure of `L` still exist?”  
+       If NO ⇒ drifted.
+
+2) **E/M → L mapping must be compression, not prediction**  
+   - Allowed:
+     - monotonic mapping
+     - nonlinear collapse
+     - `min` / hard constraints
+   - Forbidden:
+     - lookahead
+     - future simulation
+     - counterfactual judgment like “if we do this, future `L` will be larger”
+   - Self-check sentence:
+     - “Is this code answering a counterfactual question?”  
+       If YES ⇒ drifted.
+
+3) **Any “good/bad” judgment is post-hoc only**  
+   - Runtime MUST NOT know:
+     - what is a good strategy
+     - what is a bad strategy
+     - even whether “living longer” is good
+   - Allowed:
+     - post-hoc statistics: lifetime distribution, exhausted dimension, action traces
+     - research-layer interpretation
+   - Forbidden:
+     - runtime logging fields containing: `success` / `reward` / `advantage` / `score`
+     - runtime auto-adjusting gate rules based on outcomes
+   - Self-check sentence:
+     - “If I delete all post-hoc analysis, will the runtime behavior change?”  
+       If YES ⇒ drifted.
+
+4) **“Qi” reduces the action set, not the will**  
+   - Correct:
+     - `L` low ⇒ some actions are not selectable (hard block)
+     - `L` high ⇒ actions are selectable, but success is not guaranteed
+   - Incorrect (drift):
+     - `L` low ⇒ agent “does not want to act”
+     - `L` high ⇒ agent “becomes more active”
+   - Self-check sentence:
+     - “Are actions forbidden, or just scored lower?”  
+       If scored ⇒ drifted.
+
+5) **Ablation is first-class, not a debug shortcut**  
+   - Ablation paths MUST be:
+     - fully logged (same evidence discipline)
+     - verified (same verifier gates)
+     - joinable (same join keys)
+     - fail-closed (missing evidence ⇒ FAIL/NOT_MEASURABLE)
+   - Forbidden:
+     - `if ablation: return default` (silent shortcut)
+     - ablation path without logging
+     - “it is only for control, no need to be strict”
+   - Self-check sentence:
+     - “Can an ablation run be delivered as an independent evidence chain for a third party to reproduce?”  
+       If NO ⇒ drifted.
+
 ---
 
 ## §1 Canonical output (frozen)
