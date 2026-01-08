@@ -290,3 +290,10 @@ Frozen sentence (recommended for README; non-narrative):
 
 > Survival Space does not tell the agent what is good. It only tells the system what is still possible.
 
+
+---
+
+## §9 Execution checklist pointer (frozen entry)
+
+For implementation and acceptance, use:
+- `docs/v12/V12_SURVIVAL_SPACE_EXPERIMENT_EXECUTION_CHECKLIST_V0_20260108.md`
