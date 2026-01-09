@@ -82,6 +82,7 @@ SSOT entry points:
 - Survival Space v1.0.1 Fix-M extended validation milestone (append-only record): `docs/v12/V12_SURVIVAL_SPACE_EM_V1_0_1_FIX_M_EXTENDED_VALIDATION_MILESTONE_20260109.md`
 - Survival Space poset/lattice falsification checklist (v0 draft): `docs/v12/V12_SURVIVAL_SPACE_POSET_LATTICE_FALSIFICATION_CHECKLIST_V0_DRAFT_20260109.md`
 - Survival Space poset Round-1 result (incomparability test v0): `docs/v12/artifacts/survival_space_em/poset_round1_incomparability_v0_20260109/poset_round1_report.md`
+- Survival Space poset §3 result (no informational gain test v0): `docs/v12/artifacts/survival_space_em/poset_section3_info_gain_v0_20260109/poset_section3_report.md`
 - Survival Space execution checklist (acceptance gate): `docs/v12/V12_SURVIVAL_SPACE_EXPERIMENT_EXECUTION_CHECKLIST_V0_20260108.md`
 
 Tools entry points (verifiers/tools):
