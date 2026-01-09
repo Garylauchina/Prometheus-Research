@@ -1,0 +1,29 @@
+{
+  "trial": "V12 Trial-11 Adjudicability Restoration via Order-Book E-Contract",
+  "generated_at_utc": "2026-01-09T12:46:30Z",
+  "quant_commit": "d5cc98fbf8340f87dd751efd2a01a044bbe13dd2",
+  "dataset_dir_delivered": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v1_orderbook_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+  "gates": {
+    "G1_e_liquidity_coverage": {
+      "verdict": "PASS",
+      "report": "g1_e_liquidity_gate_report.json"
+    },
+    "G0_orderbook_provenance": {
+      "verdict": "FAIL",
+      "report": "g0_orderbook_provenance_gate_report.json",
+      "fail_reasons": [
+        "synthetic_detected:manifest.dataset_version_contains_synthetic",
+        "synthetic_detected:manifest.has_synthesis_method",
+        "synthetic_detected:market_snapshot.orderbook_source==synthetic"
+      ]
+    },
+    "G2_survival_space_run_verifier": {
+      "representative_run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T123943Z_seed71001_full",
+      "verdict": "PASS",
+      "report": "verify_run_seed71001.json"
+    }
+  },
+  "trial11_verdict": "FAIL",
+  "verdict_reason": "Trial-11 hard ban violated: bid/ask were synthesized from last_px (synthetic order-book)."
+}
+

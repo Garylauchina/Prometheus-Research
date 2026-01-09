@@ -1,0 +1,23 @@
+{
+  "dataset_version": "replay_v1_synthetic_orderbook",
+  "build_timestamp": "2026-01-09T12:38:57.872535Z",
+  "source_dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+  "synthesis_method": {
+    "type": "symmetric_spread_from_last_px",
+    "spread_bps": 5.0,
+    "spread_ratio": 0.0005,
+    "formula": {
+      "mid_px": "last_px",
+      "bid_px_1": "mid_px * (1 - spread_ratio / 2)",
+      "ask_px_1": "mid_px * (1 + spread_ratio / 2)"
+    }
+  },
+  "statistics": {
+    "total_ticks": 314787,
+    "valid_bid_ask_count": 314787,
+    "coverage": 1.0,
+    "dataset_hash": "edae30b2d7a995aa5c17b37c0bf8f395bfe7cc7f2a4c59a0491cd980e7d2e489"
+  },
+  "disclaimer": "This dataset uses SYNTHETIC bid/ask derived from candle last_px. NOT real order-book data. Suitable for eligibility testing only.",
+  "quant_commit": "d5cc98fbf8340f87dd751efd2a01a044bbe13dd2"
+}

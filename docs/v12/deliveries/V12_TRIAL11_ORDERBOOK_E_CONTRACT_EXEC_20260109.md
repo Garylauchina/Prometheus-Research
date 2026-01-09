@@ -42,6 +42,23 @@ Also write a build manifest inside dataset_dir:
 
 ## B) Run Gate G1 (Research tool) — must PASS
 
+## B0) Run Gate G0 (Order-book provenance) — must NOT be synthetic
+
+Hard ban reminder:
+- `bid_px_1/ask_px_1` MUST come from order-book endpoint (e.g. OKX `books5`), **not** from `last_px`.
+- Any synthetic order-book (fixed spread, symmetric spread, etc.) is **FORBIDDEN** for Trial-11 (it voids adjudicability restoration).
+
+```bash
+python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/verify_orderbook_e_contract_provenance_gate_v0.py \
+  --dataset_dir "<NEW_DATASET_DIR>" \
+  --sample_lines 50 \
+  --output_json /tmp/trial11_orderbook_provenance_gate_report.json
+```
+
+Expected:
+- verdict = NOT FAIL
+- If verdict = FAIL ⇒ dataset is synthetic ⇒ Trial-11 must be marked FAIL and stopped.
+
 ```bash
 python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/verify_e_liquidity_measurability_gate_v0.py \
   --dataset_dir "<NEW_DATASET_DIR>" \
@@ -91,6 +108,7 @@ Hard checks:
 Send back:
 - Quant commit hash
 - New dataset_dir absolute path
+- `/tmp/trial11_orderbook_provenance_gate_report.json`
 - `/tmp/trial11_e_liquidity_gate_report.json`
 - List of the 3 new run_dirs (absolute paths)
 

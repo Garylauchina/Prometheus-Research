@@ -110,3 +110,23 @@ Stop rule:
 - verifier_reports:
 - verdict:
 
+
+### Completion record — 2026-01-09 (append-only)
+
+- quant_commit: `d5cc98fbf8340f87dd751efd2a01a044bbe13dd2`
+- dataset_dir_new: `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v1_orderbook_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m`
+- g1_gate_report:
+  - operator path: `/tmp/trial11_e_liquidity_gate_report.json`
+  - archived: `docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/g1_e_liquidity_gate_report.json`
+- run_dirs (operator):
+  - `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T123943Z_seed71001_full`
+  - `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T123945Z_seed71002_full`
+  - `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T123946Z_seed71003_full`
+- verifier_reports (archived):
+  - `docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/verify_run_seed71001.json`
+- provenance evidence (archived):
+  - `docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/dataset_build_manifest.json`
+  - `docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/g0_orderbook_provenance_gate_report.json`
+- verdict: **FAIL**
+  - reason: Delivered dataset uses **synthetic** bid/ask derived from `last_px` (fixed spread), violating Trial-11 hard ban: "No fixed-spread fallback from `last_px`."
+  - recomputed verdict: `docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/trial11_recomputed_verdict.json`

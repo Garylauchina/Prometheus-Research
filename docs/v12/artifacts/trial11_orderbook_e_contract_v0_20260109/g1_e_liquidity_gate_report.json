@@ -1,0 +1,19 @@
+{
+  "tool": "verify_e_liquidity_measurability_gate_v0",
+  "generated_at_utc": "2026-01-09T12:39:13.640559Z",
+  "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v1_orderbook_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+  "market_snapshot_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v1_orderbook_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m/market_snapshot.jsonl",
+  "min_ticks": 1000,
+  "coverage_threshold": 0.95,
+  "stats": {
+    "N": 314787,
+    "eligible_tick_count": 314787,
+    "coverage": 1.0,
+    "missing_bid_count": 0,
+    "missing_ask_count": 0,
+    "bad_bid_count": 0,
+    "bad_ask_count": 0
+  },
+  "verdict": "PASS",
+  "errors": []
+}
