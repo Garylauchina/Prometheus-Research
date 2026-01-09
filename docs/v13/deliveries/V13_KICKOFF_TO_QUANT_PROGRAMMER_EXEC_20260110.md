@@ -48,7 +48,18 @@ Rules:
 
 ## 2) Immediate work item: continue Trial-12 (real-time capture → replay dataset)
 
-This is the current do-or-die path after Trial-11/11T were blocked:
+This is the current do-or-die path after Trial-11/11T were blocked.
+
+V13 pacing override (important):
+- For the next **7–10 days**, we are in **Phase 1 (Observation-first)**:
+  - ✅ focus on capture stability + append-only raw evidence + 3 window text files
+  - ❌ do NOT compute `L` / gates
+  - ❌ do NOT run adjudication
+  - ❌ do NOT require 7-day continuity before reporting anything
+  - ❌ do NOT force replay dataset build unless explicitly requested later
+
+Success criteria for Phase 1:
+- We can see at least one of: cooperate / silence / refusal / drift.
 - Trial-12 pre-reg (Research):  
   `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/pre_reg/V12_TRIAL12_REALTIME_ORDERBOOK_CAPTURE_E_CONTRACT_V0_20260109.md`
 - Trial-12 delivery (Quant instructions):  
@@ -140,11 +151,15 @@ Do NOT over-analyze. Facts only.
 
 ## 6) What to send back after 7 days (Trial-12 milestone)
 
-Return:
-- dataset_dir absolute path (built from captured evidence)
-- gate outputs (Research-run commands are in Trial-12 delivery)
-- 3 run_dirs (3 seeds full runs) if gates PASS
+This section is intentionally **de-emphasized** under V13 pacing.
 
-If gates FAIL/NOT_MEASURABLE:
-- set window `verdict.md` accordingly and return the evidence pointers.
+Only if we have accumulated enough windows and the research side explicitly moves us to Phase 3, then we will request:
+- dataset_dir build
+- gates
+- minimal runs
+
+Until then:
+- keep capturing
+- keep writing window files
+- keep returning facts (not interpretations)
 
