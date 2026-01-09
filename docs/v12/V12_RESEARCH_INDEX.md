@@ -83,6 +83,7 @@ SSOT entry points:
 - Survival Space poset/lattice falsification checklist (v0 draft): `docs/v12/V12_SURVIVAL_SPACE_POSET_LATTICE_FALSIFICATION_CHECKLIST_V0_DRAFT_20260109.md`
 - Survival Space poset Round-1 result (incomparability test v0): `docs/v12/artifacts/survival_space_em/poset_round1_incomparability_v0_20260109/poset_round1_report.md`
 - Survival Space poset §3 result (no informational gain test v0): `docs/v12/artifacts/survival_space_em/poset_section3_info_gain_v0_20260109/poset_section3_report.md`
+- Survival Space poset Round-2 result (incomparability test v0; x2=downshift_rate): `docs/v12/artifacts/survival_space_em/poset_round2_incomparability_v0_20260109/poset_round2_report.md`
 - Survival Space execution checklist (acceptance gate): `docs/v12/V12_SURVIVAL_SPACE_EXPERIMENT_EXECUTION_CHECKLIST_V0_20260108.md`
 
 Tools entry points (verifiers/tools):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Survival Space Poset Round-1 — Incomparability Saturation Test v0 (Research repo, stdlib only).
+Survival Space Poset — Incomparability Saturation Test v0 (Research repo, stdlib only).
 
 Reads per-run metrics JSONL and estimates:
   - incomparability_rate among random pairs under componentwise dominance
@@ -64,8 +64,8 @@ def _wilson_ci(k: int, n: int, z: float = 1.96) -> Tuple[Optional[float], Option
 class Point:
     run_id: str
     mode: str
-    x1: float  # suppression_ratio
-    x2: float  # block_rate
+    x1: float  # e.g. suppression_ratio
+    x2: float  # e.g. block_rate / downshift_rate
 
 
 def _dominates(a: Point, b: Point) -> bool:
@@ -73,15 +73,15 @@ def _dominates(a: Point, b: Point) -> bool:
     return (a.x1 <= b.x1) and (a.x2 <= b.x2)
 
 
-def _load_points(per_run_metrics_jsonl: Path, allowed_modes: List[str]) -> List[Point]:
+def _load_points(per_run_metrics_jsonl: Path, allowed_modes: List[str], x1_field: str, x2_field: str) -> List[Point]:
     out: List[Point] = []
     for _ln, rec in _iter_jsonl(per_run_metrics_jsonl):
         mode = rec.get("mode")
         if allowed_modes and mode not in allowed_modes:
             continue
         rid = rec.get("run_id") or rec.get("run_dir") or "unknown"
-        x1 = rec.get("suppression_ratio")
-        x2 = rec.get("block_rate")
+        x1 = rec.get(x1_field)
+        x2 = rec.get(x2_field)
         if not (_is_num(x1) and _is_num(x2)):
             continue
         out.append(Point(run_id=str(rid), mode=str(mode), x1=float(x1), x2=float(x2)))
@@ -127,6 +127,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--per_run_metrics_jsonl", required=True, help="per_run_metrics.jsonl path (Research artifact)")
     ap.add_argument("--modes", default="full,no_e", help="Comma-separated modes to include (default: full,no_e)")
+    ap.add_argument("--x1_field", default="suppression_ratio", help="Field name for x1 (default: suppression_ratio)")
+    ap.add_argument("--x2_field", default="block_rate", help="Field name for x2 (default: block_rate)")
     ap.add_argument("--seed", type=int, default=20260109, help="RNG seed for sampling (default frozen)")
     ap.add_argument("--pair_samples", type=int, default=50000, help="Pair samples per curve point")
     ap.add_argument("--curve_sizes", default="200,400,800,1600,3200", help="Comma-separated sample sizes for stability curve")
@@ -142,7 +144,7 @@ def main() -> int:
 
     modes = [m.strip() for m in args.modes.split(",") if m.strip()]
     try:
-        pts_all = _load_points(src, modes)
+        pts_all = _load_points(src, modes, str(args.x1_field), str(args.x2_field))
     except Exception as e:
         print(f"FAIL: load points: {e}", file=sys.stderr)
         return 2
@@ -156,7 +158,7 @@ def main() -> int:
             "per_run_metrics_jsonl": str(src),
             "modes": modes,
             "points_count": len(pts_all),
-            "dimension_set": {"x1": "suppression_ratio", "x2": "block_rate", "direction": "higher=harder"},
+            "dimension_set": {"x1": str(args.x1_field), "x2": str(args.x2_field), "direction": "higher=harder"},
         }
         Path(args.output_json).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         Path(args.output_md).write_text("# NOT_MEASURABLE: insufficient points\n", encoding="utf-8")
@@ -200,8 +202,8 @@ def main() -> int:
         "per_run_metrics_jsonl": str(src),
         "modes": modes,
         "dimension_set": {
-            "x1": "suppression_ratio",
-            "x2": "block_rate",
+            "x1": str(args.x1_field),
+            "x2": str(args.x2_field),
             "direction": "higher=harder",
             "order": "componentwise_dominance",
         },
@@ -226,7 +228,7 @@ def main() -> int:
     lines.append("# Survival Space Poset Round-1 — Incomparability Saturation Test v0\n")
     lines.append(f"- generated_at_utc: {report['generated_at_utc']}\n")
     lines.append(f"- modes: {', '.join(modes)}\n")
-    lines.append(f"- dimensions: (suppression_ratio, block_rate), higher=harder\n")
+    lines.append(f"- dimensions: ({args.x1_field}, {args.x2_field}), higher=harder\n")
     lines.append(f"- threshold: {report['threshold']}\n")
     lines.append(f"- verdict: **{verdict}**\n\n")
     lines.append("## Curve (sample_size → incomparability_rate)\n\n")
