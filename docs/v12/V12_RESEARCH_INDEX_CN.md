@@ -100,6 +100,8 @@ SSOT 入口：
 - Replay dataset builder：`python3 tools/v12/build_replay_dataset_v0.py --source_run_dir <QUANT_RUN_DIR> --output_root <DATASETS_ROOT>`
 - Replay dataset verifier：`python3 tools/v12/verify_replay_dataset_v0.py --dataset_dir <DATASET_DIR> --min_ticks 1000 --max_jitter_ms 500`
 - Ugly baseline verifier（只做死亡）：`python3 tools/v12/verify_ugly_baseline_death_only_v0.py --run_dir <RUN_DIR> --steps_target 5000`
+- Local Reachability verifier（Trial-0/后验证据合同）：`python3 tools/v12/verify_local_reachability_v0.py --run_dir <RUN_DIR>`
+- Local Reachability summary（仅描述统计，无阈值/无裁决）：`python3 tools/v12/summarize_local_reachability_report_v0.py --run_dir <RUN_DIR> --output_json <RUN_DIR>/local_reachability_report.json`
 
 ## V12 mini-releases (recommended cadence)
 
