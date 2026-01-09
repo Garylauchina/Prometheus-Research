@@ -11,6 +11,8 @@
   - `docs/v13/V13_SSOT_STARTUP_ONE_PAGE_V0_20260110.md`
 - **V13 开发计划（初稿）**：
   - `docs/v13/V13_DEV_PLAN_V0_20260110.md`
+- **V13 Phenomena Log Protocol（草案）**：
+  - `docs/v13/V13_PHENOMENA_LOG_PROTOCOL_V0_20260110.md`
 
 ---
 
