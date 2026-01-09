@@ -1,8 +1,8 @@
 # Prometheus V13 — SSOT 启动摘要（One-Page）v0 — 2026-01-10
 
-Additive-only. This is the frozen one-page launch SSOT for V13.
+This is the one-page launch SSOT for V13.
 
-> “米开朗基罗本来就在那里，我只是去掉了多余的石头”
+> “大卫本来就在那里，我只是去掉了多余的石头”
 
 ---
 
@@ -105,12 +105,3 @@ NOT_MEASURABLE = 裁决结果之一
 这一步，是在减少我们对世界的假设，还是在让系统更好用？
 
 如果是后者，停止。
-
-
----
-
-## Errata / 勘误（append-only）
-
-- 2026-01-10: 文首引用的第一句话口误。正确表述应为：
-  - “大卫本来就在那里”
-  - 原文保留不改写，以保持审计一致性。
