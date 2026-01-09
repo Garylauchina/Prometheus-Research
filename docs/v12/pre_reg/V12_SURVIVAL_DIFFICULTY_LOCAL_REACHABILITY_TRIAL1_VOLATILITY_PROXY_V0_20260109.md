@@ -134,3 +134,24 @@ Stop rule (hard):
 - verifier_verdict:
 - notes:
 
+
+## 8. Completion record (appended, 2026-01-09)
+
+- quant_run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e`
+- tool_path (Quant): `/Users/liugang/Cursor_Store/Prometheus-Quant/tools/v12/posthoc_local_reachability_v1_volatility_proxy.py`
+- command (Quant):
+  - `python3 tools/v12/posthoc_local_reachability_v1_volatility_proxy.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e`
+- local_reachability_jsonl:
+  - `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e/local_reachability.jsonl`
+- lines_count: 50000
+- k (frozen): 500.0
+- verifier (Research):
+  - `python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/verify_local_reachability_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e`
+  - verdict: `PASS`
+- feasible_ratio_summary_path (Research, descriptive only):
+  - `/tmp/local_reachability_report_trial1_seed50099_no_e.json`
+  - feasible_ratio.mean: 0.7722955555555555
+  - feasible_ratio.p50: 0.8888888888888888
+  - feasible_ratio.p99: 1.0
+- notes:
+  - This completion record is produced under Trial-1 E-only volatility proxy. No rollout, no search, no death label.
