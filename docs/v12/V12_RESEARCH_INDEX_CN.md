@@ -89,6 +89,7 @@ SSOT 入口：
 - Trial-9 pre-reg（仅做 epoch 标注）：`docs/v12/pre_reg/V12_WORLD_PRESSURE_EPOCH_ANNOTATION_TRIAL9_BTC_V0_20260109.md`
 - Trial-10 BTC 证据链按共识 epoch 重排（仅描述性审计；verdict=FAIL）：`docs/v12/artifacts/world_pressure_evidence_reindex/trial10_btc_reindex_by_epoch_v0_20260109/trial10_btc_evidence_reindex_report.md`
 - Trial-10 pre-reg（证据重排审计）：`docs/v12/pre_reg/V12_WORLD_PRESSURE_EVIDENCE_REINDEX_TRIAL10_BTC_V0_20260109.md`
+  - 强降级/强禁止：边界/epoch 仅允许 world_u 内部分段；禁止作为下游控制变量（SSOT §6）：`docs/v12/V12_SSOT_WORLD_PRESSURE_BOUNDARY_SIGNAL_V0_20260109.md`
 - Local Reachability Trial-4（world-conditioned impedance，封存产物）：`docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5（BTC 单世界定标，verdict=FAIL；lens 退场）：`docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg（冻结阈值 + stop rule）：`docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`

@@ -96,3 +96,36 @@ As of 2026-01-09:
 References:
 - Trial-8 pre-reg: `docs/v12/pre_reg/V12_WORLD_PRESSURE_BOUNDARY_TRIAL8_BTC_DO_OR_DIE_CHANGEPOINT_V0_20260109.md`
 - Trial-8 artifacts: `docs/v12/artifacts/world_pressure_boundary/trial8_btc_do_or_die_changepoint_v0_20260109/README.md`
+
+---
+
+## §6 Boundary Signal Demotion Rule (v12; SSOT-level; append-only)
+
+### §6.1 Scope limitation (hard)
+
+The changepoint boundaries `{t_k}` produced from `world_u` are valid **only** as internal segmentation of `world_u`.
+
+### §6.2 Prohibition (hard)
+
+`{t_k}` MUST NOT be used as:
+
+- a control variable for world coupling experiments,
+- a selector for evaluation windows,
+- a conditioning variable for gate / fail-closed evidence claims,
+- any driver of mechanism design or agent behavior,
+- any justification of causal statements about downstream evidence.
+
+### §6.3 Rationale (auditable reference)
+
+Trial-10 shows **no cross-seed reproducible structural differences** in gate / fail-closed statistics under consensus epoch segmentation (`distinguishable_pairs=0`, verdict=FAIL). Therefore downstream mechanistic usage is disallowed.
+
+Audit pointers:
+- Trial-9 epoch annotation (PASS; boundaries source): `docs/v12/artifacts/world_pressure_epoch_annotation/trial9_btc_epoch_annotation_v0_20260109/epoch_candidates.json`
+- Trial-10 evidence re-indexing by epochs (FAIL): `docs/v12/artifacts/world_pressure_evidence_reindex/trial10_btc_reindex_by_epoch_v0_20260109/trial10_btc_evidence_reindex_report.md`
+
+### §6.4 Allowed uses (hard)
+
+- Internal indexing / visualization of `world_u`
+- Descriptive summaries of `world_u` itself
+- Artifact navigation and audit referencing
+

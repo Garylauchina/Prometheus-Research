@@ -1,5 +1,8 @@
 # Trial-8 — World Pressure as Boundary Signal — BTC Do-or-Die (Changepoint) — Archived Artifacts (v0, 2026-01-09)
 
+**Demoted (SSOT rule)**: world_u boundaries are **internal segmentation only**; **prohibited** as downstream controls/conditioners per Trial-10 FAIL.  
+Reference: `docs/v12/V12_SSOT_WORLD_PRESSURE_BOUNDARY_SIGNAL_V0_20260109.md` (§6) and Trial-10 report `docs/v12/artifacts/world_pressure_evidence_reindex/trial10_btc_reindex_by_epoch_v0_20260109/trial10_btc_evidence_reindex_report.md`.
+
 Scope (frozen by pre-reg):
 - Quant commit locked: `e0e177fa6dc4cba12c82175ffda5d044c7c5c23c`
 - Dataset: BTC 2021–2022 only
