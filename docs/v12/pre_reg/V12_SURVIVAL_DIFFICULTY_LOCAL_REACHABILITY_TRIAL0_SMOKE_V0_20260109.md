@@ -123,3 +123,18 @@ This tool is considered **NOT_READY** (Trial-0 FAIL) if any of:
 - candidate_count_expected (N):
 - notes:
 
+
+### 7.3 Completion record (appended, 2026-01-09)
+
+- quant_run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e`
+- local_reachability_jsonl: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e/local_reachability.jsonl`
+- command (verify):
+  - `python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/verify_local_reachability_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e`
+  - verdict: `PASS`
+- command (summary; descriptive only):
+  - `python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/summarize_local_reachability_report_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260108T185657Z_seed50099_no_e --output_json /tmp/local_reachability_report_seed50099_no_e.json`
+  - output_json: `/tmp/local_reachability_report_seed50099_no_e.json`
+- lines_count: 50000
+- candidate_count_expected (N): 9
+- notes:
+  - For this run bundle (ablation mode `no_e`), the measured `feasible_ratio` is 0.0 for all ticks under the Trial-0 frozen feasibility proxy.
