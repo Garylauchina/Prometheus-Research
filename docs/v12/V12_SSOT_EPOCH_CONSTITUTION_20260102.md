@@ -105,3 +105,36 @@ Fail-closed（冻结）：
 - Modeling pipeline: `docs/v12/V12_SSOT_MODELING_DOCS_AND_GENOME_ALIGNMENT_20260101.md`
 
 
+
+---
+
+## Appendix A — Audit Coordinate System: Consensus Epoch Candidates from world_u changepoints (BTC, annotation-only)
+
+This appendix is **annotation-only**.
+
+- It does **not** redefine Epoch (semantic-break based) in §1.
+- It does **not** change any downstream mechanism, parameters, or evaluation semantics.
+- It provides a frozen coordinate system to re-index / summarize evidence by *candidate* epoch segments.
+
+Source (frozen):
+- Trial-9 consensus boundaries (PASS):
+  - `docs/v12/artifacts/world_pressure_epoch_annotation/trial9_btc_epoch_annotation_v0_20260109/epoch_candidates.json`
+
+Consensus boundaries (tick indices, N=10000; BTC 2021–2022, full runs used in Trial-8/9):
+- `[644, 3837, 5812, 6339, 6676]`
+
+Segments:
+- E0: [0, 644)
+- E1: [644, 3837)
+- E2: [3837, 5812)
+- E3: [5812, 6339)
+- E4: [6339, 6676)
+- E5: [6676, 10000)
+
+Audit boundary note (frozen pointer):
+- Trial-10 (descriptive audit of evidence-chain stats by these epochs) verdict = **FAIL** under frozen thresholds:
+  - `docs/v12/artifacts/world_pressure_evidence_reindex/trial10_btc_reindex_by_epoch_v0_20260109/trial10_btc_evidence_reindex_report.md`
+
+Interpretation constraint:
+- These epoch candidates may be used to **organize** evidence summaries.
+- They must not be used to claim semantic breaks or to justify mechanism changes.

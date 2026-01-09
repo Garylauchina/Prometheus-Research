@@ -87,6 +87,8 @@ SSOT entry points:
 - World pressure Trial-8 (BTC do-or-die changepoint; verdict=PASS): `docs/v12/artifacts/world_pressure_boundary/trial8_btc_do_or_die_changepoint_v0_20260109/trial8_world_pressure_boundary_report.md`
 - Trial-9 BTC epoch annotation (from world_u changepoints; verdict=PASS; annotation-only): `docs/v12/artifacts/world_pressure_epoch_annotation/trial9_btc_epoch_annotation_v0_20260109/trial9_epoch_annotation_report.md`
 - Trial-9 pre-reg (epoch annotation only): `docs/v12/pre_reg/V12_WORLD_PRESSURE_EPOCH_ANNOTATION_TRIAL9_BTC_V0_20260109.md`
+- Trial-10 BTC evidence re-indexing by consensus epochs (descriptive audit only; verdict=FAIL): `docs/v12/artifacts/world_pressure_evidence_reindex/trial10_btc_reindex_by_epoch_v0_20260109/trial10_btc_evidence_reindex_report.md`
+- Trial-10 pre-reg (re-indexing audit): `docs/v12/pre_reg/V12_WORLD_PRESSURE_EVIDENCE_REINDEX_TRIAL10_BTC_V0_20260109.md`
 - Local Reachability Trial-4 (world-conditioned impedance, archived artifacts): `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5 (BTC single-world do-or-die calibration, verdict=FAIL; lens rejected): `docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg (frozen thresholds + stop rule): `docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`

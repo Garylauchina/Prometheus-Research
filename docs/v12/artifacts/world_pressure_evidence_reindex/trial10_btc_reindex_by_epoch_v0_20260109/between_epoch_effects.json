@@ -1,0 +1,587 @@
+[
+  {
+    "pair": [
+      "E0",
+      "E1"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.7133433866110095,
+        "d_suppression": 0.07849955592502136,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.03155475944923919,
+        "delta_attempted_rate": -0.002583777012214239
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.7133433866110095,
+        "d_suppression": -0.06059557461559792,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": -0.02824435835139094,
+        "delta_attempted_rate": 0.015554697484598479
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.7133433866110095,
+        "d_suppression": 0.02663801390953361,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.009121029700618122,
+        "delta_attempted_rate": 0.022939835393027908
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.7133433866110095,
+      "d_suppression": 0.02663801390953361,
+      "delta_block_rate": 0.0,
+      "delta_downshift_rate": 0.009121029700618122,
+      "delta_attempted_rate": 0.002583777012214239
+    }
+  },
+  {
+    "pair": [
+      "E0",
+      "E2"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.14526683058095854,
+        "d_suppression": -0.005447737385999725,
+        "delta_block_rate": -0.003417634996582365,
+        "delta_downshift_rate": 0.00537906029896873,
+        "delta_attempted_rate": 0.009240506329113884
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.14526683058095854,
+        "d_suppression": -0.0526815872258854,
+        "delta_block_rate": -0.00819672131147541,
+        "delta_downshift_rate": 0.0033434736071207283,
+        "delta_attempted_rate": 0.011839767277301627
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.14526683058095854,
+        "d_suppression": -0.0294413316519829,
+        "delta_block_rate": -0.00546448087431694,
+        "delta_downshift_rate": 0.003953469117403519,
+        "delta_attempted_rate": 0.027367717587860718
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.14526683058095854,
+      "d_suppression": 0.005447737385999725,
+      "delta_block_rate": 0.003417634996582365,
+      "delta_downshift_rate": 0.0033434736071207283,
+      "delta_attempted_rate": 0.009240506329113884
+    }
+  },
+  {
+    "pair": [
+      "E0",
+      "E3"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.3552453477116677,
+        "d_suppression": -0.14844743235375854,
+        "delta_block_rate": -0.014925373134328358,
+        "delta_downshift_rate": -0.005407743889249417,
+        "delta_attempted_rate": -0.012808349146110065
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.3552453477116677,
+        "d_suppression": -0.2044637657593074,
+        "delta_block_rate": -0.014778325123152709,
+        "delta_downshift_rate": -0.035493372606774654,
+        "delta_attempted_rate": -0.017292891911322772
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.3552453477116677,
+        "d_suppression": -0.258420322201887,
+        "delta_block_rate": -0.02506265664160401,
+        "delta_downshift_rate": -0.04002430318219791,
+        "delta_attempted_rate": 0.011517790847054177
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.3552453477116677,
+      "d_suppression": 0.14844743235375854,
+      "delta_block_rate": 0.014778325123152709,
+      "delta_downshift_rate": 0.005407743889249417,
+      "delta_attempted_rate": 0.011517790847054177
+    }
+  },
+  {
+    "pair": [
+      "E0",
+      "E4"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.028331779529159728,
+        "d_suppression": -0.015170798835007097,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.007662152530292232,
+        "delta_attempted_rate": 0.02596439169139464
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.028331779529159728,
+        "d_suppression": -0.10598815533661449,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": -0.036109136153572696,
+        "delta_attempted_rate": 0.06467829035884765
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.028331779529159728,
+        "d_suppression": 0.023271932102337065,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.01010101010101011,
+        "delta_attempted_rate": 0.003054905357834037
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.028331779529159728,
+      "d_suppression": 0.015170798835007097,
+      "delta_block_rate": 0.0,
+      "delta_downshift_rate": 0.007662152530292232,
+      "delta_attempted_rate": 0.003054905357834037
+    }
+  },
+  {
+    "pair": [
+      "E0",
+      "E5"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.28985587964584913,
+        "d_suppression": 0.030282446176439486,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.011578074237920788,
+        "delta_attempted_rate": -0.006919374247894128
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.28985587964584913,
+        "d_suppression": -0.02855557784000226,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": -0.011550355271686852,
+        "delta_attempted_rate": 0.0019022206276954057
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.28985587964584913,
+        "d_suppression": 0.03712726429392397,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.015088205140772859,
+        "delta_attempted_rate": 0.024650387544752683
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.28985587964584913,
+      "d_suppression": 0.02855557784000226,
+      "delta_block_rate": 0.0,
+      "delta_downshift_rate": 0.011550355271686852,
+      "delta_attempted_rate": 0.0019022206276954057
+    }
+  },
+  {
+    "pair": [
+      "E1",
+      "E2"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.3244988750105124,
+        "d_suppression": -0.08226579793346592,
+        "delta_block_rate": -0.003417634996582365,
+        "delta_downshift_rate": -0.02617569915027046,
+        "delta_attempted_rate": 0.011824283341328123
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.3244988750105124,
+        "d_suppression": 0.002965952211957693,
+        "delta_block_rate": -0.00819672131147541,
+        "delta_downshift_rate": 0.03158783195851167,
+        "delta_attempted_rate": -0.0037149302072968515
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.3244988750105124,
+        "d_suppression": -0.056360608568079375,
+        "delta_block_rate": -0.00546448087431694,
+        "delta_downshift_rate": -0.005167560583214603,
+        "delta_attempted_rate": 0.004427882194832811
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.3244988750105124,
+      "d_suppression": 0.002965952211957693,
+      "delta_block_rate": 0.003417634996582365,
+      "delta_downshift_rate": 0.005167560583214603,
+      "delta_attempted_rate": 0.0037149302072968515
+    }
+  },
+  {
+    "pair": [
+      "E1",
+      "E3"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -1.0610408525776809,
+        "d_suppression": -0.24335078154296247,
+        "delta_block_rate": -0.014925373134328358,
+        "delta_downshift_rate": -0.036962503338488606,
+        "delta_attempted_rate": -0.010224572133895826
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -1.0610408525776809,
+        "d_suppression": -0.16482117131069504,
+        "delta_block_rate": -0.014778325123152709,
+        "delta_downshift_rate": -0.007249014255383712,
+        "delta_attempted_rate": -0.03284758939592125
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -1.0610408525776809,
+        "d_suppression": -0.3210544053046611,
+        "delta_block_rate": -0.02506265664160401,
+        "delta_downshift_rate": -0.04914533288281603,
+        "delta_attempted_rate": -0.01142204454597373
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 1.0610408525776809,
+      "d_suppression": 0.16482117131069504,
+      "delta_block_rate": 0.014778325123152709,
+      "delta_downshift_rate": 0.007249014255383712,
+      "delta_attempted_rate": 0.010224572133895826
+    }
+  },
+  {
+    "pair": [
+      "E1",
+      "E4"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.6960656352010786,
+        "d_suppression": -0.09437163044282701,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": -0.023892606918946957,
+        "delta_attempted_rate": 0.028548168703608878
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.6960656352010786,
+        "d_suppression": -0.046320607259414066,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": -0.007864777802181755,
+        "delta_attempted_rate": 0.04912359287424917
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.6960656352010786,
+        "d_suppression": -0.0029984138274539514,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.0009799804003919887,
+        "delta_attempted_rate": -0.01988493003519387
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.6960656352010786,
+      "d_suppression": 0.0029984138274539514,
+      "delta_block_rate": 0.0,
+      "delta_downshift_rate": 0.0009799804003919887,
+      "delta_attempted_rate": 0.01988493003519387
+    }
+  },
+  {
+    "pair": [
+      "E1",
+      "E5"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.27105150433154007,
+        "d_suppression": -0.04725514358034683,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": -0.0199766852113184,
+        "delta_attempted_rate": -0.004335597235679889
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.27105150433154007,
+        "d_suppression": 0.03212356750005604,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.01669400307970409,
+        "delta_attempted_rate": -0.013652476856903073
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.27105150433154007,
+        "d_suppression": 0.010547008141954105,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.005967175440154737,
+        "delta_attempted_rate": 0.0017105521517247757
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.27105150433154007,
+      "d_suppression": 0.010547008141954105,
+      "delta_block_rate": 0.0,
+      "delta_downshift_rate": 0.005967175440154737,
+      "delta_attempted_rate": 0.0017105521517247757
+    }
+  },
+  {
+    "pair": [
+      "E2",
+      "E3"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.5068246990543865,
+        "d_suppression": -0.15008701400237323,
+        "delta_block_rate": -0.011507738137745993,
+        "delta_downshift_rate": -0.010786804188218146,
+        "delta_attempted_rate": -0.02204885547522395
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.5068246990543865,
+        "d_suppression": -0.1514531549208921,
+        "delta_block_rate": -0.006581603811677298,
+        "delta_downshift_rate": -0.03883684621389538,
+        "delta_attempted_rate": -0.0291326591886244
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.5068246990543865,
+        "d_suppression": -0.24038156918950526,
+        "delta_block_rate": -0.01959817576728707,
+        "delta_downshift_rate": -0.043977772299601425,
+        "delta_attempted_rate": -0.01584992674080654
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.5068246990543865,
+      "d_suppression": 0.15008701400237323,
+      "delta_block_rate": 0.006581603811677298,
+      "delta_downshift_rate": 0.010786804188218146,
+      "delta_attempted_rate": 0.01584992674080654
+    }
+  },
+  {
+    "pair": [
+      "E2",
+      "E4"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": -0.159406832286244,
+        "d_suppression": -0.009532407756769288,
+        "delta_block_rate": 0.003417634996582365,
+        "delta_downshift_rate": 0.0022830922313235025,
+        "delta_attempted_rate": 0.016723885362280755
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": -0.159406832286244,
+        "d_suppression": -0.04463687289189053,
+        "delta_block_rate": 0.00819672131147541,
+        "delta_downshift_rate": -0.039452609760693425,
+        "delta_attempted_rate": 0.05283852308154602
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": -0.159406832286244,
+        "d_suppression": 0.050856325049445504,
+        "delta_block_rate": 0.00546448087431694,
+        "delta_downshift_rate": 0.006147540983606592,
+        "delta_attempted_rate": -0.02431281223002668
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.159406832286244,
+      "d_suppression": 0.009532407756769288,
+      "delta_block_rate": 0.003417634996582365,
+      "delta_downshift_rate": 0.0022830922313235025,
+      "delta_attempted_rate": 0.016723885362280755
+    }
+  },
+  {
+    "pair": [
+      "E2",
+      "E5"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.08455916140492048,
+        "d_suppression": 0.035340982379947664,
+        "delta_block_rate": 0.003417634996582365,
+        "delta_downshift_rate": 0.006199013938952058,
+        "delta_attempted_rate": -0.016159880577008012
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.08455916140492048,
+        "d_suppression": 0.027734492744423415,
+        "delta_block_rate": 0.00819672131147541,
+        "delta_downshift_rate": -0.01489382887880758,
+        "delta_attempted_rate": -0.009937546649606221
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.08455916140492048,
+        "d_suppression": 0.06650021497355017,
+        "delta_block_rate": 0.00546448087431694,
+        "delta_downshift_rate": 0.01113473602336934,
+        "delta_attempted_rate": -0.002717330043108035
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.08455916140492048,
+      "d_suppression": 0.027734492744423415,
+      "delta_block_rate": 0.003417634996582365,
+      "delta_downshift_rate": 0.006199013938952058,
+      "delta_attempted_rate": 0.002717330043108035
+    }
+  },
+  {
+    "pair": [
+      "E3",
+      "E4"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.28029396216986446,
+        "d_suppression": 0.12709423660377864,
+        "delta_block_rate": 0.014925373134328358,
+        "delta_downshift_rate": 0.013069896419541649,
+        "delta_attempted_rate": 0.038772740837504704
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.28029396216986446,
+        "d_suppression": 0.1028449349214793,
+        "delta_block_rate": 0.014778325123152709,
+        "delta_downshift_rate": -0.0006157635467980427,
+        "delta_attempted_rate": 0.08197118227017042
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.28029396216986446,
+        "d_suppression": 0.26367765282701544,
+        "delta_block_rate": 0.02506265664160401,
+        "delta_downshift_rate": 0.05012531328320802,
+        "delta_attempted_rate": -0.00846288548922014
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.28029396216986446,
+      "d_suppression": 0.1028449349214793,
+      "delta_block_rate": 0.014778325123152709,
+      "delta_downshift_rate": 0.0006157635467980427,
+      "delta_attempted_rate": 0.00846288548922014
+    }
+  },
+  {
+    "pair": [
+      "E3",
+      "E5"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.7323820731415577,
+        "d_suppression": 0.19442899688733026,
+        "delta_block_rate": 0.014925373134328358,
+        "delta_downshift_rate": 0.016985818127170205,
+        "delta_attempted_rate": 0.005888974898215937
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.7323820731415577,
+        "d_suppression": 0.19653773077968123,
+        "delta_block_rate": 0.014778325123152709,
+        "delta_downshift_rate": 0.0239430173350878,
+        "delta_attempted_rate": 0.019195112539018178
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.7323820731415577,
+        "d_suppression": 0.3313883339809592,
+        "delta_block_rate": 0.02506265664160401,
+        "delta_downshift_rate": 0.055112508322970766,
+        "delta_attempted_rate": 0.013132596697698506
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.7323820731415577,
+      "d_suppression": 0.19442899688733026,
+      "delta_block_rate": 0.014778325123152709,
+      "delta_downshift_rate": 0.016985818127170205,
+      "delta_attempted_rate": 0.005888974898215937
+    }
+  },
+  {
+    "pair": [
+      "E4",
+      "E5"
+    ],
+    "per_seed": [
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+        "d_world_u": 0.3061036488347242,
+        "d_suppression": 0.045854535815333795,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.003915921707628556,
+        "delta_attempted_rate": -0.03288376593928877
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+        "d_world_u": 0.3061036488347242,
+        "d_suppression": 0.07853877501555129,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.024558780881885844,
+        "delta_attempted_rate": -0.06277606973115224
+      },
+      {
+        "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+        "d_world_u": 0.3061036488347242,
+        "d_suppression": 0.013525596677375391,
+        "delta_block_rate": 0.0,
+        "delta_downshift_rate": 0.0049871950397627485,
+        "delta_attempted_rate": 0.021595482186918646
+      }
+    ],
+    "min_abs": {
+      "d_world_u": 0.3061036488347242,
+      "d_suppression": 0.013525596677375391,
+      "delta_block_rate": 0.0,
+      "delta_downshift_rate": 0.003915921707628556,
+      "delta_attempted_rate": 0.021595482186918646
+    }
+  }
+]
