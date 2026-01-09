@@ -296,3 +296,35 @@ Frozen sentence (recommended for README; non-narrative):
 
 For implementation and acceptance, use:
 - `docs/v12/V12_SURVIVAL_SPACE_EXPERIMENT_EXECUTION_CHECKLIST_V0_20260108.md`
+
+---
+
+## §9 E-liquidity fail-closed rule (append-only; v12)
+
+### §9.1 Prohibition (hard)
+
+`L_liq` MUST NOT be synthesized from `last_px` using any fixed-spread fallback.
+
+Forbidden examples (non-exhaustive):
+- `bid_px_1 = last_px - c` and `ask_px_1 = last_px + c`
+- fixed `spread_bps` derived from `last_px` without order book evidence
+
+Rationale (auditable):
+- This creates a constant `L_liq` and can lock gate into a single cap regime (e.g. persistent `gate:cap_2`), destroying world penetrability of adjudication.
+
+### §9.2 Fail-closed measurability boundary (hard)
+
+In replay evidence, if `bid_px_1` and/or `ask_px_1` are missing/unavailable at a tick, then:
+- `L_liq_mask = 0`
+- `L_liq = null`
+- `L_liq_reason_codes` MUST include: `not_measurable:market_missing_bid_ask`
+
+Additive-only vocabulary update:
+- New NOT_MEASURABLE reason code for `L_liq`:
+  - `not_measurable:market_missing_bid_ask`
+
+### §9.3 Verifier enforcement (hard)
+
+A run MUST be **FAIL** if it contains any evidence of forbidden fallback.
+
+A run MUST be **NOT_MEASURABLE** (degraded) if `L_liq` is NOT_MEASURABLE in `full` mode (since `L = min(L_liq, L_imp)` implies `L` is also NOT_MEASURABLE).

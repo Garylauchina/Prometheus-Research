@@ -162,6 +162,14 @@ def _verify_survival_space_schema(path: Path) -> Tuple[List[str], List[str], Dic
                         bad_range += 1
                         errors.append(f"survival_space.{base} out of [0,1] at line {line_no}: {fv}")
 
+        # Hard SSOT ban: forbid fixed-spread fallback derived from last_px
+        # (see V12_SSOT_SURVIVAL_SPACE_EM_V1 §9)
+        liq_rc = rec.get("L_liq_reason_codes", [])
+        if isinstance(liq_rc, list) and "liq:spread_bps_from_last_px_fallback" in liq_rc:
+            errors.append(
+                f"forbidden_liq_fallback: liq:spread_bps_from_last_px_fallback at line {line_no} (SSOT §9)"
+            )
+
     stats["masked_not_null_count"] = masked_not_null
     stats["unmasked_null_count"] = unmasked_null
     stats["out_of_range_count"] = bad_range
@@ -426,6 +434,35 @@ def verify(run_dir: Path) -> CheckResult:
     except Exception as e:
         errors.append(f"ablation semantics check crashed: {e}")
 
+    # SSOT §9: If L_liq is NOT_MEASURABLE in full mode, then the run is NOT_MEASURABLE (degraded),
+    # because L = min(L_liq, L_imp) implies L is also NOT_MEASURABLE (mask=0) at those ticks.
+    # This is an evidence-valid but degraded condition (NOT_MEASURABLE), not a schema FAIL.
+    try:
+        ab = manifest.get("ablation", {})
+        ss_ab = ab.get("survival_space", {}) if isinstance(ab, dict) else {}
+        enabled = bool(ss_ab.get("enabled")) if isinstance(ss_ab, dict) else False
+        mode = ss_ab.get("mode") if isinstance(ss_ab, dict) else None
+        stats["ssot9_mode"] = mode
+        if enabled and mode == "full":
+            liq_not_meas = 0
+            checked = 0
+            for _ln, rec in _iter_jsonl(ss_path):
+                checked += 1
+                if rec.get("L_liq_mask") == 0:
+                    liq_not_meas += 1
+                    # stop early once we know it's degraded
+                    if liq_not_meas > 0:
+                        break
+                if checked > 50_000:
+                    break
+            stats["ssot9_liq_not_measurable_seen"] = liq_not_meas > 0
+            if liq_not_meas > 0:
+                warnings.append("SSOT§9: L_liq NOT_MEASURABLE in full mode -> verdict=NOT_MEASURABLE")
+                # Do not return yet if there are hard FAIL errors; we only degrade when errors==[]
+                # (handled after the main error gate below)
+    except Exception as e:
+        errors.append(f"SSOT§9 measurability check crashed: {e}")
+
     # Join integrity
     ms_path = run_dir / "market_snapshot.jsonl"
     snapshot_ids, e_sid, st_sid = _load_snapshot_ids(ms_path)
@@ -450,6 +487,10 @@ def verify(run_dir: Path) -> CheckResult:
 
     if errors:
         return CheckResult(verdict="FAIL", errors=errors, warnings=warnings, stats=stats)
+
+    # Apply SSOT§9 degradation (after hard FAIL errors cleared)
+    if stats.get("ssot9_liq_not_measurable_seen") is True:
+        return CheckResult(verdict="NOT_MEASURABLE", errors=errors, warnings=warnings, stats=stats)
 
     # Degrade to NOT_MEASURABLE if errors.jsonl is non-empty (same spirit as verify_tick_loop_v0)
     try:
@@ -508,5 +549,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except BrokenPipeError:
+        # Allow piping to `head` without crashing the verifier output path.
+        raise SystemExit(0)
 
