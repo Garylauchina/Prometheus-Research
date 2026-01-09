@@ -79,6 +79,9 @@ SSOT 入口：
 - V12 避坑手册（append-only，上线前“六拷问”门禁）：`docs/v12/V12_AVOID_PIT_HAND_BOOK_v1_20260108.md`
 - Survival Space（E+M 最小合同）：`docs/v12/V12_SSOT_SURVIVAL_SPACE_EM_V1_20260108.md`
 - Survival Difficulty（Local Reachability；冻结 M；测量“下一步可行动邻域”收缩速度；SSOT v0）：`docs/v12/V12_SSOT_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_V0_20260109.md`
+- Local Reachability Trial-4（world-conditioned impedance，封存产物）：`docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
+- Local Reachability Trial-5（BTC 单世界定标，verdict=FAIL；lens 退场）：`docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
+- Local Reachability Trial-5 pre-reg（冻结阈值 + stop rule）：`docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
 - Survival Space v1.0.1 Fix-M 扩展验证（封存产物）：`docs/v12/artifacts/survival_space_em/v1_0_1_fixm_extended_validation_20260109/README.md`
 - Survival Space v1.0.1 Fix-M 扩展验证里程碑（append-only 记录）：`docs/v12/V12_SURVIVAL_SPACE_EM_V1_0_1_FIX_M_EXTENDED_VALIDATION_MILESTONE_20260109.md`
 - Survival Space 偏序/格 证伪清单（v0 草案）：`docs/v12/V12_SURVIVAL_SPACE_POSET_LATTICE_FALSIFICATION_CHECKLIST_V0_DRAFT_20260109.md`

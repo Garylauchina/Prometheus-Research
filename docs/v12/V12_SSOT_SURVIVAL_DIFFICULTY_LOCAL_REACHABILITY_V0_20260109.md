@@ -216,3 +216,28 @@ Frozen closing sentence (non-narrative):
 
 > We do not search for ways to make the agent live; we measure how the world makes actionability collapse.
 
+
+---
+
+## §8 Operational status / lens registry (append-only)
+
+This SSOT defines the *object* and the *evidence contract* for Local Reachability. Specific **lenses** (how feasibility is computed from available evidence) are experimental and can be rejected.
+
+### §8.1 Lens status (as of 2026-01-09)
+
+- Trial-1 (E-only volatility proxy lens): **REJECTED** (trivial across seeds; see pre-reg completion record).
+- Trial-2 (impedance-proxy lens; probe-on; feasibility derived from M-windowed impedance): **ENGINEERING-REJECTED** for “measuring continuous world pressure” under single-world do-or-die calibration (Trial-5 verdict = FAIL).
+  - Meaning: it may show quantile separation (`delta`), but fails the frozen minimum continuous association threshold (`rho_min`) across 3 seeds.
+  - Stop rule applies: no patching inside the same claim.
+
+References (frozen pointers):
+- Trial-4 artifacts (world-conditioned impedance runs used as source): `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/`
+- Trial-5 pre-reg (do-or-die calibration): `docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
+- Trial-5 artifacts (final verdict + per-run reports): `docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/`
+
+### §8.2 Evidence join key rule (clarification; frozen going forward)
+
+If a lens requires joining `local_reachability.jsonl` to another per-tick evidence file (e.g. `interaction_impedance.jsonl`), the join semantics MUST be explicitly frozen in the lens pre-reg:
+
+- Preferred: explicit `tick_index` present in both files (1:1 join).
+- Allowed (only if the evidence file lacks `tick_index`): strict implicit ordering join **with an explicit audit check** (e.g. enforce `local_reachability.tick_index == implicit line index`), and record this in the lens/tool contract.
