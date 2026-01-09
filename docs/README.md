@@ -21,6 +21,7 @@ If you are here to **audit V10** or **reproduce conclusions**, start with the V1
 - **V11 Index / V11入口**: [`docs/v11/V11_RESEARCH_INDEX.md`](v11/V11_RESEARCH_INDEX.md)
 - **V12 Index / V12入口**: [`docs/v12/V12_RESEARCH_INDEX.md`](v12/V12_RESEARCH_INDEX.md)
 - **V12 Index (CN) / V12入口（中文）**: [`docs/v12/V12_RESEARCH_INDEX_CN.md`](v12/V12_RESEARCH_INDEX_CN.md)
+- **V13 Index (CN) / V13入口（中文）**: [`docs/v13/V13_RESEARCH_INDEX_CN.md`](v13/V13_RESEARCH_INDEX_CN.md)
 
 ---
 
