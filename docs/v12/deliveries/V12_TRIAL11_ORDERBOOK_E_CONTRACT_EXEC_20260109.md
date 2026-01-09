@@ -1,5 +1,8 @@
 # Delivery — Quant Instructions — Trial-11 Adjudicability Restoration via Order-Book E-Contract — 2026-01-09
 
+This instruction file (absolute path):
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/deliveries/V12_TRIAL11_ORDERBOOK_E_CONTRACT_EXEC_20260109.md`
+
 Repo: `/Users/liugang/Cursor_Store/Prometheus-Quant`
 
 Goal (do-or-die):
@@ -59,7 +62,7 @@ DATASET="<NEW_DATASET_DIR>"
 RUNS_ROOT="/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool"
 
 for SEED in 71001 71002 71003; do
-  python3 tools/v12/run_survival_space_em_v1.py \
+  python3 /Users/liugang/Cursor_Store/Prometheus-Quant/tools/v12/run_survival_space_em_v1.py \
     --dataset_dir "$DATASET" \
     --runs_root "$RUNS_ROOT" \
     --steps 2000 \
