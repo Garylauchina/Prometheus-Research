@@ -78,6 +78,7 @@ SSOT entry points:
 - D0 falsification death verdict (constitution-level stop rule): `docs/v12/V12_SSOT_D0_FALSIFICATION_DEATH_VERDICT_V0_20260107.md`
 - Avoid Pit Handbook (append-only “pre-flight interrogation” gate): `docs/v12/V12_AVOID_PIT_HAND_BOOK_v1_20260108.md`
 - Survival Space (E+M minimal contract): `docs/v12/V12_SSOT_SURVIVAL_SPACE_EM_V1_20260108.md`
+- Survival Space v1.0.1 Fix-M extended validation (finalized artifacts): `docs/v12/artifacts/survival_space_em/v1_0_1_fixm_extended_validation_20260109/README.md`
 - Survival Space execution checklist (acceptance gate): `docs/v12/V12_SURVIVAL_SPACE_EXPERIMENT_EXECUTION_CHECKLIST_V0_20260108.md`
 
 Tools entry points (verifiers/tools):
