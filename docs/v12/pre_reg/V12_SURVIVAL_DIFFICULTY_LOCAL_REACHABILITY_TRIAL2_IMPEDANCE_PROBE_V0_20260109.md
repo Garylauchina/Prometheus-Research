@@ -154,3 +154,25 @@ Stop rule (hard):
 - summary_json_path:
 - notes:
 
+
+## 9. Completion record (appended, 2026-01-09)
+
+- quant_run_dir: `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T065121Z_seed60001_full`
+- probe_config (frozen): `probe_attempts_per_tick=1`
+- evidence sanity (from run_manifest.json):
+  - interaction_impedance.count: 10000
+  - order_attempts.count: 22350
+- local_reachability_jsonl:
+  - `/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T065121Z_seed60001_full/local_reachability.jsonl`
+  - lines_count: 10000
+- verifier (Research):
+  - `python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/verify_local_reachability_v0.py --run_dir /Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T065121Z_seed60001_full`
+  - verdict: `PASS`
+- summary_json_path (Research; descriptive only):
+  - `/tmp/local_reachability_report_trial2_seed60001_full.json`
+  - feasible_ratio.mean: 0.6777555555555556
+  - feasible_ratio.p50: 0.6666666666666666
+  - feasible_ratio.p99: 0.7777777777777778
+- notes:
+  - interaction_impedance is measurable per tick (sampled: verdict=PASS, order_attempts_count>=1).
+  - No thresholds used for acceptance; this record only freezes evidence + descriptive readouts.
