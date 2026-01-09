@@ -216,7 +216,6 @@ Frozen closing sentence (non-narrative):
 
 > We do not search for ways to make the agent live; we measure how the world makes actionability collapse.
 
-
 ---
 
 ## §8 Operational status / lens registry (append-only)
@@ -241,3 +240,4 @@ If a lens requires joining `local_reachability.jsonl` to another per-tick eviden
 
 - Preferred: explicit `tick_index` present in both files (1:1 join).
 - Allowed (only if the evidence file lacks `tick_index`): strict implicit ordering join **with an explicit audit check** (e.g. enforce `local_reachability.tick_index == implicit line index`), and record this in the lens/tool contract.
+

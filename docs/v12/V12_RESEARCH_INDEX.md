@@ -79,6 +79,8 @@ SSOT entry points:
 - Avoid Pit Handbook (append-only “pre-flight interrogation” gate): `docs/v12/V12_AVOID_PIT_HAND_BOOK_v1_20260108.md`
 - Survival Space (E+M minimal contract): `docs/v12/V12_SSOT_SURVIVAL_SPACE_EM_V1_20260108.md`
 - Survival Difficulty (Local Reachability; M-frozen; measure next-step actionability neighborhood compression speed; SSOT v0): `docs/v12/V12_SSOT_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_V0_20260109.md`
+- World pressure candidate tool (EDoF v0; REJECTED after Trial-6): `docs/v12/V12_SSOT_WORLD_PRESSURE_EFFECTIVE_DOF_V0_20260109.md`
+- World pressure Trial-6 (BTC do-or-die calibration; verdict=FAIL; tool exits): `docs/v12/artifacts/world_pressure_edof/trial6_btc_do_or_die_v0_20260109/trial6_world_pressure_edof_report.md`
 - Local Reachability Trial-4 (world-conditioned impedance, archived artifacts): `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5 (BTC single-world do-or-die calibration, verdict=FAIL; lens rejected): `docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg (frozen thresholds + stop rule): `docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
