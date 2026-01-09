@@ -110,7 +110,6 @@ Stop rule:
 - verifier_reports:
 - verdict:
 
-
 ### Completion record — 2026-01-09 (append-only)
 
 - quant_commit: `d5cc98fbf8340f87dd751efd2a01a044bbe13dd2`

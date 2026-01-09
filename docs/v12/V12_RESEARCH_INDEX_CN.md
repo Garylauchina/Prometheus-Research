@@ -94,6 +94,9 @@ SSOT 入口：
 - E-liquidity 门槛结果（BTC 2021–2022 replay；verdict=NOT_MEASURABLE）：`docs/v12/artifacts/e_liquidity_gate/eligibility_btc_2021_2022_v0_20260109/README.md`
 - Trial-11 pre-reg（裁决资格恢复：Order-Book E-Contract；do-or-die）：`docs/v12/pre_reg/V12_TRIAL11_ADJUDICABILITY_RESTORATION_ORDERBOOK_E_CONTRACT_V0_20260109.md`
 - Trial-11 Quant 执行指令（构建带 bid/ask 的新 replay dataset）：`docs/v12/deliveries/V12_TRIAL11_ORDERBOOK_E_CONTRACT_EXEC_20260109.md`
+- Trial-11 封存（不合规 synthetic 尝试；verdict=FAIL；不可变）：`docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/README.md`
+- Trial-11T pre-reg（trade-derived bid/ask 代理；明确不是 order-book）：`docs/v12/pre_reg/V12_TRIAL11T_TRADE_DERIVED_QUOTES_E_CONTRACT_V0_20260109.md`
+- Trial-11T Quant 执行指令（构建 trade-derived quotes dataset）：`docs/v12/deliveries/V12_TRIAL11T_TRADE_DERIVED_QUOTES_E_CONTRACT_EXEC_20260109.md`
 - Local Reachability Trial-4（world-conditioned impedance，封存产物）：`docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5（BTC 单世界定标，verdict=FAIL；lens 退场）：`docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg（冻结阈值 + stop rule）：`docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
@@ -111,6 +114,9 @@ SSOT 入口：
 - Base dimensions verifier（E/I/M）：`python3 tools/v12/verify_base_dimensions_eim_v0.py --run_dir <RUN_DIR>`
 - Scanner E schema verifier（market_snapshot canonical schema）：`python3 tools/v12/verify_scanner_e_schema_v0.py --run_dir <RUN_DIR>`
 - World structure gate（W0，world-coupling 前置门槛）：`python3 tools/v12/verify_world_structure_gate_v0.py --dataset_dir <DATASET_DIR> --k_windows 1,100,500 --p99_threshold 0.001 --min_samples 1000`
+- E-contract provenance gate（G0，fail-closed；支持 expected_source）：
+  - `python3 tools/v12/verify_orderbook_e_contract_provenance_gate_v0.py --expected_source orderbook --dataset_dir <DATASET_DIR>`
+  - `python3 tools/v12/verify_orderbook_e_contract_provenance_gate_v0.py --expected_source trade_derived --dataset_dir <DATASET_DIR>`
 - Genome alignment table verifier（V12.2, machine-readable）：`python3 tools/v12/verify_genome_alignment_table_v0.py --input <genome_alignment_table.json>`
 - Tick loop verifier（V12.3, sequence integrity）：`python3 tools/v12/verify_tick_loop_v0.py --run_dir <RUN_DIR> --min_ticks <N>`
 - Tick loop repeatability gate（V12.3, FAIL=0）：`python3 tools/v12/verify_tick_loop_repeatability_gate.py --runs_root <QUANT_RUNS_ROOT> --run_ids <run_id_1,run_id_2,...>`

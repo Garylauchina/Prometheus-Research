@@ -11,8 +11,9 @@ Semantics (fail-closed):
   - FAIL if we detect synthesis.
   - NOT_MEASURABLE if provenance evidence is missing/insufficient.
 
-This gate is intentionally strict and minimal: it looks for explicit signals in
-dataset_build_manifest.json and/or market_snapshot.jsonl that the order-book is synthetic.
+This gate is intentionally strict and minimal:
+- It is a provenance gate, not a coverage gate.
+- It can be used for different expected E-contract sources (order-book vs trade-derived).
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ class GateResult:
     dataset_dir: str
     manifest_path: str
     market_snapshot_path: str
+    expected_source: str  # orderbook | trade_derived
     sample_lines: int
     verdict: str  # PASS | FAIL | NOT_MEASURABLE
     errors: List[str]
@@ -45,6 +47,7 @@ class GateResult:
             "dataset_dir": self.dataset_dir,
             "manifest_path": self.manifest_path,
             "market_snapshot_path": self.market_snapshot_path,
+            "expected_source": self.expected_source,
             "sample_lines": self.sample_lines,
             "verdict": self.verdict,
             "errors": self.errors,
@@ -67,23 +70,22 @@ def _read_json(path: Path) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         return None, f"manifest_unreadable:{str(path)}:{type(e).__name__}:{e}"
 
 
-def _scan_market_snapshot_for_synthetic(
+def _scan_market_snapshot_orderbook_source(
     market_snapshot_path: Path, sample_lines: int
-) -> Tuple[Optional[bool], List[str], Dict[str, Any]]:
+) -> Tuple[Optional[Dict[str, int]], List[str], Dict[str, Any]]:
     """
     Returns:
-      - synthetic_detected: True/False if determinable from sampled lines, else None
+      - orderbook_source_counts: dict if determinable from sampled lines, else None
       - errors/warnings: list of strings
       - notes: counters
     """
     notes: Dict[str, Any] = {
         "sampled": 0,
         "has_orderbook_source_field": 0,
-        "orderbook_source_synthetic_count": 0,
-        "orderbook_source_non_synthetic_count": 0,
     }
     warnings: List[str] = []
     errors: List[str] = []
+    source_counts: Dict[str, int] = {}
 
     try:
         with market_snapshot_path.open("r", encoding="utf-8") as f:
@@ -101,10 +103,10 @@ def _scan_market_snapshot_for_synthetic(
                 # Heuristic 1: explicit marker used by some builders
                 if "orderbook_source" in obj:
                     notes["has_orderbook_source_field"] += 1
-                    if str(obj.get("orderbook_source")).lower() == "synthetic":
-                        notes["orderbook_source_synthetic_count"] += 1
-                    else:
-                        notes["orderbook_source_non_synthetic_count"] += 1
+                    src = str(obj.get("orderbook_source")).strip().lower()
+                    if not src:
+                        src = "empty"
+                    source_counts[src] = source_counts.get(src, 0) + 1
     except FileNotFoundError:
         return None, ["market_snapshot_missing"], notes
     except Exception as e:
@@ -113,20 +115,49 @@ def _scan_market_snapshot_for_synthetic(
     if notes["sampled"] == 0:
         return None, ["market_snapshot_empty"], notes
 
-    if notes["orderbook_source_synthetic_count"] > 0:
-        return True, errors + warnings, notes
+    if notes["has_orderbook_source_field"] > 0:
+        return source_counts, errors + warnings, notes
 
-    # If we saw explicit orderbook_source field and none were synthetic, treat as non-synthetic.
-    if notes["has_orderbook_source_field"] > 0 and notes["orderbook_source_synthetic_count"] == 0:
-        return False, errors + warnings, notes
-
-    # Otherwise we cannot decide from market_snapshot alone.
     return None, errors + warnings, notes
+
+
+def _manifest_declared_kind(manifest: Dict[str, Any]) -> str:
+    """
+    Conservative classification from manifest.
+    Returns: synthetic | trade_derived | orderbook | unknown
+    """
+    dataset_version = str(manifest.get("dataset_version", ""))
+    if "synthetic" in dataset_version.lower():
+        return "synthetic"
+    if "trade" in dataset_version.lower() and "derived" in dataset_version.lower():
+        return "trade_derived"
+    if "synthesis_method" in manifest:
+        return "synthetic"
+    if "trade_provenance" in manifest:
+        return "trade_derived"
+    if "orderbook_provenance" in manifest:
+        return "orderbook"
+    return "unknown"
+
+
+def _has_positive_provenance(manifest: Dict[str, Any], expected_source: str) -> bool:
+    if expected_source == "orderbook":
+        return isinstance(manifest.get("orderbook_provenance"), dict)
+    if expected_source == "trade_derived":
+        return isinstance(manifest.get("trade_provenance"), dict)
+    return False
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset_dir", required=True)
+    ap.add_argument(
+        "--expected_source",
+        required=False,
+        default="orderbook",
+        choices=["orderbook", "trade_derived"],
+        help="Expected E-contract source kind. 'orderbook' is Trial-11; 'trade_derived' must be a separate pre-registered contract.",
+    )
     ap.add_argument("--sample_lines", type=int, default=50)
     ap.add_argument("--output_json", required=False, default="")
     args = ap.parse_args()
@@ -138,6 +169,7 @@ def main() -> None:
     errors: List[str] = []
     warnings: List[str] = []
     notes: Dict[str, Any] = {}
+    expected_source = str(args.expected_source)
 
     manifest, manifest_err = _read_json(manifest_path)
     if manifest_err is not None:
@@ -149,6 +181,7 @@ def main() -> None:
             dataset_dir=str(dataset_dir),
             manifest_path=str(manifest_path),
             market_snapshot_path=str(market_snapshot_path),
+            expected_source=expected_source,
             sample_lines=int(args.sample_lines),
             verdict=verdict,
             errors=errors,
@@ -162,40 +195,62 @@ def main() -> None:
             print(out)
         return
 
-    # Fail-fast on explicit synthesis markers in manifest
-    dataset_version = str(manifest.get("dataset_version", ""))
-    if "synthetic" in dataset_version.lower():
-        errors.append("synthetic_detected:manifest.dataset_version_contains_synthetic")
+    declared_kind = _manifest_declared_kind(manifest)
+    notes["manifest_declared_kind"] = declared_kind
 
-    if "synthesis_method" in manifest:
-        errors.append("synthetic_detected:manifest.has_synthesis_method")
-        notes["synthesis_method"] = manifest.get("synthesis_method")
-
-    if errors:
-        verdict = "FAIL"
-    else:
-        verdict = "NOT_MEASURABLE"
-        warnings.append("provenance_insufficient:manifest_has_no_explicit_synthesis_marker_but_no_positive_orderbook_provenance_fields_defined_in_v0_gate")
+    # Hard FAIL on synthesis
+    if declared_kind == "synthetic":
+        if "synthesis_method" in manifest:
+            notes["synthesis_method"] = manifest.get("synthesis_method")
+            errors.append("synthetic_detected:manifest.has_synthesis_method")
+        errors.append("synthetic_detected:manifest.declared_kind==synthetic")
 
     # Secondary heuristic scan of market_snapshot
-    synthetic_from_snapshot, snap_msgs, snap_notes = _scan_market_snapshot_for_synthetic(
+    src_counts, snap_msgs, snap_notes = _scan_market_snapshot_orderbook_source(
         market_snapshot_path, int(args.sample_lines)
     )
     notes["market_snapshot_scan"] = snap_notes
+    if src_counts is not None:
+        notes["market_snapshot_orderbook_source_counts"] = src_counts
+        if src_counts.get("synthetic", 0) > 0:
+            errors.append("synthetic_detected:market_snapshot.orderbook_source==synthetic")
+        if src_counts.get("trade_derived", 0) > 0:
+            notes["trade_derived_seen_in_market_snapshot"] = True
+
     for m in snap_msgs:
-        # treat scan errors as warnings unless they are hard missing/invalid
         if m.startswith("market_snapshot_missing") or m.startswith("market_snapshot_invalid_jsonl"):
             errors.append(m)
-            verdict = "NOT_MEASURABLE"
         else:
             warnings.append(m)
 
-    if synthetic_from_snapshot is True:
-        errors.append("synthetic_detected:market_snapshot.orderbook_source==synthetic")
+    # If any errors so far, verdict is FAIL unless evidence itself missing => NOT_MEASURABLE
+    if any(e.startswith("market_snapshot_missing") for e in errors) or any(
+        e.startswith("market_snapshot_invalid_jsonl") for e in errors
+    ):
+        verdict = "NOT_MEASURABLE"
+    elif errors:
         verdict = "FAIL"
-    elif synthetic_from_snapshot is False:
-        # If manifest didn't mark synthetic, we still don't have a positive proof; keep NOT_MEASURABLE.
-        pass
+    else:
+        # No synthetic detected. Now enforce expected source kind.
+        if expected_source == "orderbook":
+            # Trade-derived is explicitly not acceptable as "order-book restoration".
+            if declared_kind == "trade_derived" or bool(notes.get("trade_derived_seen_in_market_snapshot")):
+                verdict = "FAIL"
+                errors.append("expected_source_mismatch:expected_orderbook_but_trade_derived_detected")
+            elif _has_positive_provenance(manifest, expected_source="orderbook"):
+                verdict = "PASS"
+            else:
+                verdict = "NOT_MEASURABLE"
+                warnings.append("provenance_insufficient:missing_manifest.orderbook_provenance")
+        elif expected_source == "trade_derived":
+            if declared_kind == "trade_derived" or _has_positive_provenance(manifest, expected_source="trade_derived"):
+                verdict = "PASS"
+            else:
+                verdict = "NOT_MEASURABLE"
+                warnings.append("provenance_insufficient:missing_manifest.trade_provenance_or_trade_derived_dataset_version")
+        else:
+            verdict = "NOT_MEASURABLE"
+            warnings.append("unknown_expected_source")
 
     result = GateResult(
         tool="verify_orderbook_e_contract_provenance_gate_v0",
@@ -203,6 +258,7 @@ def main() -> None:
         dataset_dir=str(dataset_dir),
         manifest_path=str(manifest_path),
         market_snapshot_path=str(market_snapshot_path),
+        expected_source=expected_source,
         sample_lines=int(args.sample_lines),
         verdict=verdict,
         errors=errors,
