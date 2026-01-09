@@ -15,6 +15,8 @@
   - `docs/v13/V13_PHENOMENA_LOG_PROTOCOL_V0_20260110.md`
 - **V13 Capture Window 最小合同（冻结）**：
   - `docs/v13/V13_SSOT_CAPTURE_WINDOW_MIN_CONTRACT_V0_20260110.md`
+- **V13 Quant 交付封存（Kickoff/VPS）**：
+  - `docs/v13/artifacts/v13_kickoff_quant_delivery_v0_20260110/README.md`
 
 ---
 

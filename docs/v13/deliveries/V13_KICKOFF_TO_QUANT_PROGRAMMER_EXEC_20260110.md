@@ -60,6 +60,10 @@ V13 pacing override (important):
 
 Success criteria for Phase 1:
 - We can see at least one of: cooperate / silence / refusal / drift.
+
+Operational constraint (accepted):
+- If local environment cannot use WebSocket, Phase 1 live capture MUST run on a VPS.
+- This is not a bug; it is part of the world/observation condition in V13.
 - Trial-12 pre-reg (Research):  
   `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/pre_reg/V12_TRIAL12_REALTIME_ORDERBOOK_CAPTURE_E_CONTRACT_V0_20260109.md`
 - Trial-12 delivery (Quant instructions):  
