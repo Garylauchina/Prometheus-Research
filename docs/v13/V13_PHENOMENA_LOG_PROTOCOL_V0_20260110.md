@@ -7,15 +7,17 @@ Purpose (V13-only):
 Scope:
 - Applies to any V13 real-time capture attempt (books5/trades) and its derived dataset/run artifacts.
 
+Hard freeze reference (minimal contract):
+- `docs/v13/V13_SSOT_CAPTURE_WINDOW_MIN_CONTRACT_V0_20260110.md`
+
 ---
 
 ## One capture window = one log entry
 
-Create one markdown file per capture window under:
-- `docs/v13/artifacts/v13_capture_windows/<WINDOW_ID>/PHENOMENA_LOG.md`
-
-Where `<WINDOW_ID>` is frozen as:
-- `<inst_id>_<start_utc>__<end_utc>` (example: `BTC-USDT-SWAP_2026-01-10T00:00Z__2026-01-17T00:00Z`)
+Per window, we MUST have exactly three textual files (directory layout is NOT frozen):
+- `window.meta.yaml` (or `window.meta.md`)
+- `phenomena.log.md`
+- `verdict.md`
 
 ---
 

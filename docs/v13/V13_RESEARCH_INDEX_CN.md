@@ -13,6 +13,8 @@
   - `docs/v13/V13_DEV_PLAN_V0_20260110.md`
 - **V13 Phenomena Log Protocol（草案）**：
   - `docs/v13/V13_PHENOMENA_LOG_PROTOCOL_V0_20260110.md`
+- **V13 Capture Window 最小合同（冻结）**：
+  - `docs/v13/V13_SSOT_CAPTURE_WINDOW_MIN_CONTRACT_V0_20260110.md`
 
 ---
 
