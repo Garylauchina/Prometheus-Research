@@ -1,0 +1,152 @@
+{
+  "tool": "calibrate_local_reachability_world_pressure_v0",
+  "generated_at_utc": "2026-01-09T09:43:19.145535Z",
+  "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full",
+  "inputs": {
+    "interaction_impedance_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full/interaction_impedance.jsonl",
+    "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092251Z_seed71002_full/local_reachability.jsonl",
+    "records": 10000
+  },
+  "series": {
+    "world_u": {
+      "count": 10000,
+      "min": 0.0,
+      "p50": 0.03257986883602238,
+      "p90": 0.12599820382781027,
+      "p99": 0.6863951320058553,
+      "max": 1.0,
+      "mean": 0.06076706129072836
+    },
+    "feasible_ratio": {
+      "count": 10000,
+      "min": 0.1111111111111111,
+      "p50": 0.6666666666666666,
+      "p90": 0.7777777777777778,
+      "p99": 0.7777777777777778,
+      "max": 0.8888888888888888,
+      "mean": 0.6321333333333333
+    }
+  },
+  "eval": {
+    "spearman_rho_u_vs_(1-fr)": 0.09391120251852578,
+    "quantile_delta_fr_lo_minus_hi": {
+      "q": 0.1,
+      "lo_thr": 0.0031203519767216852,
+      "hi_thr": 0.12599820382781027,
+      "lo_count": 1000,
+      "hi_count": 1000,
+      "mean_fr_lo": 0.6312222222222221,
+      "mean_fr_hi": 0.5718888888888889,
+      "delta": 0.05933333333333324
+    },
+    "windowed": [
+      {
+        "window": 1000,
+        "segments": 10,
+        "rho": {
+          "count": 10,
+          "min": -0.009893472112398759,
+          "p50": 0.08373293105692384,
+          "p90": 0.16053237296992603,
+          "p99": 0.16792955707562446,
+          "max": 0.16875146642070205,
+          "mean": 0.08598655239643824
+        },
+        "delta": {
+          "count": 10,
+          "min": -0.0022222222222222365,
+          "p50": 0.04777777777777781,
+          "p90": 0.11295925509311337,
+          "p99": 0.1447244969378828,
+          "max": 0.1482539682539683,
+          "mean": 0.05584026996625422
+        }
+      },
+      {
+        "window": 5000,
+        "segments": 2,
+        "rho": {
+          "count": 2,
+          "min": 0.06257210933884495,
+          "p50": 0.09154649669950407,
+          "p90": 0.11472600658803135,
+          "p99": 0.11994139631294999,
+          "max": 0.12052088406016317,
+          "mean": 0.09154649669950407
+        },
+        "delta": {
+          "count": 2,
+          "min": 0.035777777777777686,
+          "p50": 0.05688888888888888,
+          "p90": 0.07377777777777783,
+          "p99": 0.07757777777777784,
+          "max": 0.07800000000000007,
+          "mean": 0.05688888888888888
+        }
+      },
+      {
+        "window": 10000,
+        "segments": 1,
+        "rho": {
+          "count": 1,
+          "min": 0.09391120251852578,
+          "p50": 0.09391120251852578,
+          "p90": 0.09391120251852578,
+          "p99": 0.09391120251852578,
+          "max": 0.09391120251852578,
+          "mean": 0.09391120251852578
+        },
+        "delta": {
+          "count": 1,
+          "min": 0.05933333333333324,
+          "p50": 0.05933333333333324,
+          "p90": 0.05933333333333324,
+          "p99": 0.05933333333333324,
+          "max": 0.05933333333333324,
+          "mean": 0.05933333333333324
+        }
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "full_series_sign",
+      "pass": true,
+      "rho": 0.09391120251852578,
+      "delta": 0.05933333333333324
+    },
+    {
+      "name": "full_series_thresholds",
+      "pass": false,
+      "rho_min": 0.15,
+      "delta_min": 0.02,
+      "rho": 0.09391120251852578,
+      "delta": 0.05933333333333324
+    },
+    {
+      "name": "epoch_robustness_window_1000",
+      "pass": false,
+      "rho_p50": 0.08373293105692384,
+      "delta_p50": 0.04777777777777781,
+      "rho_win_min": 0.1,
+      "delta_win_min": 0.015
+    },
+    {
+      "name": "epoch_robustness_window_5000",
+      "pass": false,
+      "rho_p50": 0.09154649669950407,
+      "delta_p50": 0.05688888888888888,
+      "rho_win_min": 0.1,
+      "delta_win_min": 0.015
+    },
+    {
+      "name": "epoch_robustness_window_10000",
+      "pass": false,
+      "rho_p50": 0.09391120251852578,
+      "delta_p50": 0.05933333333333324,
+      "rho_win_min": 0.1,
+      "delta_win_min": 0.015
+    }
+  ],
+  "verdict": "FAIL"
+}

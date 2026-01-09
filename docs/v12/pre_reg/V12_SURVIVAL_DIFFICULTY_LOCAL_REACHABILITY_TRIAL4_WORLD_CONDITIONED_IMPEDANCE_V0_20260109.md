@@ -135,7 +135,6 @@ Stop rule:
 
 - notes:
 
-
 ### 6.5 Completion record (2026-01-09)
 
 - quant_commit: `e0e177fa6dc4cba12c82175ffda5d044c7c5c23c`
