@@ -80,6 +80,7 @@ SSOT 入口：
 - Survival Space（E+M 最小合同）：`docs/v12/V12_SSOT_SURVIVAL_SPACE_EM_V1_20260108.md`
 - Survival Space v1.0.1 Fix-M 扩展验证（封存产物）：`docs/v12/artifacts/survival_space_em/v1_0_1_fixm_extended_validation_20260109/README.md`
 - Survival Space v1.0.1 Fix-M 扩展验证里程碑（append-only 记录）：`docs/v12/V12_SURVIVAL_SPACE_EM_V1_0_1_FIX_M_EXTENDED_VALIDATION_MILESTONE_20260109.md`
+- Survival Space 偏序/格 证伪清单（v0 草案）：`docs/v12/V12_SURVIVAL_SPACE_POSET_LATTICE_FALSIFICATION_CHECKLIST_V0_DRAFT_20260109.md`
 - Survival Space 执行检查表（验收门禁）：`docs/v12/V12_SURVIVAL_SPACE_EXPERIMENT_EXECUTION_CHECKLIST_V0_20260108.md`
 
 工具入口（verifiers/tools）：
