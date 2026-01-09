@@ -97,6 +97,9 @@ SSOT entry points:
 - Trial-11 archive (non-compliant synthetic attempt; verdict=FAIL; immutable): `docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/README.md`
 - Trial-11T pre-reg (trade-derived bid/ask proxies; NOT order-book): `docs/v12/pre_reg/V12_TRIAL11T_TRADE_DERIVED_QUOTES_E_CONTRACT_V0_20260109.md`
 - Trial-11T Quant execution instructions (build trade-derived quotes dataset): `docs/v12/deliveries/V12_TRIAL11T_TRADE_DERIVED_QUOTES_E_CONTRACT_EXEC_20260109.md`
+- Trial-11T blocker evidence (OKX history-trades not available for 2021–2022; verdict=NOT_MEASURABLE): `docs/v12/artifacts/trial11t_trade_derived_blocked_v0_20260109/PROGRAMMER_BLOCKER_REPORT.md`
+- Trial-12 pre-reg (real-time order-book capture E-contract; books5+trades; do-or-die): `docs/v12/pre_reg/V12_TRIAL12_REALTIME_ORDERBOOK_CAPTURE_E_CONTRACT_V0_20260109.md`
+- Trial-12 Quant execution instructions (deploy recorder; build live order-book replay dataset): `docs/v12/deliveries/V12_TRIAL12_REALTIME_ORDERBOOK_CAPTURE_E_CONTRACT_EXEC_20260109.md`
 - Local Reachability Trial-4 (world-conditioned impedance, archived artifacts): `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5 (BTC single-world do-or-die calibration, verdict=FAIL; lens rejected): `docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg (frozen thresholds + stop rule): `docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`

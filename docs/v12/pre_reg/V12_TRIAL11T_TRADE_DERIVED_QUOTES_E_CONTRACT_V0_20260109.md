@@ -133,3 +133,15 @@ Trial-11T verdict:
 - verifier_reports:
 - verdict:
 
+
+### Completion record — 2026-01-09 (append-only)
+
+- quant_commit: (blocked; no eligible dataset built)
+- dataset_dir_new: (none)
+- g0t_provenance_gate_report: (not executed; dataset not buildable)
+- g1t_coverage_gate_report: (not executed; dataset not buildable)
+- run_dirs: (none)
+- verifier_reports: (none)
+- verdict: **NOT_MEASURABLE**
+  - reason: OKX `history-trades` endpoint provides only recent trades; cannot obtain 2021–2022 historical trades required by this trial.
+  - evidence: `docs/v12/artifacts/trial11t_trade_derived_blocked_v0_20260109/PROGRAMMER_BLOCKER_REPORT.md`

@@ -97,6 +97,9 @@ SSOT 入口：
 - Trial-11 封存（不合规 synthetic 尝试；verdict=FAIL；不可变）：`docs/v12/artifacts/trial11_orderbook_e_contract_v0_20260109/README.md`
 - Trial-11T pre-reg（trade-derived bid/ask 代理；明确不是 order-book）：`docs/v12/pre_reg/V12_TRIAL11T_TRADE_DERIVED_QUOTES_E_CONTRACT_V0_20260109.md`
 - Trial-11T Quant 执行指令（构建 trade-derived quotes dataset）：`docs/v12/deliveries/V12_TRIAL11T_TRADE_DERIVED_QUOTES_E_CONTRACT_EXEC_20260109.md`
+- Trial-11T 阻断证据（OKX history-trades 无法提供 2021–2022；verdict=NOT_MEASURABLE）：`docs/v12/artifacts/trial11t_trade_derived_blocked_v0_20260109/PROGRAMMER_BLOCKER_REPORT.md`
+- Trial-12 pre-reg（实时采集 order-book E-contract：books5+trades；do-or-die）：`docs/v12/pre_reg/V12_TRIAL12_REALTIME_ORDERBOOK_CAPTURE_E_CONTRACT_V0_20260109.md`
+- Trial-12 Quant 执行指令（部署 recorder；构建 live order-book replay dataset）：`docs/v12/deliveries/V12_TRIAL12_REALTIME_ORDERBOOK_CAPTURE_E_CONTRACT_EXEC_20260109.md`
 - Local Reachability Trial-4（world-conditioned impedance，封存产物）：`docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5（BTC 单世界定标，verdict=FAIL；lens 退场）：`docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg（冻结阈值 + stop rule）：`docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
