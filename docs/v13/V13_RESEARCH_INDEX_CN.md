@@ -17,6 +17,8 @@
   - `docs/v13/V13_SSOT_CAPTURE_WINDOW_MIN_CONTRACT_V0_20260110.md`
 - **V13 Quant 交付封存（Kickoff/VPS）**：
   - `docs/v13/artifacts/v13_kickoff_quant_delivery_v0_20260110/README.md`
+- **V13 Trial-12 Phase 1（VPS 部署成功封存）**：
+  - `docs/v13/artifacts/v13_trial12_vps_deployment_v0_20260110/README.md`
 
 ---
 
