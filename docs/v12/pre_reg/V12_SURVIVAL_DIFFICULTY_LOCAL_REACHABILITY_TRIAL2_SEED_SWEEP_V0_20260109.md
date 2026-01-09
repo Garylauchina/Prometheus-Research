@@ -77,3 +77,25 @@ Stop rule:
 - per_run_mean_feasible_ratio_stats:
 - notes:
 
+
+## 5. Completion record (appended, 2026-01-09)
+
+### 5.1 Run anchors
+
+- run_dirs_file: `/tmp/local_reachability_trial2_run_dirs.txt`
+- command_batch:
+  - `python3 /Users/liugang/Cursor_Store/Prometheus-Research/tools/v12/summarize_local_reachability_multi_run_v0.py --run_dirs_file /tmp/local_reachability_trial2_run_dirs.txt --output_json /tmp/local_reachability_trial2_seed_sweep_report.json`
+- aggregate_report_json: `/tmp/local_reachability_trial2_seed_sweep_report.json`
+
+### 5.2 Observed summary (descriptive)
+
+- per_run_mean_feasible_ratio_stats:
+  - count: 3
+  - min: 0.6777555555555556
+  - p50: 0.6788444444444445
+  - max: 0.6793666666666667
+  - mean: 0.6786555555555557
+- notes:
+  - All run_dirs verified PASS under `verify_local_reachability_v0`.
+  - Reason codes indicate Trial-2 impedance proxy outputs (`reachability_proxy:impedance_exp`).
+  - This record is descriptive only; it does not assert acceptance beyond evidence integrity.
