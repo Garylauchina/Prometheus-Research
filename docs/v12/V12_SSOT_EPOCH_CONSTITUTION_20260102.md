@@ -138,3 +138,7 @@ Audit boundary note (frozen pointer):
 Interpretation constraint:
 - These epoch candidates may be used to **organize** evidence summaries.
 - They must not be used to claim semantic breaks or to justify mechanism changes.
+
+Hard prohibition (appendix-level, aligned with SSOT):
+- The consensus epoch candidates above are **annotation-only** and are **prohibited** as downstream control variables / conditioning windows / mechanism design drivers.
+- Enforced by: `docs/v12/V12_SSOT_WORLD_PRESSURE_BOUNDARY_SIGNAL_V0_20260109.md` (§6) and Trial-10 FAIL: `docs/v12/artifacts/world_pressure_evidence_reindex/trial10_btc_reindex_by_epoch_v0_20260109/trial10_btc_evidence_reindex_report.md`.
