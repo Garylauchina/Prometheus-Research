@@ -108,3 +108,36 @@ Stop rule:
 
 - notes:
 
+
+## 6. Completion record (appended, 2026-01-09)
+
+### 6.1 Dataset anchors
+
+- dataset_A_path: `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m`
+- dataset_B_path: `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_ETH-USDT-SWAP_2024-10-01__2024-12-31_bar1m`
+
+### 6.2 Run anchors (archived)
+
+- artifact_root: `docs/v12/artifacts/local_reachability/trial3_cross_dataset_transfer_v0_20260109/`
+- run_dirs_file_A: `docs/v12/artifacts/local_reachability/trial3_cross_dataset_transfer_v0_20260109/run_dirs_A.txt`
+- grouped_report_json_A: `docs/v12/artifacts/local_reachability/trial3_cross_dataset_transfer_v0_20260109/grouped_A.json`
+- run_dirs_file_B: `docs/v12/artifacts/local_reachability/trial3_cross_dataset_transfer_v0_20260109/run_dirs_B.txt`
+- grouped_report_json_B: `docs/v12/artifacts/local_reachability/trial3_cross_dataset_transfer_v0_20260109/grouped_B.json`
+
+### 6.3 Observed summary (descriptive)
+
+Dataset A (BTC 2021–2022), per-run mean feasible_ratio:
+- full (n=3): mean=0.678737037037037
+- no_m (n=3): mean=0.678737037037037
+- no_e (n=3): mean=0.6502
+- null (n=3): mean=0.647662962962963
+
+Dataset B (ETH 2024-Q4), per-run mean feasible_ratio:
+- full (n=3): mean=0.678737037037037
+- no_m (n=3): mean=0.678737037037037
+- no_e (n=3): mean=0.6502
+- null (n=3): mean=0.647662962962963
+
+Notes:
+- Both dataset bundles have `failures=[]` in grouped reports.
+- The grouped summaries for dataset A and dataset B are numerically identical under this protocol.

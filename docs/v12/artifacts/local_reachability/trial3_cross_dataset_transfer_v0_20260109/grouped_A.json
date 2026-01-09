@@ -1,0 +1,242 @@
+{
+  "tool": "summarize_local_reachability_multi_run_grouped_v0",
+  "generated_at_utc": "2026-01-09T09:06:07.698749Z",
+  "inputs": {
+    "run_dirs_count": 12,
+    "run_dirs_file": "/private/tmp/local_reachability_trial3_run_dirs_A.txt"
+  },
+  "grouped_per_run_mean_feasible_ratio": {
+    "full": {
+      "count": 3,
+      "min": 0.6766666666666667,
+      "p50": 0.6777333333333333,
+      "p90": 0.6809955555555556,
+      "p99": 0.6817295555555556,
+      "max": 0.6818111111111111,
+      "mean": 0.678737037037037
+    },
+    "no_e": {
+      "count": 3,
+      "min": 0.6468777777777778,
+      "p50": 0.6510555555555556,
+      "p90": 0.6523444444444445,
+      "p99": 0.6526344444444445,
+      "max": 0.6526666666666667,
+      "mean": 0.6502
+    },
+    "no_m": {
+      "count": 3,
+      "min": 0.6766666666666667,
+      "p50": 0.6777333333333333,
+      "p90": 0.6809955555555556,
+      "p99": 0.6817295555555556,
+      "max": 0.6818111111111111,
+      "mean": 0.678737037037037
+    },
+    "null": {
+      "count": 3,
+      "min": 0.6460666666666667,
+      "p50": 0.6475333333333333,
+      "p90": 0.6490177777777778,
+      "p99": 0.6493517777777777,
+      "max": 0.6493888888888889,
+      "mean": 0.647662962962963
+    }
+  },
+  "per_run": [
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085822Z_seed70001_full",
+      "mode": "full",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085822Z_seed70001_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6777333333333333
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085830Z_seed70001_no_e",
+      "mode": "no_e",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085830Z_seed70001_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6526666666666667
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085838Z_seed70001_no_m",
+      "mode": "no_m",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085838Z_seed70001_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6777333333333333
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085846Z_seed70001_null",
+      "mode": "null",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085846Z_seed70001_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6493888888888889
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085854Z_seed70002_full",
+      "mode": "full",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085854Z_seed70002_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6818111111111111
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085902Z_seed70002_no_e",
+      "mode": "no_e",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085902Z_seed70002_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6510555555555556
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085910Z_seed70002_no_m",
+      "mode": "no_m",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085910Z_seed70002_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6818111111111111
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085918Z_seed70002_null",
+      "mode": "null",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085918Z_seed70002_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6475333333333333
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085927Z_seed70003_full",
+      "mode": "full",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085927Z_seed70003_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6766666666666667
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085934Z_seed70003_no_e",
+      "mode": "no_e",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085934Z_seed70003_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6468777777777778
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085943Z_seed70003_no_m",
+      "mode": "no_m",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085943Z_seed70003_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6766666666666667
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085950Z_seed70003_null",
+      "mode": "null",
+      "dataset_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m",
+      "probe_attempts_per_tick": 1,
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T085950Z_seed70003_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.2222222222222222,
+        "p50": 0.6666666666666666,
+        "p90": 0.7777777777777778,
+        "p99": 0.7777777777777778,
+        "max": 0.8888888888888888,
+        "mean": 0.6460666666666667
+      }
+    }
+  ],
+  "failures": [],
+  "notes": "Descriptive only. No thresholds, no verdict."
+}
