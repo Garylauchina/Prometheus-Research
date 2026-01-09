@@ -1,0 +1,152 @@
+{
+  "tool": "calibrate_world_pressure_gate_transfer_v0",
+  "generated_at_utc": "2026-01-09T11:14:53.969053Z",
+  "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full",
+  "inputs": {
+    "join": "implicit_ordering_with_ts_utc_equality",
+    "decision_trace": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full/decision_trace.jsonl",
+    "interaction_impedance": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092326Z_seed71003_full/interaction_impedance.jsonl"
+  },
+  "series_stats": {
+    "world_u": {
+      "count": 7470,
+      "min": 0.0,
+      "p50": 0.032362034686333974,
+      "p90": 0.12832315144841996,
+      "p99": 0.7302767260293597,
+      "max": 1.0,
+      "mean": 0.061416144071750174
+    },
+    "suppression": {
+      "count": 7470,
+      "min": 0.0,
+      "p50": 0.0,
+      "p90": 0.33333333333333337,
+      "p99": 0.33333333333333337,
+      "max": 1.0,
+      "mean": 0.11642124051762608
+    }
+  },
+  "eval": {
+    "spearman_rho_u_vs_suppression": -0.012427399495680601,
+    "quantile_delta_hi_minus_lo": {
+      "q": 0.1,
+      "lo_thr": 0.0031679043979775173,
+      "hi_thr": 0.12832315144841996,
+      "lo_count": 747,
+      "hi_count": 747,
+      "mean_x_lo": 0.12896028558679162,
+      "mean_x_hi": 0.13766175814368586,
+      "delta": 0.00870147255689424
+    },
+    "segment_reports": [
+      {
+        "segment_size": 1000,
+        "segments": 8,
+        "rho": {
+          "count": 8,
+          "min": -0.05249371722088198,
+          "p50": -0.005006065002976379,
+          "p90": 0.01514956207183355,
+          "p99": 0.01728779424055963,
+          "max": 0.017525375592640304,
+          "mean": -0.012722065444096436
+        },
+        "delta": {
+          "count": 8,
+          "min": -0.016666666666666677,
+          "p50": -0.006258865248226941,
+          "p90": 0.052566666666666664,
+          "p99": 0.06495666666666668,
+          "max": 0.06633333333333336,
+          "mean": 0.007351950354609931
+        }
+      },
+      {
+        "segment_size": 5000,
+        "segments": 2,
+        "rho": {
+          "count": 2,
+          "min": -0.018575283542318945,
+          "p50": -0.00869921301292051,
+          "p90": -0.0007983565894017597,
+          "p99": 0.0009793361058899582,
+          "max": 0.001176857516477927,
+          "mean": -0.00869921301292051
+        },
+        "delta": {
+          "count": 2,
+          "min": 0.0020242914979757137,
+          "p50": 0.009845479082321175,
+          "p90": 0.016102429149797544,
+          "p99": 0.01751024291497973,
+          "max": 0.017666666666666636,
+          "mean": 0.009845479082321175
+        }
+      },
+      {
+        "segment_size": 10000,
+        "segments": 1,
+        "rho": {
+          "count": 1,
+          "min": -0.012427399495680601,
+          "p50": -0.012427399495680601,
+          "p90": -0.012427399495680601,
+          "p99": -0.012427399495680601,
+          "max": -0.012427399495680601,
+          "mean": -0.012427399495680601
+        },
+        "delta": {
+          "count": 1,
+          "min": 0.00870147255689424,
+          "p50": 0.00870147255689424,
+          "p90": 0.00870147255689424,
+          "p99": 0.00870147255689424,
+          "max": 0.00870147255689424,
+          "mean": 0.00870147255689424
+        }
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "sign",
+      "pass": false,
+      "rho": -0.012427399495680601,
+      "delta": 0.00870147255689424
+    },
+    {
+      "name": "min_effect",
+      "pass": false,
+      "rho_min": 0.15,
+      "delta_min": 0.02,
+      "rho": -0.012427399495680601,
+      "delta": 0.00870147255689424
+    },
+    {
+      "name": "epoch_robustness_seg_1000",
+      "pass": false,
+      "rho_p50": -0.005006065002976379,
+      "delta_p50": -0.006258865248226941,
+      "rho_seg_min": 0.1,
+      "delta_seg_min": 0.015
+    },
+    {
+      "name": "epoch_robustness_seg_5000",
+      "pass": false,
+      "rho_p50": -0.00869921301292051,
+      "delta_p50": 0.009845479082321175,
+      "rho_seg_min": 0.1,
+      "delta_seg_min": 0.015
+    },
+    {
+      "name": "epoch_robustness_seg_10000",
+      "pass": false,
+      "rho_p50": -0.012427399495680601,
+      "delta_p50": 0.00870147255689424,
+      "rho_seg_min": 0.1,
+      "delta_seg_min": 0.015
+    }
+  ],
+  "verdict": "FAIL"
+}

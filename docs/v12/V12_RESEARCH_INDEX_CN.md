@@ -81,6 +81,8 @@ SSOT 入口：
 - Survival Difficulty（Local Reachability；冻结 M；测量“下一步可行动邻域”收缩速度；SSOT v0）：`docs/v12/V12_SSOT_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_V0_20260109.md`
 - World pressure 候选工具（EDoF v0；Trial-6 后工程否决）：`docs/v12/V12_SSOT_WORLD_PRESSURE_EFFECTIVE_DOF_V0_20260109.md`
 - World pressure Trial-6（BTC do-or-die 定标；verdict=FAIL；工具退场）：`docs/v12/artifacts/world_pressure_edof/trial6_btc_do_or_die_v0_20260109/trial6_world_pressure_edof_report.md`
+- World pressure 候选工具（Gate Transfer / Suppression v0；Trial-7 后工程否决）：`docs/v12/V12_SSOT_WORLD_PRESSURE_GATE_TRANSFER_V0_20260109.md`
+- World pressure Trial-7（BTC do-or-die 定标；verdict=FAIL；工具退场）：`docs/v12/artifacts/world_pressure_gate_transfer/trial7_btc_do_or_die_v0_20260109/trial7_world_pressure_gate_transfer_report.md`
 - Local Reachability Trial-4（world-conditioned impedance，封存产物）：`docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5（BTC 单世界定标，verdict=FAIL；lens 退场）：`docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg（冻结阈值 + stop rule）：`docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
