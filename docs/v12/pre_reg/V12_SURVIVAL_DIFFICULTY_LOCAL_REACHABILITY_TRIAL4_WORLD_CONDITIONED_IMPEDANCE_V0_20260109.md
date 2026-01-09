@@ -135,3 +135,18 @@ Stop rule:
 
 - notes:
 
+
+### 6.5 Completion record (2026-01-09)
+
+- quant_commit: `e0e177fa6dc4cba12c82175ffda5d044c7c5c23c`
+- runner_flags: `world_conditioned_impedance=1, world_r_cap=0.01, world_a_http=0.02, world_a_rl=0.10, world_a_rej=0.05, world_a_lat_ms=200.0, probe_attempts_per_tick=1, steps=10000, seeds=71001/71002/71003, modes=full/no_e/no_m/null`
+- dataset_A_path: `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_BTC-USDT-SWAP_2021-01-01__2022-12-31_bar1m`
+- dataset_B_path: `/Users/liugang/Cursor_Store/Prometheus-Quant/datasets_v12/dataset_replay_v0_SWAP_ETH-USDT-SWAP_2024-10-01__2024-12-31_bar1m`
+- artifacts_dir: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/`
+- run_dirs_file_A: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/run_dirs_A.txt`
+- grouped_report_json_A: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/grouped_A.json`
+- run_dirs_file_B: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/run_dirs_B.txt`
+- grouped_report_json_B: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/grouped_B.json`
+- verifier_reports_jsonl: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/verify_local_reachability_reports.jsonl`
+- programmer_completion_report: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/PROGRAMMER_COMPLETION_REPORT.md`
+- sample_coupling_stats: `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/world_u_latency_sample_stats.json`

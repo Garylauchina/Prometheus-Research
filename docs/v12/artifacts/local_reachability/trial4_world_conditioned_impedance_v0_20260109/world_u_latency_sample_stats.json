@@ -1,0 +1,51 @@
+{
+  "sample_runs": {
+    "A": {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+      "records": 10000,
+      "world_u": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.03257986883602238,
+        "p90": 0.12599820382781027,
+        "p99": 0.6863951320058553,
+        "max": 1.0,
+        "mean": 0.06076706129072836
+      },
+      "avg_ack_latency_ms": {
+        "count": 10000,
+        "min": 20.0,
+        "p50": 45.689420698013194,
+        "p90": 66.8161775351169,
+        "p99": 113.93456085330006,
+        "max": 208.79176165080943,
+        "mean": 49.11355447815061
+      },
+      "pearson_corr_world_u_vs_latency": 0.35239765734438644
+    },
+    "B": {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092415Z_seed71001_full",
+      "records": 10000,
+      "world_u": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.036759551265415746,
+        "p90": 0.13265990825488477,
+        "p99": 0.38823696381632267,
+        "max": 1.0,
+        "mean": 0.060416714891734294
+      },
+      "avg_ack_latency_ms": {
+        "count": 10000,
+        "min": 20.0,
+        "p50": 45.847329165264014,
+        "p90": 65.83848939928038,
+        "p99": 101.1967473527304,
+        "max": 174.8658273955744,
+        "mean": 48.798154330303774
+      },
+      "pearson_corr_world_u_vs_latency": 0.49907996399632093
+    }
+  },
+  "notes": "Sample-only. Confirms world_u is present and monotone latency coupling produces positive correlation."
+}
