@@ -91,3 +91,29 @@ Stop rule:
 - notes:
   - All three run_dirs contain Trial-1 volatility-proxy outputs (reason_codes include `reachability_proxy:volatility_exp` and `reachability_proxy:k=500`).
   - This record is descriptive only; it does not assert acceptance beyond evidence integrity.
+
+## 6. Completion record (appended, 2026-01-09)
+
+### 6.1 Run anchors
+
+- artifact_root: `docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/`
+- source_run_dirs_file: `docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/source_run_dirs.txt` (30 Quant run_dirs)
+- source_map_json: `docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/source_map.json`
+- artifact_run_dirs_file: `docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/run_dirs_file.txt` (30 artifact run dirs)
+- aggregate_report_json: `docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/aggregate_report.json`
+
+### 6.2 Observed summary (descriptive)
+
+- per_run_mean_feasible_ratio_stats (n=30):
+  - min: 0.7508444444444444
+  - p50: 0.7508444444444444
+  - max: 0.7508444444444444
+  - mean: 0.7508444444444444
+
+### 6.3 Pre-reg falsification check
+
+- Triviality across seeds: **TRIGGERED** (per-run mean feasible_ratio is identical across all runs in this sweep).
+- Per this seed sweep pre-reg v0, this triggers **REJECT** for Trial-1 as a useful variability/stability lens across seeds.
+
+Notes:
+- This completion uses Research-side artifactization to avoid overwriting Quant run_dir files.

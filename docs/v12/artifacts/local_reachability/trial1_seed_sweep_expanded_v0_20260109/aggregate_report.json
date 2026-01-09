@@ -1,0 +1,444 @@
+{
+  "tool": "summarize_local_reachability_multi_run_v0",
+  "generated_at_utc": "2026-01-09T06:43:11.550466Z",
+  "inputs": {
+    "run_dirs_count": 30,
+    "run_dirs": [
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153332Z_seed10001_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153336Z_seed10002_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153340Z_seed10001_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153344Z_seed10002_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153347Z_seed10001_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153351Z_seed10002_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153355Z_seed10001_null",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153401Z_seed10002_null",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153509Z_seed20001_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153512Z_seed20002_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153516Z_seed20001_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153522Z_seed20002_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153528Z_seed20001_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153532Z_seed20002_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153536Z_seed20001_null",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153542Z_seed20002_null",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153637Z_seed30001_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153643Z_seed30002_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153649Z_seed30001_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153655Z_seed30002_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153701Z_seed30001_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153708Z_seed30002_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153714Z_seed30001_null",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153721Z_seed30002_null",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155036Z_seed40001_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155040Z_seed40002_full",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155044Z_seed40001_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155050Z_seed40002_no_m",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155056Z_seed40001_no_e",
+      "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155100Z_seed40002_no_e"
+    ]
+  },
+  "per_run": [
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153332Z_seed10001_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153332Z_seed10001_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153336Z_seed10002_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153336Z_seed10002_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153340Z_seed10001_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153340Z_seed10001_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153344Z_seed10002_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153344Z_seed10002_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153347Z_seed10001_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153347Z_seed10001_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153351Z_seed10002_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153351Z_seed10002_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153355Z_seed10001_null",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153355Z_seed10001_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153401Z_seed10002_null",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153401Z_seed10002_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153509Z_seed20001_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153509Z_seed20001_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153512Z_seed20002_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153512Z_seed20002_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153516Z_seed20001_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153516Z_seed20001_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153522Z_seed20002_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153522Z_seed20002_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153528Z_seed20001_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153528Z_seed20001_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153532Z_seed20002_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153532Z_seed20002_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153536Z_seed20001_null",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153536Z_seed20001_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153542Z_seed20002_null",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153542Z_seed20002_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153637Z_seed30001_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153637Z_seed30001_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153643Z_seed30002_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153643Z_seed30002_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153649Z_seed30001_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153649Z_seed30001_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153655Z_seed30002_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153655Z_seed30002_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153701Z_seed30001_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153701Z_seed30001_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153708Z_seed30002_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153708Z_seed30002_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153714Z_seed30001_null",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153714Z_seed30001_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153721Z_seed30002_null",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T153721Z_seed30002_null/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155036Z_seed40001_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155036Z_seed40001_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155040Z_seed40002_full",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155040Z_seed40002_full/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155044Z_seed40001_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155044Z_seed40001_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155050Z_seed40002_no_m",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155050Z_seed40002_no_m/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155056Z_seed40001_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155056Z_seed40001_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    },
+    {
+      "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155100Z_seed40002_no_e",
+      "local_reachability_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/local_reachability/trial1_seed_sweep_expanded_v0_20260109/runs/run_tool_model_survival_space_em_v1_20260108T155100Z_seed40002_no_e/local_reachability.jsonl",
+      "feasible_ratio": {
+        "count": 10000,
+        "min": 0.0,
+        "p50": 0.7777777777777778,
+        "p90": 0.8888888888888888,
+        "p99": 1.0,
+        "max": 1.0,
+        "mean": 0.7508444444444444
+      }
+    }
+  ],
+  "aggregate": {
+    "per_run_mean_feasible_ratio": {
+      "count": 30,
+      "min": 0.7508444444444444,
+      "p50": 0.7508444444444444,
+      "p90": 0.7508444444444444,
+      "p99": 0.7508444444444444,
+      "max": 0.7508444444444444,
+      "mean": 0.7508444444444444
+    }
+  },
+  "failures": [],
+  "notes": "Descriptive only. No thresholds, no verdict. Failures are reported but not treated as PASS/FAIL here."
+}
