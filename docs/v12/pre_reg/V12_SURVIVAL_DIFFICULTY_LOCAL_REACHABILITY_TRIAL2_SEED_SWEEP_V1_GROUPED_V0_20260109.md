@@ -82,3 +82,22 @@ Stop rule:
 - grouped_per_run_mean_feasible_ratio:
 - notes:
 
+
+## 5. Completion record (appended, 2026-01-09)
+
+### 5.1 Run anchors
+
+- run_dirs_file: `/tmp/local_reachability_trial2_v1_grouped_run_dirs.txt`
+- grouped_aggregate_report_json: `/tmp/local_reachability_trial2_v1_grouped_report.json`
+
+### 5.2 Observed summary (descriptive)
+
+- grouped_per_run_mean_feasible_ratio:
+  - full (n=10): mean=0.6801755555555555, min=0.6757444444444445, p50=0.6801944444444445, max=0.6846444444444444
+  - no_m (n=10): mean=0.68018, min=0.6757444444444445, p50=0.6802166666666667, max=0.6846444444444444
+  - no_e (n=10): mean=0.6507233333333333, min=0.6449333333333334, p50=0.6513888888888889, max=0.6561666666666667
+  - null (n=10): mean=0.6476522222222222, min=0.6419222222222222, p50=0.6485166666666666, max=0.6529
+- notes:
+  - failures_count=0 in grouped report.
+  - full ≈ no_m (as expected if E is the main differentiator for agent actions, while reachability lens is M-probe based).
+  - no_e and null are shifted lower than full/no_m under the same probe contract.
