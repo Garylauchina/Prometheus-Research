@@ -1,0 +1,37 @@
+{
+  "tool": "poset_info_gain_test_v0",
+  "generated_at_utc": "2026-01-09T05:26:27.486454Z",
+  "per_run_metrics_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Research/docs/v12/artifacts/survival_space_em/v1_0_1_fixm_extended_validation_20260109/per_run_metrics.jsonl",
+  "label": {
+    "y_full": "order_attempts_count(full) > 0"
+  },
+  "baseline": {
+    "y_hat_baseline": "order_attempts_count(no_e) > 0"
+  },
+  "poset_dims": {
+    "x1": "suppression_ratio(full)",
+    "x2": "downshift_rate(full)",
+    "direction": "higher=harder",
+    "model": "axis_or"
+  },
+  "split": {
+    "train": "seed%2==0",
+    "test": "seed%2==1"
+  },
+  "fit": {
+    "t1": 1.0,
+    "t2": 0.75118,
+    "train_accuracy": 1.0
+  },
+  "metrics": {
+    "pairs_count": 200,
+    "train_count": 100,
+    "test_count": 100,
+    "accuracy_baseline_train": 1.0,
+    "accuracy_baseline_test": 1.0,
+    "accuracy_poset_train": 1.0,
+    "accuracy_poset_test": 1.0
+  },
+  "verdict": "FAIL",
+  "interpretation": "FAIL means no informational gain over M-only baseline under §3; PASS means poset survives this knife only."
+}

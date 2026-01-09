@@ -8,6 +8,12 @@ Purpose: 明确“偏序 / 格”在本系统中**不成立或不应继续使用
 Cross-links:
 - Survival Space SSOT: `docs/v12/V12_SSOT_SURVIVAL_SPACE_EM_V1_20260108.md`
 - v1.0.1 Extended Validation Milestone: `docs/v12/V12_SURVIVAL_SPACE_EM_V1_0_1_FIX_M_EXTENDED_VALIDATION_MILESTONE_20260109.md`
+- Poset §3 (Round-2 dims) report: `docs/v12/artifacts/survival_space_em/poset_round2_section3_info_gain_v0_20260109/poset_round2_section3_report.md`
+
+Status (append-only, 2026-01-09):
+- **§3 triggered (No informational gain) on dims=(suppression_ratio, downshift_rate)**.
+- Engineering decision: **poset approach is REJECTED for Survival Space v1.x**.
+- Hard gate: **no further §1 / §2 tests are permitted for v1.x** (do not spend cycles on stability/illusion after §3 FAIL).
 
 ---
 

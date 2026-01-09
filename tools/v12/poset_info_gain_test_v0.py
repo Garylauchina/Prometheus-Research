@@ -4,7 +4,7 @@ Survival Space Poset §3 — No-Informational-Gain test v0 (Research repo, stdli
 
 Compares:
   - Baseline (M-only) predictor from no_e: y_hat = [order_attempts_count(no_e) > 0]
-  - Poset monotone predictor using Round-1 dims from full: (suppression_ratio, block_rate)
+  - Poset monotone predictor using configurable dims from full: (x1_field, x2_field)
 
 Label (frozen v0):
   y_full = [order_attempts_count(full) > 0]
@@ -13,10 +13,13 @@ Train/test split (frozen v0): seed parity
   train: seed % 2 == 0
   test:  seed % 2 == 1
 
-Poset predictor family (frozen v0):
-  - block_rate has discrete levels; define a suppression threshold per level
-  - predict y_hat=0 (cannot act) if suppression_ratio >= threshold(level)
-  - monotone constraint: as block_rate increases, threshold must be <= (more strict)
+Poset predictor family (supported models):
+  - per_level_threshold (legacy; designed for discrete x2 like block_rate):
+      * define x1 threshold per x2 level with monotone constraint across levels
+      * predict y_hat=0 (cannot act) if x1 >= threshold(level)
+  - axis_or (Round-2 friendly; continuous x2 like downshift_rate):
+      * predict y_hat=0 if (x1 >= t1) OR (x2 >= t2)
+      * monotone under (higher=harder) without weights/scoring
 
 Exit codes:
   0: PASS (report produced; verdict in JSON)
@@ -72,7 +75,7 @@ class Pair:
     y_hat_baseline: int
     # poset dims from full
     suppression_ratio: float
-    block_rate: float
+    x2: float
 
 
 def _acc(y_true: List[int], y_hat: List[int]) -> float:
@@ -85,7 +88,7 @@ def _acc(y_true: List[int], y_hat: List[int]) -> float:
     return ok / len(y_true)
 
 
-def _load_pairs(per_run_metrics_jsonl: Path) -> List[Pair]:
+def _load_pairs(per_run_metrics_jsonl: Path, x1_field: str, x2_field: str) -> List[Pair]:
     # index by (mode, seed)
     by_mode_seed: Dict[Tuple[str, int], Dict[str, Any]] = {}
     for _ln, rec in _iter_jsonl(per_run_metrics_jsonl):
@@ -113,8 +116,8 @@ def _load_pairs(per_run_metrics_jsonl: Path) -> List[Pair]:
         y_full = 1 if int(oa_full) > 0 else 0
         y_hat_baseline = 1 if int(oa_noe) > 0 else 0
 
-        x1 = full.get("suppression_ratio")
-        x2 = full.get("block_rate")
+        x1 = full.get(x1_field)
+        x2 = full.get(x2_field)
         if not (_is_num(x1) and _is_num(x2)):
             continue
 
@@ -124,14 +127,14 @@ def _load_pairs(per_run_metrics_jsonl: Path) -> List[Pair]:
                 y_full=y_full,
                 y_hat_baseline=y_hat_baseline,
                 suppression_ratio=float(x1),
-                block_rate=float(x2),
+                x2=float(x2),
             )
         )
     return out
 
 
-def _block_levels(pairs: List[Pair]) -> List[float]:
-    xs = sorted(set(p.block_rate for p in pairs))
+def _x2_levels(pairs: List[Pair]) -> List[float]:
+    xs = sorted(set(p.x2 for p in pairs))
     return xs
 
 
@@ -151,21 +154,21 @@ def _candidate_thresholds(values: List[float]) -> List[float]:
     return out
 
 
-def _predict_poset(pairs: List[Pair], thresholds_by_level: Dict[float, float]) -> List[int]:
+def _predict_poset_per_level(pairs: List[Pair], thresholds_by_level: Dict[float, float]) -> List[int]:
     yhat: List[int] = []
     for p in pairs:
-        th = thresholds_by_level[p.block_rate]
+        th = thresholds_by_level[p.x2]
         # y_hat=0 if too hard (suppression >= th), else 1
         yhat.append(0 if p.suppression_ratio >= th else 1)
     return yhat
 
 
-def _fit_thresholds_monotone(train: List[Pair]) -> Dict[str, Any]:
-    levels = _block_levels(train)
+def _fit_thresholds_monotone_per_level(train: List[Pair]) -> Dict[str, Any]:
+    levels = _x2_levels(train)
     # collect candidate thresholds per level
     cand_by_level: Dict[float, List[float]] = {}
     for lv in levels:
-        vals = [p.suppression_ratio for p in train if p.block_rate == lv]
+        vals = [p.suppression_ratio for p in train if p.x2 == lv]
         cand_by_level[lv] = _candidate_thresholds(vals)
 
     # brute-force search over small number of levels (empirically 2)
@@ -175,7 +178,7 @@ def _fit_thresholds_monotone(train: List[Pair]) -> Dict[str, Any]:
         nonlocal best
         if i >= len(levels):
             y_true = [p.y_full for p in train]
-            y_hat = _predict_poset(train, cur)
+            y_hat = _predict_poset_per_level(train, cur)
             acc = _acc(y_true, y_hat)
             if best is None or acc > best["train_accuracy"]:
                 best = {"thresholds": dict(cur), "train_accuracy": acc}
@@ -191,12 +194,42 @@ def _fit_thresholds_monotone(train: List[Pair]) -> Dict[str, Any]:
 
     rec(0, None, {})
     assert best is not None
-    return {"block_rate_levels": levels, **best}
+    return {"x2_levels": levels, **best}
+
+
+def _predict_poset_axis_or(pairs: List[Pair], t1: float, t2: float) -> List[int]:
+    yhat: List[int] = []
+    for p in pairs:
+        yhat.append(0 if (p.suppression_ratio >= t1 or p.x2 >= t2) else 1)
+    return yhat
+
+
+def _fit_thresholds_axis_or(train: List[Pair]) -> Dict[str, Any]:
+    cand_t1 = _candidate_thresholds([p.suppression_ratio for p in train])
+    cand_t2 = _candidate_thresholds([p.x2 for p in train])
+    best = None
+    y_true = [p.y_full for p in train]
+    for t1 in cand_t1:
+        for t2 in cand_t2:
+            y_hat = _predict_poset_axis_or(train, float(t1), float(t2))
+            acc = _acc(y_true, y_hat)
+            if best is None or acc > best["train_accuracy"]:
+                best = {"t1": float(t1), "t2": float(t2), "train_accuracy": acc}
+    assert best is not None
+    return best
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--per_run_metrics_jsonl", required=True)
+    ap.add_argument("--x1_field", default="suppression_ratio", help="x1 field name in per_run_metrics (default: suppression_ratio)")
+    ap.add_argument("--x2_field", default="block_rate", help="x2 field name in per_run_metrics (default: block_rate)")
+    ap.add_argument(
+        "--model",
+        default="per_level_threshold",
+        choices=["per_level_threshold", "axis_or"],
+        help="Poset predictor model family (default: per_level_threshold)",
+    )
     ap.add_argument("--output_json", required=True)
     ap.add_argument("--output_md", required=True)
     args = ap.parse_args()
@@ -207,7 +240,7 @@ def main() -> int:
         return 2
 
     try:
-        pairs = _load_pairs(src)
+        pairs = _load_pairs(src, str(args.x1_field), str(args.x2_field))
     except Exception as e:
         print(f"FAIL: load pairs: {e}", file=sys.stderr)
         return 2
@@ -227,8 +260,12 @@ def main() -> int:
     train = [p for p in pairs if (p.seed % 2) == 0]
     test = [p for p in pairs if (p.seed % 2) == 1]
 
-    fit = _fit_thresholds_monotone(train)
-    thresholds = fit["thresholds"]
+    if args.model == "per_level_threshold":
+        fit = _fit_thresholds_monotone_per_level(train)
+        thresholds_by_level: Optional[Dict[float, float]] = fit["thresholds"]
+    else:
+        fit = _fit_thresholds_axis_or(train)
+        thresholds_by_level = None
 
     y_train = [p.y_full for p in train]
     y_test = [p.y_full for p in test]
@@ -236,8 +273,12 @@ def main() -> int:
     yhat_baseline_train = [p.y_hat_baseline for p in train]
     yhat_baseline_test = [p.y_hat_baseline for p in test]
 
-    yhat_poset_train = _predict_poset(train, thresholds)
-    yhat_poset_test = _predict_poset(test, thresholds)
+    if args.model == "per_level_threshold":
+        yhat_poset_train = _predict_poset_per_level(train, thresholds_by_level or {})
+        yhat_poset_test = _predict_poset_per_level(test, thresholds_by_level or {})
+    else:
+        yhat_poset_train = _predict_poset_axis_or(train, float(fit["t1"]), float(fit["t2"]))
+        yhat_poset_test = _predict_poset_axis_or(test, float(fit["t1"]), float(fit["t2"]))
 
     acc_baseline_train = _acc(y_train, yhat_baseline_train)
     acc_baseline_test = _acc(y_test, yhat_baseline_test)
@@ -253,7 +294,12 @@ def main() -> int:
         "per_run_metrics_jsonl": str(src),
         "label": {"y_full": "order_attempts_count(full) > 0"},
         "baseline": {"y_hat_baseline": "order_attempts_count(no_e) > 0"},
-        "poset_dims": {"x1": "suppression_ratio(full)", "x2": "block_rate(full)", "direction": "higher=harder"},
+        "poset_dims": {
+            "x1": f"{args.x1_field}(full)",
+            "x2": f"{args.x2_field}(full)",
+            "direction": "higher=harder",
+            "model": str(args.model),
+        },
         "split": {"train": "seed%2==0", "test": "seed%2==1"},
         "fit": fit,
         "metrics": {
@@ -284,8 +330,12 @@ def main() -> int:
     md.append(f"- baseline_test_accuracy: {acc_baseline_test}\n")
     md.append(f"- poset_test_accuracy: {acc_poset_test}\n")
     md.append("\n## Fitted thresholds (monotone)\n\n")
-    for lv in fit["block_rate_levels"]:
-        md.append(f"- block_rate={lv}: suppression_threshold={thresholds[lv]}\n")
+    if args.model == "per_level_threshold":
+        for lv in fit["x2_levels"]:
+            md.append(f"- {args.x2_field}={lv}: {args.x1_field}_threshold={thresholds_by_level[lv]}\n")
+    else:
+        md.append(f"- {args.x1_field}_threshold(t1)={fit['t1']}\n")
+        md.append(f"- {args.x2_field}_threshold(t2)={fit['t2']}\n")
     out_md.write_text("".join(md), encoding="utf-8")
 
     print(json.dumps(report, ensure_ascii=False))
