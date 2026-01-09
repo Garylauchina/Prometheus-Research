@@ -92,6 +92,8 @@ SSOT entry points:
   - Demotion rule: boundaries/epochs are **internal segmentation only**; **prohibited** as downstream controls per SSOT §6: `docs/v12/V12_SSOT_WORLD_PRESSURE_BOUNDARY_SIGNAL_V0_20260109.md`
 - E-liquidity measurability gate (qualification; bid/ask coverage; v0): `docs/v12/V12_GATE_E_LIQUIDITY_MEASURABILITY_V0_20260109.md`
 - E-liquidity gate result (BTC 2021–2022 replay; verdict=NOT_MEASURABLE): `docs/v12/artifacts/e_liquidity_gate/eligibility_btc_2021_2022_v0_20260109/README.md`
+- Trial-11 pre-reg (Adjudicability restoration via Order-Book E-contract; do-or-die): `docs/v12/pre_reg/V12_TRIAL11_ADJUDICABILITY_RESTORATION_ORDERBOOK_E_CONTRACT_V0_20260109.md`
+- Trial-11 Quant execution instructions (build order-book E-contract dataset): `docs/v12/deliveries/V12_TRIAL11_ORDERBOOK_E_CONTRACT_EXEC_20260109.md`
 - Local Reachability Trial-4 (world-conditioned impedance, archived artifacts): `docs/v12/artifacts/local_reachability/trial4_world_conditioned_impedance_v0_20260109/README.md`
 - Local Reachability Trial-5 (BTC single-world do-or-die calibration, verdict=FAIL; lens rejected): `docs/v12/artifacts/local_reachability/trial5_btc_world_pressure_calibration_v0_20260109/trial5_btc_world_pressure_calibration_report.md`
 - Local Reachability Trial-5 pre-reg (frozen thresholds + stop rule): `docs/v12/pre_reg/V12_SURVIVAL_DIFFICULTY_LOCAL_REACHABILITY_TRIAL5_BTC_WORLD_PRESSURE_CALIBRATION_V0_20260109.md`
