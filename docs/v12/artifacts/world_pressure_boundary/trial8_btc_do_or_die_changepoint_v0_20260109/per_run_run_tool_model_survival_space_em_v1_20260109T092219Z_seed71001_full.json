@@ -1,0 +1,111 @@
+{
+  "tool": "detect_world_pressure_boundaries_v0",
+  "generated_at_utc": "2026-01-09T11:23:35.488387Z",
+  "run_dir": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full",
+  "inputs": {
+    "interaction_impedance_jsonl": "/Users/liugang/Cursor_Store/Prometheus-Quant/runs_v12_modeling_tool/run_tool_model_survival_space_em_v1_20260109T092219Z_seed71001_full/interaction_impedance.jsonl",
+    "N": 10000,
+    "params": {
+      "min_segment_len": 200,
+      "max_changepoints": 10,
+      "beta": 0.5
+    }
+  },
+  "output": {
+    "changepoints": [
+      644,
+      3837,
+      5812,
+      6339,
+      6676
+    ],
+    "changepoints_normalized": [
+      0.0644,
+      0.3837,
+      0.5812,
+      0.6339,
+      0.6676
+    ],
+    "segments": [
+      {
+        "i": 0,
+        "j": 644,
+        "len": 644,
+        "mean": 0.0849864994379846,
+        "std": 0.10038921061914993,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "i": 644,
+        "j": 3837,
+        "len": 3193,
+        "mean": 0.03747448833055771,
+        "std": 0.057442942348936425,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "i": 3837,
+        "j": 5812,
+        "len": 1975,
+        "mean": 0.06719123045068326,
+        "std": 0.1288865286158452,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "i": 5812,
+        "j": 6339,
+        "len": 527,
+        "mean": 0.14686111610019456,
+        "std": 0.23473731318223948,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "i": 6339,
+        "j": 6676,
+        "len": 337,
+        "mean": 0.08848075360021483,
+        "std": 0.15822244950408582,
+        "min": 0.0,
+        "max": 1.0
+      },
+      {
+        "i": 6676,
+        "j": 10000,
+        "len": 3324,
+        "mean": 0.05817291327965594,
+        "std": 0.09090243884391443,
+        "min": 0.0,
+        "max": 1.0
+      }
+    ],
+    "SSE0": 121.03714327879241,
+    "SSEk": 114.65811020209335,
+    "R2": 0.05270310339368989,
+    "median_adjacent_mean_jump": 0.04751201110742689,
+    "std_u": 0.1100223832697753
+  },
+  "checks": [
+    {
+      "name": "cp_count>=1",
+      "pass": true,
+      "cp_count": 5
+    },
+    {
+      "name": "R2>=0.05",
+      "pass": true,
+      "R2": 0.05270310339368989
+    },
+    {
+      "name": "median_jump>=0.05*std",
+      "pass": true,
+      "median_jump": 0.04751201110742689,
+      "std_u": 0.1100223832697753,
+      "threshold": 0.0055011191634887656
+    }
+  ],
+  "verdict": "PASS"
+}
