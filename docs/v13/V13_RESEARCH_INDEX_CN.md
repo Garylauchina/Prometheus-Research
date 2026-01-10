@@ -21,6 +21,8 @@
   - verifier: `python3 tools/v13/verify_world_contract_v0_2.py --run_dir <RUN_DIR>`
 - **V13 World Contract v0.2（Quant 交付封存）**：
   - `docs/v13/artifacts/v13_world_contract_v0_2_delivery_20260110/README.md`
+- **V13 Phase 1（Live Window Contract Layer 验证封存）**：
+  - `docs/v13/artifacts/v13_phase1_live_window_verifier_v0_20260110/README.md`
 - **V13 Quant 交付封存（Kickoff/VPS）**：
   - `docs/v13/artifacts/v13_kickoff_quant_delivery_v0_20260110/README.md`
 - **V13 Trial-12 Phase 1（VPS 部署成功封存）**：
