@@ -15,6 +15,10 @@
   - `docs/v13/V13_PHENOMENA_LOG_PROTOCOL_V0_20260110.md`
 - **V13 Capture Window 最小合同（冻结）**：
   - `docs/v13/V13_SSOT_CAPTURE_WINDOW_MIN_CONTRACT_V0_20260110.md`
+- **V13 World Contract v0.2（冻结）**：
+  - `docs/v13/V13_SSOT_WORLD_CONTRACT_V0_2_20260110.md`
+  - spec: `docs/v13/spec/world_contract_v0_2_spec.json`
+  - verifier: `python3 tools/v13/verify_world_contract_v0_2.py --run_dir <RUN_DIR>`
 - **V13 Quant 交付封存（Kickoff/VPS）**：
   - `docs/v13/artifacts/v13_kickoff_quant_delivery_v0_20260110/README.md`
 - **V13 Trial-12 Phase 1（VPS 部署成功封存）**：

@@ -1,0 +1,37 @@
+{
+  "contract_version": "v0.2",
+  "required_files": ["evidence.json"],
+  "required_join_keys": ["strategy_id"],
+  "required_channels": ["market_api", "observation_window"],
+  "contract_verdict_enum": ["PASS", "NOT_MEASURABLE", "FAIL"],
+  "reason_codes_enum": [
+    "fail:evidence_file_missing",
+    "fail:evidence_parse_error",
+    "fail:schema_field_missing",
+    "fail:schema_type_mismatch",
+    "fail:join_key_missing",
+    "fail:invalid_reason_code",
+    "not_measurable:channel_missing:market_api",
+    "not_measurable:channel_missing:observation_window",
+    "not_measurable:other"
+  ],
+  "canonical_schema": {
+    "required_fields": [
+      "timestamp",
+      "strategy_id",
+      "life_verdict",
+      "contract_reason_codes",
+      "ablation_flags",
+      "channels"
+    ],
+    "types": {
+      "timestamp": "str",
+      "strategy_id": "str",
+      "life_verdict": "str",
+      "contract_reason_codes": "list",
+      "ablation_flags": "list",
+      "channels": "list"
+    }
+  }
+}
+
