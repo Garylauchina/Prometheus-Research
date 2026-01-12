@@ -1,0 +1,11 @@
+[
+  {
+    "timestamp": "2026-01-12T00:00:00Z",
+    "strategy_id": "phase1_observer_only",
+    "life_verdict": "n/a",
+    "contract_reason_codes": ["not_measurable:other"],
+    "ablation_flags": [],
+    "channels": ["market_api", "observation_window"]
+  }
+]
+

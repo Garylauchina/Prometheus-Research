@@ -26,6 +26,12 @@ Canonical spec JSON (frozen):
 
 The verifier MUST be driven by the spec only (self-contained).
 
+Additive references (frozen, minimal):
+- Window ↔ Contract verdict mapping:
+  - `docs/v13/spec/V13_WINDOW_VERDICT_CONTRACT_VERDICT_MAPPING_V0_20260112.md`
+- Reason Consistency example library:
+  - `docs/v13/spec/examples/world_contract_v0_2_reason_consistency/README.md`
+
 ---
 
 ## §2 Evidence file (v0.2)

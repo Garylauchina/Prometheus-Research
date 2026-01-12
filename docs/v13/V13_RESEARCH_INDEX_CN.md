@@ -27,6 +27,12 @@
   - `docs/v13/artifacts/v13_phase1_24h_window_v0_20260112/README.md`
 - **V13 Phase 2（现象命名注册表，append-only）**：
   - `docs/v13/phenomena/V13_PHENOMENA_NAMING_REGISTRY_V0_20260112.jsonl`
+
+- **V13 Spec（冻结增量：window↔contract 映射 / evidence bridge / stop conditions / reason examples）**：
+  - `docs/v13/spec/V13_WINDOW_VERDICT_CONTRACT_VERDICT_MAPPING_V0_20260112.md`
+  - `docs/v13/spec/V13_EVIDENCE_CHAIN_BRIDGE_MIN_SPEC_V0_20260112.md`
+  - `docs/v13/ops/V13_PHASE1_STOP_CONDITIONS_CHECKLIST_V0_20260112.md`
+  - `docs/v13/spec/examples/world_contract_v0_2_reason_consistency/README.md`
 - **V13 Quant 交付封存（Kickoff/VPS）**：
   - `docs/v13/artifacts/v13_kickoff_quant_delivery_v0_20260110/README.md`
 - **V13 Trial-12 Phase 1（VPS 部署成功封存）**：

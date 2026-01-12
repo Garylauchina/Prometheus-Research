@@ -42,6 +42,25 @@ Notes:
 - YAML is preferred (`window.meta.yaml`).
 - If Markdown is used, file must be named `window.meta.md` and include the same fields in a simple key-value block.
 
+#### §2.1.1 Additional factual fields (frozen as **recommended**, Phase 2+)
+
+These fields do **not** change the minimal existence semantics, but they harden auditability.
+
+Recommended:
+- `observation_config_fingerprint`
+  - a stable fingerprint of the observation configuration used for this window
+  - allowed forms:
+    - `sha256:<64-hex>`
+    - `git:<commit_sha>` (if config is fully captured by a commit)
+- `time_sync`
+  - `time_sync.method` (e.g., `systemd-timesyncd`, `chrony`, `ntpd`, `manual`)
+  - `time_sync.checked_at_utc` (ISO8601)
+  - `time_sync.offset_estimate_ms` (number; signed; if unknown, use `null`)
+  - `time_sync.notes` (one factual line; optional)
+
+Grandfathering:
+- Windows created before 2026-01-12 may omit these fields without being considered invalid windows.
+
 ### §2.2 `phenomena.log.md`
 
 This is the **core V13 product** for a window. It is allowed to be extremely short.
