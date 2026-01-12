@@ -25,6 +25,8 @@
   - `docs/v13/artifacts/v13_phase1_live_window_verifier_v0_20260110/README.md`
 - **V13 Phase 1（首个 24h window 完成封存；verdict=MEASURABLE）**：
   - `docs/v13/artifacts/v13_phase1_24h_window_v0_20260112/README.md`
+- **V13 Phase 1（24h window 完成报告归档；window=MEASURABLE, contract=PASS）**：
+  - `docs/v13/artifacts/v13_phase1_24h_window_completion_report_v0_20260112/README.md`
 - **V13 Phase 2（现象命名注册表，append-only）**：
   - `docs/v13/phenomena/V13_PHENOMENA_NAMING_REGISTRY_V0_20260112.jsonl`
 
