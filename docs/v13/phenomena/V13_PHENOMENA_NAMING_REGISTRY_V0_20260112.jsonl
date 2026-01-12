@@ -1,0 +1,3 @@
+{"generated_at_utc":"2026-01-12T00:00:00Z","schema":"v13_phenomena_naming_registry_v0","note":"Append-only. One line per window label assignment. Facts/labels only; no interpretation."}
+
+{"window_id":"BTC-USDT-SWAP_2026-01-09T20:04:48Z__24h","window_dir_vps":"/data/prometheus/live_capture_v13/windows/BTC-USDT-SWAP_2026-01-09T20:04:15Z__24h","verdict":"MEASURABLE","labels":["stable_observation","no_reconnects","no_errors","no_silence_logged","phase1_complete"],"source_artifact":"docs/v13/artifacts/v13_phase1_24h_window_v0_20260112/V13_PHASE1_24H_WINDOW_COMPLETION_REPORT.md"}

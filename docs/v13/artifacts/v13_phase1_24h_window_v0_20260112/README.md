@@ -15,6 +15,11 @@ This directory archives the completion report for the first 24h Phase 1 capture 
 - `verdict.md`: `MEASURABLE`
 - `evidence.json`: present and v0.2 compliant (as reported)
 
+## Phase 2 naming (labels only; no interpretation)
+
+- labels: `stable_observation`, `no_reconnects`, `no_errors`, `no_silence_logged`, `phase1_complete`
+- registry: `docs/v13/phenomena/V13_PHENOMENA_NAMING_REGISTRY_V0_20260112.jsonl`
+
 ## Archived report
 
 - `V13_PHASE1_24H_WINDOW_COMPLETION_REPORT.md`
