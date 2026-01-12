@@ -153,6 +153,16 @@ Do NOT over-analyze. Facts only.
 
 ---
 
+## 5.1) Phase 1 reporting review gate (added 2026-01-12; mandatory going forward)
+
+For every capture window (including 24h / 7d milestones), produce a completion report using the frozen template:
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v13/templates/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_V0_20260112.md`
+
+And follow the reporting instruction:
+- `/Users/liugang/Cursor_Store/Prometheus-Research/docs/v13/deliveries/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md`
+
+---
+
 ## 6) What to send back after 7 days (Trial-12 milestone)
 
 This section is intentionally **de-emphasized** under V13 pacing.

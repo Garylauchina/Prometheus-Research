@@ -33,6 +33,10 @@
   - `docs/v13/spec/V13_EVIDENCE_CHAIN_BRIDGE_MIN_SPEC_V0_20260112.md`
   - `docs/v13/ops/V13_PHASE1_STOP_CONDITIONS_CHECKLIST_V0_20260112.md`
   - `docs/v13/spec/examples/world_contract_v0_2_reason_consistency/README.md`
+
+- **V13 Ops（Phase 1 完成报告模板 + review gate）**：
+  - `docs/v13/templates/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_V0_20260112.md`
+  - `docs/v13/deliveries/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md`
 - **V13 Quant 交付封存（Kickoff/VPS）**：
   - `docs/v13/artifacts/v13_kickoff_quant_delivery_v0_20260110/README.md`
 - **V13 Trial-12 Phase 1（VPS 部署成功封存）**：
