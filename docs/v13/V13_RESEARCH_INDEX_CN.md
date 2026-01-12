@@ -39,6 +39,8 @@
 - **V13 Ops（Phase 1 完成报告模板 + review gate）**：
   - `docs/v13/templates/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_V0_20260112.md`
   - `docs/v13/deliveries/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md`
+- **V13 Phase 1（继续观察指令）**：
+  - `docs/v13/deliveries/V13_PHASE1_CONTINUE_OBSERVATION_EXEC_20260112.md`
 - **V13 VPS 工作流程（冻结）**：
   - `docs/ops/V13_VPS_WORKFLOW_V0_20260112.md`（指令发布：cat输出；交付物读取：SSH）
   - `tools/v13/fetch_vps_delivery.sh`（辅助脚本：从VPS拉取交付物）
