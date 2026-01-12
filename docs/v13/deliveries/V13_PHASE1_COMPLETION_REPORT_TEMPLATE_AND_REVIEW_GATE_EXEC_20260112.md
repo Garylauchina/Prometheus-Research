@@ -1,8 +1,8 @@
 # Delivery — Quant Instructions — V13 Phase 1: Completion Report Template + Review Gates (stop conditions + verdict mapping) — 2026-01-12
 
-> **注意：本指令文件内容需通过 cat 命令输出给程序员AI**  
-> 架构师侧执行: `cat <本文件路径>`  
-> 用户将输出内容粘贴给程序员AI（VPS工作区）
+> **注意：本指令文件需发布到VPS指令目录供程序员AI读取**  
+> 架构师侧执行: `./tools/v13/publish_instruction_to_vps.sh <本文件路径>`  
+> VPS路径: `/data/prometheus/v13_instructions/<FILENAME>`
 
 Repo (Research): `/Users/liugang/Cursor_Store/Prometheus-Research`  
 Target (Quant): produce completion report for every capture window (facts only).

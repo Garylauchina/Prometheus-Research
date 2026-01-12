@@ -13,7 +13,7 @@ Additive-only.
 ### 1.2 Research 侧（架构师）
 - **位置**: 本地（`/Users/liugang/Cursor_Store/Prometheus-Research`）
 - **职责**: 
-  - 用 `cat` 命令输出指令内容到代码块，供用户粘贴给程序员
+  - 将指令文件发布到 VPS 的指令目录，供程序员AI直接读取
   - 用 SSH 连接 VPS 读取程序员的交付物
 
 ---
@@ -33,20 +33,35 @@ Additive-only.
 
 ## §3 指令发布流程（冻结）
 
-### 3.1 架构师侧：输出指令内容
+### 3.1 VPS 指令目录（已冻结）
 
-**方法**: 使用 `cat` 命令将指令文件内容输出到代码块
+**目录路径**: `/data/prometheus/v13_instructions/`
+
+**规则**:
+- 所有交付指令文件必须发布到此目录
+- 程序员AI在VPS上直接读取此目录中的指令文件
+- 文件名保持原样（如 `V13_XXX_EXEC_YYYYMMDD.md`）
+
+### 3.2 架构师侧：发布指令到VPS
+
+**方法**: 使用发布脚本将指令文件上传到VPS
+
+**脚本**: `tools/v13/publish_instruction_to_vps.sh`
 
 **示例**:
 ```bash
-cat /Users/liugang/Cursor_Store/Prometheus-Research/docs/v13/deliveries/V13_XXX_EXEC_YYYYMMDD.md
+./tools/v13/publish_instruction_to_vps.sh docs/v13/deliveries/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md
 ```
 
-**输出格式**: 直接显示完整 Markdown 内容，用户复制粘贴给程序员
+**脚本功能**:
+- 自动创建VPS指令目录（如不存在）
+- 通过SCP上传指令文件
+- 验证上传成功
 
-### 3.2 程序员侧：接收指令
+### 3.3 程序员侧：读取指令
 
-- 用户将代码块内容粘贴给程序员AI
+- 程序员AI在VPS上读取指令目录中的文件
+- 指令文件路径: `/data/prometheus/v13_instructions/<FILENAME>`
 - 程序员在 VPS 上执行指令
 - 交付物保存在 VPS 工作区
 
@@ -109,7 +124,18 @@ echo "VPS_HOST=$VPS_HOST"
 echo "VPS_USER=$VPS_USER"
 ```
 
-### 5.2 SSH 读取交付物脚本
+### 5.2 发布指令到VPS脚本
+
+创建: `tools/v13/publish_instruction_to_vps.sh`
+
+```bash
+#!/bin/bash
+# Publish instruction files to VPS instruction directory
+
+./tools/v13/publish_instruction_to_vps.sh <INSTRUCTION_FILE> [VPS_HOST] [VPS_USER]
+```
+
+### 5.3 SSH 读取交付物脚本
 
 创建: `tools/v13/fetch_vps_delivery.sh`
 
@@ -150,9 +176,9 @@ echo "Files fetched to /tmp/v13_${WINDOW_ID}_*.{md,yaml,json}"
 
 **顶部说明**:
 ```markdown
-# 注意：本指令文件内容需通过 cat 命令输出给程序员AI
-# 架构师侧执行: cat <本文件路径>
-# 用户将输出内容粘贴给程序员AI
+# 注意：本指令文件需发布到VPS指令目录供程序员AI读取
+# 架构师侧执行: ./tools/v13/publish_instruction_to_vps.sh <本文件路径>
+# VPS路径: /data/prometheus/v13_instructions/<FILENAME>
 ```
 
 ### 6.2 路径引用规则
@@ -160,7 +186,7 @@ echo "Files fetched to /tmp/v13_${WINDOW_ID}_*.{md,yaml,json}"
 **禁止**: 直接引用本地绝对路径（如 `/Users/liugang/...`）
 
 **改为**: 
-- 如果指令需要引用 Research 仓库内容，用 `cat` 输出完整内容
+- 如果指令需要引用 Research 仓库内容，在VPS上通过SSH读取或提供完整内容
 - 如果指令需要引用 VPS 路径，使用 VPS 绝对路径（如 `/data/prometheus/...`）
 
 ---
@@ -171,10 +197,19 @@ echo "Files fetched to /tmp/v13_${WINDOW_ID}_*.{md,yaml,json}"
 
 **架构师侧**:
 ```bash
-cat /Users/liugang/Cursor_Store/Prometheus-Research/docs/v13/deliveries/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md
+./tools/v13/publish_instruction_to_vps.sh docs/v13/deliveries/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md
 ```
 
-**用户**: 复制输出内容，粘贴给程序员AI
+**输出**: 脚本会显示VPS路径，例如：
+```
+✓ Instruction file published successfully!
+  VPS path: /data/prometheus/v13_instructions/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md
+```
+
+**程序员侧**: 在VPS上读取指令
+```bash
+cat /data/prometheus/v13_instructions/V13_PHASE1_COMPLETION_REPORT_TEMPLATE_AND_REVIEW_GATE_EXEC_20260112.md
+```
 
 ### 7.2 读取交付物
 
